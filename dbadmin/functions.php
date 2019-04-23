@@ -1,0 +1,10 @@
+<?php
+	require("update_table_data.php");
+	require("common_funct.php");
+	require("view_funct.php");
+	require("misc_funct.php");
+	require("import_export_funct.php");
+	require("table_funct.php");
+	require("record_funct.php");
+	require("database_sync.php");
+?>

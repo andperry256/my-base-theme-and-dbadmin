@@ -607,7 +607,7 @@ associated base table for widget information.
 
 function handle_record($action,$params)
 {
-	global $BaseURL, $BaseDir, $RelativePath, $Location, $presets;
+	global $BaseURL, $BaseDir, $DBAdminURL, $RelativePath, $Location, $presets;
 	$db = admin_db_connect();
 
 	// Interpret the URL parameters

@@ -607,7 +607,7 @@ associated base table for widget information.
 
 function handle_record($action,$params)
 {
-	global $BaseURL, $BaseDir, $RelativePath, $Location, $presets;
+	global $BaseURL, $BaseDir, $DBAdminURL, $RelativePath, $Location, $presets;
 	$db = admin_db_connect();
 
 	// Interpret the URL parameters
@@ -722,7 +722,7 @@ function handle_record($action,$params)
 		$param_list .= "&-returnurl=";
 		$param_list .= urlencode($_SESSION['get_vars']['-returnurl']);
 	}
-	print("<form method=\"post\" action=\"$BaseURL/_link_to_common/dbadmin/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
+	print("<form method=\"post\" action=\"$DBAdminURL/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
 	$last_display_group = '';
 	$query_result = mysqli_query($db,$select_this_record);
 

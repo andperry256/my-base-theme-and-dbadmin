@@ -83,8 +83,8 @@ foreach ($_POST as $key => $value)
 }
 
 require("$BaseDir/path_defs.php");
-require("$BaseDir/_link_to_common/dbadmin/functions.php");
-require("$BaseDir/_link_to_common/dbadmin/classes.php");
+require("$DBAdminDir/functions.php");
+require("$DBAdminDir/classes.php");
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)

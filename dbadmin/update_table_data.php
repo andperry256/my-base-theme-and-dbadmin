@@ -29,6 +29,7 @@ function update_table_data_main($dbid)
     return;
   }
   $dbname = admin_db_name();
+  mysqli_query($db,"ALTER DATABASE `$dbname` CHARACTER SET utf8 COLLATE utf8_general_ci");
   $access_types = "'read-only','edit','full'";
   $default_access_type = 'full';
   $widget_types = '';
@@ -157,11 +158,17 @@ function update_table_data_main($dbid)
   $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` NOT LIKE 'dataface__%'");
   while ($row = mysqli_fetch_assoc($query_result))
   {
+    if ($row['Table_type'] != 'VIEW')
+    {
+      mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci");
+      mysqli_query($db,"ALTER TABLE $table ENGINE=InnoDB");
+    }
     $table = $row[$table_field];
     mysqli_query($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
     mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
     if ($table == get_base_table($table))
     {
+
       if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) || (substr($table,0,4) == 'dba_'))
       {
         // Process table

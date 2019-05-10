@@ -53,6 +53,17 @@ class db_record
 
 class tables_dba_table_info
 {
+  function beforeSave($record)
+  {
+      $charset = $record->FieldVal('character_set');
+      $collation = $record->FieldVal('collation');
+      $len = strlen($charset);
+      if (substr($collation,0,$len) != $charset)
+      {
+        return report_error("Collation does not match the character set");
+      }
+  }
+
   function afterDelete($record)
 	{
     $db = admin_db_connect();

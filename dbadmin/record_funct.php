@@ -653,7 +653,8 @@ function handle_record($action,$params)
 			$select_this_record .= " AND";
 		}
 		$field_added = true;
-		$select_this_record .= " $field='$value'";
+		$mysql_field = addslashes($value);
+		$select_this_record .= " $field='$mysql_field'";
 	}
 
 	// Determine the access level for the table

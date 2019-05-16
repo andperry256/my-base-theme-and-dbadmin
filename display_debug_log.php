@@ -15,7 +15,12 @@
   {
     // Delete log file
     unlink($debug_file_path);
-    header("Location: ./display_debug_log.php");
+    $new_url = './display_debug_log.php';
+    if (isset($_GET['site']))
+    {
+        $new_url .= "?site={$_GET['site']}";
+    }
+    header("Location: $new_url");
     exit;
   }
 

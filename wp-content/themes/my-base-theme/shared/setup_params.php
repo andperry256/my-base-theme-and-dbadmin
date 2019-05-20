@@ -12,30 +12,53 @@ function set_header_image_paths($dir,$url)
 	global $desktop_header_image_url;
 	global $mobile_header_image_path;
 	global $mobile_header_image_url;
+	$image_file_exts = array( 'png', 'jpg' );
+	if (!isset($_SESSION['header_image_no']))
+	{
+		$_SESSION['header_image_no'] = 1;
+	}
 
-	if (is_file("$dir/header_image.png"))
+	foreach ($image_file_exts as $ext)
 	{
-		// Select top level desktop header image file (PNG)
-		$desktop_header_image_path = "$dir/header_image.png";
-		$desktop_header_image_url = "$url/header_image.png";
+		if (is_file("$dir/header_image.$ext"))
+		{
+			// Select desktop header image file
+			if (!is_file("$dir/header_image_{$_SESSION['header_image_no']}.$ext"))
+			{
+				$_SESSION['header_image_no'] = 1;
+			}
+			if ($_SESSION['header_image_no'] == 1)
+			{
+				$desktop_header_image_path = "$dir/header_image.$ext";
+				$desktop_header_image_url = "$url/header_image.$ext";
+			}
+			else
+			{
+				$desktop_header_image_path = "$dir/header_image_{$_SESSION['header_image_no']}.$ext";
+				$desktop_header_image_url = "$url/header_image_{$_SESSION['header_image_no']}.$extg";
+			}
+			$next_header_image_no = $_SESSION['header_image_no'] + 1;
+			if (is_file("$dir/header_image_$next_header_image_no.$ext"))
+			{
+				$_SESSION['header_image_no']++;
+			}
+			else
+			{
+				$_SESSION['header_image_no'] = 1;
+			}
+			break;
+		}
 	}
-	elseif (is_file("$dir/header_image.jpg"))
+
+	foreach ($image_file_exts as $ext)
 	{
-		// Select top level desktop header image file (JPG)
-		$desktop_header_image_path = "$dir/header_image.jpg";
-		$desktop_header_image_url = "$url/header_image.jpg";
-	}
-	if (is_file("$dir/header_image_mobile.png"))
-	{
-		// Select top level mobile header image file (PNG)
-		$mobile_header_image_path = "$dir/header_image_mobile.png";
-		$mobile_header_image_url = "$url/header_image_mobile.png";
-	}
-	elseif (is_file("$dir/header_image_mobile.jpg"))
-	{
-		// Select top level mobile header image file (JPG)
-		$mobile_header_image_path = "$dir/header_image_mobile.jpg";
-		$mobile_header_image_url = "$url/header_image_mobile.jpg";
+		if (is_file("$dir/header_image_mobile.$ext"))
+		{
+			// Select mobile header image file
+			$mobile_header_image_path = "$dir/header_image_mobile.$ext";
+			$mobile_header_image_url = "$url/header_image_mobile.$ext";
+			break;
+		}
 	}
 }
 

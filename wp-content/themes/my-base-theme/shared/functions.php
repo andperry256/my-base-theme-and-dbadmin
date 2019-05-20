@@ -159,6 +159,17 @@ add_action( 'init', 'define_supercategory_taxonomy' );
 
 //================================================================================
 
+function start_session()
+{
+	if (!session_id())
+	{
+		session_start();
+	}
+}
+add_action( 'init', 'start_session', 1);
+
+//================================================================================
+
 function wpb_remove_loginshake()
 {
     remove_action('login_head', 'wp_shake_js', 12);

@@ -70,6 +70,28 @@ function cur_url_par()
 }
 
 //==============================================================================
+/*
+Function user_is_authenticated
+*/
+//==============================================================================
+
+function user_is_authenticated()
+{
+	global $AuthDBID;
+	$db = db_connect($AuthDBID);
+	$session_id = session_id();
+	$query_result = mysqli_query($db,"SELECT * FROM login_sessions WHERE session_id='$session_id'");
+	if ($row = mysqli_fetch_assoc($query_result))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+//==============================================================================
 }
 //==============================================================================
 ?>

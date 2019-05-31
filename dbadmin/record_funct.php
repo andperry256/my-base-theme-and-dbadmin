@@ -668,12 +668,21 @@ function handle_record($action,$params)
 		$access_level = 'read-only';  // This should not occur
 	}
 
-	// Output any success/error message from a save operation
+  /*
+	Output any success/error message from a save operation.
+	Clear the $_SERVER['get_vars'] array in the event of success, but leave it
+	intact in the event of a failure as it may contain information that needs to
+	be carried through to the completion of the operation.
+	*/
 	if (isset($_GET['-saveresult']))
 	{
 		if ($_GET['-saveresult'] == 1)
 		{
 			print("<p class=\"highlight-success\">Record successfully saved</p>\n");
+			if (isset($_SESSION['get_vars']))
+			{
+			  unset($_SESSION['get_vars']);
+			}
 		}
 		else
 		{

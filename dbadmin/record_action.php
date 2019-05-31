@@ -168,16 +168,6 @@ $new_record_id = encode_record_id($new_primary_keys);
 */
 $_SESSION['saved_record_id'] = $new_record_id;
 
-/*
-  Clear the $_SESSION['get_vars'] array. Not quite sure why but there previously
-  appeared to be occasional problems where an old variable was being carried
-  over to a new operation.
-*/
-if (isset($_SESSION['get_vars']))
-{
-  unset($_SESSION['get_vars']);
-}
-
 if (save_record($record,$old_record_id,$new_record_id))
 {
   // Record successfully saved

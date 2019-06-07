@@ -263,6 +263,10 @@ function update_table_data_main($dbid)
               $default_widget_type = 'date';
               break;
 
+            case 'time':
+              $default_widget_type = 'time';
+              break;
+
             case 'varchar';
             case 'char';
               if ($field_size >= 128)

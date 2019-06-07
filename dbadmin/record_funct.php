@@ -62,7 +62,7 @@ Function generate_widget
 
 function generate_widget($table,$field_name,$field_value)
 {
-	global $BaseDir, $BaseURL;
+	global $BaseDir, $BaseURL, $DBAdminURL, $NewDateStartYear;
 	$db = admin_db_connect();
 	/*
 	Although in the vast majority of cases, the widget information will come from
@@ -106,7 +106,12 @@ function generate_widget($table,$field_name,$field_value)
 		switch ($row['widget_type'])
 		{
 			case 'date':
-				print("<input type=\"date\" name=\"field_$field_name\" value=\"$field_value\">");
+				print("<input type=\"text\" id=\"field_$field_name\" name=\"field_$field_name\"  value=\"$field_value\" size=\"10\" style=\"margin-right:0.5em\"
+				    	 data-datepick=\"showOtherMonths: true, firstDay: 7, dateFormat: 'yyyy-mm-dd', minDate: 'new Date($NewDateStartYear, 1 - 1, 1)'\">\n");
+				print("<script>
+			         $('#field_$field_name').datepick({showTrigger: '#calImg'});
+							 $('#field_$field_name').datepick($.extend( {pickerClass: 'my-picker'}, $.datepick.regionalOptions['en-GB']));
+							 </script>");
 				break;
 
 			case 'input-text':

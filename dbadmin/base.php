@@ -116,6 +116,7 @@ $WidgetTypes = array (
   'select' => true,
   'static' => true,
   'textarea' => true,
+  'time' => false,
 );
 
 //==============================================================================

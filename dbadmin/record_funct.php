@@ -136,7 +136,7 @@ function generate_widget($table,$field_name,$field_value)
 				break;
 
 			case 'input-num':
-				print("<input type=\"text\" name=\"field_$field_name\" size=\"7\" value=\"$field_value\">");
+				print("<input type=\"text\" name=\"field_$field_name\" size=\"12\" value=\"$field_value\">");
 				break;
 
 			case 'password':
@@ -167,6 +167,18 @@ function generate_widget($table,$field_name,$field_value)
 				print("</select>");
 				break;
 
+			case 'time':
+				if (empty($row['vocab_table']))
+				{
+					/*
+					Generate a simple input widget if no vocabulary is specified. The use
+					of a proper time picker is for future development. If a vocabulary is
+					specified then drop down to the next case (for a select widget).
+					*/
+					print("<input type=\"text\" name=\"field_$field_name\" size=\"8\" value=\"$field_value\">");
+					break;
+				}
+
 			case 'select':
 				print("<select name=\"field_$field_name\">\n");
 				print("<option value=\"\">Please select ...</option>\n");
@@ -176,7 +188,8 @@ function generate_widget($table,$field_name,$field_value)
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					print("<option value=\"{$row2[$vocab_field]}\"");
-					if ($row2[$vocab_field] == $field_value)
+					if ((($row['widget_type'] == 'time') && (time_compare($row2[$vocab_field],$field_value) == 0)) ||
+				      ($row2[$vocab_field] == $field_value))
 					{
 						print(" selected");
 					}

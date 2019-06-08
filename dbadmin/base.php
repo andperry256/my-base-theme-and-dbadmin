@@ -181,7 +181,7 @@ function display_sidebar_content($mode)
       else
       {
         // Sidebar is a label only (i.e. no link)
-        print("<td class=\"sidebar-item\">$label</td></tr>\n");
+        print("<tr><td class=\"sidebar-item\">$label</td></tr>\n");
       }
     }
     print("</table>");
@@ -436,7 +436,7 @@ else
 {
   // Request desktop mode
   print("<fieldset>\n");
-  print("<form method=\"post\" action=\"$DBAdminURL/load_viewing_mode.php?view=desktop&returnurl=$return_url\"\n");
+  print("<form method=\"post\" action=\"$DBAdminURL/load_viewing_mode.php?view=desktop&returnurl=$return_url\">\n");
   print("<p><input type=\"Submit\" value =\"Load Desktop View\"></p>\n");
   print("<p><input type=\"checkbox\" name=\"save_setting\"> Remember setting on this computer (uses a cookie)</p>\n");
   print("</form>\n");
@@ -461,7 +461,7 @@ else
 {
   // Request mobile mode
   print("<fieldset>\n");
-  print("<form method=\"post\" action=\"$DBAdminURL/load_viewing_mode.php?view=mobile&returnurl=$return_url\"\n");
+  print("<form method=\"post\" action=\"$DBAdminURL/load_viewing_mode.php?view=mobile&returnurl=$return_url\">\n");
   print("<p><input type=\"Submit\" value =\"Load Mobile View\"></p>\n");
   print("<p><input type=\"checkbox\" name=\"save_setting\"> Remember setting on this device (uses a cookie)</p>\n");
   print("</form>\n");

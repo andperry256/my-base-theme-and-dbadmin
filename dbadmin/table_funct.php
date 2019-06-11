@@ -300,7 +300,11 @@ function display_table($params)
 
 	// Determine the access level for the table
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-	if ($row = mysqli_fetch_assoc($query_result))
+	if ((isset($_SESSION['read_only'])) && ($_SESSION['read_only']))
+	{
+		$access_level = 'read-only';
+	}
+	elseif ($row = mysqli_fetch_assoc($query_result))
 	{
 		$access_level = $row[$Location.'_access'];
 	}

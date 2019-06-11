@@ -143,6 +143,11 @@ while ($row = mysqli_fetch_assoc($query_result))
           exit("Failed to obtain next auto-increment value - this should not occur");
         }
       }
+      elseif ($row2['widget_type'] == 'time')
+      {
+        $time = strtotime($_POST["field_$field_name"]);
+        $new_primary_keys[$field_name] = date("H:i:s",$time);
+      }
       else
       {
         $new_primary_keys[$field_name] = stripslashes($_POST["field_$field_name"]);

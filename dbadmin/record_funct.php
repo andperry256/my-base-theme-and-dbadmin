@@ -677,7 +677,11 @@ function handle_record($action,$params)
 
 	// Determine the access level for the table
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-	if ($row = mysqli_fetch_assoc($query_result))
+	if ((isset($_SESSION['read_only'])) && ($_SESSION['read_only']))
+	{
+		$access_level = 'read-only';
+	}
+	elseif ($row = mysqli_fetch_assoc($query_result))
 	{
 		$access_level = $row[$Location.'_access'];
 	}
@@ -905,7 +909,7 @@ function handle_record($action,$params)
 			}
 		}
 		print("</table>\n");
-		if ($action != 'view')
+		if ($access_level != 'read-only')
 		{
 			print("<input type=\"Submit\" value =\"Save\">\n");
 			print("<input type=\"hidden\" name=\"submitted\"/>\n");

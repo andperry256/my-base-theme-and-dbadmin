@@ -676,20 +676,8 @@ function handle_record($action,$params)
 	}
 
 	// Determine the access level for the table
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-	if ((isset($_SESSION['read_only'])) && ($_SESSION['read_only']))
-	{
-		$access_level = 'read-only';
-	}
-	elseif ($row = mysqli_fetch_assoc($query_result))
-	{
-		$access_level = $row[$Location.'_access'];
-	}
-	else
-	{
-		$access_level = 'read-only';  // This should not occur
-	}
-
+	$access_level = get_table_access_level($table);
+	
   /*
 	Output any success/error message from a save operation.
 	Clear the $_SERVER['get_vars'] array in the event of success, but leave it

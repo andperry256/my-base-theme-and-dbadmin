@@ -72,14 +72,27 @@ function create_view_structure($view,$table,$conditions)
 	  }
 	}
 
-	// Set the parent table for the view in the table info record for the view.
+	// Set the parent table in the table info record for the view
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$view'");
 	if (mysqli_num_rows($query_result) == 0)
 	{
+		// New table info record
   	mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$view','$table')");
+		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+		if ($row2 = mysqli_fetch_assoc($query_result2))
+		{
+			/*
+			Copy the access level fields from the table into the view. Only do this for a
+			new table info record, thus allowing a view to be subsequently altered from
+			the parent table should that ever be required.
+			*/
+			mysqli_query($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$view'");
+			mysqli_query($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$view'");
+		}
 	}
 	else
 	{
+		// Update existing table info record
 		mysqli_query($db,"UPDATE dba_table_info SET parent_table='$table' WHERE table_name='$view'");
 	}
 }
@@ -136,7 +149,30 @@ function create_child_table_structure($child,$parent)
   {
 		symlink("$CustomPagesPath/$RelativePath/tables/$parent","$link");
   }
-  mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$parent')");
+
+	// Set the parent table in the table info record for the child table
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$child'");
+	if (mysqli_num_rows($query_result) == 0)
+	{
+		// New table info record
+  	mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$table')");
+		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+		if ($row2 = mysqli_fetch_assoc($query_result2))
+		{
+			/*
+			Copy the access level fields from the table into the child table. Only do
+			this for a new table info record, thus allowing a child table to be
+			subsequently altered from	the parent table should that ever be required.
+			*/
+			mysqli_query($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$child'");
+			mysqli_query($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$child'");
+		}
+	}
+	else
+	{
+		// Update existing table info record
+		mysqli_query($db,"UPDATE dba_table_info SET parent_table='$table' WHERE table_name='$child'");
+	}
 }
 
 //==============================================================================

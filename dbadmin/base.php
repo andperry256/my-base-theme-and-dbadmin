@@ -394,7 +394,8 @@ if ((!isset($SupportMobile)) || (!($SupportMobile)))
 {
   print("<div class=\"no-mobile-support\"><strong>N.B. </strong>This page is not optimised for mobile viewing. For a better user experience please use a computer or tablet.</div>\n");
 }
-if ((defined('MASTER_LOCATION')) && ($Location != MASTER_LOCATION))
+$query_result = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
+if (($row = mysqli_fetch_assoc($query_result)) && ($row['location'] != $Location))
 {
   print("<p class=\"small\"><span class=\"highlight-warning\">WARNING</span> - You are not using the master copy of the database. Any changes are liable to be lost on the next database synchronisation.<p>\n");
 }
@@ -473,6 +474,7 @@ print("</div>\n");
 print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_table_info\">Table&nbsp;Info</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=_view_dba_table_fields\">Table&nbsp;Fields</a>");
+print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_master_location\">Master&nbsp;Location</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=export_table\">Export&nbsp;Table(s)</a>");

@@ -44,6 +44,67 @@ function get_master_location($default)
 
 //==============================================================================
 /*
+Function get_table_access_level
+*/
+//==============================================================================
+
+function get_table_access_level($table)
+{
+	global $Location;
+	$db = admin_db_connect();
+	$query_result = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
+	if ($row = mysqli_fetch_assoc($query_result))
+	{
+		$master_location = $row['location'];
+	}
+	else
+	{
+		return('read-only');  // This should not occur
+	}
+
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	if ((isset($_SESSION['read_only'])) && ($_SESSION['read_only']))
+	{
+		$access_level = 'read-only';
+	}
+	elseif ($row = mysqli_fetch_assoc($query_result))
+	{
+		$access_level = $row[$Location.'_access'];
+		if ($access_level == 'auto-full')
+		{
+			if ($Location == $master_location)
+			{
+				return 'full';
+			}
+			else
+			{
+				return 'read-only';
+			}
+		}
+		elseif ($access_level == 'auto-edit')
+		{
+			if ($Location == $master_location)
+			{
+				return 'edit';
+			}
+			else
+			{
+				return 'read-only';
+			}
+		}
+		else
+		{
+			return $access_level;
+		}
+	}
+	else
+	{
+		$access_level = 'read-only';  // This should not occur
+	}
+}
+
+//==============================================================================
+/*
 Function hs
 */
 //==============================================================================

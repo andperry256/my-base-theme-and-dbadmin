@@ -41,7 +41,7 @@ function update_table_data_main($dbid)
   {
     print("Unable to update default collation for database<br />");
   }
-  $access_types = "'read-only','edit','full'";
+  $access_types = "'read-only','edit','auto-edit','full','auto-full'";
   $default_access_type = 'full';
   $widget_types = '';
   foreach ($WidgetTypes as $key => $value)
@@ -152,6 +152,13 @@ function update_table_data_main($dbid)
   mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `link` `link` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `link`");
   mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `new_window` `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+
+  // Run the following queries to create/update the structure for the master location table.
+  // Any queries to create existing fields will automatically fail.
+  mysqli_query($db,"CREATE TABLE `dba_master_location` ( `rec_id` INT(11) COLLATE $default_collation NOT NULL, PRIMARY KEY (`rec_id`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+  mysqli_query($db,"ALTER TABLE `dba_master_location` ADD `location` ENUM( 'local', 'real' ) NOT NULL DEFAULT 'real' AFTER `rec_id`");
+  mysqli_query($db,"ALTER TABLE `dba_master_location` CHANGE `location` `location` ENUM( 'local', 'real' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT 'real'");
+  mysqli_query($db,"INSERT INTO `dba_master_location` VALUES (1,'real')");
 
   /*
   Create views for displaying orphan records. Do not use the 'create_view_structure'
@@ -390,6 +397,7 @@ function update_table_data_main($dbid)
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1 WHERE table_name='dba_table_info' AND field_name='auto_dump'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_group'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
+  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_master_location' AND field_name='location'");
 
   // Set sequencing info for built-in tables
   mysqli_query($db,"UPDATE dba_table_info SET sort_1_field='table_name',seq_no_field='display_order',seq_method='repeat',renumber_enabled=1 WHERE table_name='dba_table_fields'");

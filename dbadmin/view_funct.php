@@ -155,8 +155,8 @@ function create_child_table_structure($child,$parent)
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
-  	mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$table')");
-		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+  	mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$parent')");
+		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$parent'");
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			/*
@@ -171,7 +171,7 @@ function create_child_table_structure($child,$parent)
 	else
 	{
 		// Update existing table info record
-		mysqli_query($db,"UPDATE dba_table_info SET parent_table='$table' WHERE table_name='$child'");
+		mysqli_query($db,"UPDATE dba_table_info SET parent_table='$parent' WHERE table_name='$child'");
 	}
 }
 

@@ -677,7 +677,7 @@ function handle_record($action,$params)
 
 	// Determine the access level for the table
 	$access_level = get_table_access_level($table);
-	
+
   /*
 	Output any success/error message from a save operation.
 	Clear the $_SERVER['get_vars'] array in the event of success, but leave it
@@ -689,10 +689,6 @@ function handle_record($action,$params)
 		if ($_GET['-saveresult'] == 1)
 		{
 			print("<p class=\"highlight-success\">Record successfully saved</p>\n");
-			if (isset($_SESSION['get_vars']))
-			{
-			  unset($_SESSION['get_vars']);
-			}
 		}
 		else
 		{

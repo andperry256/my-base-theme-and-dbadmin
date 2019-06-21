@@ -92,6 +92,38 @@ function user_is_authenticated()
 }
 
 //==============================================================================
+/*
+Function check_new_action
+*/
+//==============================================================================
+
+function check_new_action($action,$table)
+{
+	if (!isset($_SESSION['dba_action']))
+	{
+		$_SESSION['dba_action'] = '';
+	}
+	if (!isset($_SESSION['dba_table']))
+	{
+		$_SESSION['dba_table'] = '';
+	}
+	if (($action != $_SESSION['dba_action']) || ($table != $_SESSION['dba_table']))
+	{
+		// Action and/or table has changed - clear temporary session variables
+		if (isset($_SESSION['get_vars']))
+		{
+			unset($_SESSION['get_vars']);
+		}
+		if (isset($_SESSION['post_vars']))
+		{
+			unset($_SESSION['post_vars']);
+		}
+	}
+	$_SESSION['dba_action'] = $action;
+	$_SESSION['dba_table'] = $table;
+}
+
+//==============================================================================
 }
 //==============================================================================
 ?>

@@ -278,6 +278,14 @@ function display_main_content($mode)
     }
 
     // Process the given action
+    if (isset($table))
+    {
+      check_new_action($action,$table);
+    }
+    else
+    {
+      check_new_action($action,'');
+    }
     switch ($action)
     {
       case 'list':

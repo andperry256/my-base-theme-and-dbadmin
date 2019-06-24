@@ -108,23 +108,47 @@ function display_table($params)
 		$start_offset = 0;
 	}
 
-	if ((isset($_GET['-sortfield'])) && (isset($_GET['-sortorder'])))
+	if (!isset($_SESSION['filtered_table']))
 	{
-		$sort_field = $_GET['-sortfield'];
-		$sort_order = $_GET['-sortorder'];
+		$_SESSION['filtered_table'] = '';
+	}
+	if ((isset($_GET['-showall'])) || ($table != $_SESSION['filtered_table']))
+	{
+		// Clear all filters
+		$_SESSION['search_clause'] = '';
+		$_SESSION['sort_clause'] = '';
 	}
 	else
 	{
-		$sort_field = '';
-		$sort_order = '';
+		// Initialise the search filter if not set
+		if (!isset($_SESSION['search_clause']))
+		{
+			$_SESSION['search_clause'] = '';
+		}
+
+		if ((isset($_GET['-sortfield'])) && (isset($_GET['-sortorder'])))
+		{
+			// Apply a sort filter
+			$sort_field = $_GET['-sortfield'];
+			$sort_order = $_GET['-sortorder'];
+			$_SESSION['sort_clause'] = "ORDER BY $sort_field ".strtoupper($sort_order);
+		}
+		elseif (!isset($_SESSION['sort_clause']))
+		{
+			$_SESSION['sort_clause'] = '';
+		}
+		else
+		{
+			// Leave the existing sort filter in place.
+			$tempstr = str_replace('ORDER BY ','',$_SESSION['sort_clause']);
+			$sort_field = strtok($tempstr,' ');
+			$sort_order = strtolower(strtok(' '));
+		}
 	}
+	$_SESSION['filtered_table'] = $table;
 
 	$display_table = true;
 	$form_started = false;
-	if ((isset($_GET['-search'])) && (!empty($_GET['-search'])))
-	{
-		$search_string = $_GET['-search'];
-	}
 	if (isset($_POST['submitted']))
 	{
 		// Not quite sure yet why we need this, but it seems to prevent problems
@@ -135,18 +159,33 @@ function display_table($params)
 		switch ($submit_option)
 		{
 			case 'apply_search':
-				if ((isset($_POST['search_string'])) && (!empty($_POST['search_string'])))
+				// Apply new search filter
+				$_SESSION['search_clause'] = '';
+				if (!empty($_POST['search_string']))
 				{
-					$search_string = $_POST['search_string'];
-				}
-				elseif (isset($_POST['search_string2']))
-				{
-					$search_string = $_POST['search_string2'];
-					print("<input type=\"hidden\" name=\"search_string2\" value=\"$search_string2\"/>\n");
-				}
-				else
-				{
-					$search_string = '';
+					$lc_search_string = strtolower($_POST['search_string']);
+					$_SESSION['search_clause'] = "WHERE";
+					$field_processed = false;
+					$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
+					while ($row = mysqli_fetch_assoc($query_result))
+					{
+						$field_name = $row['Field'];
+						$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+						if ($row2 = mysqli_fetch_assoc($query_result2))
+						{
+							if ($WidgetTypes[$row2['widget_type']])
+							{
+								if ($field_processed)
+								{
+									$_SESSION['search_clause'] .= " OR";
+								}
+								$field_processed = true;
+								$_SESSION['search_clause'] .= " LOWER($field_name) LIKE '%";
+								$_SESSION['search_clause'] .= addslashes($lc_search_string);
+								$_SESSION['search_clause'] .= "%'";
+							}
+						}
+					}
 				}
 				break;
 
@@ -202,42 +241,8 @@ function display_table($params)
 		}
 	}
 
-	// Create the search clause to be added to the main table query.
-	$search_clause = '';
-	if (!empty($search_string))
-	{
-		$lc_search_string = strtolower($search_string);
-		$search_clause = "WHERE";
-		$field_processed = false;
-		$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
-		while ($row = mysqli_fetch_assoc($query_result))
-		{
-			$field_name = $row['Field'];
-			$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
-			if ($row2 = mysqli_fetch_assoc($query_result2))
-			{
-				if ($WidgetTypes[$row2['widget_type']])
-				{
-					if ($field_processed)
-					{
-						$search_clause .= " OR";
-					}
-					$field_processed = true;
-					$search_clause .= " LOWER($field_name) LIKE '%";
-					$search_clause .= addslashes($lc_search_string);
-					$search_clause .= "%'";
-				}
-			}
-		}
-	}
-	if (!empty($sort_field))
-	{
-		$search_clause .= " ORDER BY $sort_field ".strtoupper($sort_order);
-	}
-	$_SESSION['search_clause'] = $search_clause;
-
 	// Calculate pagination parameters
-	$query_result = mysqli_query($db,"SELECT * FROM $table $search_clause");
+	$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']}");
 	$table_size = mysqli_num_rows($query_result);
 	$page_count = ceil($table_size / $list_size);
 	$current_page = floor($start_offset / $list_size +1);
@@ -325,7 +330,7 @@ function display_table($params)
 	{
 		print("<td><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></td>");
 	}
-	print("<td><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table\">Show&nbsp;All</a></td>");
+	print("<td><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-showall\">Show&nbsp;All</a></td>");
 	if (isset($params['additional_links']))
 	{
 		print($params['additional_links']);
@@ -425,7 +430,7 @@ function display_table($params)
 
 	// Process table records
 	$record_offset = $start_offset;
-	$query_result = mysqli_query($db,"SELECT * FROM $table $search_clause LIMIT $start_offset,$list_size");
+	$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $start_offset,$list_size");
 	$row_no = 0;
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
@@ -491,7 +496,6 @@ Function delete_record_set
 
 function delete_record_set($table)
 {
-	$search_clause = $_SESSION['search_clause'];
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
 	$primary_keys = array();
@@ -503,7 +507,7 @@ function delete_record_set($table)
 			$record_offset = substr($key,7);
 
 			// Build up array of deletions indexed by record ID.
-			$query_result = mysqli_query($db,"SELECT * FROM $table $search_clause LIMIT $record_offset,1");
+			$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
@@ -603,7 +607,7 @@ function select_update($table,$option)
 	print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-table=$table\">\n");
 	if ($option == 'all')
 	{
-		print("<p>You are updating all records in the table - please check to confirm&nbsp;&nbsp;<input type=\"checkbox\" name=\"confirm_update_all\"></p>\n");
+		print("<p><strong>Important</strong> - You are updating all records in the table - please check to confirm&nbsp;&nbsp;<input type=\"checkbox\" name=\"confirm_update_all\"></p>\n");
 	}
 	$last_display_group = '';
 	$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
@@ -664,7 +668,6 @@ function run_update($table,$option)
 	$base_table = get_base_table($table);
 	$primary_keys = array();
 	$updates = array();
-	$search_clause = $_SESSION['search_clause'];
 
 	// Build up array of updates indexed by record ID.
 	if ($option == 'selection')
@@ -674,7 +677,7 @@ function run_update($table,$option)
 			if (substr($key,0,7) == 'select_')
 			{
 				$record_offset = substr($key,7);
-				$query_result = mysqli_query($db,"SELECT * FROM $table $search_clause LIMIT $record_offset,1");
+				$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
 					$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
@@ -690,11 +693,11 @@ function run_update($table,$option)
 	}
 	elseif ($option == 'all')
 	{
-		$query_result = mysqli_query($db,"SELECT * FROM $table");
+		$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']}");
 		$record_count = mysqli_num_rows($query_result);
 		for ($record_offset=0; $record_offset<$record_count; $record_offset++)
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM $table $search_clause LIMIT $record_offset,1");
+			$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
@@ -893,7 +896,6 @@ function run_copy($table)
 	$base_table = get_base_table($table);
 	$primary_keys = array();
 	$updates = array();
-	$search_clause = $_SESSION['search_clause'];
 
 	// Build up array of updates indexed by record ID.
 	foreach ($_POST as $key => $value)
@@ -901,7 +903,7 @@ function run_copy($table)
 		if (substr($key,0,7) == 'select_')
 		{
 			$record_offset = substr($key,7);
-			$query_result = mysqli_query($db,"SELECT * FROM $table $search_clause LIMIT $record_offset,1");
+			$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");

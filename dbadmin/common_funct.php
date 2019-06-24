@@ -121,6 +121,12 @@ function check_new_action($action,$table)
 	}
 	$_SESSION['dba_action'] = $action;
 	$_SESSION['dba_table'] = $table;
+
+	if (empty($table))
+	{
+		// No table is being displayed - force filters to be cleared on next table display.
+		$_SESSION['filtered_table'] = '';
+	}
 }
 
 //==============================================================================

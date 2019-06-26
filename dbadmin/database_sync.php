@@ -21,17 +21,19 @@ function sync_databases($local_db_name)
 			switch ($row['mode'])
 			{
 					case 'auto':
-						copy("$DBAdminURL/dbmode.php?site=$local_site_dir&dbname=$local_db_name","__temp_.txt");
-						$mode = trim(file_get_contents("__temp_.txt"));
-						unlink("__temp_.txt");
-						if ($mode == 'master')
-						{
-							$sync_direction = 'out';
-						}
-						elseif ($mode == 'sub-master')
-						{
-							$sync_direction = 'in';
-						}
+						$db = mysqli_connect( 'localhost', REAL_DB_USER, REAL_DB_PASSWD, $local_db_name );
+					  $query_result = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
+					  if ($row = mysqli_fetch_assoc($query_result))
+					  {
+					    if ($row['location'] == $Location)
+					    {
+								$sync_direction = 'out';
+					    }
+					    else
+					    {
+								$sync_direction = 'in';
+					    }
+					  }
 						break;
 
 					case 'master':

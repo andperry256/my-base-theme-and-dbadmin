@@ -22,10 +22,10 @@ function sync_databases($local_db_name)
 			{
 					case 'auto':
 						$db = mysqli_connect( 'localhost', REAL_DB_USER, REAL_DB_PASSWD, $local_db_name );
-					  $query_result = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
-					  if ($row = mysqli_fetch_assoc($query_result))
+					  $query_result2 = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
+					  if ($row2 = mysqli_fetch_assoc($query_result2))
 					  {
-					    if ($row['location'] == $Location)
+					    if ($row2['location'] == $Location)
 					    {
 								$sync_direction = 'out';
 					    }

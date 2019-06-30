@@ -47,7 +47,7 @@ function output_page_header()
  * from the pages content for use at different points in the page.
  */
 
-function get_content_part($part_no)
+function get_content_part($part_no,$option='')
 {
 	$page_id = get_the_ID();
 	$page_object = get_page($page_id);
@@ -57,7 +57,6 @@ function get_content_part($part_no)
 		// Use part number 0 to return whole page content
 		$content = apply_filters( 'the_content', $content );
 		$content = str_replace( ']]>', ']]&gt;', $content );
-		return $content;
 	}
 	else
 	{
@@ -70,8 +69,13 @@ function get_content_part($part_no)
 		$content = apply_filters( 'the_content', $content );
 		$content = str_replace( ']]>', ']]&gt;', $content );
 		$content = str_replace( '__', '&nbsp;', $content );
-		return $content;
 	}
+	if ($option == 'strip_paras')
+	{
+		$content = str_replace('<p>','',$content);
+		$content = str_replace('</p>','',$content);
+	}
+	return $content;
 }
 
 //================================================================================

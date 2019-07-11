@@ -265,7 +265,7 @@ function handle_file_widget_before_save(&$record,$field)
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field'");
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$filename = basename($_FILES["field_$field"]['name']);
@@ -318,7 +318,7 @@ function handle_file_widget_after_save($record,$field)
 	$table = $record->table;
 	$base_table = get_base_table($table);
 
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field'");
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$filename = basename($_FILES["field_$field"]['name']);

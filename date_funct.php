@@ -486,9 +486,35 @@ if (!function_exists('DateDifference'))
 
 //==============================================================================
 
+if (!function_exists('short_date'))
+{
+	function short_date($date,$day_offset=0)
+	{
+		// Format date string from MySQL
+		$day = (int)substr($date,8,2);
+		$month = (int)substr($date,5,2);
+		$year = (int)substr($date,0,4);
+		$day += $day_offset;
+		if ($day > DaysInMonth($month,$year))
+		{
+			$day -= DaysInMonth($month,$year);
+			if ($month == 12)
+			{
+				$month = 1;
+				$year++;
+			}
+			else
+				$month++;
+		}
+		return sprintf("%02d %s %04d",$day,ShortMonthName($month),$year);
+	}
+}
+
+//==============================================================================
+
 if (!function_exists('title_date'))
 {
-	function title_date($date,$day_offset)
+	function title_date($date,$day_offset=0)
 	{
 		// Format date string from MySQL
 		$day = (int)substr($date,8,2);
@@ -515,7 +541,7 @@ if (!function_exists('title_date'))
 
 if (!function_exists('long_title_date'))
 {
-	function long_title_date($date,$day_offset)
+	function long_title_date($date,$day_offset=0)
 	{
 		// Format date string from MySQL
 		$day = (int)substr($date,8,2);

@@ -782,7 +782,31 @@ function handle_record($action,$params)
 				else
 				{
 					$temp_pk = array();
-					$temp_pk['table_name'] = $base_table;
+					$temp_table = $table;
+					for ($i=5; $i>0; $i--)
+					{
+						$query_result4 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$temp_table'");
+						if ($row4 = mysqli_fetch_assoc($query_result4))
+						{
+							$query_result5 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$temp_table' AND field_name='$field_name'");
+							if ((mysqli_num_rows($query_result5) != 0) || (empty($row4['parent_table'])))
+							{
+								/*
+								Stop searching when an associated table field record has been found.
+								The parent table link is checked as a precaution although the first
+								part of the above condition should become true when the parent table
+								is reached.
+								*/
+								break;
+							}
+							else
+							{
+								$temp_table = $row4['parent_table'];
+							}
+						}
+					}
+
+					$temp_pk['table_name'] = $temp_table;
 					$temp_pk['field_name'] = $field_name;
 					$edit_field_atts_url = "$BaseURL/$RelativePath/?-action=edit&-table=dba_table_fields&-recordid=".encode_record_id($temp_pk);
 					$edit_field_atts_url .= "&-returnurl=$return_url";

@@ -110,7 +110,7 @@ function display_table($params)
 
 	/*
 	Set up the display filters (for search and sort) apart from the creation of
-	a new search filter, which is done later on when processing a post with a 
+	a new search filter, which is done later on when processing a post with a
 	search string.
 	*/
 	if (!isset($_SESSION['filtered_table']))
@@ -669,6 +669,7 @@ Function run_update
 
 function run_update($table,$option)
 {
+	$_POST = array_map( 'stripslashes_deep', $_POST );
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
 	$primary_keys = array();
@@ -897,6 +898,7 @@ Function run_copy
 
 function run_copy($table)
 {
+	$_POST = array_map( 'stripslashes_deep', $_POST );
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
 	$primary_keys = array();

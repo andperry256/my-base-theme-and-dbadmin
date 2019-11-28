@@ -116,8 +116,8 @@ function update_table_data_main($dbid)
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `alt_label` `alt_label` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `widget_type` ENUM( $widget_types ) NOT NULL DEFAULT '$default_widget_type' AFTER `alt_label`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `widget_type` `widget_type` ENUM( $widget_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_widget_type'");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `description` VARCHAR( 255 ) NULL AFTER `widget_type`");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `description` `description` VARCHAR( 255 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `description` VARCHAR( 511 ) NULL AFTER `widget_type`");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `description` `description` VARCHAR( 511 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `vocab_table` VARCHAR( 63 ) NULL AFTER `description`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `vocab_table` `vocab_table` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `vocab_field` VARCHAR( 63 ) NULL AFTER `vocab_table`");

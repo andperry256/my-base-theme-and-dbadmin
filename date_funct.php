@@ -323,6 +323,44 @@ if (!function_exists('DateOfEaster'))
 }
 
 //==============================================================================
+
+if (!function_exists('IsWorkingDay'))
+{
+	function IsWorkingDay($date)
+	{
+		$year = (int)substr($date,0,4);
+		$month = (int)substr($date,5,2);
+		$day = (int)substr($date,8,2);
+		$dow = GregorianDoW($day,$month,$year);
+
+		// Check for weekends and bank holidays
+		$easter_sunday = DateOfEaster($year);
+		$good_friday = AddDays($easter_sunday,-2);
+		$easter_monday = NextDate($easter_sunday);
+		if (($dow == 6) ||  // Saturday
+		    ($dow == 0) ||  // Sunday
+				(($month == 1) && ($day == 1)) ||  // New Year's Day
+				(($month == 1) && ($dow == 1) && ($day <= 3)) ||  // New Year in lieu
+				($date == $good_friday) ||  // Good Friday
+				($date == $easter_monday) ||  // Easter Monday
+				(($month == 5) && ($dow == 1) && ($day <= 7)) ||  // May Day BH
+				(($month == 5) && ($dow == 1) && ($day >= 25)) ||  // Late May BH
+				(($month == 8) && ($dow == 1) && ($day >= 25)) ||  // August BH
+				(($month == 12) && ($day == 25)) ||  // Christmas Day
+				(($month == 12) && ($day == 26)) ||  // Boxing Day
+				(($month == 12) && ($dow <= 2) && ($day >= 27) && ($day <= 28))  // Christmas in lieu
+			 )
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+}
+
+//==============================================================================
 // The following functions perform calculations relating to school terms.
 // A term is defined as starting on 1 January, Easter Sunday or 1 September.
 //==============================================================================

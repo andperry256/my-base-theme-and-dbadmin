@@ -4,10 +4,9 @@ if (!function_exists('db_connect'))
 {
 	require_once("$PrivateScriptsDir/mysql_connect.php");
 }
-//==============================================================================
-
 $db = db_connect($AuthDBID);
-$session_id = session_id();
+
+define ('SESSION_TIMEOUT',3600);  // 1 hour
 $time = time();
 
 // Determine whether access is internal to the local network
@@ -25,44 +24,41 @@ else
 	$local_access = false;
 }
 
-/*
-If access is internal to the local network and no login record exists
-for the current session then create a record with the username set to
-default.
-*/
-if (($Location == 'local') && ($local_access))
+if (($Location == 'local') && ($local_access) && (!isset($_SESSION['user'])))
 {
-	$query_result = mysqli_query($db,"SELECT * FROM login_sessions WHERE session_id='$session_id'");
-	if (mysqli_num_rows($query_result) == 0)
+	/*
+	Access is internal to the local network and there is no logged on user
+	but with no active logout (i.e. where $_SESSION['user'] is set but empty).
+	Automatically log on as the default user.
+	*/
+	if (!isset($DefaultLocalUser))
 	{
-		if (!isset($DefaultLocalUser))
-		{
-			// Logged in by default
-			$DefaultLocalUser = 'local';
-		}
-		mysqli_query($db,"INSERT into login_sessions (session_id,username,access_time) VALUES ('$session_id','$DefaultLocalUser',$time)");
+		$DefaultLocalUser = 'local';
 	}
+	$_SESSION['user'] = $DefaultLocalUser;
+	$_SESSION['access_time'] = $time;
 }
 
-$query_result = mysqli_query($db,"SELECT * FROM login_sessions WHERE session_id='$session_id'");
-if ($row = mysqli_fetch_assoc($query_result))
+if ((isset($_SESSION['user'])) && (!empty($_SESSION['user'])) && (($time - $_SESSION['access_time']) < SESSION_TIMEOUT))
 {
-	if (empty($row['username']))
+	// User is logged on
+	$UserAuthenticated = true;
+	$_SESSION['access_time'] = $time;
+}
+elseif ((isset($_SESSION['user'])) && (empty($_SESSION['user'])))
+{
+	// Actively logged off from previous session
+	$UserAuthenticated = false;
+	if (($time - $_SESSION['access_time']) > SESSION_TIMEOUT)
 	{
-		// Session record with an empty username indicates no user logged on.
-		$UserAuthenticated = false;
-	}
-	else
-	{
-		// There is a logged on user.
-		mysqli_query($db,"UPDATE login_sessions SET access_time=$time WHERE session_id='$session_id'");
-		$UserAuthenticated = true;
+		// Session timeout has expired - remove empty username
+		unset($_SESSION['user']);
 	}
 }
 else
 {
-	// No record found for current session.
 	$UserAuthenticated = false;
+	unset($_SESSION['user']);
 }
 
 // Process result of login form
@@ -75,30 +71,19 @@ if ((!$UserAuthenticated) && (isset($_POST['submitted'])))
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))
-			$authenticated = true;
+		{
+			$UserAuthenticated = true;
+		}
 	}
-	if ($authenticated)
+	if ($UserAuthenticated)
 	{
-		$session_id = session_id();
-		$time = time();
-		$query_result = mysqli_query($db,"SELECT * FROM login_sessions WHERE session_id='$session_id'");
-		if ($row = mysqli_fetch_assoc($query_result))
-		{
-			// Session record already exists.
-			if (empty($row['username']))
-			{
-				mysqli_query($db,"UPDATE login_sessions SET username='$username',access_time=$time WHERE session_id='$session_id'");
-			}
-		}
-		else
-		{
-			// Create session record
-			mysqli_query($db,"INSERT into login_sessions (session_id,username,access_time) VALUES ('$session_id','$username',$time)");
-		}
-		$UserAuthenticated = true;
+		$_SESSION['user'] = $username;
+		$_SESSION['access_time'] = $time;
 	}
 	else
+	{
 		print("<p><b>Invalid login - please try again.</b></p>");
+	}
 }
 
 // Output login form is no user authenicated

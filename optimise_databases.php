@@ -1,6 +1,8 @@
 <?php
+define ('HOME_IP_ADDR','212.159.74.141');
+define ('LONGCROFT_IP_ADDR','217.45.173.179');
   $redundant_table_prefixes = array ('wp_duplicator', 'wp_itsec');
-  if (($_SERVER['REMOTE_ADDR'] != $_SERVER['SERVER_ADDR']) && ($_SERVER['REMOTE_ADDR'] != '212.159.74.141') && ($_SERVER['REMOTE_ADDR'] != '81.133.202.101') && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
+  if (($_SERVER['REMOTE_ADDR'] != $_SERVER['SERVER_ADDR']) && ($_SERVER['REMOTE_ADDR'] != HOME_IP_ADDR) && ($_SERVER['REMOTE_ADDR'] != LONGCROFT_IP_ADDR) && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
   {
   	exit("Authentication Failure");
   }

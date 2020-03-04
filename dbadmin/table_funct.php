@@ -638,7 +638,12 @@ function select_update($table,$option)
 				$last_display_group = $display_group;
 			}
 			print("<tr>");
-			print("<td class=\"update-selection\"><input type=\"checkbox\" name=\"select_$field_name\"></td>");
+			print("<td class=\"update-selection\">");
+			if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static'))
+			{
+				print("<input type=\"checkbox\" name=\"select_$field_name\">");
+			}
+			print("</td>");
 			$label = field_label($table,$field_name);
 			print("<td class=\"update-selection\">$label</td>");
 			print("<td class=\"update-selection\">");
@@ -842,7 +847,7 @@ function select_copy($table)
 		return false;
 	}
 	print("<h2>Copy Records</h2>\n");
-	print("<p class=\"small\">* = Primary key field - at least one must be selected.</p>\n");
+	print("<p class=\"small\">* = Primary key field - at least one must be selected (unless there is an auto-increment field).</p>\n");
 
 	print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-table=$table\">\n");
 	$last_display_group = '';
@@ -869,10 +874,14 @@ function select_copy($table)
 				$last_display_group = $display_group;
 			}
 			print("<tr>");
-			print("<td class=\"update-selection\"><input type=\"checkbox\" name=\"select_$field_name\">");
-			if ($row2['is_primary'])
+			print("<td class=\"update-selection\">");
+			if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static'))
 			{
-				print("&nbsp;*");
+				print("<input type=\"checkbox\" name=\"select_$field_name\">");
+				if ($row2['is_primary'])
+				{
+					print("&nbsp;*");
+				}
 			}
 			print("</td>");
 			$label = field_label($table,$field_name);
@@ -924,14 +933,15 @@ function run_copy($table)
 		}
 	}
 
-  // Check the number of primary key fields being updated
+	// Check the number of primary key fields being updated
 	$primary_key_count = 0;
 	$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
 		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name' AND is_primary=1");
-		if (($row2 = mysqli_fetch_assoc($query_result2)) && (isset($_POST["select_$field_name"])))
+		if (($row2 = mysqli_fetch_assoc($query_result2)) &&
+		    ((isset($_POST["select_$field_name"])) || ($row2['widget_type'] == 'auto-increment')))
 		{
 			$primary_key_count++;
 		}

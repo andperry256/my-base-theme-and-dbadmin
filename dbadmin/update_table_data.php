@@ -27,6 +27,22 @@ function update_table_data_main($dbid)
 {
   global $CustomPagesPath, $RelativePath;
   global $WidgetTypes;
+  global $argc;
+  if (isset($argc))
+  {
+    $mode = 'command';
+    $eol = "\n";
+    $ltag = '[';
+    $rtag = ']';
+  }
+  else
+  {
+    $mode = 'web';
+    $eol = "<br />\n";
+    $ltag = '<em>';
+    $rtag = '</em>';
+  }
+
   $default_engine = DEFAULT_ENGINE;
   $default_charset = DEFAULT_CHARSET;
   $default_collation = DEFAULT_COLLATION;
@@ -39,7 +55,7 @@ function update_table_data_main($dbid)
   $dbname = admin_db_name();
   if (mysqli_query($db,"ALTER DATABASE `$dbname` CHARACTER SET $default_charset COLLATE $default_collation") === false)
   {
-    print("Unable to update default collation for database<br />");
+    print("Unable to update default collation for database$eol");
   }
   $access_types = "'read-only','edit','auto-edit','full','auto-full'";
   $default_access_type = 'full';
@@ -94,7 +110,7 @@ function update_table_data_main($dbid)
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if ($new_installation)
   {
-    print("<p>This is a first time installation - please return to the main page (to do any auto view creation) and then repeat this operation</p>\n");
+    print("This is a first time installation - please return to the main page (to do any auto view creation) and then repeat this operation.$eol");
     return;
   }
 
@@ -182,6 +198,7 @@ function update_table_data_main($dbid)
     mysqli_query($db,"DROP TABLE $table");
   }
   $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` NOT LIKE 'dataface__%'");
+  $count = mysqli_num_rows($query_result);
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $table = $row[$table_field];
@@ -209,15 +226,15 @@ function update_table_data_main($dbid)
       }
       if (mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
       {
-        print("--Unable to update charset/collation for table $table<br />");
+        print("--Unable to update charset/collation for table $table$eol");
       }
       if (mysqli_query($db,"ALTER TABLE $table ENGINE=$engine") == false)
       {
-        print("--Unable to update storage engine for table $table<br />");
+        print("--Unable to update storage engine for table $table$eol");
       }
       if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
       {
-        print("--Unable to optimise table $table<br />");
+        print("--Unable to optimise table $table$eol");
       }
     }
     $table = $row[$table_field];
@@ -225,7 +242,6 @@ function update_table_data_main($dbid)
     mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
     if ($table == get_base_table($table))
     {
-
       if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) || (substr($table,0,4) == 'dba_'))
       {
         // Process table
@@ -238,7 +254,7 @@ function update_table_data_main($dbid)
         {
           print(" table");
         }
-        print(" <em>$table</em> ...<br />\n");
+        print(" $ltag$table$rtag ...$eol");
         mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Will automatically fail if already present.
         $last_display_order = 0;
         $query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table");
@@ -375,7 +391,7 @@ function update_table_data_main($dbid)
             $query .= " (table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order)";
             $query .= " VALUES ('$table','$field_name',$is_primary,$required,'$default_widget_type',$is_primary,$is_primary,$display_order)";
             mysqli_query($db,$query);
-            print("&nbsp;&nbsp;&nbsp;Field <em>$field_name</em> added<br />\n");
+            print("&nbsp;&nbsp;&nbsp;Field $ltag$field_name$rtag added$eol");
           }
         }
       }
@@ -407,9 +423,12 @@ function update_table_data_main($dbid)
   mysqli_query($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
 
-  print("<p>Operation completed.</p>\n");
-  print("<p><a href=\"./?-table=_view_orphan_table_info_records\" target=\"_blank\">Orphan Table Info Records</a><br />\n");
-  print("<a href=\"./?-table=_view_orphan_table_field_records\" target=\"_blank\">Orphan Table Field Records</a></p>\n");
+  print("Operation completed.$eol");
+  if ($mode == 'web')
+  {
+    print("<p><a href=\"./?-table=_view_orphan_table_info_records\" target=\"_blank\">Orphan Table Info Records</a><br />\n");
+    print("<a href=\"./?-table=_view_orphan_table_field_records\" target=\"_blank\">Orphan Table Field Records</a></p>\n");
+  }
 }
 //==============================================================================
 }

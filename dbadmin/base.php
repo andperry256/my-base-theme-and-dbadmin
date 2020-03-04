@@ -96,28 +96,7 @@ if (!isset($CalendarIcon))
   $CalendarIcon = "$DBAdminURL/datepicker/img/calendar-cyan-20px.gif";
 }
 
-/*
-  The following array defines the valid widget types. At present there is only
-  one attribute definable against each type, namely a boolean flag to indicate
-  whether fields of the given type are to be included in a search. Should
-  other attributes be required in the future, then the structure will be
-  changed so that each array element becomes a sub-array of elements.
-*/
-$WidgetTypes = array (
-  'auto-increment' => false,
-  'checkbox' => false,
-  'date' => false,
-  'enum' => true,
-  'file' => false,
-  'hidden' => false,
-  'input-num' => false,
-  'input-text' => true,
-  'password' => false,
-  'select' => true,
-  'static' => true,
-  'textarea' => true,
-  'time' => false,
-);
+require("widget_types.php");
 
 //==============================================================================
 
@@ -343,6 +322,7 @@ function display_main_content($mode)
 
       case 'update_table_data1':
         print("<h1>Update Table Data</h1>\n");
+        print("<p><strong>N.B.</strong> Due to possible performance issues in web mode, you may wish to perform this operation in command line mode if available.</p>\n");
         print("<p>This operation will cause a bulk database update.</p>\n");
         print("<p><a href=\"$BaseURL/$RelativePath/?-action=update_table_data2\"><button>Continue</button></a></p>\n");
         break;

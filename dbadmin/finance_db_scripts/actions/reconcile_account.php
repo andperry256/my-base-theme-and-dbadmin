@@ -119,7 +119,7 @@ if (isset($_POST['submitted']))
 				$query_result2 = mysqli_query($db,"SELECT * FROM _view_account_$account ORDER BY date DESC, seq_no DESC LIMIT 1");
 				if ($row2 = mysqli_fetch_assoc($query_result2))
 				{
-					print("<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['cleared_balance']}</p>\n");
+					print("<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['reconciled_balance']}</p>\n");
 				}
 			}
 		}
@@ -168,6 +168,7 @@ if ($display_form)
 					$amount = - $amount;
 					$balance = 0;
 				}
+				$description = substr($description,0,31);
 				mysqli_query($db,"INSERT INTO bank_import (date,description,amount,balance) VALUES ('$mysql_date','$description',$amount,$balance)");
 			}
 		}

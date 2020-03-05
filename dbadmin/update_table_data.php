@@ -34,6 +34,7 @@ function update_table_data_main($dbid)
     $eol = "\n";
     $ltag = '[';
     $rtag = ']';
+    $nbsp = ' ';
   }
   else
   {
@@ -41,6 +42,7 @@ function update_table_data_main($dbid)
     $eol = "<br />\n";
     $ltag = '<em>';
     $rtag = '</em>';
+    $nbsp = '&nbsp;';
   }
 
   $default_engine = DEFAULT_ENGINE;
@@ -391,7 +393,7 @@ function update_table_data_main($dbid)
             $query .= " (table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order)";
             $query .= " VALUES ('$table','$field_name',$is_primary,$required,'$default_widget_type',$is_primary,$is_primary,$display_order)";
             mysqli_query($db,$query);
-            print("&nbsp;&nbsp;&nbsp;Field $ltag$field_name$rtag added$eol");
+            print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
           }
         }
       }

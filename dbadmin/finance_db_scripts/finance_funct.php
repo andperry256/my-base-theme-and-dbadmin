@@ -25,12 +25,29 @@ function update_account_balances($account,$start_date)
 {
 	$db = admin_db_connect();
 	$view = "_view_account_$account";
+	$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'");
+	if ($row = mysqli_fetch_assoc($query_result))
+	{
+		$use_quoted_balance = $row['use_quoted_balance'];
+	}
+	else
+	{
+		// This should not occur
+		$use_quoted_balance = false;
+	}
 	$query_result = mysqli_query($db,"SELECT * FROM $view WHERE date<'$start_date' ORDER BY date DESC,seq_no DESC LIMIT 1");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$full_balance = $row['full_balance'];
 		$reconciled_balance = $row['reconciled_balance'];
-		$quoted_balance = $row['quoted_balance'];
+		if ($use_quoted_balance)
+		{
+			$quoted_balance = $row['quoted_balance'];
+		}
+		else
+		{
+			$quoted_balance = $full_balance;
+		}
 	}
 	else
 	{
@@ -71,7 +88,14 @@ function update_account_balances($account,$start_date)
 		}
 		if ($row['no_quote'] == 0)
 		{
-			$quoted_balance = add_money($quoted_balance,subtract_money($row['credit_amount'],$row['debit_amount']));
+			if ($use_quoted_balance)
+			{
+				$quoted_balance = add_money($quoted_balance,subtract_money($row['credit_amount'],$row['debit_amount']));
+			}
+			else
+			{
+				$quoted_balance = $full_balance;
+			}
 		}
 		mysqli_query($db,"UPDATE $view SET full_balance=$full_balance,reconciled_balance=$reconciled_balance,quoted_balance=$quoted_balance WHERE seq_no={$row['seq_no']}");
 	}

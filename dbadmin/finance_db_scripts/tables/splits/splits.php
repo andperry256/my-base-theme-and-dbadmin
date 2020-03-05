@@ -8,7 +8,7 @@ class tables_splits
 			return true;
 		$year = (int)substr($value,0,4);
 		$separator = substr($value,4,1);
-		$month = (int)substr($value,5-2);
+		$month = (int)substr($value,5,2);
 		if (($year < 2000) || ($year > 2099) || ( $month < 1) || ($month > 12) || ($separator != '-'))
 		{
 			return report_error("Invalid accounting month.");

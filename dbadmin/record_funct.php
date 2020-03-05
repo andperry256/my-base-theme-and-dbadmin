@@ -476,7 +476,7 @@ function save_record($record,$old_record_id,$new_record_id)
 		}
 	}
 
-	$classname = "tables_$table";
+	$classname = "tables_$base_table";
 	if  (class_exists ($classname,false))
 	{
 		$table_obj = new $classname;
@@ -949,7 +949,7 @@ function delete_record($record,$record_id)
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
-	$classname = "tables_$table";
+	$classname = "tables_$base_table";
 	if  (class_exists ($classname,false))
 	{
 		$table_obj = new $classname;

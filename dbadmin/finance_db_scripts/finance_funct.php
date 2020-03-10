@@ -94,7 +94,7 @@ function update_account_balances($account,$start_date)
 			}
 			else
 			{
-				$quoted_balance = $full_balance;
+				$quoted_balance = 0;
 			}
 		}
 		mysqli_query($db,"UPDATE $view SET full_balance=$full_balance,reconciled_balance=$reconciled_balance,quoted_balance=$quoted_balance WHERE seq_no={$row['seq_no']}");

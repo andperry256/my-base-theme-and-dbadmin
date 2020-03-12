@@ -8,9 +8,12 @@ Function get_base_table
 */
 //==============================================================================
 
-function get_base_table($table)
+function get_base_table($table,$db=false)
 {
-	$db = admin_db_connect();
+	if ($db === false)
+	{
+		$db = admin_db_connect();
+	}
 	/*
 	  In practice the following loop should execute 2 times at the most. It is
 		controlled by a counter to prevent infinite loop execution in the case of

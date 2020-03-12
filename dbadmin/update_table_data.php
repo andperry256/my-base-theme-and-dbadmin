@@ -13,21 +13,22 @@ Function update_table_data
 */
 //==============================================================================
 
-function update_table_data()
+function update_table_data($update_charsets=false,$optimise=false)
 {
-  update_table_data_main('');
+  update_table_data_main('',$update_charsets,$optimise);
 }
 
-function update_table_data_with_dbid($dbid)
+function update_table_data_with_dbid($dbid,$update_charsets=false,$optimise=false)
 {
-  update_table_data_main($dbid);
+  update_table_data_main($dbid,$update_charsets,$optimise);
 }
 
-function update_table_data_main($dbid)
+function update_table_data_main($dbid,$update_charsets,$optimise)
 {
   global $CustomPagesPath, $RelativePath;
   global $WidgetTypes;
   global $argc;
+  global $dbinfo, $Location;
   if (isset($argc))
   {
     $mode = 'command';
@@ -45,19 +46,47 @@ function update_table_data_main($dbid)
     $nbsp = '&nbsp;';
   }
 
+  print($eol);
+  print("Processing database at relative path [$RelativePath] ...$eol");
   $default_engine = DEFAULT_ENGINE;
   $default_charset = DEFAULT_CHARSET;
   $default_collation = DEFAULT_COLLATION;
-  $db = admin_db_connect();
+  if (!empty($dbid))
+  {
+    if (function_exists('db_full_connect'))
+    {
+      $db = db_full_connect($dbid);
+    }
+    else
+    {
+      $db = db_connect($dbid);
+    }
+    if ($Location == 'local')
+    {
+      $dbname = $dbinfo[$dbid][0];
+    }
+    else
+    {
+      $dbname = $dbinfo[$dbid][1];
+    }
+  }
+  else
+  {
+    $db = admin_db_connect();
+    $dbname = admin_db_name();
+  }
   if (!$db)
   {
     print("<p>Failed to connect to database</p>");
     return;
   }
-  $dbname = admin_db_name();
-  if (mysqli_query($db,"ALTER DATABASE `$dbname` CHARACTER SET $default_charset COLLATE $default_collation") === false)
+
+  if ($update_charsets)
   {
-    print("Unable to update default collation for database$eol");
+    if (mysqli_query($db,"ALTER DATABASE `$dbname` CHARACTER SET $default_charset COLLATE $default_collation") === false)
+    {
+      print("Unable to update default collation for database$eol");
+    }
   }
   $access_types = "'read-only','edit','auto-edit','full','auto-full'";
   $default_access_type = 'full';
@@ -204,59 +233,65 @@ function update_table_data_main($dbid)
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $table = $row[$table_field];
+    print("Processing");
+    if ($row['Table_type'] == 'VIEW')
+    {
+      print(" view");
+    }
+    else
+    {
+      print(" table");
+    }
+    print(" $ltag$table$rtag ...$eol");
     if ($row['Table_type'] != 'VIEW')
     {
-      // Set the table to the required character set and collation
-      $charset = $default_charset;
-      $collation = $default_collation;
-      $engine = $default_engine;
-      $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-      if ($row2 = mysqli_fetch_assoc($query_result2))
+      if ($update_charsets)
       {
-        if (!empty($row2['engine']))
+        // Set the table to the required character set and collation
+        $charset = $default_charset;
+        $collation = $default_collation;
+        $engine = $default_engine;
+        $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+        if ($row2 = mysqli_fetch_assoc($query_result2))
         {
-          $engine = $row2['engine'];
+          if (!empty($row2['engine']))
+          {
+            $engine = $row2['engine'];
+          }
+          if ((!empty($row2['character_set'])) && ($row2['character_set'] != '-auto-'))
+          {
+            $charset = $row2['character_set'];
+          }
+          if ((!empty($row2['collation'])) && ($row2['collation'] != '-auto-'))
+          {
+            $collation = $row2['collation'];
+          }
         }
-        if ((!empty($row2['character_set'])) && ($row2['character_set'] != '-auto-'))
+        if (mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
         {
-          $charset = $row2['character_set'];
+          print("--Unable to update charset/collation for table $table$eol");
         }
-        if ((!empty($row2['collation'])) && ($row2['collation'] != '-auto-'))
+        if (mysqli_query($db,"ALTER TABLE $table ENGINE=$engine") == false)
         {
-          $collation = $row2['collation'];
+          print("--Unable to update storage engine for table $table$eol");
         }
       }
-      if (mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
+      if ($optimise)
       {
-        print("--Unable to update charset/collation for table $table$eol");
-      }
-      if (mysqli_query($db,"ALTER TABLE $table ENGINE=$engine") == false)
-      {
-        print("--Unable to update storage engine for table $table$eol");
-      }
-      if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
-      {
-        print("--Unable to optimise table $table$eol");
+        // Optimise the table
+        if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
+        {
+          print("--Unable to optimise table $table$eol");
+        }
       }
     }
     $table = $row[$table_field];
     mysqli_query($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
     mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
-    if ($table == get_base_table($table))
+    if ($table == get_base_table($table,$db))
     {
       if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) || (substr($table,0,4) == 'dba_'))
       {
-        // Process table
-        print("Processing");
-        if ($row['Table_type'] == 'VIEW')
-        {
-          print(" view");
-        }
-        else
-        {
-          print(" table");
-        }
-        print(" $ltag$table$rtag ...$eol");
         mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Will automatically fail if already present.
         $last_display_order = 0;
         $query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table");

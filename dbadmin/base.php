@@ -322,14 +322,20 @@ function display_main_content($mode)
 
       case 'update_table_data1':
         print("<h1>Update Table Data</h1>\n");
-        print("<p><strong>N.B.</strong> Due to possible performance issues in web mode, you may wish to perform this operation in command line mode if available.</p>\n");
-        print("<p>This operation will cause a bulk database update.</p>\n");
-        print("<p><a href=\"$BaseURL/$RelativePath/?-action=update_table_data2\"><button>Continue</button></a></p>\n");
+        print("<p><strong>N.B.</strong>This operation will cause a bulk database update.");
+        print(" Ticking one or both of the options below may cause adverse performace in web mode and may therefore need to be reserved for command line mode.</p>\n");
+        print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-action=update_table_data2\">\n");
+        print("<p><input type=\"checkbox\" name=\"update_charsets\">&nbsp;&nbsp;Update charsets and collation</p>\n");
+        print("<p><input type=\"checkbox\" name=\"optimise\">&nbsp;&nbsp;Optimise tables</p>\n");
+        print("<input type=\"submit\" value=\"Continue\">\n");
+        print("</form>\n");
         break;
 
       case 'update_table_data2':
         print("<h1>Update Table Data</h1>\n");
-        update_table_data();
+        $update_charsets = (isset($_POST['update_charsets']));
+        $optimise = (isset($_POST['optimise']));
+        update_table_data($update_charsets,$optimise);
         break;
 
       case 'renumber_records1':

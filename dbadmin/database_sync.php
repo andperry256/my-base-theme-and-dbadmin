@@ -64,10 +64,13 @@ function sync_databases($local_db_name)
 				{
 					$cmd .= " -rs -force";
 				}
+				$start_time = time();
 				exec("$cmd > '__temp2_.txt'");
+				$duration = time() - $start_time;
 				$output = implode(file('__temp2_.txt'));
 				$output = str_replace("\n","<br />\n",$output);
 				print("$output");
+				print("Execution time: $duration seconds.<br />\n");
 				unlink ('__temp2_.txt');
 			}
 			else

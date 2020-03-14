@@ -48,6 +48,14 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
 
   print($eol);
   print("Processing database at relative path [$RelativePath] ...$eol");
+  if ($update_charsets)
+  {
+    print("[Updating of charsets/collation included]$eol");
+  }
+  if ($optimise)
+  {
+    print("[Optimising of tables included]$eol");
+  }
   $default_engine = DEFAULT_ENGINE;
   $default_charset = DEFAULT_CHARSET;
   $default_collation = DEFAULT_COLLATION;

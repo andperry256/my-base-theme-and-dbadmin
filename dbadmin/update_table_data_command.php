@@ -57,7 +57,10 @@ if ($RelativePath == '+')
   foreach ($dbinfo as $dbid => $info)
   {
     $RelativePath = $info[3];
-    update_table_data_with_dbid($dbid,$update_charsets,$optimise);
+    if (!empty($RelativePath))
+    {
+      update_table_data_with_dbid($dbid,$update_charsets,$optimise);
+    }
   }
 }
 elseif (is_file("$CustomPagesPath/$RelativePath/db_funct.php"))

@@ -201,21 +201,21 @@ if ($row = mysqli_fetch_assoc($query_result))
     // Row 16 - 'Edit Transaction' Button
     if ($sched_freq == '#')
     {
-      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=_view_account_$account&-recordid=$record_id\">Edit Transaction</a></td></tr>\n");
+      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=_view_account_$account&-recordid=$record_id\"><button>Edit Transaction</button></a></td></tr>\n");
     }
     else
     {
-      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=_view_scheduled_transactions&account=$account&seq_no=$seq_no\">Edit Transaction</a></td></tr>\n");
+      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=_view_scheduled_transactions&account=$account&seq_no=$seq_no\"><button>Edit Transaction</button></a></td></tr>\n");
     }
 
     // Row 17 (optional) - 'Go to Transfer' Button
     if ((!empty($row['target_account'])) && (!empty($row['target_seq_no'])))
     {
-      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=transactions&-recordid=$record_id2&summary\">Go to Transfer</a></td></tr>\n");
+      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=transactions&-recordid=$record_id2&summary\"><button>Go to Transfer</button></a></td></tr>\n");
     }
     elseif ((!empty($row['source_account'])) && (!empty($row['source_seq_no'])))
     {
-      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=transactions&-recordid=$record_id2&summary\">Go to Transfer</a></td></tr>\n");
+      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=transactions&-recordid=$record_id2&summary\"><button>Go to Transfer</button></a></td></tr>\n");
     }
 
     // Row 18 - 'New Split' Button
@@ -225,7 +225,7 @@ if ($row = mysqli_fetch_assoc($query_result))
     $presets['acct_month'] = $row['acct_month'];
     $presets_par = encode_record_id($presets);
     $return_url = cur_url_par();
-    print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=new&-table=splits&-presets=$presets_par&-returnurl=$return_url\">New Split</a></td></tr>\n");
+    print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=new&-table=splits&-presets=$presets_par&-returnurl=$return_url\"><button>New Split</button></a></td></tr>\n");
 
     print("</table>\n");
 

@@ -34,34 +34,53 @@
   }
 
 	if (!function_exists('DayName'))
+	{
 		require("$BaseDir/_link_to_common/date_funct.php");
+	}
 	if (!function_exists('db_connect'))
+	{
 		require("$PrivateScriptsDir/mysql_connect.php");
+	}
 
 	// Determine current counter year
 	$year = (int)date('Y');
 	$month = (int)date('m');
 	if ($month >= $CounterStartMonth)
+	{
 		$start_year = $year;
+	}
 	else
+	{
 		$start_year = $year - 1;
+	}
 	if ($CounterStartMonth == 1)
+	{
 		$end_year = $start_year;
+	}
 	else
+	{
 		$end_year = $start_year + 1;
+	}
 
 	$counter_file = "$CounterDir/counter-$end_year.txt";
 	$daily_average_file = "$CounterDir/daily-average-$end_year.txt";
 	$today_date = date('Y-m-d');
 	if (function_exists('db_connect_with_params'))
+	{
 		$db = db_connect_with_params($dbid,$DBMode,$Location);
+	}
 	else
+	{
 		$db = db_connect($dbid);
+	}
 
 	// Check if counter text file exists. If not create one and initialize it to zero.
 	if (!is_dir($CounterDir))
+	{
 		mkdir($CounterDir);
-	if (!file_exists($counter_file)) {
+	}
+	if (!file_exists($counter_file))
+	{
 	  $f = fopen($counter_file, "w");
 	  fwrite($f,"0");
 	  fclose($f);
@@ -70,6 +89,10 @@
 	// Read the current value from the counter file
 	$f = fopen($counter_file,"r");
 	$counter_val = fread($f, filesize($counter_file));
+	if (empty($counter_val))
+	{
+		$counter_val = 0;
+	}
 	fclose($f);
 
 	if ((!isset($StandaloneCounter)) && (!$is_bot))
@@ -86,7 +109,9 @@
 			mysqli_query($db,"INSERT INTO counter_hits VALUES('$today_date','$ip_addr',$counter_val)");
 		}
 		elseif ($row = mysqli_fetch_assoc($query_result))
+		{
 			$own_counter = $row['count'];
+		}
 	}
 
 	// Determine start date of current count period
@@ -134,12 +159,18 @@
 			// Display counter on web page
 			print("You are visitor number ");
 			if (isset($own_counter))
+			{
 				$counter_val = $own_counter;
+			}
 			print(sprintf("<span class=\"counter\">&nbsp;%05d&nbsp;</span>",$counter_val));
 			if (isset($MultilingualDates))
+			{
 				print(sprintf("<br />since %02d %s $start_year",$start_day, MonthName($start_month,'en')));
+			}
 			else
+			{
 				print(sprintf("<br />since %02d %s $start_year",$start_day, MonthName($start_month)));
+			}
 		}
 		if (isset($_GET['showcount']))
 		{

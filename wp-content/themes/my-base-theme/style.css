@@ -388,12 +388,16 @@ body {
 	max-height:150px;
 }
 
+/*
+The styles for mobile/desktop only items are defined against a single width
+boundary of 37.5em. To make use of an intemediate width (normally from 37.5
+to 65.0em), these styles will need to be redefined in the child theme.
+*/
 @media screen and (min-width: 37.5em) {
 	.mobile-only-item {
 		display: none;
 	}
 }
-
 @media screen and (max-width: 37.49em) {
 	.desktop-only-item {
 		display: none;
@@ -688,7 +692,7 @@ a:active {
 	display: block;
 }
 
-@media screen and (min-width: 37.5em) {
+@media screen and (min-width: 65.0em) {
 	.menu-toggle {
 		display: none;
 	}

@@ -10,6 +10,8 @@ function set_header_image_paths($dir,$url)
 {
 	global $desktop_header_image_path;
 	global $desktop_header_image_url;
+	global $intermediate_header_image_path;
+	global $intermediate_header_image_url;
 	global $mobile_header_image_path;
 	global $mobile_header_image_url;
 	$image_file_exts = array( 'png', 'jpg' );
@@ -52,6 +54,17 @@ function set_header_image_paths($dir,$url)
 
 	foreach ($image_file_exts as $ext)
 	{
+		if (is_file("$dir/header_image_intermediate.$ext"))
+		{
+			// Select intermediate header image file
+			$intermediate_header_image_path = "$dir/header_image_intermediate.$ext";
+			$intermediate_header_image_url = "$url/header_image_intermediate.$ext";
+			break;
+		}
+	}
+
+	foreach ($image_file_exts as $ext)
+	{
 		if (is_file("$dir/header_image_mobile.$ext"))
 		{
 			// Select mobile header image file
@@ -71,6 +84,7 @@ global $meta_refresh_interval;
 global $meta_refresh_url;
 global $meta_refresh_url_pars;
 global $desktop_header_image_path, $desktop_header_image_url;
+global $intermediate_header_image_path, $intermediate_header_image_url;
 global $mobile_header_image_path, $mobile_header_image_url;
 global $PrivateScriptsDir, $DBMode, $Location;
 global $site_path_defs_path;

@@ -25,6 +25,11 @@ class db_record
     return $this->fields[$field_name];
   }
 
+  function FieldIsSet($field_name)
+  {
+    return (isset($this->fields[$field_name]));
+  }
+
   function SaveOldPKs($primary_keys)
   {
     foreach ($primary_keys as $key => $val)

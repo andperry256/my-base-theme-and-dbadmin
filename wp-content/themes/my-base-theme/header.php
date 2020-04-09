@@ -38,9 +38,17 @@
 	<div class="site-branding">
 		<?php
 			if (is_file($desktop_header_image_path))
+			{
 				echo("<div class=\"desktop-only-item\"><img src=\"$desktop_header_image_url?v=$link_version\" /></div>");
+			}
+			if (is_file($intermediate_header_image_path))
+			{
+				echo("<div class=\"intermediate-width-item\"><img src=\"$intermediate_header_image_url?v=$link_version\" /></div>");
+			}
 			if (is_file($mobile_header_image_path))
+			{
 				echo("<div class=\"mobile-only-item\"><img src=\"$mobile_header_image_url?v=$link_version\" /></div>");
+			}
 		?>
 		<?php if ( true ) : ?>
 			<!-- Force title not to display in this implementation -->

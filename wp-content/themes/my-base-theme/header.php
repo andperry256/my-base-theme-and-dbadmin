@@ -67,6 +67,17 @@
 		<?php endif; ?>
 	</div><!-- .site-branding -->
 
+	<?php
+		if ((is_file("$CustomThemePath/style-light.css")) && ($_SESSION['theme_mode'] == 'light'))
+		{
+			print("<link rel='stylesheet' id='-home-styles-css'  href='$CustomThemeURL/style-light.css?v=$link_version' type='text/css' media='all' />");
+		}
+		elseif ((is_file("$CustomThemePath/style-dark.css")) && ($_SESSION['theme_mode'] == 'dark'))
+		{
+			print("<link rel='stylesheet' id='-home-styles-css'  href='$CustomThemeURL/style-dark.css?v=$link_version' type='text/css' media='all' />");
+		}
+	?>
+
 	<?php if ($menu_id != 'none'): ?>
 	<nav id="site-navigation" class="main-navigation" role="navigation">
 		<div id="main-menu">

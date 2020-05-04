@@ -221,6 +221,11 @@ function generate_widget($table,$field_name,$field_value)
 				print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
 				break;
 
+			case 'hidden':
+				print("******");
+				print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
+				break;
+
 			case 'file':
 				print("$field_value<br />");
 				print("<input type=\"file\" name=\"field_$field_name\"");
@@ -244,10 +249,6 @@ function generate_widget($table,$field_name,$field_value)
 						print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
 					}
 				}
-				break;
-
-			case 'hidden':
-				print("******");
 				break;
 		}
 	}

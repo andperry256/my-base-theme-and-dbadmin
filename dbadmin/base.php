@@ -82,6 +82,18 @@ function runCopy(form)
 
 //==============================================================================
 </script>
+<?php if ($_SESSION['theme_mode'] == 'dark'): ?>
+  <style>
+    /* These styles are intentionally included inline */
+    #page a:link, #page a:visited {
+    	color: #ddd;
+    }
+    #page a:hover {
+    	color: #ff9;
+    }
+  </style>
+<?php endif; ?>
+
 <?php
 //==============================================================================
 

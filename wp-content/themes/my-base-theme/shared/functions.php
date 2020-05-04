@@ -131,9 +131,18 @@ function output_meta_data()
 
 function output_stylesheet_link($path,$sub_path)
 {
-	global $link_version;
+	global $link_version, $BaseDir, $BaseURL;
 	$stylesheet_id = str_replace('/','-',$sub_path);
+	$dir_path = str_replace($BaseURL,$BaseDir,$path);
 	print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-css'  href='$path/$sub_path/styles.css?v=$link_version' type='text/css' media='all' />\n");
+	if (($_SESSION['theme_mode'] == 'light') && (is_file("$dir_path/$sub_path/styles-light.css")))
+	{
+		print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-light-css'  href='$path/$sub_path/styles-light.css?v=$link_version' type='text/css' media='all' />\n");
+	}
+	elseif (($_SESSION['theme_mode'] == 'dark') && (is_file("$dir_path/$sub_path/styles-dark.css")))
+	{
+		print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-dark-css'  href='$path/$sub_path/styles-dark.css?v=$link_version' type='text/css' media='all' />\n");
+	}
 }
 
 //================================================================================
@@ -168,6 +177,10 @@ function start_session()
 	if (!session_id())
 	{
 		session_start();
+	}
+	if (!isset($_SESSION['theme_mode']))
+	{
+		$_SESSION['theme_mode'] = 'light';
 	}
 }
 add_action( 'init', 'start_session', 1);

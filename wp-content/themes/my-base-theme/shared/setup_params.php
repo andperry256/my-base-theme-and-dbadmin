@@ -257,15 +257,26 @@ if (!is_file($site_path_defs_path))
 
 	elseif ((is_single()) || (is_category()))
 	{
-		$categories = get_the_category();
-		if (!empty($categories))
+		if (is_file("$custom_categories_path/select_menu.php"))
 		{
-			$id = $categories[0]->term_id;
-			$slug =  $categories[0]->slug;
+			include("$custom_categories_path/select_menu.php");
+		}
+		$categories = get_the_category();
+		foreach ($categories as $key => $dummy)
+		{
+			$id = $categories[$key]->term_id;
+			$slug =  $categories[$key]->slug;
 			$hierarchy = get_category_parents($id, false, '/', true);
 
-			// Move down the category hierarchy to the given address, matching various items along the way.
-			// Set the cupercategory to the top level category in the hierarchy.
+			/*
+			Move down the category hierarchy to the given address, matching various
+			items along the way. Set the supercategory to the top level category in
+			the hierarchy.
+			CAUTION - If the post is allocated to multiple categories and there are
+			items to be processed in more than one line of ancestry, then the results
+			may be unpredictable as they could depend upon the order in which the
+			categories are processed.
+			*/
 			$tok = strtok($hierarchy,'/');
 			if (!empty($tok))
 			{
@@ -283,6 +294,11 @@ if (!is_file($site_path_defs_path))
 				{
 					// Select custom footer script
 					$custom_footer_script = "$custom_categories_path/$uri_sub_path/footer.php";
+				}
+				if (is_file("$custom_categories_path/$uri_sub_path/select_menu.php"))
+				{
+					// Select menu
+					include("$custom_categories_path/$uri_sub_path/select_menu.php");
 				}
 				if (is_file("$custom_categories_path/$uri_sub_path/styles.css"))
 				{
@@ -369,7 +385,7 @@ if (!is_file($site_path_defs_path))
 
 	//================================================================================
 
-	if ((function_exists('GetAccessLevel')) && (GetAccessLevel() < $minimum_access_level))
+	if ((function_exists('GetAccessLevel')) && (isset($minimum_access_level)) && (GetAccessLevel() < $minimum_access_level))
 	{
 		die("<p>User authentication failed. Please return to the <a href=\"$BaseURL\">main site home page</a> and log back into the required facility.</p>");
 	}

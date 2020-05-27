@@ -810,7 +810,10 @@ function handle_record($action,$params)
 					$temp_pk['table_name'] = $temp_table;
 					$temp_pk['field_name'] = $field_name;
 					$edit_field_atts_url = "$BaseURL/$RelativePath/?-action=edit&-table=dba_table_fields&-recordid=".encode_record_id($temp_pk);
-					$edit_field_atts_url .= "&-returnurl=$return_url";
+					if (isset($return_url))
+					{
+						$edit_field_atts_url .= "&-returnurl=$return_url";
+					}
 				}
 
 				// Select the CSS class for use with the field label

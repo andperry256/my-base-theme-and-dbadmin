@@ -22,16 +22,19 @@
     'facebook',
     'fetch',
   );
-	$user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
 	$is_bot = false;
-	foreach ($bot_identifiers as $identifier)
+	if (isset($_SERVER['HTTP_USER_AGENT']))
 	{
-    if (strpos($user_agent, $identifier) !== FALSE)
+		$user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+		foreach ($bot_identifiers as $identifier)
 		{
-      $is_bot = true;
-			break;
-    }
-  }
+	    if (strpos($user_agent, $identifier) !== FALSE)
+			{
+	      $is_bot = true;
+				break;
+	    }
+	  }
+	}
 
 	if (!function_exists('DayName'))
 	{

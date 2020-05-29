@@ -168,6 +168,7 @@ if ($display_form)
 					$amount = - $amount;
 					$balance = 0;
 				}
+				$description = addslashes($description);
 				$description = substr($description,0,31);
 				mysqli_query($db,"INSERT INTO bank_import (date,description,amount,balance) VALUES ('$mysql_date','$description',$amount,$balance)");
 			}

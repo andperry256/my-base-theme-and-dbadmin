@@ -12,6 +12,7 @@
 $WidgetTypes = array (
   'auto-increment' => false,
   'checkbox' => false,
+  'checklist' => false,
   'date' => false,
   'enum' => true,
   'file' => false,

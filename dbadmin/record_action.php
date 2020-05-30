@@ -124,6 +124,19 @@ while ($row = mysqli_fetch_assoc($query_result))
         $record->SetField($field_name,0);
       }
     }
+    elseif ($row2['widget_type'] == 'checklist')
+    {
+      $field_value = '^';
+      foreach ($_POST as $key => $value)
+      {
+        if (strpos($key,"item_$field_name"."___") !== false)
+        {
+          $item = urldecode(substr($key,strlen("item_$field_name"."___")));
+          $field_value .= "$item^";
+        }
+      }
+      $record->SetField($field_name,addslashes($field_value));
+    }
     else
     {
       $record->SetField($field_name,stripslashes($_POST["field_$field_name"]));

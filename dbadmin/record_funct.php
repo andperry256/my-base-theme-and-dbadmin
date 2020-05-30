@@ -198,6 +198,36 @@ function generate_widget($table,$field_name,$field_value)
 				print("</select>");
 				break;
 
+			case 'checklist':
+				$vocab_table = $row['vocab_table'];
+				$vocab_field = $row['vocab_field'];
+				$item_list = array();
+				$tok = strtok($field_value,'^');
+				while ($tok !== false)
+				{
+					if (!empty($tok))
+					{
+						$item_list[$tok] = true;
+					}
+					$tok = strtok('^');
+				}
+				$query_result2 = mysqli_query($db,"SELECT $vocab_field FROM $vocab_table ORDER BY $vocab_field ASC");
+				while ($row2 = mysqli_fetch_assoc($query_result2))
+				{
+					$item = $row2[$vocab_field];
+					if ($item != '*')
+					{
+						$item_par = urlencode($item);
+						print("<input type=\"checkbox\" name=\"item_$field_name"."___$item_par\"");
+						if (isset($item_list[$item]))
+						{
+							print(" checked");
+						}
+						print(">&nbsp;$item<br/>\n");
+					}
+				}
+				break;
+
 			case 'textarea':
 				print("<textarea  name=\"field_$field_name\" rows=\"6\" cols=\"64\">$field_value</textarea>\n");
 				break;

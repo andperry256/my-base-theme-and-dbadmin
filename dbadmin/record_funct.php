@@ -217,7 +217,14 @@ function generate_widget($table,$field_name,$field_value)
 					$item = $row2[$vocab_field];
 					if ($item != '*')
 					{
+						/*
+						Dots, spaces and open square brackets are not allowed in $_POST
+						variable names. Spaces and brackets are converted by the urlencode,
+						but dots then need to be replaced with the hex code that will
+						convert back in urldecode.
+						*/
 						$item_par = urlencode($item);
+						$item_par = str_replace('.','%2e',$item_par);
 						print("<input type=\"checkbox\" name=\"item_$field_name"."___$item_par\"");
 						if (isset($item_list[$item]))
 						{

@@ -361,6 +361,21 @@ if (!function_exists('IsWorkingDay'))
 }
 
 //==============================================================================
+
+if (!function_exists('IsBST'))
+{
+	function IsBST($date)
+	{
+		$year = (int)substr($date,0,4);
+		$march_end_dow = GregorianDoW(31,3,$year);
+		$bst_start = sprintf("$year-03-%02d",31-$march_end_dow);
+		$october_end_dow = GregorianDoW(31,10,$year);
+		$bst_end = sprintf("$year-10-%02d",31-$october_end_dow);
+		return (($date >= $bst_start) && ($date < $bst_end));
+	}
+}
+
+//==============================================================================
 // The following functions perform calculations relating to school terms.
 // A term is defined as starting on 1 January, Easter Sunday or 1 September.
 //==============================================================================

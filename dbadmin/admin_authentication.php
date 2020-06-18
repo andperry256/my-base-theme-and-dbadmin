@@ -6,16 +6,13 @@ if (!function_exists('db_connect'))
 }
 $db = db_connect($AuthDBID);
 
-define ('SESSION_TIMEOUT',3600);  // 1 hour
-$time = time();
-
 // Determine whether access is internal to the local network
 $remote_ip = $_SERVER['REMOTE_ADDR'];
-if ((isset($IP_Subnet_Addr)) && (substr($_SERVER['REMOTE_ADDR'],0,strlen($IP_Subnet_Addr)) == $IP_Subnet_Addr))
+if (($Location == 'local') && (isset($IP_Subnet_Addr)) && (substr($_SERVER['REMOTE_ADDR'],0,strlen($IP_Subnet_Addr)) == $IP_Subnet_Addr))
 {
 	$local_access = true;
 }
-elseif (($Location == 'local') && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr))
+elseif (($Location == 'local') && (isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr))
 {
 	$local_access = true;
 }
@@ -36,29 +33,16 @@ if (($Location == 'local') && ($local_access) && (!isset($_SESSION['user'])))
 		$DefaultLocalUser = 'local';
 	}
 	$_SESSION['user'] = $DefaultLocalUser;
-	$_SESSION['access_time'] = $time;
 }
 
-if ((isset($_SESSION['user'])) && (!empty($_SESSION['user'])) && (($time - $_SESSION['access_time']) < SESSION_TIMEOUT))
+if ((isset($_SESSION['user'])) && (!empty($_SESSION['user'])))
 {
 	// User is logged on
 	$UserAuthenticated = true;
-	$_SESSION['access_time'] = $time;
-}
-elseif ((isset($_SESSION['user'])) && (empty($_SESSION['user'])))
-{
-	// Actively logged off from previous session
-	$UserAuthenticated = false;
-	if (($time - $_SESSION['access_time']) > SESSION_TIMEOUT)
-	{
-		// Session timeout has expired - remove empty username
-		unset($_SESSION['user']);
-	}
 }
 else
 {
 	$UserAuthenticated = false;
-	unset($_SESSION['user']);
 }
 
 // Process result of login form
@@ -78,7 +62,6 @@ if ((!$UserAuthenticated) && (isset($_POST['submitted'])))
 	if ($UserAuthenticated)
 	{
 		$_SESSION['user'] = $username;
-		$_SESSION['access_time'] = $time;
 	}
 	else
 	{

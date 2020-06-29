@@ -328,6 +328,7 @@ function display_table($params)
 	print("<input type=\"hidden\" name=\"listsize\" value=\"$list_size\"/>\n");
 
 	// Output top navigation
+	print("<h2>Table $table</h2>");
 	print("<p class=\"small\">Found $table_size records");
 	print("&nbsp;&nbsp;&nbsp;Showing&nbsp;<input class=\"small\" name=\"listsize2\" value=$list_size size=4>&nbsp;results&nbsp;per&nbsp;page");
 	print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Apply\" onClick=\"submitForm(this.form)\"/>");

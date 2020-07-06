@@ -46,7 +46,7 @@ function check_field_status($table,$field,$value)
 		{
 			return report_error("Attempt to set numeric field <em>$field</em> to a non-numeric value.");
 		}
-		elseif (($row['required']) && (empty($value)))
+		elseif (($row['required'] == 2) && (empty($value)))
 		{
 			return report_error("Field <em>$field</em> is required but not set.");
 		}
@@ -854,7 +854,7 @@ function handle_record($action,$params)
 				}
 
 				// Select the CSS class for use with the field label
-				if (($row3['required']) && ($row3['widget_type'] != 'checkbox') && ($row3['widget_type'] != 'static'))
+				if (($row3['required'] == 2) && ($row3['widget_type'] != 'checkbox') && ($row3['widget_type'] != 'static'))
 				{
 					$class = 'required';
 				}

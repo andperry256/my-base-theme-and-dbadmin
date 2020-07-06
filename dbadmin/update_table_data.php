@@ -165,8 +165,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_table_fields`  DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `field_name`)");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `is_primary` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `field_name`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `is_primary` `is_primary` TINYINT( 1 ) NOT NULL DEFAULT '0'");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `required` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `is_primary`");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `required` `required` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `required` INT( 11 ) NOT NULL DEFAULT '0' AFTER `is_primary`");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `required` `required` Int( 11 ) NOT NULL DEFAULT '0'");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `alt_label` VARCHAR( 63 ) NULL AFTER `required`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `alt_label` `alt_label` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `widget_type` ENUM( $widget_types ) NOT NULL DEFAULT '$default_widget_type' AFTER `alt_label`");
@@ -312,18 +312,19 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
           if ($row2['Key'] == 'PRI')
           {
             $is_primary = 1;
+            $required = 2;  // Value required
           }
           else
           {
             $is_primary = 0;
-          }
-          if ($row2['Null'] == 'NO')
-          {
-            $required = 1;
-          }
-          else
-          {
-            $required = 0;
+            if ($row2['Null'] == 'NO')
+            {
+              $required = 1;  // Can be empty but not null
+            }
+            else
+            {
+              $required = 0;  //Can be null
+            }
           }
           switch ($field_type)
           {
@@ -337,7 +338,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
 
             case 'varchar';
             case 'char';
-              if ($field_size >= 128)
+              if ($field_size >= 200)
               {
                 $default_widget_type = 'textarea';
               }
@@ -357,16 +358,28 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
               {
                 $default_widget_type = 'input-num';
               }
+              if ($required == 1)
+              {
+                $required = 2;
+              }
               break;
 
             case 'tinyint':
               $default_widget_type = 'checkbox';
+              if ($required == 1)
+              {
+                $required = 2;
+              }
               break;
 
             case 'enum':
               $enum_select_list = $field_size;
               $field_size ='';
               $default_widget_type = 'enum';
+              if ($required == 1)
+              {
+                $required = 2;
+              }
               break;
 
             default:
@@ -467,6 +480,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   // Set miscellaneous field descriptions for built-in tables
   mysqli_query($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
+  mysqli_query($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
 
   print("Operation completed.$eol");
   if ($mode == 'web')

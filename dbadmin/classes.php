@@ -197,21 +197,6 @@ class tables__view_orphan_table_field_records extends tables_dba_table_fields {}
 
 //==============================================================================
 
-class tables_dba_master_location
-{
-  function rec_id__validate($record,$value)
-  {
-    if ($value != 1)
-		{
-			return report_error("Invalid record ID - only a single record with ID=1 is allowed.");
-		}
-		else
-			return true;
-  }
-}
-
-//==============================================================================
-
 class tables_admin_passwords
 {
 	function beforeSave($record)

@@ -1,48 +1,7 @@
 <?php
 //==============================================================================
-if (!function_exists('get_master_location'))
+if (!function_exists('get_table_access_level'))
 {
-//==============================================================================
-/*
-Function get_master_location
-*/
-//==============================================================================
-
-function get_master_location($default)
-{
-	global $PrivateScriptsDir;
-	global $local_site_dir;
-	global $RelativePath;
-	global $MainDomain;
-	global $Location;
-
-	require_once("$PrivateScriptsDir/mysql_connect.php");
-	$db = sites_db_connect();
-	$query_result = mysqli_query($db,"SHOW TABLES LIKE 'dbases'");
-	if (mysqli_num_rows($query_result) > 0)
-	{
-		$query2 = "SELECT * FROM dbases WHERE site_path='$local_site_dir' AND sub_path='$RelativePath' AND (mode='master' OR mode='sub-master')";
-		if ($Location == 'real')
-			$query2 .= " AND domname='$MainDomain'";
-		else
-			$query2 .= " AND dbname LIKE 'local_%'";
-		$query_result2 = mysqli_query($db,$query2);
-		if ($row2 = mysqli_fetch_assoc($query_result2))
-		{
-			if ($row2['mode'] == 'master')
-				return $Location;
-			elseif ($row2['auto_restore'] == 0)
-				return '*';
-			elseif ($Location == 'real')
-				return 'local';
-			else
-				return 'real';
-		}
-	}
-	return $default;
-}
-
-//==============================================================================
 /*
 Function get_table_access_level
 */
@@ -50,12 +9,12 @@ Function get_table_access_level
 
 function get_table_access_level($table)
 {
-	global $Location;
+	global $Location, $RelativePath, $db_master_location;
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
-	if ($row = mysqli_fetch_assoc($query_result))
+	$db_sub_path = str_replace('dbadmin/','',$RelativePath);
+	if (isset($db_master_location[$db_sub_path]))
 	{
-		$master_location = $row['location'];
+		$master_location = $db_master_location[$db_sub_path];
 	}
 	else
 	{

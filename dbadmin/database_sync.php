@@ -5,7 +5,7 @@ if (!function_exists('sync_databases'))
 //==============================================================================
 function sync_databases($local_db_name)
 {
-	global $Location, $RelativePath, $local_site_dir, $Localhost_ID, $DBAdminURL;
+	global $Location, $RelativePath, $local_site_dir, $Localhost_ID, $DBAdminURL, $db_master_location;
 
 	set_time_limit(300);
 	print("<h1>Synchronise Databases</h1>\n");
@@ -21,19 +21,15 @@ function sync_databases($local_db_name)
 			switch ($row['mode'])
 			{
 					case 'auto':
-						$db = mysqli_connect( 'localhost', REAL_DB_USER, REAL_DB_PASSWD, $local_db_name );
-					  $query_result2 = mysqli_query($db,"SELECT * FROM dba_master_location WHERE rec_id=1");
-					  if ($row2 = mysqli_fetch_assoc($query_result2))
-					  {
-					    if ($row2['location'] == $Location)
-					    {
-								$sync_direction = 'out';
-					    }
-					    else
-					    {
-								$sync_direction = 'in';
-					    }
-					  }
+						$db_sub_path = str_replace('dbadmin/','',$RelativePath);
+				    if ($Location == $db_master_location[$db_sub_path])
+				    {
+							$sync_direction = 'out';
+				    }
+				    else
+				    {
+							$sync_direction = 'in';
+				    }
 						break;
 
 					case 'master':

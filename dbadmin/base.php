@@ -410,7 +410,8 @@ if ((!isset($SupportMobile)) || (!($SupportMobile)))
   print("<div class=\"no-mobile-support\"><strong>N.B. </strong>This page is not optimised for mobile viewing. For a better user experience please use a computer or tablet.</div>\n");
 }
 $db_sub_path = str_replace('dbadmin/','',$RelativePath);
-if ($db_master_location[$db_sub_path] != $Location)
+if (($db_master_location[$db_sub_path] != $Location) &&
+    ((!isset($override_db_sync_warning[$db_sub_path])) || (!$override_db_sync_warning[$db_sub_path])))
 {
   print("<p class=\"small\"><span class=\"highlight-warning\">WARNING</span> - You are not using the master copy of the database. Any changes are liable to be lost on the next database synchronisation.<p>\n");
 }

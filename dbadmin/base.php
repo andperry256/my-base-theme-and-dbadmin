@@ -497,7 +497,7 @@ if ($Location == 'local')
 {
   print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=dbsync\">Sync&nbsp;Databases</a>");
 }
-if (is_file("$BaseDir/admin_logout.php"))
+if ((is_file("$BaseDir/admin_logout.php")) && (!is_file("$CustomPagesPath/$RelativePath/logout.php")))
 {
   print("&nbsp;&nbsp; <a href=\"$BaseURL/admin_logout.php\">Logout</a>");
 }

@@ -256,6 +256,7 @@ Return values:-
 12 = Originator address not specified
 13 = Destination address not specified
 14 = Entry not found in mail route table
+21 = Not used here but reserved for SMTP2GO event logged
 */
 //================================================================================
 

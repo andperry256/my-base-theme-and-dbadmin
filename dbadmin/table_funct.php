@@ -1,3 +1,20 @@
+<style>
+	a.current-page-link, a.other-page-link {
+		font-size: 0.9em;
+		border: solid 1px steelblue;
+		padding: 0.3em;
+		margin-right: 0.3em;
+		text-decoration: none;
+	}
+	a.current-page-link {
+		color: #fff;
+		background-color: steelblue;
+	}
+	a.other-page-link {
+		color: steelblue;
+		background-color: #fff;
+	}
+</style>
 <?php
 //==============================================================================
 if (!function_exists('get_base_table'))
@@ -278,38 +295,51 @@ function display_table($params)
 	}
 	if ($page_count > 1)
 	{
-		if ($current_page == 1)
+		if ($current_page > 5)
 		{
-			$page_links .= "<span style=\"color:silver\">Prev</span>";
+			$first_linked_page = $current_page - 5;
 		}
 		else
 		{
-			$offset = $start_offset - $list_size;
-			$page_links .= "<a href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">Prev</a>";
+			$first_linked_page = 1;
 		}
-		for ($page = 1; $page <= $page_count; $page++)
+		if ($current_page < $page_count-5)
 		{
-			$page_links .= " |&nbsp;";
+			$last_linked_page = $current_page + 5;
+		}
+		else
+		{
+			$last_linked_page = $page_count;
+		}
+
+		if ($current_page != 1)
+		{
+			$offset = 0;
+			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&laquo;</a>";
+			$offset = $start_offset - $list_size;
+			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&lt;</a>";
+		}
+		for ($page = $first_linked_page; $page <= $last_linked_page; $page++)
+		{
 			if ($page == $current_page)
 			{
-				$page_links .= "<span style=\"color:silver\">$page</span>";
+				$class = 'current-page-link';
 			}
 			else
 			{
-				$page_offset = ($page - 1) * $list_size;
-				$page_links .= "<a href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$page_offset&-listsize=$list_size$add_pars\">$page</a>";
+				$class = 'other-page-link';
 			}
+			$page_offset = ($page - 1) * $list_size;
+			$page_links .= "<a class=\"$class\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$page_offset&-listsize=$list_size$add_pars\">$page</a>";
 		}
-		if ($current_page == $page_count)
-		{
-			$page_links .= " |&nbsp;<span style=\"color:silver\">Next</span>";
-		}
-		else
+		if ($current_page != $page_count)
 		{
 			$offset = $start_offset + $list_size;
-			$page_links .= " |&nbsp;<a href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">Next</a>";
+			$page_links .= "<a  class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&gt;</a>";
+			$offset = ($page_count - 1) * $list_size;
+			$page_links .= "<a  class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&raquo;</a>";
 		}
-	}
+}
 
 	// Determine the access level for the table
 	$access_level = get_table_access_level($table);
@@ -331,9 +361,8 @@ function display_table($params)
 	print("<h2>Table $table</h2>");
 	print("<p class=\"small\">Found $table_size records");
 	print("&nbsp;&nbsp;&nbsp;Showing&nbsp;<input class=\"small\" name=\"listsize2\" value=$list_size size=4>&nbsp;results&nbsp;per&nbsp;page");
-	print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Apply\" onClick=\"submitForm(this.form)\"/>");
-	print("<br/>$page_links");
-	print("<br />\n");
+	print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Apply\" onClick=\"submitForm(this.form)\"/></p>");
+	print("<p>$page_links</p>\n");
 	print("<table class=\"table-top-navigation\"><tr>\n");
 	if ($access_level == 'full')
 	{
@@ -485,7 +514,7 @@ function display_table($params)
 	}
 
 	print("</table>\n");
-	print("$page_links<br /><br />");
+	print("<p>$page_links</p>\n");
 	if ($access_level == 'full')
 	{
 		print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Update Selected\" onClick=\"selectUpdate(this.form)\"/>");

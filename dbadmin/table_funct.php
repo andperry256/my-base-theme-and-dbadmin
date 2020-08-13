@@ -1,20 +1,3 @@
-<style>
-	a.current-page-link, a.other-page-link {
-		font-size: 0.9em;
-		border: solid 1px steelblue;
-		padding: 0.3em;
-		margin-right: 0.3em;
-		text-decoration: none;
-	}
-	a.current-page-link {
-		color: #fff;
-		background-color: steelblue;
-	}
-	a.other-page-link {
-		color: steelblue;
-		background-color: #fff;
-	}
-</style>
 <?php
 //==============================================================================
 if (!function_exists('get_base_table'))
@@ -65,7 +48,9 @@ function display_table($params)
 	global $BaseURL, $RelativePath, $Location;
 	global $search_clause;
 	global $WidgetTypes;
+	global $DBAdminDir;
 	$db = admin_db_connect();
+	print(file_get_contents("$DBAdminDir/page_link_styles.css"));
 
 	// Interpret the URL parameters
 	if (!isset($_GET['-table']))

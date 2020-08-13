@@ -1,0 +1,17 @@
+<style>
+	a.current-page-link, a.other-page-link {
+		font-size: 0.9em;
+		border: solid 1px steelblue;
+		padding: 0.3em;
+		margin-right: 0.3em;
+		text-decoration: none;
+	}
+	a.current-page-link {
+		color: #fff;
+		background-color: steelblue;
+	}
+	a.other-page-link {
+		color: steelblue;
+		background-color: #fff;
+	}
+</style>

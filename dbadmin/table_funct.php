@@ -263,6 +263,7 @@ function display_table($params)
 	}
 
 	// Generate the page links
+	$page_range = 4;
 	$page_links = '';
 	$add_pars = '';
 	if (!empty($search_string))
@@ -280,29 +281,44 @@ function display_table($params)
 	}
 	if ($page_count > 1)
 	{
-		if ($current_page > 5)
+		if ($current_page > $page_range+1)
 		{
-			$first_linked_page = $current_page - 5;
+			$first_linked_page = $current_page - $page_range;
 		}
 		else
 		{
-			$first_linked_page = 1;
+			$first_linked_page = 2;
 		}
-		if ($current_page < $page_count-5)
+		if ($current_page < $page_count-$page_range-1)
 		{
-			$last_linked_page = $current_page + 5;
+			$last_linked_page = $current_page +$page_range;
 		}
 		else
 		{
-			$last_linked_page = $page_count;
+			$last_linked_page = $page_count - 1;
 		}
 
 		if ($current_page != 1)
 		{
-			$offset = 0;
-			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&laquo;</a>";
 			$offset = $start_offset - $list_size;
-			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&lt;</a>";
+			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&laquo;</a>";
+		}
+		if ($current_page == 1)
+		{
+			$class = 'current-page-link';
+		}
+		else
+		{
+			$class = 'other-page-link';
+		}
+		$offset = 0;
+		$page_links .= "<a class=\"$class\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">1</a>";
+		if ($current_page != 1)
+		{
+			if ($first_linked_page > 2)
+			{
+				$page_links .= "&hellip;";
+			}
 		}
 		for ($page = $first_linked_page; $page <= $last_linked_page; $page++)
 		{
@@ -317,14 +333,26 @@ function display_table($params)
 			$page_offset = ($page - 1) * $list_size;
 			$page_links .= "<a class=\"$class\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$page_offset&-listsize=$list_size$add_pars\">$page</a>";
 		}
+		if ($last_linked_page < $page_count-1)
+		{
+			$page_links .= "&hellip;";
+		}
+		if ($current_page == $page_count)
+		{
+			$class = 'current-page-link';
+		}
+		else
+		{
+			$class = 'other-page-link';
+		}
+		$offset = ($page_count - 1) * $list_size;
+		$page_links .= "<a  class=\"$class\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">$page_count</a>";
 		if ($current_page != $page_count)
 		{
 			$offset = $start_offset + $list_size;
-			$page_links .= "<a  class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&gt;</a>";
-			$offset = ($page_count - 1) * $list_size;
 			$page_links .= "<a  class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&raquo;</a>";
 		}
-}
+	}
 
 	// Determine the access level for the table
 	$access_level = get_table_access_level($table);

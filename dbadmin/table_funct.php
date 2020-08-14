@@ -50,7 +50,7 @@ function display_table($params)
 	global $WidgetTypes;
 	global $DBAdminDir;
 	$db = admin_db_connect();
-	print(file_get_contents("$DBAdminDir/page_link_styles.css"));
+	print("<style>\n".file_get_contents("$DBAdminDir/page_link_styles.css")."</style>\n");
 
 	// Interpret the URL parameters
 	if (!isset($_GET['-table']))

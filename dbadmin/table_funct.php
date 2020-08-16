@@ -301,7 +301,7 @@ function display_table($params)
 		if ($current_page != 1)
 		{
 			$offset = $start_offset - $list_size;
-			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&laquo;</a>";
+			$page_links .= "<a class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">Prev</a>";
 		}
 		if ($current_page == 1)
 		{
@@ -350,7 +350,7 @@ function display_table($params)
 		if ($current_page != $page_count)
 		{
 			$offset = $start_offset + $list_size;
-			$page_links .= "<a  class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">&raquo;</a>";
+			$page_links .= "<a  class=\"other-page-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-startoffset=$offset&-listsize=$list_size$add_pars\">Next</a>";
 		}
 	}
 

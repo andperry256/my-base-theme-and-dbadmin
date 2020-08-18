@@ -1,50 +1,72 @@
 <?php
+  if (isset($_GET['site']))
+  {
+    $local_site_dir = $_GET['site'];
+  }
+  if (is_file("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php"))
+  {
+    require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+  }
+  if (!isset($local_site_dir))
+  {
+    exit("Site not specified");
+  }
+  $debug_file_path = array();
   if (is_file("/Config/localhost.php"))
   {
     // Local server
-    require("/Config/linux_pathdefs.php");
-    $debug_file_path = "$Localhost_RootDir/Sites/{$_GET['site']}/public_html/wp-content/debug.log";
+    $debug_file_path[0] = "$RootDir/logs/php_error.log";
+    $debug_file_path[1] = "$BaseDir/wp-content/debug.log";
   }
   else
   {
     // Online site
-    $debug_file_path = "../wp-content/debug.log";
+    $debug_file_path[0] = "$RootDir/logs/php_error.log";
+    $debug_file_path[1] = "$RootDir/logs/".str_replace('.','_',$MainDomain).'.php.error.log';
+    $debug_file_path[2] = "$BaseDir/wp-content/debug.log";
   }
 
-  if ((isset($_GET['clear'])) && (is_file($debug_file_path)))
+  $dt = date("YmdHis");
+  if (isset($_GET['clear']))
   {
-    // Delete log file
-    unlink($debug_file_path);
-    $new_url = './display_debug_log.php';
-    if (isset($_GET['site']))
+    foreach($debug_file_path as $file)
     {
-        $new_url .= "?site={$_GET['site']}";
+      if (is_file($file))
+      {
+        // Delete log file
+        unlink($file);
+      }
     }
-    header("Location: $new_url");
+    header("Location: ./display_debug_log.php?site={$_GET['site']}&dt=$dt");
     exit;
   }
+  $links = "<a href=\"./display_debug_log.php?site={$_GET['site']}&dt=$dt\">Reload</a>";
+  $links .= " | <a href=\"./display_debug_log.php?site={$_GET['site']}&dt=$dt&clear\">Clear</a>";
 
-  if (is_file($debug_file_path))
+  print("$links<br />\n");
+  $files_found = false;
+  foreach($debug_file_path as $file)
   {
-    // Display log file
-    if (isset($_GET['site']))
+    if (is_file($file))
     {
-      $link = "./display_debug_log.php?site={$_GET['site']}&clear";
+      print("<br />\n");
+      print("==================== $file ====================<br />\n");
+      print("<br />\n");
+      $content = file($file);
+      foreach ($content as $line)
+      {
+        print("$line<br />\n");
+      }
+      $files_found = true;
     }
-    else
-    {
-      $link = "./display_debug_log.php?clear";
-    }
-    print("<p><a href=\"$link\">Clear Log</a></p>\n");
-    $content = file($debug_file_path);
-    foreach ($content as $line)
-    {
-      print("$line<br />\n");
-    }
-    print("<p><a href=\"$link\">Clear Log</a></p>\n");
+  }
+  print("<br />\n");
+  if ($files_found)
+  {
+    print("$links<br />\n");
   }
   else
   {
-    print("Debug log file not found.");
+    print("No debug logs found\n");
   }
 ?>

@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 
-$db - admin_db_connect();
+$db = admin_db_connect();
 $params = array();
 $account = $table;
 if (substr($account,0,14) == '_view_account_')

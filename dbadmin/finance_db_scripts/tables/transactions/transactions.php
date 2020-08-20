@@ -257,8 +257,8 @@ class tables_transactions
 			$primary_keys['seq_no'] = $seq_no;
 			$_SESSION['saved_record_id'] = encode_record_id($primary_keys);
 		}
-		$old_account = $record->OldPKVal('old_account');
-		$old_seq_no = $record->OldPKVal('old_seq_no');
+		$old_account = $record->OldPKVal('account');
+		$old_seq_no = $record->OldPKVal('seq_no');
 
 		// Re-link any splits if the transaction primary keys have changed.
 		// Can leave the split sequence numbers intact as they are specific to the individual transaction.

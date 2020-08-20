@@ -453,7 +453,7 @@ function display_table($params)
 	print("<td class=\"table-listing-header\"><input type=\"checkbox\" name=\"select_all\"  onclick=\"checkAll(this)\"></td>");
 	foreach ($fields as $f => $ord)
 	{
-		if ($sort_field == $f)
+		if ((isset($sort_field)) && ($sort_field == $f))
 		{
 			if (strtolower($sort_order) == 'asc')
 			{

@@ -310,6 +310,11 @@ if (!is_file($site_path_defs_path))
 			}
 		}
 
+		/*
+		This code is temporarily disabled. The call to db_connect_with_params is
+		currently being called with a database ID of 1, which may not be correct
+		for all sites. The use of supercategories needs to be reviewed anyway.
+		
 		if ((is_single()) && (isset($enable_supercategories)) && ($enable_supercategories))
 		{
 			// Automatically assign required supercategory.
@@ -327,6 +332,7 @@ if (!is_file($site_path_defs_path))
 				}
 			}
 		}
+		*/
 	}
 
 	//================================================================================

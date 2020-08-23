@@ -778,13 +778,13 @@ function handle_record($action,$params)
 	}
 	print("<form method=\"post\" action=\"$DBAdminURL/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
 	$last_display_group = '';
-	$query_result = mysqli_query($db,$select_this_record);
 
 	// Check that the record exists unless the action is set to 'new'.
-	if (($row = mysqli_fetch_assoc($query_result)) || ($action == 'new'))
+	// Check the action first as the query result will not be valid in the event
+	// of action being set to 'new'.
+	$query_result = mysqli_query($db,$select_this_record);
+	if (($action == 'new') || ($row = mysqli_fetch_assoc($query_result)))
 	{
-		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' ORDER by display_order ASC");
-
 		// Main loop for processing record fields
 		$query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table");
 		while ($row2 = mysqli_fetch_assoc($query_result2))

@@ -178,6 +178,10 @@ function start_session()
 	{
 		session_start();
 	}
+	if (is_file('/var/www/html/user_authentication.php'))
+	{
+		include('/var/www/html/user_authentication.php');
+	}
 	if (!isset($_SESSION['theme_mode']))
 	{
 		$_SESSION['theme_mode'] = 'light';

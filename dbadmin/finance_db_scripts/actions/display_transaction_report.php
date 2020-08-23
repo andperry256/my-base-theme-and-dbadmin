@@ -2,6 +2,7 @@
 //==============================================================================
 
 global $BaseDir;
+global $Location;
 $db = admin_db_connect();
 $csv_file = "report".date('YmdHis').".csv";
 $ofp2 = fopen("$BaseDir/admin_data/finances/$csv_file", "w");

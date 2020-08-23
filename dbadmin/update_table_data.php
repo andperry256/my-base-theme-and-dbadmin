@@ -45,6 +45,10 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
     $rtag = '</em>';
     $nbsp = '&nbsp;';
   }
+  if (!isset($WidgetTypes))
+  {
+    exit("ERROR - Attempt to run script out of context.\n");
+  }
 
   print($eol);
   print("Processing database at relative path [$RelativePath] ...$eol");

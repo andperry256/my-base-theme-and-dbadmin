@@ -233,6 +233,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
     $table = $row[$table_field];
     mysqli_query($db,"DROP TABLE $table");
   }
+
+  // Main loop to process all tables in the database
   $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` NOT LIKE 'dataface__%'");
   $count = mysqli_num_rows($query_result);
   while ($row = mysqli_fetch_assoc($query_result))
@@ -250,9 +252,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
     print(" $ltag$table$rtag ...$eol");
     if ($row['Table_type'] != 'VIEW')
     {
+      // Set the table to the required character set and collation if required
       if ($update_charsets)
       {
-        // Set the table to the required character set and collation
         $charset = $default_charset;
         $collation = $default_collation;
         $engine = $default_engine;
@@ -281,15 +283,17 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
           print("--Unable to update storage engine for table $table$eol");
         }
       }
+
+      // Optimise the table if required
       if ($optimise)
       {
-        // Optimise the table
         if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
         {
           print("--Unable to optimise table $table$eol");
         }
       }
     }
+
     $table = $row[$table_field];
     mysqli_query($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
     mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
@@ -299,10 +303,11 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
       {
         mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Will automatically fail if already present.
         $last_display_order = 0;
+
+        // Loop through the table fields
         $query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table");
         while ($row2 = mysqli_fetch_assoc($query_result2))
         {
-          // Process table field
           $field_name = $row2['Field'];
           $field_type = strtok($row2['Type'],'(');
           $field_size = strtok(')');
@@ -383,6 +388,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
               $default_widget_type = 'input-text';
               break;
           }
+
+          // Run query to select data for the given table & field
           $query_result3 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
           if ($row3 = mysqli_fetch_assoc($query_result3))
           {
@@ -396,6 +403,16 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   						4. Set the widget type to 'enum' for any enum field.
               5. Set the widget type to 'auto-increment' for any auto-increment field.
             */
+            if ($row3['is_primary'])
+            {
+              /*
+                If the field is already set to primary then do not reset this
+                as it may have been set manually (normally in the case of a view
+                where primary key status does not occur naturally).
+              */
+              $is_primary = 1;
+              $required = 2;
+            }
             mysqli_query($db,"UPDATE dba_table_fields SET is_primary=$is_primary,required=$required WHERE table_name='$table' AND field_name='$field_name'");
   					if ($is_primary)
   					{

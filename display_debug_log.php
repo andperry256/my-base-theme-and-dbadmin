@@ -26,7 +26,6 @@
     $debug_file_path[2] = "$BaseDir/wp-content/debug.log";
   }
 
-  $dt = date("YmdHis");
   if (isset($_GET['clear']))
   {
     foreach($debug_file_path as $file)
@@ -37,11 +36,11 @@
         unlink($file);
       }
     }
-    header("Location: ./display_debug_log.php?site={$_GET['site']}&dt=$dt");
+    header("Location: ./load_display_debug_log.php?site={$_GET['site']}");
     exit;
   }
-  $links = "<a href=\"./display_debug_log.php?site={$_GET['site']}&dt=$dt\">Reload</a>";
-  $links .= " | <a href=\"./display_debug_log.php?site={$_GET['site']}&dt=$dt&clear\">Clear</a>";
+  $links = "<a href=\"./load_display_debug_log.php?site={$_GET['site']}\">Reload</a>";
+  $links .= " | <a href=\"./display_debug_log.php?site={$_GET['site']}&clear\">Clear</a>";
 
   print("$links<br />\n");
   $files_found = false;

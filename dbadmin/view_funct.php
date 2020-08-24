@@ -201,6 +201,30 @@ function delete_child_table_structure($child,$parent)
 }
 
 //==============================================================================
+/*
+Function set_primary_key_on_view
+*/
+//==============================================================================
+
+function set_primary_key_on_view($table,$field)
+{
+	$db = admin_db_connect();
+	mysqli_query($db,"UPDATE dba_table_fields SET is_primary=1,required=2 WHERE table_name='$table' AND field_name='$field'");
+}
+
+//==============================================================================
+/*
+Function clear_primary_key_on_view
+*/
+//==============================================================================
+
+function clear_primary_key_on_view($table,$field)
+{
+	$db = admin_db_connect();
+	mysqli_query($db,"UPDATE dba_table_fields SET is_primary=0,required=0 WHERE table_name='$table' AND field_name='$field'");
+}
+
+//==============================================================================
 }
 //==============================================================================
 ?>

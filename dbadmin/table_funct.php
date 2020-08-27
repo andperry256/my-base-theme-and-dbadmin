@@ -441,10 +441,15 @@ function display_table($params)
 	}
 
 	// Construct array for primary key data
+	$primary_key = array();
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER BY display_order ASC");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$primary_key[$row['field_name']] = '';
+	}
+	if (count($primary_key) == 0)
+	{
+		exit("ERROR - no primary key defined for table/view $base_table");
 	}
 
 	// Output table header

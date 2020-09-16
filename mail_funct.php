@@ -39,7 +39,7 @@ elseif (is_file("$PHPMailerDir/PHPMailer.php"))
 
 //================================================================================
 
-function getmsg($mbox,$mid)
+function getmsg($mbox,$mid,$noattach=false)
 {
 	// Global data to be populated with message information.
 	// The main message may be plain text, HTML or both.
@@ -55,19 +55,21 @@ function getmsg($mbox,$mid)
 	if ((!isset($struct->parts)) || (!$struct->parts))
 	{
 		// Not multipart
-		getpart($mbox,$mid,$struct,0);
+		getpart($mbox,$mid,$struct,0,$noattach);
 	}
 	else
 	{
 		// Multipart: iterate through each part
 		foreach ($struct->parts as $partno0=>$part)
-			getpart($mbox,$mid,$part,$partno0+1);
+		{
+			getpart($mbox,$mid,$part,$partno0+1,$noattach);
+		}
 	}
 }
 
 //================================================================================
 
-function getpart($mbox,$mid,$part,$partno)
+function getpart($mbox,$mid,$part,$partno,$noattach=false)
 {
 	global $AttachmentsDir;
 	global $TotalAttachmentSize;
@@ -75,35 +77,56 @@ function getpart($mbox,$mid,$part,$partno)
 
 	// Extract decode data
 	if($partno)
+	{
 		$data = imap_fetchbody($mbox,$mid,$partno);  // Multipart
+	}
 	else
+	{
 		$data = imap_body($mbox,$mid);  // Not multipart
+	}
 
 	// Any part may be encoded, even plain text messages, so check everything.
 	// No need to decode 7-bit, 8-bit, or binary.
 	if ($part->encoding==4)
+	{
 		$data = quoted_printable_decode($data);
+	}
 	elseif ($part->encoding==3)
+	{
 		$data = base64_decode($data);
+	}
 
 	// Get all parameters, like charset, filenames of attachments, etc.
 	$params = array();
 	if ((isset($part->parameters)) && ($part->parameters))
+	{
 		foreach ($part->parameters as $x)
+		{
 			$params[ strtolower( $x->attribute ) ] = $x->value;
+		}
+	}
 	if ((isset($part->dparameters)) && ($part->dparameters))
+	{
 		foreach ($part->dparameters as $x)
+		{
 			$params[ strtolower( $x->attribute ) ] = $x->value;
+		}
+	}
 
 	// Check for attachment
-	if (((isset($params['filename'])) && ($params['filename'])) ||
-	    ((isset($params['name'])) && ($params['name'])))
+	if ((!$noattach) &&
+	    (((isset($params['filename'])) && ($params['filename'])) ||
+	     ((isset($params['name'])) && ($params['name']))))
 	{
 		// Filename may be given as 'filename', 'name' or both.
 		if ($params['filename'])
+		{
 			$filename = $params['filename'];
+		}
 		else
+		{
 			$filename = $params['name'];
+		}
 
 		// Deal with the possibility of two files having the same name
 		$path_parts = pathinfo($filename);
@@ -112,8 +135,8 @@ function getpart($mbox,$mid,$part,$partno)
 		$fileno = 0;
 		while (isset($attachments[$filename]))
 		{
-				$fileno++;
-				$filename = $filename_base.'-'."$fileno.$ext";
+			$fileno++;
+			$filename = $filename_base.'-'."$fileno.$ext";
 		}
 
 		// filename may be encoded, so see imap_mime_header_decode()
@@ -145,7 +168,9 @@ function getpart($mbox,$mid,$part,$partno)
 		}
 
 		if (isset($TotalAttachmentSize))
+		{
 			$TotalAttachmentSize += filesize("$AttachmentsDir/$filename");
+		}
 		fclose($ofp);
 	}
 
@@ -155,9 +180,13 @@ function getpart($mbox,$mid,$part,$partno)
 		// Messages may be split in different parts because of inline attachments,
 		// so append parts together with blank row.
 		if (strtolower($part->subtype)=='plain')
+		{
 			$plainmsg .= trim($data) ."\n\n";
+		}
 		else
+		{
 			$htmlmsg .= $data ."<br><br>";
+		}
 		$charset = $params['charset'];  // assume all parts are same charset
 	}
 
@@ -172,7 +201,9 @@ function getpart($mbox,$mid,$part,$partno)
 	if ((isset($part->parts)) && ($part->parts))
 	{
 		foreach ($part->parts as $partno0=>$subpart)
+		{
 			getpart($mbox,$mid,$subpart,$partno.'.'.($partno0+1));
+		}
 	}
 }
 

@@ -14,7 +14,9 @@ class tables_splits
 			return report_error("Invalid accounting month.");
 		}
 		else
+		{
 			return true;
+		}
 	}
 
 	function credit_amount__validate($record, $value)
@@ -24,7 +26,9 @@ class tables_splits
 			return report_error("Invalid credit amount.");
 		}
 		else
+		{
 			return true;
+		}
 	}
 
 	function debit_amount__validate($record, $value)
@@ -34,15 +38,21 @@ class tables_splits
 			return report_error("Invalid debit amount.");
 		}
 		else
+		{
 			return true;
+		}
 	}
 
 	function beforeSave($record)
 	{
 		$action = $record->action;
 		$table = $record->table;
+		$credit_amount = $record->FieldVal('credit_amount');
+		$debit_amount = $record->FieldVal('debit_amount');
 		if (($credit_amount != 0) && ($debit_amount != 0))
+		{
 			return report_error("Credit and debit amounts both specified.");
+		}
 	}
 
 	function afterSave($record)
@@ -208,7 +218,6 @@ class tables_splits
 			header("Location: $BaseURL/$RelativePath/?-action=edit&-table=_view_account_$account&-recordid=$record_id&summary");
 			exit;
 		}
-
 	}
 }
 ?>

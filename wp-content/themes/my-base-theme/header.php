@@ -9,6 +9,10 @@
 	 * @package My_Base_Theme
 	 */
 	 global $link_version;
+	 if (is_file("last_preset_link_version.php"))
+	 {
+	 	 require("last_preset_link_version.php");
+	 }
 	 $link_version = date('ym').'01';
 	 if ((isset($last_preset_link_version)) && ($link_version < $last_preset_link_version))
 	 {

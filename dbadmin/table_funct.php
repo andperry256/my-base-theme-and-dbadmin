@@ -49,6 +49,7 @@ function display_table($params)
 	global $search_clause;
 	global $WidgetTypes;
 	global $DBAdminDir;
+	global $display_table;
 	$db = admin_db_connect();
 	print("<style>\n".file_get_contents("$DBAdminDir/page_link_styles.css")."</style>\n");
 
@@ -725,6 +726,7 @@ Function run_update
 
 function run_update($table,$option)
 {
+	global $display_table;
 	$_POST = array_map( 'stripslashes_deep', $_POST );
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);

@@ -164,6 +164,12 @@ if (!function_exists('DaysInMonth'))
 }
 
 //==============================================================================
+/*
+The following function 'GegorianDow' is deprecated, but will not be deleted from
+the library as the code provides insight into an algorithm for calculating the
+day of week.
+*/
+//==============================================================================
 
 if (!function_exists('GregorianDoW'))
 {
@@ -186,6 +192,27 @@ if (!function_exists('GregorianDoW'))
 		$result += $GregorianCenturyAdjust[floor($year / 100) - 10];
 		$result %= 7;
 		return($result);
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('DateToDoW'))
+{
+	function DateToDoW($date)
+	{
+		return date('w',strtotime($date));
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('DMYToDoW'))
+{
+	function DMYToDoW($day,$month,$year)
+	{
+		$date = sprintf("%04d-%02d-%02d",$year,$month,$day);
+		return date('w',strtotime($date));
 	}
 }
 

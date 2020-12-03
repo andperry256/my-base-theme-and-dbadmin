@@ -106,12 +106,7 @@ function generate_widget($table,$field_name,$field_value)
 		switch ($row['widget_type'])
 		{
 			case 'date':
-				print("<input type=\"text\" id=\"field_$field_name\" name=\"field_$field_name\"  value=\"$field_value\" size=\"10\" style=\"margin-right:0.5em\"
-				    	 data-datepick=\"showOtherMonths: true, firstDay: 7, dateFormat: 'yyyy-mm-dd', minDate: 'new Date($NewDateStartYear, 1 - 1, 1)'\">\n");
-				print("<script>
-			         $('#field_$field_name').datepick({showTrigger: '#calImg'});
-							 $('#field_$field_name').datepick($.extend( {pickerClass: 'my-picker'}, $.datepick.regionalOptions['en-GB']));
-							 </script>");
+				datepicker_widget("field_$field_name",$field_value);
 				break;
 
 			case 'input-text':

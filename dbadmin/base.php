@@ -99,15 +99,7 @@ function runCopy(form)
 
 require("classes.php");
 require("functions.php");
-if (!isset($NewDateStartYear))
-{
-  $NewDateStartYear = 2000;
-}
-if (!isset($CalendarIcon))
-{
-  $CalendarIcon = "$DBAdminURL/datepicker/img/calendar-cyan-20px.gif";
-}
-
+require("datepicker_include.php");
 require("widget_types.php");
 require("$RootDir/maintenance/db_master_location.php");
 
@@ -438,7 +430,6 @@ else
   $viewing_mode = 'desktop';
 }
 
-print("<div style=\"display: none;\"><img id=\"calImg\" src=\"$CalendarIcon\" alt=\"Popup\" class=\"trigger\"></div>");
 print("<div id=\"desktop-content\">\n");
 if ($viewing_mode  == 'desktop')
 {

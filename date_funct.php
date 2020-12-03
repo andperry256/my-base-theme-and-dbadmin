@@ -218,6 +218,16 @@ if (!function_exists('DMYToDoW'))
 
 //==============================================================================
 
+if (!function_exists('DateIsValid'))
+{
+	function DateIsValid($date)
+	{
+		return (checkdate((int)(substr($date,5,2)),(int)(substr($date,8,2)),(int)(substr($date,0,4))));
+	}
+}
+
+//==============================================================================
+
 if (!function_exists('StartWeekOfMonth'))
 {
 	function StartWeekOfMonth($month,$year)

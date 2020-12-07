@@ -776,25 +776,4 @@ if (!function_exists('ChurchCalendar'))
 }
 
 //==============================================================================
-
-if (!function_exists('MySQLDateValid'))
-{
-	function MySQLDateValid($date)
-	{
-		$year = (int)substr($date,0,4);
-		$month = (int)substr($date,5,2);
-		$day = (int)substr($date,8,2);
-		if (($year >= 2000) && ($year <= 2099))
-		{
-			if (($month >= 1) && ($month <= 12))
-			{
-				if (($day >= 1) && ($day <= DaysInMonth($month,$year)))
-					return true;
-			}
-		}
-		return false;
-	}
-}
-
-//==============================================================================
 ?>

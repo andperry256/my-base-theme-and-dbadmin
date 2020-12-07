@@ -222,7 +222,8 @@ if (!function_exists('DateIsValid'))
 {
 	function DateIsValid($date)
 	{
-		return (checkdate((int)(substr($date,5,2)),(int)(substr($date,8,2)),(int)(substr($date,0,4))));
+		return ((preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/",$date)) &&
+			      (checkdate((int)(substr($date,5,2)),(int)(substr($date,8,2)),(int)(substr($date,0,4)))));
 	}
 }
 

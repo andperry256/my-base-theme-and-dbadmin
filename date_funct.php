@@ -15,11 +15,17 @@ if (!isset($BaseDir))
 }
 
 if (is_file("alt_date_funct.php"))
+{
 	require("alt_date_funct.php");
+}
 elseif (is_file("../alt_date_funct.php"))
+{
 	require("../alt_date_funct.php");
+}
 elseif (is_file("$BaseDir/alt_date_funct.php"))
+{
 	require("$BaseDir/alt_date_funct.php");
+}
 
 //==============================================================================
 
@@ -56,11 +62,17 @@ if (!function_exists('DayNumber'))
 		$LongName = array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
 		                  "thursday" => 4, "friday" => 5, "saturday" => 6);
 		if (isset($ShortName[$Day]))
+		{
 			return $ShortName[$Day];
+		}
 		elseif (isset($LongName[$Day]))
+		{
 			return $LongName[$Day];
+		}
 		else
+		{
 			return -1;
+		}
 	}
 }
 
@@ -105,11 +117,17 @@ if (!function_exists('MonthNumber'))
 		                  "july" => 7, "august" => 8, "september" => 9,
 		                  "october" => 10, "november" => 11, "december" => 12);
 		if (isset($ShortName[$month]))
+		{
 			return $ShortName[$month];
+		}
 		elseif (isset($LongName[$month]))
+		{
 			return $LongName[$month];
+		}
 		else
+		{
 			return 0;
+		}
 	}
 }
 
@@ -142,11 +160,17 @@ if (!function_exists('IsLeapYear'))
 	function IsLeapYear($year)
 	{
 		if ((($year % 100) == 0) && (($year % 400) != 0))
+		{
 			return 0;
+		}
 		elseif (($year % 4) == 0)
+		{
 			return 1;
+		}
 		else
+		{
 			return 0;
+		}
 	}
 }
 
@@ -157,9 +181,13 @@ if (!function_exists('DaysInMonth'))
 	function DaysInMonth($month,$year)
 	{
 		if (IsLeapYear($year))
+		{
 			return LeapYearDays($month);
+		}
 		else
+		{
 			return NonLeapYearDays($month);
+		}
 	}
 }
 
@@ -177,19 +205,23 @@ if (!function_exists('GregorianDoW'))
 	{
 		$LeapYearMonthAdjust	 = array(0,6,2,3,6,1,4,6,2,5,0,3,5);
 		$NonLeapYearMonthAdjust = array(0,0,3,3,6,1,4,6,2,5,0,3,5);
-		$GregorianCenturyAdjust = array(2,0,6,4,2,0,6,4,2,0,6);
+		$GregorianCenturyAdjust = array(6,4,2,0);
 
-		if (($year < 1000) || ($year > 2099) || ($month < 1) || ($month > 12) ||
-			($day < 1) || ($day > DaysInMonth($month,$year)))
+		if (!checkdate((int)$month,(int)$day,(int)$year))
+		{
 			return -1;
-
+		}
 		$result = floor((($year % 100) * 5) / 4);
 		$result += $day;
 		if (IsLeapYear($year))
+		{
 			$result += $LeapYearMonthAdjust[$month];
+		}
 		else
+		{
 			$result += $NonLeapYearMonthAdjust[$month];
-		$result += $GregorianCenturyAdjust[floor($year / 100) - 10];
+		}
+		$result += $GregorianCenturyAdjust[floor(($year % 400) / 100)];
 		$result %= 7;
 		return($result);
 	}
@@ -255,9 +287,13 @@ if (!function_exists('StartWeekOfMonth'))
 				$SoWMonth = $month - 1;
 			}
 			if (IsLeapYear($SoWYear))
+			{
 				$SoWDay = LeapYearDays($SoWMonth) + 1 - $StartDoW;
+			}
 			else
+			{
 				$SoWDay = NonLeapYearDays($SoWMonth) + 1 - $StartDoW;
+			}
 		}
 		return sprintf("%04d-%02d-%02d",$SoWYear,$SoWMonth,$SoWDay);
 	}
@@ -342,7 +378,9 @@ if (!function_exists('DateOfEaster'))
 		$PaschalFullMoonDay = array(0,14,3,23,11,31,18,8,28,16,5,25,13,2,22,10,30,17,7,27);
 
 		if (($year < 1900) || ($year > 2099))
-			return ("");
+		{
+			return ('');
+		}
 		else
 		{
 			$GoldenNumber = ($year % 19) + 1;
@@ -427,11 +465,17 @@ if (!function_exists('StartOfTerm'))
 		$ThisYear = date('Y');
 		$Easter = DateOfEaster($ThisYear);
 		if ($Today >= "$ThisYear-09-01")
+		{
 			return ("$ThisYear-09-01");
+		}
 		elseif ($Today >= $Easter)
+		{
 			return ($Easter);
+		}
 		else
+		{
 			return ("$ThisYear-01-01");
+		}
 	}
 }
 
@@ -473,16 +517,24 @@ if (!function_exists('EndOfThisTerm'))
 		$ThisYear = date('Y');
 		$Easter = DateOfEaster($ThisYear);
 		if ($Today >= "$ThisYear-09-01")
+		{
 			return ("$ThisYear-12-31");
+		}
 		elseif ($Today >= $Easter)
+		{
 			return ("$ThisYear-08-31");
+		}
 		else
 		{
 			$EasterDay = (int)substr($Easter,8,2);
 			if ($EasterDay == 1)
+			{
 				$EndOfTerm = "$Year-03-31";
+			}
 			else
+			{
 				$EndOfTerm = substr($Easter,0,8).sprintf("%02d",$EasterDay-1);
+			}
 			return ($EndOfTerm);
 		}
 	}
@@ -505,15 +557,23 @@ if (!function_exists('EndOfNextTerm'))
 		{
 			$NextEasterDay = (int)substr($NextEaster,8,2);
 			if ($NextEasterDay == 1)
+			{
 				$EndOfTerm = "$NextYear-03-31";
+			}
 			else
+			{
 				$EndOfTerm = substr($NextEaster,0,8).sprintf("%02d",$NextEasterDay-1);
+			}
 			return ($EndOfTerm);
 		}
 		elseif ($Today >= $Easter)
+		{
 			return ("$ThisYear-12-31");
+		}
 		else
+		{
 			return ("$ThisYear-08-31");
+		}
 	}
 }
 
@@ -595,7 +655,9 @@ if (!function_exists('short_date'))
 				$year++;
 			}
 			else
+			{
 				$month++;
+			}
 		}
 		return sprintf("%02d %s %04d",$day,ShortMonthName($month),$year);
 	}
@@ -621,7 +683,9 @@ if (!function_exists('title_date'))
 				$year++;
 			}
 			else
+			{
 				$month++;
+			}
 		}
 		$dow = GregorianDoW($day,$month,$year);
 		return sprintf("%s %02d %s %04d",ShortDayName($dow),$day,ShortMonthName($month),$year);
@@ -648,7 +712,9 @@ if (!function_exists('long_title_date'))
 				$year++;
 			}
 			else
+			{
 				$month++;
+			}
 		}
 		$dow = GregorianDoW($day,$month,$year);
 		return sprintf("%s %02d %s %04d",DayName($dow),$day,MonthName($month),$year);
@@ -734,20 +800,30 @@ if (!function_exists('ChurchCalendar'))
 		$date_of_septuagesima = AddDays(DateOfEaster($year),-63);
 		$dow_of_christmas = GregorianDoW(25,12,$year);
 		if ($dow_of_christmas == 0)
+		{
 			$days_in_advent = 28;
+		}
 		else
+		{
 			$days_in_advent = $dow_of_christmas + 21;
+		}
 		$date_of_advent_sunday = AddDays("$year-12-25",-$days_in_advent);
 
 		if ($date < $date_of_septuagesima)
 		{
 			// Prior to Septuagesisma
 			if ($date == "$year-01-01")
+			{
 				return "Sunday after Christmas";
-			else if ($date < "$year-01-06")
+			}
+			elseif ($date < "$year-01-06")
+			{
 				return "2nd Sunday after Christmas";
-			else if ($date == "$year-01-06")
+			}
+			elseif ($date == "$year-01-06")
+			{
 				return "Epiphany";
+			}
 			else
 			{
 				$days_after_epiphany = DateDifference("$year-01-06",$date);
@@ -769,9 +845,13 @@ if (!function_exists('ChurchCalendar'))
 				return $advent_sundays[$days_into_advent / 7];
 			}
 			elseif ($date == "$year-12-25")
+			{
 				return "Christmas Day";
+			}
 			else
+			{
 				return "Sunday after Christmas";
+			}
 		}
 	}
 }

@@ -265,7 +265,7 @@ if (!function_exists('StartWeekOfMonth'))
 {
 	function StartWeekOfMonth($month,$year)
 	{
-		$StartDoW = GregorianDoW(1,$month,$year);
+		$StartDoW = DMYToDoW(1,$month,$year);
 		if ($StartDoW == 0)
 		{
 			// Month starts on a Sunday
@@ -314,7 +314,7 @@ if (!function_exists('EndWeekOfMonth'))
 			$LastDay = NonLeapYearDays($month);
 		}
 
-		$EndDoW = GregorianDoW($LastDay,$month,$year);
+		$EndDoW = DMYToDoW($LastDay,$month,$year);
 		$SoWDay = $LastDay - $EndDoW;
 		return sprintf("%04d-%02d-%02d",$year,$month,$SoWDay);
 	}
@@ -386,7 +386,7 @@ if (!function_exists('DateOfEaster'))
 			$GoldenNumber = ($year % 19) + 1;
 			$day = $PaschalFullMoonDay[$GoldenNumber];
 			$month = $PaschalFullMoonMonth[$GoldenNumber];
-			$dayofweek = GregorianDoW($day, $month, $year);
+			$dayofweek = DMYToDoW($day, $month, $year);
 			$day += (7 - $dayofweek);
 			if ($day > 31)
 			{
@@ -407,7 +407,7 @@ if (!function_exists('IsWorkingDay'))
 		$year = (int)substr($date,0,4);
 		$month = (int)substr($date,5,2);
 		$day = (int)substr($date,8,2);
-		$dow = GregorianDoW($day,$month,$year);
+		$dow = DMYToDoW($day,$month,$year);
 
 		// Check for weekends and bank holidays
 		$easter_sunday = DateOfEaster($year);
@@ -443,9 +443,9 @@ if (!function_exists('IsBST'))
 	function IsBST($date)
 	{
 		$year = (int)substr($date,0,4);
-		$march_end_dow = GregorianDoW(31,3,$year);
+		$march_end_dow = DMYToDoW(31,3,$year);
 		$bst_start = sprintf("$year-03-%02d",31-$march_end_dow);
-		$october_end_dow = GregorianDoW(31,10,$year);
+		$october_end_dow = DMYToDoW(31,10,$year);
 		$bst_end = sprintf("$year-10-%02d",31-$october_end_dow);
 		return (($date >= $bst_start) && ($date < $bst_end));
 	}
@@ -687,7 +687,7 @@ if (!function_exists('title_date'))
 				$month++;
 			}
 		}
-		$dow = GregorianDoW($day,$month,$year);
+		$dow = DMYToDoW($day,$month,$year);
 		return sprintf("%s %02d %s %04d",ShortDayName($dow),$day,ShortMonthName($month),$year);
 	}
 }
@@ -716,7 +716,7 @@ if (!function_exists('long_title_date'))
 				$month++;
 			}
 		}
-		$dow = GregorianDoW($day,$month,$year);
+		$dow = DMYToDoW($day,$month,$year);
 		return sprintf("%s %02d %s %04d",DayName($dow),$day,MonthName($month),$year);
 	}
 }
@@ -789,7 +789,7 @@ if (!function_exists('ChurchCalendar'))
 			"4th Sunday in Advent"
 		);
 
-		if (GregorianDoW($day,$month,$year) != 0)
+		if (DMYToDoW($day,$month,$year) != 0)
 		{
 			// Abort if date is not a Sunday
 			return "Error";
@@ -798,7 +798,7 @@ if (!function_exists('ChurchCalendar'))
 
 		// Calculate the dates of Septuagesima and Advent Sunday
 		$date_of_septuagesima = AddDays(DateOfEaster($year),-63);
-		$dow_of_christmas = GregorianDoW(25,12,$year);
+		$dow_of_christmas = DMYToDoW(25,12,$year);
 		if ($dow_of_christmas == 0)
 		{
 			$days_in_advent = 28;

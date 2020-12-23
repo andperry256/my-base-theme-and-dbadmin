@@ -164,7 +164,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 				}
 				$split_seq_no = next_split_no($account,$seq_no);
 				$query = "INSERT INTO splits (account,transact_seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES";
-				$query .= " ('$account',$seq_no,$split_seq_no,$missing_split_credit,$missing_split_debit,'Unresolved:TBD','-none-','Missing split','$acct_month')";
+				$query .= " ('$account',$seq_no,$split_seq_no,$missing_split_credit,$missing_split_debit,'TBD','-none-','Missing split','$acct_month')";
 				run_or_preview_query($ofp,$query,$count_missing_splits);
 			}
 		}

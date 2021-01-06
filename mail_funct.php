@@ -21,7 +21,7 @@ global $PHPMailerMainVersion;
 
 if (!is_dir($PHPMailerDir))
 {
-	die("PHPMailer directory not defined");
+	exit("PHPMailer directory not defined");
 }
 elseif (is_file("$PHPMailerDir/class.phpmailer.php"))
 {

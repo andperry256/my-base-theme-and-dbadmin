@@ -1,7 +1,7 @@
 <?php
 	if (($_SERVER['REMOTE_ADDR'] != '212.159.74.141') && (substr($_SERVER['REMOTE_ADDR'],0,10) != '192.168.0.'))
 	{
-		die("Authentication Failure");
+		exit("Authentication Failure");
 	}
 	$local_site_dir = $_GET['site'];
 	require_once("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");

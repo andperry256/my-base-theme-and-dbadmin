@@ -8,7 +8,7 @@
   }
   else
   {
-    die("Site parameter not specified");
+    exit("Site parameter not specified");
   }
   if (isset($_GET['table']))
   {
@@ -16,7 +16,7 @@
   }
   else
   {
-    die("Table parameter not specified");
+    exit("Table parameter not specified");
   }
   if (isset($_GET['subpath']))
   {

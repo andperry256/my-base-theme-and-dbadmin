@@ -8,7 +8,7 @@
   }
   else
   {
-    die("Site parameter not specified");
+    exit("Site parameter not specified");
   }
   if (isset($_GET['action']))
   {
@@ -16,7 +16,7 @@
   }
   else
   {
-    die("Action parameter not specified");
+    exit("Action parameter not specified");
   }
   if (isset($_GET['subpath']))
   {

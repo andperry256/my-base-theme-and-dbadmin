@@ -21,7 +21,7 @@ if (isset($_GET['-action']))
 }
 else
 {
-  die("No action specified\n");
+  exit("No action specified\n");
 }
 
 if (isset($_GET['-table']))
@@ -30,7 +30,7 @@ if (isset($_GET['-table']))
 }
 else
 {
-  die("No table specified\n");
+  exit("No table specified\n");
 }
 
 if (isset($_GET['-recordid']))
@@ -43,7 +43,7 @@ elseif ($action == 'new')
 }
 else
 {
-  die("No record ID specified\n");
+  exit("No record ID specified\n");
 }
 
 if (isset($_GET['-basedir']))
@@ -52,7 +52,7 @@ if (isset($_GET['-basedir']))
 }
 else
 {
-  die("No base directory specified\n");
+  exit("No base directory specified\n");
 }
 
 if (isset($_GET['-relpath']))
@@ -61,7 +61,7 @@ if (isset($_GET['-relpath']))
 }
 else
 {
-  die("No relative path specified\n");
+  exit("No relative path specified\n");
 }
 
 // Save all the $_GET and $_POST variables for use by the next script
@@ -97,7 +97,7 @@ $classname = "tables_$table";
 $base_classname = "tables_$base_table";
 if ((!class_exists ($classname,false))  && (!class_exists ($base_classname,false)))
 {
-  die("Table class not found\n");
+  exit("Table class not found\n");
 }
 $base_table = get_base_table($table);
 $db = admin_db_connect();

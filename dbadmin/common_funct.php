@@ -126,6 +126,95 @@ function check_new_action($action,$table)
 }
 
 //==============================================================================
+/*
+Function page_links
+
+N.B. The parameter $url_function carries the name of the function used locally
+to return the URL for a given page. This function only takes a single paramater,
+namely for the page number, and must make use of global variables to obtain the
+necessary other information for generating the required URL.
+*/
+//==============================================================================
+
+function page_links($page_count,$current_page,$page_range,$current_page_link_style,$other_page_link_style,$url_function)
+{
+	if (!function_exists($url_function))
+	{
+		exit("Function $url_function does not exist");
+	}
+	$result = '';
+	if ($page_count > 1)
+	{
+		if ($current_page > $page_range+1)
+		{
+			$first_linked_page = $current_page - $page_range;
+		}
+		else
+		{
+			$first_linked_page = 2;
+		}
+		if ($current_page < $page_count-$page_range-1)
+		{
+			$last_linked_page = $current_page + $page_range;
+		}
+		else
+		{
+			$last_linked_page = $page_count - 1;
+		}
+
+		if ($current_page != 1)
+		{
+			$result .= "<a class=\"$other_page_link_style\" href=\"".$url_function($current_page-1)."\">Prev</a>";
+		}
+		if ($current_page == 1)
+		{
+			$class = $current_page_link_style;
+		}
+		else
+		{
+			$class = $other_page_link_style;
+		}
+		$result .= "<a class=\"$class\" href=\"".$url_function(1)."\">1</a>";
+		if ($current_page != 1)
+		{
+			if ($first_linked_page > 2)
+			{
+				$result .= "&hellip;";
+			}
+		}
+		for ($page = $first_linked_page; $page <= $last_linked_page; $page++)
+		{
+			if ($page == $current_page)
+			{
+				$class = $current_page_link_style;
+			}
+			else
+			{
+				$class = $other_page_link_style;
+			}
+			$result .= "<a class=\"$class\" href=\"".$url_function($page)."\">$page</a>";
+		}
+		if ($last_linked_page < $page_count-1)
+		{
+			$result .= "&hellip;";
+		}
+		if ($current_page == $page_count)
+		{
+			$class = $current_page_link_style;
+		}
+		else
+		{
+			$class = $other_page_link_style;
+		}
+		$result .= "<a  class=\"$class\" href=\"".$url_function($page_count)."\">$page_count</a>";
+		if ($current_page != $page_count)
+		{
+			$result .= "<a  class=\"$other_page_link_style\" href=\"".$url_function($current_page+1)."\">Next</a>";
+		}
+	}
+	return $result;
+}
+//==============================================================================
 }
 //==============================================================================
 ?>

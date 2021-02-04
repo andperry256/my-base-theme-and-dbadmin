@@ -46,6 +46,13 @@ else
   exit("No record ID specified\n");
 }
 
+if (($action == 'edit') && (isset($_POST['save_as_new'])))
+{
+  $action = 'new';
+  $_SESSION['dba_action'] = $action;
+  $record_id = '';
+}
+
 if (isset($_GET['-basedir']))
 {
   $BaseDir = $_GET['-basedir'];

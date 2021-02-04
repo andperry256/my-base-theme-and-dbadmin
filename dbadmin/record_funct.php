@@ -955,6 +955,11 @@ function handle_record($action,$params)
 		print("</table>\n");
 		if ($access_level != 'read-only')
 		{
+			if ($_GET['-action'] == 'edit')
+			{
+				print("<input type=\"checkbox\" name =\"save_as_new\">&nbsp;Save as new record\n");
+				print("<div class=\"halfspace\">&nbsp;</div>");
+			}
 			print("<input type=\"Submit\" value =\"Save\">\n");
 			print("<input type=\"hidden\" name=\"submitted\"/>\n");
 		}

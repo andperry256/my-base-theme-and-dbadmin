@@ -784,6 +784,18 @@ function run_update($table,$option)
 								$field_value = 0;
 							}
 						}
+						elseif ($row3['widget_type'] == 'checklist')
+						{
+							$field_value = '^';
+							foreach ($_POST as $key => $value)
+							{
+								if (strpos($key,"item_$field_name"."___") !== false)
+								{
+									$item = urldecode(substr($key,strlen("item_$field_name"."___")));
+									$field_value .= "$item^";
+								}
+							}
+						}
 						else
 						{
 							$field_value = $_POST["field_$field_name"];

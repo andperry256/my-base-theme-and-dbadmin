@@ -126,7 +126,7 @@
 		exit;
 	}
 
-	if ((!$StandaloneCounter) && (!$is_bot))
+	if (((!isset($StandaloneCounter)) || (!$StandaloneCounter)) && (!$is_bot))
 	{
 		$ip_addr = $_SERVER['REMOTE_ADDR'];
 		mysqli_query($db,"DELETE FROM counter_hits WHERE date<'$today_date'");
@@ -152,7 +152,7 @@
 	$daily_average = sprintf("%01.1f",$counter_val/$days_counting);
 	mysqli_query($db,"UPDATE counter_info SET value='$daily_average' WHERE id='$end_year"."_daily'");
 
-	if ($StandaloneCounter)
+	if ((isset($StandaloneCounter)) && ($StandaloneCounter))
 	{
 		// Generate 'standalone counter' display (i.e. not on native web page).
 		$query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date'");
@@ -178,7 +178,7 @@
 				$counter_val = $own_counter;
 			}
 			print(sprintf("<span class=\"counter\">&nbsp;%05d&nbsp;</span>",$counter_val));
-			if ($MultilingualDates)
+			if ((isset($MultilingualDates)) && ($MultilingualDates))
 			{
 				print(sprintf("<br />since %02d %s $start_year",$start_day, MonthName($start_month,'en')));
 			}

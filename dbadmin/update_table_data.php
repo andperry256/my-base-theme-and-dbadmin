@@ -330,7 +330,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
             $is_primary = 0;
             if ($row2['Null'] == 'NO')
             {
-              $required = 1;  // Can be empty but not null
+              // Require value by default. Can later call the
+              // enable_non_null_empty function to override this.
+              $required = 2;
             }
             else
             {

@@ -137,6 +137,18 @@ function next_seq_number($table,$sort_1_value)
 
 //==============================================================================
 /*
+Function enable_non_null_empty
+*/
+//==============================================================================
+
+function enable_non_null_empty($table,$field)
+{
+	$db = admin_db_connect();
+	mysqli_query($db,"UPDATE dba_table_fields SET required=1 WHERE table_name='$table' AND field_name='$field'");
+}
+
+//==============================================================================
+/*
 Function time_compare
 */
 //==============================================================================

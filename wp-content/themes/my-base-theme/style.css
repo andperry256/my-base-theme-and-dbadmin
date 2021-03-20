@@ -388,9 +388,10 @@ body {
 }
 
 /*
-The styles for mobile/desktop only items are defined against a single width
-boundary of 601px. To make use of an intemediate width (normally from 37.5
-to 901px), these styles will need to be redefined in the child theme.
+The styles for mobile/desktop only items are defined here against a single 
+breakpoint of 40.0em. To make use of an intemediate width (normally from
+40.01em to 60.0em), the necessary styles will need to be redefined in the
+child theme.
 */
 @media screen and (min-width: 40.01em) {
 	.mobile-only-item {

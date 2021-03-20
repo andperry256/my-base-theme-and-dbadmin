@@ -1,4 +1,4 @@
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 40.0em) {
 	.no-mobile-support {
 		background-color: #444;
 	}

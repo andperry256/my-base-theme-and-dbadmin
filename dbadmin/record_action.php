@@ -49,7 +49,7 @@ else
 if (($action == 'edit') && (isset($_POST['save_as_new'])))
 {
   $action = 'new';
-  $_SESSION['dba_action'] = $action;
+  update_session_var('dba_action',$action);
   $record_id = '';
 }
 
@@ -71,30 +71,32 @@ else
   exit("No relative path specified\n");
 }
 
-// Save all the $_GET and $_POST variables for use by the next script
-if (isset($_SESSION['get_vars']))
-{
-  unset($_SESSION['get_vars']);
-}
-foreach ($_GET as $key => $value)
-{
-  $_SESSION['get_vars'][$key] = $value;
-}
-if (isset($_SESSION['post_vars']))
-{
-  unset($_SESSION['post_vars']);
-}
-foreach ($_POST as $key => $value)
-{
-  $_SESSION['post_vars'][$key] = $value;
-}
-
 require("$BaseDir/path_defs.php");
+require("$BaseDir/wp-content/themes/my-base-theme/shared/functions.php");
 require("$DBAdminDir/functions.php");
 require("$DBAdminDir/classes.php");
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
+
+// Save all the $_GET and $_POST variables for use by the next script
+if (session_var_is_set('get_vars'))
+{
+  delete_session_var('get_vars');
+}
+foreach ($_GET as $key => $value)
+{
+  update_session_var('get_vars',$value,$key);
+}
+if (session_var_is_set('post_vars'))
+{
+  delete_session_var('post_vars');
+}
+foreach ($_POST as $key => $value)
+{
+  update_session_var('post_vars',$value,$key);
+}
+
 if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
 {
   require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
@@ -191,7 +193,7 @@ $new_record_id = encode_record_id($new_primary_keys);
   by an action in the afterSave function, thus allowing an updated record ID
   to be used should a primary key field be updated by afterSave.
 */
-$_SESSION['saved_record_id'] = $new_record_id;
+update_session_var('saved_record_id',$new_record_id);
 
 if (save_record($record,$old_record_id,$new_record_id))
 {
@@ -202,7 +204,7 @@ if (save_record($record,$old_record_id,$new_record_id))
     // a repeat save.
     $action = 'edit';
   }
-  header("Location: $BaseURL/$RelativePath/?-action=$action&-table=$table&-recordid={$_SESSION['saved_record_id']}&-saveresult=1");
+  header("Location: $BaseURL/$RelativePath/?-action=$action&-table=$table&-recordid=".get_session_var('saved_record_id')."&-saveresult=1");
   exit;
 }
 else

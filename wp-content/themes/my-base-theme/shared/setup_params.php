@@ -61,9 +61,9 @@ function set_header_image_paths($dir,$url)
 	global $intermediate_header_image_url;
 	global $mobile_header_image_path;
 	global $mobile_header_image_url;
-	if (!isset($_SESSION['header_image_no']))
+	if (!session_var_is_set('header_image_no'))
 	{
-		$_SESSION['header_image_no'] = 1;
+		update_session_var('header_image_no',1);
 	}
 
 	foreach ($image_file_exts as $ext)
@@ -71,28 +71,28 @@ function set_header_image_paths($dir,$url)
 		if (is_file("$dir/header_image.$ext"))
 		{
 			// Select desktop header image file
-			if (!is_file("$dir/header_image_{$_SESSION['header_image_no']}.$ext"))
+			if (!is_file("$dir/header_image_".get_session_var('header_image_no').".$ext"))
 			{
-				$_SESSION['header_image_no'] = 1;
+				update_session_var('header_image_no',1);
 			}
-			if ($_SESSION['header_image_no'] == 1)
+			if (get_session_var('header_image_no') == 1)
 			{
 				$desktop_header_image_path = "$dir/header_image.$ext";
 				$desktop_header_image_url = "$url/header_image.$ext";
 			}
 			else
 			{
-				$desktop_header_image_path = "$dir/header_image_{$_SESSION['header_image_no']}.$ext";
-				$desktop_header_image_url = "$url/header_image_{$_SESSION['header_image_no']}.$ext";
+				$desktop_header_image_path = "$dir/header_image_".get_session_var('header_image_no').".$ext";
+				$desktop_header_image_url = "$url/header_image_".get_session_var('header_image_no').".$ext";
 			}
-			$next_header_image_no = $_SESSION['header_image_no'] + 1;
+			$next_header_image_no = get_session_var('header_image_no') + 1;
 			if (is_file("$dir/header_image_$next_header_image_no.$ext"))
 			{
-				$_SESSION['header_image_no']++;
+				update_session_var('header_image_no',(int)get_session_var('header_image_no')+1);
 			}
 			else
 			{
-				$_SESSION['header_image_no'] = 1;
+				update_session_var('header_image_no',1);
 			}
 			break;
 		}
@@ -171,9 +171,9 @@ if (!is_file($site_path_defs_path))
 	$custom_categories_path = "$CustomScriptsPath/categories";
 	$custom_categories_url = "$CustomScriptsURL/categories";
 	require("$CustomPagesPath/select_menu.php");
-	if (!isset($_SESSION['header_no']))
+	if (!session_var_is_set('header_no'))
 	{
-		$_SESSION['header_no'] = 1;
+		update_session_var('header_no',1);
 	}
 	$page_uri = get_page_uri(get_the_ID());
 	if (is_file("$CustomScriptsPath/functions.php"))
@@ -314,7 +314,7 @@ if (!is_file($site_path_defs_path))
 		This code is temporarily disabled. The call to db_connect_with_params is
 		currently being called with a database ID of 1, which may not be correct
 		for all sites. The use of supercategories needs to be reviewed anyway.
-		
+
 		if ((is_single()) && (isset($enable_supercategories)) && ($enable_supercategories))
 		{
 			// Automatically assign required supercategory.
@@ -344,11 +344,11 @@ if (!is_file($site_path_defs_path))
 
 	//================================================================================
 
-	if (!isset($_SESSION['header_no']))
+	if (!session_var_is_set('header_no'))
 	{
-		$_SESSION['header_no'] = 1;
+		update_session_var('header_no',1);
 	}
-	$header_no = $_SESSION['header_no'];
+	$header_no = get_session_var('header_no');
 	$next_header_no = $header_no + 1;
 	$alt_desktop_header_image_path = str_replace(".png","_$header_no.png",$desktop_header_image_path);
 	$alt_desktop_header_image_path = str_replace(".jpg","_$header_no.jpg",$alt_desktop_header_image_path);
@@ -374,12 +374,12 @@ if (!is_file($site_path_defs_path))
 	if (is_file($next_alt_desktop_header_image_path))
 	{
 		// Next image found - increment header number
-		$_SESSION['header_no']++;
+		update_session_var('header_no',(int)get_session_var('header_no')+1);
 	}
 	else
 	{
 		// Next image not found - reset header number to 1
-		$_SESSION['header_no'] = 1;
+		update_session_var('header_no',1);
 	}
 
 	// Set mobile header image to desktop header image if separate item not found.

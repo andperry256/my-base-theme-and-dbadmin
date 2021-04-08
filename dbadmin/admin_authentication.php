@@ -21,7 +21,7 @@ else
 	$local_access = false;
 }
 
-if (($Location == 'local') && ($local_access) && (!isset($_SESSION['user'])))
+if (($Location == 'local') && ($local_access) && (!session_var_is_set('user')))
 {
 	/*
 	Access is internal to the local network and there is no logged on user
@@ -32,10 +32,10 @@ if (($Location == 'local') && ($local_access) && (!isset($_SESSION['user'])))
 	{
 		$DefaultLocalUser = 'local';
 	}
-	$_SESSION['user'] = $DefaultLocalUser;
+	update_session_var('user',$DefaultLocalUser);
 }
 
-if ((isset($_SESSION['user'])) && (!empty($_SESSION['user'])))
+if ((session_var_is_set('user')) && (!empty(get_session_var('user'))))
 {
 	// User is logged on
 	$UserAuthenticated = true;
@@ -61,7 +61,7 @@ if ((!$UserAuthenticated) && (isset($_POST['submitted'])))
 	}
 	if ($UserAuthenticated)
 	{
-		$_SESSION['user'] = $username;
+		update_session_var('user',$username);
 	}
 	else
 	{

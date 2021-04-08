@@ -82,7 +82,7 @@ function runCopy(form)
 
 //==============================================================================
 </script>
-<?php if ($_SESSION['theme_mode'] == 'dark'): ?>
+<?php if (get_session_var('theme_mode') == 'dark'): ?>
   <style>
     /* These styles are intentionally included inline */
     #page a:link, #page a:visited {
@@ -421,9 +421,9 @@ if (isset($_COOKIE['viewing_mode']))
 {
   $viewing_mode = $_COOKIE['viewing_mode'];
 }
-elseif (isset($_SESSION['viewing_mode']))
+elseif (session_var_is_set('viewing_mode'))
 {
-  $viewing_mode = $_SESSION['viewing_mode'];
+  $viewing_mode = get_session_var('viewing_mode');
 }
 else
 {

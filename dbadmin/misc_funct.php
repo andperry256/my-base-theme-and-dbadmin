@@ -22,7 +22,7 @@ function get_table_access_level($table)
 	}
 
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-	if ((isset($_SESSION['read_only'])) && ($_SESSION['read_only']))
+	if ((session_var_is_set('read_only')) && (get_session_var('read_only')))
 	{
 		$access_level = 'read-only';
 	}

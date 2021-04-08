@@ -147,22 +147,22 @@ function display_table($params)
 	a new search filter, which is done later on when processing a post with a
 	search string.
 	*/
-	if (!isset($_SESSION['filtered_table']))
+	if (!session_var_is_set('filtered_table'))
 	{
-		$_SESSION['filtered_table'] = '';
+		update_session_var('filtered_table','');
 	}
-	if ((isset($_GET['-showall'])) || ($table != $_SESSION['filtered_table']))
+	if ((isset($_GET['-showall'])) || ($table != get_session_var('filtered_table')))
 	{
 		// Clear all filters
-		$_SESSION['search_clause'] = '';
-		$_SESSION['sort_clause'] = '';
+		update_session_var('search_clause','');
+		update_session_var('sort_clause','');
 	}
 	else
 	{
 		// Initialise the search filter if not set
-		if (!isset($_SESSION['search_clause']))
+		if (!session_var_is_set('search_clause'))
 		{
-			$_SESSION['search_clause'] = '';
+			update_session_var('search_clause','');
 		}
 
 		if ((isset($_GET['-sortfield'])) && (isset($_GET['-sortorder'])))
@@ -170,21 +170,21 @@ function display_table($params)
 			// Apply a sort filter
 			$sort_field = $_GET['-sortfield'];
 			$sort_order = $_GET['-sortorder'];
-			$_SESSION['sort_clause'] = "ORDER BY $sort_field ".strtoupper($sort_order);
+			update_session_var('sort_clause',"ORDER BY $sort_field ".strtoupper($sort_order));
 		}
-		elseif (!isset($_SESSION['sort_clause']))
+		elseif (!session_var_is_set('sort_clause'))
 		{
-			$_SESSION['sort_clause'] = '';
+			update_session_var('sort_clause','');
 		}
 		else
 		{
 			// Leave the existing sort filter in place.
-			$tempstr = str_replace('ORDER BY ','',$_SESSION['sort_clause']);
+			$tempstr = str_replace('ORDER BY ','',get_session_var('sort_clause'));
 			$sort_field = strtok($tempstr,' ');
 			$sort_order = strtolower(strtok(' '));
 		}
 	}
-	$_SESSION['filtered_table'] = $table;
+	update_session_var('filtered_table',$table);
 
 	$display_table = true;
 	$form_started = false;
@@ -199,11 +199,11 @@ function display_table($params)
 		{
 			case 'apply_search':
 				// Apply new search filter
-				$_SESSION['search_clause'] = '';
+				update_session_var('search_clause','');
 				if (!empty($_POST['search_string']))
 				{
 					$lc_search_string = strtolower($_POST['search_string']);
-					$_SESSION['search_clause'] = "WHERE";
+					$search_clause = "WHERE";
 					$field_processed = false;
 					$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
 					while ($row = mysqli_fetch_assoc($query_result))
@@ -216,12 +216,13 @@ function display_table($params)
 							{
 								if ($field_processed)
 								{
-									$_SESSION['search_clause'] .= " OR";
+									$search_clause .= " OR";
 								}
 								$field_processed = true;
-								$_SESSION['search_clause'] .= " LOWER($field_name) LIKE '%";
-								$_SESSION['search_clause'] .= addslashes($lc_search_string);
-								$_SESSION['search_clause'] .= "%'";
+								$search_clause .= " LOWER($field_name) LIKE '%";
+								$search_clause .= addslashes($lc_search_string);
+								$search_clause .= "%'";
+								update_session_var('search_clause',$search_clause);
 							}
 						}
 					}
@@ -286,7 +287,7 @@ function display_table($params)
 	}
 
 	// Calculate pagination parameters
-	$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']}");
+	$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause'));
 	$table_size = mysqli_num_rows($query_result);
 	$page_count = ceil($table_size / $list_size);
 	$current_page = floor($start_offset / $list_size +1);
@@ -432,7 +433,7 @@ function display_table($params)
 
 	// Process table records
 	$record_offset = $start_offset;
-	$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $start_offset,$list_size");
+	$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $start_offset,$list_size");
 	$row_no = 0;
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
@@ -509,7 +510,7 @@ function delete_record_set($table)
 			$record_offset = substr($key,7);
 
 			// Build up array of deletions indexed by record ID.
-			$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
+			$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
@@ -686,7 +687,7 @@ function run_update($table,$option)
 			if (substr($key,0,7) == 'select_')
 			{
 				$record_offset = substr($key,7);
-				$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
+				$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause'). "LIMIT $record_offset,1");
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
 					$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
@@ -702,11 +703,11 @@ function run_update($table,$option)
 	}
 	elseif ($option == 'all')
 	{
-		$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']}");
+		$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause'));
 		$record_count = mysqli_num_rows($query_result);
 		for ($record_offset=0; $record_offset<$record_count; $record_offset++)
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
+			$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
@@ -929,7 +930,7 @@ function run_copy($table)
 		if (substr($key,0,7) == 'select_')
 		{
 			$record_offset = substr($key,7);
-			$query_result = mysqli_query($db,"SELECT * FROM $table {$_SESSION['search_clause']} {$_SESSION['sort_clause']} LIMIT $record_offset,1");
+			$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");

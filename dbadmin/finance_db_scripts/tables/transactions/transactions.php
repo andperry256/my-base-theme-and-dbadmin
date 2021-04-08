@@ -255,7 +255,7 @@ class tables_transactions
 			$seq_no = next_seq_number('transactions',$account);
 			mysqli_query($db,"UPDATE transactions SET seq_no=$seq_no WHERE account='$account' AND seq_no=".NEXT_SEQ_NO_INDICATOR);
 			$primary_keys['seq_no'] = $seq_no;
-			$_SESSION['saved_record_id'] = encode_record_id($primary_keys);
+			update_session_var('saved_record_id',encode_record_id($primary_keys));
 		}
 		$old_account = $record->OldPKVal('account');
 		$old_seq_no = $record->OldPKVal('seq_no');

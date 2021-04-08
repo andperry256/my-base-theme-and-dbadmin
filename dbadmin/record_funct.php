@@ -403,7 +403,7 @@ Function report_error
 
 function report_error($message)
 {
-	$_SESSION['error_message'] = $message;
+	update_session_var('error_message',$message);
 	return false;
 }
 
@@ -623,7 +623,7 @@ function save_record($record,$old_record_id,$new_record_id)
 	by an action in the afterSave function, thus allowing an updated record ID
 	to be used should a primary key field be updated by afterSave.
 	*/
-	$_SESSION['saved_record_id'] = $new_record_id;
+	update_session_var('saved_record_id',$new_record_id);
 
 	// Run afterSave method if available
 	if  (class_exists ($classname,false))
@@ -725,8 +725,8 @@ function handle_record($action,$params)
 		}
 		else
 		{
-			print("<p class=\"highlight-error\">{$_SESSION['error_message']}</p>\n");
-			unset($_SESSION['error_message']);
+			print("<p class=\"highlight-error\">".get_session_var('error_message')."</p>\n");
+			delete_session_var('error_message');
 		}
 	}
 
@@ -741,9 +741,9 @@ function handle_record($action,$params)
 	{
 		print("<a class=\"admin-link\" href=\"{$_GET['-returnurl']}\">Go&nbsp;Back</a>");
 	}
-	elseif (isset($_SESSION['get_vars']['-returnurl']))
+	elseif (session_var_is_set('get_vars','-returnurl'))
 	{
-		print("<a class=\"admin-link\" href=\"{$_SESSION['get_vars']['-returnurl']}\">Go&nbsp;Back</a>");
+		print("<a class=\"admin-link\" href=\"".get_session_var('get_vars','-returnurl')."\">Go&nbsp;Back</a>");
 	}
 	else
 	{
@@ -766,10 +766,10 @@ function handle_record($action,$params)
 		$param_list .= "&-returnurl=";
 		$param_list .= urlencode($_GET['-returnurl']);
 	}
-	elseif (isset($_SESSION['get_vars']['-returnurl']))
+	elseif (session_var_is_set('get_vars','-returnurl'))
 	{
 		$param_list .= "&-returnurl=";
-		$param_list .= urlencode($_SESSION['get_vars']['-returnurl']);
+		$param_list .= urlencode(get_session_var('get_vars','-returnurl'));
 	}
 	print("<form method=\"post\" action=\"$DBAdminURL/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
 	$last_display_group = '';
@@ -881,7 +881,7 @@ function handle_record($action,$params)
 					}
 					elseif ($widget_type == 'checkbox')
 					{
-						if (isset($_SESSION['post_vars']["field_$field_name"]))
+						if (session_var_is_set('post_vars',"field_$field_name"))
 						{
 							$value = 1;
 						}
@@ -892,7 +892,7 @@ function handle_record($action,$params)
 					}
 					else
 					{
-						$value = stripslashes($_SESSION['post_vars']["field_$field_name"]);
+						$value = stripslashes(get_session_var('post_vars',"field_$field_name"));
 					}
 				}
 				elseif (($action == 'edit') || ($action == 'update'))
@@ -969,13 +969,13 @@ function handle_record($action,$params)
 	{
 		print("<p>Record not found.</p>\n");
 	}
-	if (isset($_SESSION['get_vars']))
+	if (session_var_is_set('get_vars'))
 	{
-		unset($_SESSION['get_vars']);
+		delete_session_var('get_vars');
 	}
-	if (isset($_SESSION['post_vars']))
+	if (session_var_is_set('post_vars'))
 	{
-		unset($_SESSION['post_vars']);
+		delete_session_var('post_vars');
 	}
 }
 
@@ -1064,9 +1064,9 @@ function load_return_url()
 			header("Location: {$_GET['-returnurl']}");
 			exit;
 		}
-		elseif (isset($_SESSION['get_vars']['-returnurl']))
+		elseif (session_var_is_set('get_vars','-returnurl'))
 		{
-			header("Location: {$_SESSION['get_vars']['-returnurl']}");
+			header("Location: ".get_session_var('get_vars','-returnurl'));
 			exit;
 		}
 	}

@@ -77,7 +77,7 @@ Function user_is_authenticated
 
 function user_is_authenticated()
 {
-	if ((isset($_SESSION['user'])) && (!empty($_SESSION['user'])))
+	if ((session_var_is_set('user')) && (!empty(get_session_var('user'))))
 	{
 		return true;
 	}
@@ -95,33 +95,33 @@ Function check_new_action
 
 function check_new_action($action,$table)
 {
-	if (!isset($_SESSION['dba_action']))
+	if (!session_var_is_set('dba_action'))
 	{
-		$_SESSION['dba_action'] = '';
+		update_session_var('dba_action','');
 	}
-	if (!isset($_SESSION['dba_table']))
+	if (!session_var_is_set('dba_table'))
 	{
-		$_SESSION['dba_table'] = '';
+		update_session_var('dba_table','');
 	}
-	if (($action != $_SESSION['dba_action']) || ($table != $_SESSION['dba_table']))
+	if (($action != get_session_var('dba_action')) || ($table != get_session_var('dba_table')))
 	{
 		// Action and/or table has changed - clear temporary session variables
-		if (isset($_SESSION['get_vars']))
+		if (session_var_is_set('get_vars'))
 		{
-			unset($_SESSION['get_vars']);
+			delete_session_var('get_vars');
 		}
-		if (isset($_SESSION['post_vars']))
+		if (session_var_is_set('post_vars'))
 		{
-			unset($_SESSION['post_vars']);
+			delete_session_var('post_vars');
 		}
 	}
-	$_SESSION['dba_action'] = $action;
-	$_SESSION['dba_table'] = $table;
+	update_session_var('dba_action',$action);
+	update_session_var('dba_table',$table);
 
 	if (empty($table))
 	{
 		// No table is being displayed - force filters to be cleared on next table display.
-		$_SESSION['filtered_table'] = '';
+		update_session_var('filtered_table','');
 	}
 }
 

@@ -22,11 +22,11 @@ Function set_temp_view_name
 
 function set_temp_view_name()
 {
-	if ((!isset($_SESSION['TEMP_VIEW'])) || (empty($_SESSION['TEMP_VIEW'])))
+	if ((!session_var_is_set('TEMP_VIEW')) || (empty(get_session_var('TEMP_VIEW'))))
 	{
 		$temp_str1 = str_replace('.','_',$_SERVER['REMOTE_ADDR']);
 		$temp_str2 = date('His');
-		$_SESSION['TEMP_VIEW'] = "_view_temp_$temp_str1"."_$temp_str2";
+		update_session_var('TEMP_VIEW',"_view_temp_$temp_str1"."_$temp_str2");
 	}
 }
 

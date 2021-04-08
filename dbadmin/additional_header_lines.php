@@ -1,6 +1,6 @@
 <?php
   print("<link rel='stylesheet' id='dbadmin-styles-css'  href='$BaseURL/_link_to_common/dbadmin/styles.css?v=$link_version' type='text/css' media='all' />\n");
-  if ($_SESSION['theme_mode'] == 'dark')
+  if (get_session_var('theme_mode') == 'dark')
   {
     print("<link rel='stylesheet' id='dbadmin-styles-dark-css'  href='$BaseURL/_link_to_common/dbadmin/styles-dark.css?v=$link_version' type='text/css' media='all' />\n");
   }

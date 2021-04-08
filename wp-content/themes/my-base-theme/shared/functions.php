@@ -79,8 +79,9 @@ function start_session()
 		// Transfer all $_SESSION variables into the $GlobalSessionVars array.
 		foreach($_SESSION as $name => $value)
 		{
-			if (is_array($name))
+			if (is_array($_SESSION[$name]))
 			{
+				$GlobalSessionVars[$name] = array();
 				foreach($_SESSION[$name] as $name2 => $value2)
 				{
 					$GlobalSessionVars[$name][$name2] = $value2;

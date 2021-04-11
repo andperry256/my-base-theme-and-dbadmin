@@ -6,6 +6,11 @@
  * Additional functions that may need to be accessed by scripts running
  * outside the WordPress environment.
  */
+ //================================================================================
+
+if (!function_exists('start_session'))
+{
+
 //================================================================================
 /*
  * Function start_session
@@ -37,16 +42,16 @@ function start_session()
 	{
 		$_SESSION['theme_mode'] = 'light';
 	}
-	$query_result = $wpdb->query("SELECT * FROM session_updates");
+	$query_result = $wpdb->query("SELECT * FROM wp_session_updates");
 	if ($query_result !== false)
 	{
-		// The session_updates table exists in the database which means that the
+		// The wp_session_updates table exists in the database which means that the
 		// new session handling mechanism is in use.
 		$GlobalSessionVars = array();
 
 		// Transfer all updates for the current session from the database to the
 		// appropriate $_SESSION variables.
-		$query_result2 = $wpdb->get_results("SELECT * FROM session_updates WHERE session_id='$GlobalSessionID'");
+		$query_result2 = $wpdb->get_results("SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
 		foreach ($query_result2 as $row2)
 		{
 			if ($row2->type == 'update')
@@ -74,7 +79,7 @@ function start_session()
 				}
 			}
 		}
-		$query_result = $wpdb->query("DELETE FROM session_updates WHERE session_id='$GlobalSessionID'");
+		$query_result = $wpdb->query("DELETE FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
 
 		// Transfer all $_SESSION variables into the $GlobalSessionVars array.
 		foreach($_SESSION as $name => $value)
@@ -160,12 +165,14 @@ function update_session_var($name,$value,$name2='')
 	if ((isset($GlobalSessionVars)) && (isset($wpdb)))
 	{
 		$timestamp = time();
+		$old_timestamp = $timestamp - 86400;  // 24 hours ago
+		$wpdb->query("DELETE FROM wp_session_updates WHERE timestamp>$old_timestamp");
 		if (empty($name2))
 		{
 			$GlobalSessionVars[$name] = $value;
-			$select_query = "SELECT * FROM session_updates WHERE session_id='$GlobalSessionID' AND name='$name'";
-			$insert_query = "INSERT INTO session_updates (session_id,name,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$value','update',$timestamp)";
-			$update_query = "UPDATE session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name'";
+			$select_query = "SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID' AND name='$name'";
+			$insert_query = "INSERT INTO wp_session_updates (session_id,name,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$value','update',$timestamp)";
+			$update_query = "UPDATE wp_session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name'";
 		}
 		else
 		{
@@ -174,12 +181,12 @@ function update_session_var($name,$value,$name2='')
 				$GlobalSessionVars[$name] = array();
 			}
 			$GlobalSessionVars[$name][$name2] = $value;
-			$select_query = "SELECT * FROM session_updates WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
-			$insert_query = "INSERT INTO session_updates (session_id,name,name2,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$name2','$value','update',$timestamp)";
-			$update_query = "UPDATE session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
+			$select_query = "SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
+			$insert_query = "INSERT INTO wp_session_updates (session_id,name,name2,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$name2','$value','update',$timestamp)";
+			$update_query = "UPDATE wp_session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
 		}
 		$query_result = $wpdb->query($select_query);
-		if ($query_result->num_rows == 0)
+		if ((!$query_result) || ($query_result->num_rows == 0))
 		{
 			$wpdb->query($insert_query);
 		}
@@ -218,9 +225,9 @@ function delete_session_var($name,$name2='')
 			{
 				unset($GlobalSessionVars[$name]);
 			}
-			$select_query = "SELECT * FROM session_updates WHERE session_id='$GlobalSessionID' AND name='$name'";
-			$insert_query = "INSERT INTO session_updates (session_id,name,type,timestamp) VALUES ('$GlobalSessionID','$name','delete',$timestamp)";
-			$update_query = "UPDATE session_updates SET type='delete' WHERE session_id='$GlobalSessionID' AND name='$name'";
+			$select_query = "SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID' AND name='$name'";
+			$insert_query = "INSERT INTO wp_session_updates (session_id,name,type,timestamp) VALUES ('$GlobalSessionID','$name','delete',$timestamp)";
+			$update_query = "UPDATE wp_session_updates SET type='delete' WHERE session_id='$GlobalSessionID' AND name='$name'";
 		}
 		else
 		{
@@ -228,12 +235,12 @@ function delete_session_var($name,$name2='')
 			{
 				unset($GlobalSessionVars[$name][$name2]);
 			}
-			$select_query = "SELECT * FROM session_updates WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
-			$insert_query = "INSERT INTO session_updates (session_id,name,name2,type,timestamp) VALUES ('$GlobalSessionID','$name','$name2','delete',$timestamp)";
-			$update_query = "UPDATE session_updates SET type='delete' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
+			$select_query = "SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
+			$insert_query = "INSERT INTO wp_session_updates (session_id,name,name2,type,timestamp) VALUES ('$GlobalSessionID','$name','$name2','delete',$timestamp)";
+			$update_query = "UPDATE wp_session_updates SET type='delete' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
 		}
 		$query_result = $wpdb->query($select_query);
-		if ($query_result->num_rows == 0)
+		if ((!$query_result) || ($query_result->num_rows == 0))
 		{
 			$wpdb->query($insert_query);
 		}
@@ -252,5 +259,7 @@ function delete_session_var($name,$name2='')
 	}
 }
 
+//================================================================================
+}
 //================================================================================
 ?>

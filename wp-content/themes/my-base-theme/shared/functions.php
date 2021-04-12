@@ -33,6 +33,11 @@ function start_session()
 	{
 		session_start();
 	}
+	else
+	{
+		// This should not occur
+		exit ("ERROR - Unable to start session");
+	}
 	$GlobalSessionID = session_id();
 	if (is_file('/var/www/html/user_authentication.php'))
 	{
@@ -42,11 +47,17 @@ function start_session()
 	{
 		$_SESSION['theme_mode'] = 'light';
 	}
+
+	/*
+	The following query checks whether the table wp_session_updates is present.
+	If it is then the current session variables are all transferred to the array
+	$GlobalSessionVars and the PHP session is closed.
+	If the table is not present then no action is performed and the PHP session
+	left permanently open (not recommended).
+	*/
 	$query_result = $wpdb->query("SELECT * FROM wp_session_updates");
 	if ($query_result !== false)
 	{
-		// The wp_session_updates table exists in the database which means that the
-		// new session handling mechanism is in use.
 		$GlobalSessionVars = array();
 
 		// Transfer all updates for the current session from the database to the

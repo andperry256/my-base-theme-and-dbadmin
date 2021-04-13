@@ -11,7 +11,6 @@ originator script within the $_SESSION['post_vars'] array.
 */
 //==============================================================================
 
-session_start();
 error_reporting(E_ALL & ~E_DEPRECATED);
 
 // Interpret the URL parameters
@@ -72,12 +71,14 @@ else
 }
 
 require("$BaseDir/path_defs.php");
+require("$PrivateScriptsDir/mysql_connect.php");
 require("$BaseDir/wp-content/themes/my-base-theme/shared/functions.php");
 require("$DBAdminDir/functions.php");
 require("$DBAdminDir/classes.php");
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
+start_session();
 
 // Save all the $_GET and $_POST variables for use by the next script
 if (session_var_is_set('get_vars'))
@@ -96,7 +97,6 @@ foreach ($_POST as $key => $value)
 {
   update_session_var('post_vars',$value,$key);
 }
-
 if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
 {
   require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");

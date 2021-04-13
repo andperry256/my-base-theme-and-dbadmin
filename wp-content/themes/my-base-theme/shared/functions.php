@@ -15,10 +15,10 @@ if (!function_exists('start_session'))
 /*
  * Function start_session
  *
- * Strictly speaking this function should be held inside the main functions.php
- * script for the theme, but is here because its funtionality is closely
- * linked to that of other functions in this script. The main functions.php
- * script must contain the following statement after including this file:-
+ * This function is used both inside and outside the WordPress environment.
+ * When used inside WordPress it is invoked through the inclusion of this file
+ * within the main functions.php file for the theme. The latter must run the
+ * following statement immediately after the file inclusion:-
  *
  * add_action( 'init', 'start_session', 1);
  */
@@ -62,7 +62,7 @@ function start_session()
 	if (!isset($wpdb))
 	{
 		// This should not occur
-		exit("ERROR - Unable to connect to WP database.");
+		exit("ERROR - Unable to connect to the WP database.");
 	}
 
 	/*
@@ -72,7 +72,6 @@ function start_session()
 	If the table is not present then no action is performed and the PHP session
 	left permanently open (not recommended).
 	*/
-
 	$query_result = $wpdb->query("SELECT * FROM wp_session_updates");
 	if ($query_result !== false)
 	{
@@ -80,7 +79,7 @@ function start_session()
 		// appropriate $_SESSION variables.
 		if ($env == 'wp')
 		{
-			// Inside WordPress environment
+			// Inside the WordPress environment
 			$query_result2 = $wpdb->get_results("SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
 			foreach ($query_result2 as $row2)
 			{
@@ -116,7 +115,7 @@ function start_session()
 		}
 		else
 		{
-			// Outside WordPress environment
+			// Outside the WordPress environment
 			$query_result2 = $wpdb->query("SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
 			while ($row2 = $query_result2->fetch_assoc())
 			{

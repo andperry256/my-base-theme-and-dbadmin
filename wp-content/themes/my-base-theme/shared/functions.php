@@ -39,13 +39,30 @@ function start_session()
 		exit ("ERROR - Unable to start session");
 	}
 	$GlobalSessionID = session_id();
-	if (is_file('/var/www/html/user_authentication.php'))
+
+	if (isset($wpdb))
 	{
-		include('/var/www/html/user_authentication.php');
+		// Running inside the WP environment
+		if (is_file('/var/www/html/user_authentication.php'))
+		{
+			include('/var/www/html/user_authentication.php');
+		}
+		if (!isset($_SESSION['theme_mode']))
+		{
+			$_SESSION['theme_mode'] = 'light';
+		}
+		$env = 'wp';
 	}
-	if (!isset($_SESSION['theme_mode']))
+	elseif (function_exists('wp_db_connect'))
 	{
-		$_SESSION['theme_mode'] = 'light';
+		// Running outside the WP environment
+		wp_db_connect();
+		$env = 'non-wp';
+	}
+	if (!isset($wpdb))
+	{
+		// This should not occur
+		exit("ERROR - Unable to connect to WP database.");
 	}
 
 	/*
@@ -55,44 +72,88 @@ function start_session()
 	If the table is not present then no action is performed and the PHP session
 	left permanently open (not recommended).
 	*/
+
 	$query_result = $wpdb->query("SELECT * FROM wp_session_updates");
 	if ($query_result !== false)
 	{
-		$GlobalSessionVars = array();
-
 		// Transfer all updates for the current session from the database to the
 		// appropriate $_SESSION variables.
-		$query_result2 = $wpdb->get_results("SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
-		foreach ($query_result2 as $row2)
+		if ($env == 'wp')
 		{
-			if ($row2->type == 'update')
+			// Inside WordPress environment
+			$query_result2 = $wpdb->get_results("SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
+			foreach ($query_result2 as $row2)
 			{
-				// Update is a variable assignment
-				if ($row2->name2 == '#')
+				if ($row2->type == 'update')
 				{
-					$_SESSION[$row2->name] = $row2->value;
+					// Update is a variable assignment
+					if ($row2->name2 == '#')
+					{
+						$_SESSION[$row2->name] = $row2->value;
+					}
+					else
+					{
+						if (!isset($_SESSION[$row2->name]))
+						{
+							$_SESSION[$row2->name] = array();
+						}
+						$_SESSION[$row2->name][$row2->name2] = $row2->value;
+					}
 				}
-				else
+				elseif (($row2->type == 'delete') && (isset($_SESSION[$row2->name])))
 				{
-					$_SESSION[$row2->name][$row2->name2] = $row2->value;
+					// Update is a variable deletion (unset)
+					if ($row2->name2 == '#')
+					{
+						unset($_SESSION[$row2->name]);
+					}
+					else
+					{
+						unset($_SESSION[$row2->name][$row2->name2]);
+					}
 				}
 			}
-			elseif (($row2->type == 'delete') && (isset($_SESSION[$row2->name])))
+		}
+		else
+		{
+			// Outside WordPress environment
+			$query_result2 = $wpdb->query("SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
+			while ($row2 = $query_result2->fetch_assoc())
 			{
-				// Update is a variable deletion (unset)
-				if ($row2->name2 == '#')
+				if ($row2['type'] == 'update')
 				{
-					unset($_SESSION[$row2->name]);
+					// Update is a variable assignment
+					if ($row2['name2'] == '#')
+					{
+						$_SESSION[$row2['name']] = $row2['value'];
+					}
+					else
+					{
+						if (!isset($_SESSION[$row2['name']]))
+						{
+							$_SESSION[$row2['name']] = array();
+						}
+						$_SESSION[$row2['name']][$row2['name2']] = $row2['value'];
+					}
 				}
-				else
+				elseif (($row2['type'] == 'delete') && (isset($_SESSION[$row2['name']])))
 				{
-					unset($_SESSION[$row2->name][$row2->name2]);
+					// Update is a variable deletion (unset)
+					if ($row2['name2'] == '#')
+					{
+						unset($_SESSION[$row2['name']]);
+					}
+					else
+					{
+						unset($_SESSION[$row2['name']][$row2['name2']]);
+					}
 				}
 			}
 		}
 		$query_result = $wpdb->query("DELETE FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
 
 		// Transfer all $_SESSION variables into the $GlobalSessionVars array.
+		$GlobalSessionVars = array();
 		foreach($_SESSION as $name => $value)
 		{
 			if (is_array($_SESSION[$name]))
@@ -173,11 +234,23 @@ function update_session_var($name,$value,$name2='')
 	global $GlobalSessionVars;
 	global $GlobalSessionID;
 	global $wpdb;
-	if ((isset($GlobalSessionVars)) && (isset($wpdb)))
+	if (!isset($wpdb))
+	{
+		if (function_exists('wp_db_connect'))
+		{
+			wp_db_connect();
+		}
+		else
+		{
+			// This should not occur
+			exit("ERROR - Unable to connect to WP database.");
+		}
+	}
+	if (isset($GlobalSessionVars))
 	{
 		$timestamp = time();
 		$old_timestamp = $timestamp - 86400;  // 24 hours ago
-		$wpdb->query("DELETE FROM wp_session_updates WHERE timestamp>$old_timestamp");
+		$wpdb->query("DELETE FROM wp_session_updates WHERE timestamp<$old_timestamp");
 		if (empty($name2))
 		{
 			$GlobalSessionVars[$name] = $value;
@@ -227,7 +300,19 @@ function delete_session_var($name,$name2='')
 	global $GlobalSessionVars;
 	global $GlobalSessionID;
 	global $wpdb;
-	if ((isset($GlobalSessionVars)) && (isset($wpdb)))
+	if (!isset($wpdb))
+	{
+		if (function_exists('wp_db_connect'))
+		{
+			wp_db_connect();
+		}
+		else
+		{
+			// This should not occur
+			exit("ERROR - Unable to connect to WP database.");
+		}
+	}
+	if (isset($GlobalSessionVars))
 	{
 		$timestamp = time();
 		if (empty($name2))

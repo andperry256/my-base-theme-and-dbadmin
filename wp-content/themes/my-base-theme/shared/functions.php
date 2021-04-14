@@ -8,23 +8,23 @@
  */
  //================================================================================
 
-if (!function_exists('start_session'))
+if (!function_exists('run_session'))
 {
 
 //================================================================================
 /*
- * Function start_session
+ * Function run_session
  *
  * This function is used both inside and outside the WordPress environment.
  * When used inside WordPress it is invoked through the inclusion of this file
  * within the main functions.php file for the theme. The latter must run the
  * following statement immediately after the file inclusion:-
  *
- * add_action( 'init', 'start_session', 1);
+ * add_action( 'init', 'run_session', 1);
  */
 //================================================================================
 
-function start_session()
+function run_session()
 {
 	global $wpdb;
 	global $GlobalSessionVars;

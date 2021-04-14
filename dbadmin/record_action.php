@@ -78,7 +78,7 @@ require("$DBAdminDir/classes.php");
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
-start_session();
+run_session();
 
 // Save all the $_GET and $_POST variables for use by the next script
 if (session_var_is_set('get_vars'))

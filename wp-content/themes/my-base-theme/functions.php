@@ -334,4 +334,4 @@ require get_template_directory() . '/inc/jetpack.php';
  * Load additonal functions file.
  */
 require get_template_directory() . '/shared/functions.php';
-add_action( 'init', 'start_session', 1);
+add_action( 'init', 'run_session', 1);

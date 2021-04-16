@@ -45,13 +45,6 @@ else
   exit("No record ID specified\n");
 }
 
-if (($action == 'edit') && (isset($_POST['save_as_new'])))
-{
-  $action = 'new';
-  update_session_var('dba_action',$action);
-  $record_id = '';
-}
-
 if (isset($_GET['-basedir']))
 {
   $BaseDir = $_GET['-basedir'];
@@ -78,6 +71,13 @@ require("$DBAdminDir/classes.php");
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
+
+if (($action == 'edit') && (isset($_POST['save_as_new'])))
+{
+  $action = 'new';
+  update_session_var('dba_action',$action);
+  $record_id = '';
+}
 run_session();
 
 // Save all the $_GET and $_POST variables for use by the next script

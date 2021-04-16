@@ -40,7 +40,7 @@ function run_session()
 	}
 	$GlobalSessionID = session_id();
 
-	if (isset($wpdb))
+	if ((isset($wpdb)) && (function_exists('have_posts')))
 	{
 		// Running inside the WP environment
 		if (is_file('/var/www/html/user_authentication.php'))

@@ -149,7 +149,7 @@ function run_session()
 				}
 			}
 		}
-		$query_result = $wpdb->query("DELETE FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
+		$wpdb->query("DELETE FROM wp_session_updates WHERE session_id='$GlobalSessionID'");
 
 		// Transfer all $_SESSION variables into the $GlobalSessionVars array.
 		$GlobalSessionVars = array();
@@ -269,7 +269,20 @@ function update_session_var($name,$value,$name2='')
 			$update_query = "UPDATE wp_session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
 		}
 		$query_result = $wpdb->query($select_query);
-		if ((!$query_result) || ($query_result->num_rows == 0))
+		if (isset($query_result->num_rows))
+		{
+			$num_rows = $query_result->num_rows;
+		}
+		elseif(isset($wpdb->num_rows))
+		{
+			$num_rows = $wpdb->num_rows;
+		}
+		else
+		{
+			// This should not occur
+			$num_rows = -1;
+		}
+		if ($num_rows == 0)
 		{
 			$wpdb->query($insert_query);
 		}
@@ -335,7 +348,20 @@ function delete_session_var($name,$name2='')
 			$update_query = "UPDATE wp_session_updates SET type='delete' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
 		}
 		$query_result = $wpdb->query($select_query);
-		if ((!$query_result) || ($query_result->num_rows == 0))
+		if (isset($query_result->num_rows))
+		{
+			$num_rows = $query_result->num_rows;
+		}
+		elseif(isset($wpdb->num_rows))
+		{
+			$num_rows = $wpdb->num_rows;
+		}
+		else
+		{
+			// This should not occur
+			$num_rows = -1;
+		}
+		if ($num_rows == 0)
 		{
 			$wpdb->query($insert_query);
 		}

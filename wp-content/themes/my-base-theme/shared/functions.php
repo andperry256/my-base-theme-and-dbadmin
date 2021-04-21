@@ -33,7 +33,7 @@ function run_session()
 	{
 		session_start();
 	}
-	else
+	if (!session_id())
 	{
 		// This should not occur
 		exit ("ERROR - Unable to start session");

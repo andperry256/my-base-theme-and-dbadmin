@@ -250,12 +250,13 @@ function update_session_var($name,$value,$name2='')
 		$timestamp = time();
 		$old_timestamp = $timestamp - 86400;  // 24 hours ago
 		$wpdb->query("DELETE FROM wp_session_updates WHERE timestamp<$old_timestamp");
+		$value_par = addslashes($value);
 		if (empty($name2))
 		{
 			$GlobalSessionVars[$name] = $value;
 			$select_query = "SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID' AND name='$name'";
-			$insert_query = "INSERT INTO wp_session_updates (session_id,name,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$value','update',$timestamp)";
-			$update_query = "UPDATE wp_session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name'";
+			$insert_query = "INSERT INTO wp_session_updates (session_id,name,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$value_par','update',$timestamp)";
+			$update_query = "UPDATE wp_session_updates SET value='$value_par',type='update' WHERE session_id='$GlobalSessionID' AND name='$name'";
 		}
 		else
 		{
@@ -265,8 +266,8 @@ function update_session_var($name,$value,$name2='')
 			}
 			$GlobalSessionVars[$name][$name2] = $value;
 			$select_query = "SELECT * FROM wp_session_updates WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
-			$insert_query = "INSERT INTO wp_session_updates (session_id,name,name2,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$name2','$value','update',$timestamp)";
-			$update_query = "UPDATE wp_session_updates SET value='$value',type='update' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
+			$insert_query = "INSERT INTO wp_session_updates (session_id,name,name2,value,type,timestamp) VALUES ('$GlobalSessionID','$name','$name2','$value_par','update',$timestamp)";
+			$update_query = "UPDATE wp_session_updates SET value='$value_par',type='update' WHERE session_id='$GlobalSessionID' AND name='$name' AND name2='$name2'";
 		}
 		$query_result = $wpdb->query($select_query);
 		if (isset($query_result->num_rows))

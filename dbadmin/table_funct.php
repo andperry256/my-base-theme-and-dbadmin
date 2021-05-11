@@ -188,6 +188,7 @@ function display_table($params)
 
 	$display_table = true;
 	$form_started = false;
+	//print('<br>*'.get_session_var('search_clause').'*<br>');
 	if (isset($_POST['submitted']))
 	{
 		// Not quite sure yet why we need this, but it seems to prevent problems
@@ -281,6 +282,7 @@ function display_table($params)
 		}
 	}
 
+	//print('<br>*'.get_session_var('search_clause').'*<br>');
 	if (!$display_table)
 	{
 		print("<div style=\"display:none\">\n");
@@ -296,7 +298,7 @@ function display_table($params)
 	global $PageURLTable,$PageURLListSize,$PageURLSearchString,$PageURLSortField,$PageURLSortOrder;
 	$PageURLTable = $table;
 	$PageURLListSize = $list_size;
-	$PageURLSearchString = $search_string;
+	$PageURLSearchString = $lc_search_string;
 	$PageURLSortField = $sort_field;
 	$PageURLSortOrder = $sort_order;
 	$page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url');
@@ -306,14 +308,16 @@ function display_table($params)
 
 	if (!$form_started)
 	{
+		/*
+		The target URL of the post is to the same script for the same table. A
+		post is only performed for update, copy and delete requests, or to apply a
+		search, for all of which the next stage is performed by a second iteration
+		of the current script.
+		*/
 		print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-table=$table\">\n");
 	}
 
 	// Ensure that certain parameters are propagated through any subsquent form submission.
-	if (!empty($search_string))
-	{
-		print("<input type=\"hidden\" name=\"search_string2\" value=\"$search_string\"/>\n");
-	}
 	print("<input type=\"hidden\" name=\"startoffset\" value=\"$start_offset\"/>\n");
 	print("<input type=\"hidden\" name=\"listsize\" value=\"$list_size\"/>\n");
 
@@ -407,6 +411,7 @@ function display_table($params)
 	{
 		if ((isset($sort_field)) && ($sort_field == $f))
 		{
+			// There is already a sort order in force on the given field.
 			if (strtolower($sort_order) == 'asc')
 			{
 				$new_sort_order = 'desc';
@@ -416,15 +421,10 @@ function display_table($params)
 				$new_sort_order = 'asc';
 			}
 		}
-		elseif (!empty($sort_field))
-		{
-			// There is currently a custom sort in use on a differen field.
-			$new_sort_order = 'asc';
-		}
 		else
 		{
-			// There is no custom sort currently in use.
-			$new_sort_order = 'desc';
+			// Applying sort for first time to new field.
+			$new_sort_order = 'asc';
 		}
 		print("<td class=\"table-listing-header\"><a href=\"./?-table=$table&-reorder&-sortfield=$f&-sortorder=$new_sort_order\">");
 		print(field_label($table,$f)."</a></td>");
@@ -464,8 +464,12 @@ function display_table($params)
 		    (($submit_option == 'select_update') || ($submit_option == 'select_update_all') || ($submit_option == 'select_copy')) &&
 				(isset($_POST["select_$record_offset"])))
 		{
-			// We are currently processing a select update/copy screen and need to
-			// preserve the record selection for the next form submission.
+			/*
+			We are currently displaying a select update/copy screen. The table record
+			list is present but invisible with a "display:none" style. We are here
+			because the given record was checked in the initial screen and needs to
+			be checked again to carry it through the next form submission.
+			*/
 			print(" checked");
 		}
 		print("></td>");

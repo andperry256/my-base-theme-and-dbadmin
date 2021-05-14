@@ -4,7 +4,7 @@
 global $BaseDir;
 global $Location;
 $db = admin_db_connect();
-$csv_file = "report".date('YmdHis').".csv";
+$csv_file = 'report_'.date('Ymd').'_'.date('His').'.csv';
 $ofp2 = fopen("$BaseDir/admin_data/finances/$csv_file", "w");
 fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
 print("<h1>Transaction Report</h1>\n");

@@ -261,24 +261,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	// Re-order table
 	mysqli_query($db,"ALTER TABLE report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
 
-	// Create a transaction view from the report parameters and display a link to it.
-	if ($Location == 'local')
-	{
-		$payee_par = urlencode($payee_name);
-		$fund_par = urlencode($fund_name);
-		$category_par = urlencode($category_name);
-		$url_link = "index.php?-action=display_temp_transaction_view&account=$account_name&payee=$payee_par&fund=$fund_par&category=$category_par&start_month=$start_month&end_month=$end_month";
-		$url_link = str_replace('%','%%',$url_link);
-		print("<p><a href=\"$url_link\" target=\"_blank\">Table View (Transactions)</a> (opens in new window)</p>\n");
-		if (($fund_name != '%') || ($category_name != '%'))
-		{
-			// Create a splits view from the report parameters and display a link to it. Only applicable if the
-			// fund and/or category is specified in the report
-			$url_link = "index.php?-action=display_temp_split_view&account=$account_name&fund=$fund_par&category=$category_par&start_month=$start_month&end_month=$end_month";
-			$url_link = str_replace('%','%%',$url_link);
-			print("<p><a href=\"$url_link\" target=\"_blank\">Table View (Splits)</a> (opens in new window)</p>\n");
-		}
-	}
+	// Create link to CSV report.
 	print("<p><a href=\"$BaseURL/admin_data/finances/$csv_file\" target=\"_blank\">CSV Report</a> (opens in new window)</p>\n");
 
 	// Print report

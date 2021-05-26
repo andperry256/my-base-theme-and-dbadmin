@@ -170,6 +170,13 @@ class tables__view_orphan_table_info_records extends tables_dba_table_info {}
 
 //==============================================================================
 
+class tables_dba_relationships
+{
+
+}
+
+//==============================================================================
+
 class tables_dba_sidebar_config
 {
 	function afterSave($record)

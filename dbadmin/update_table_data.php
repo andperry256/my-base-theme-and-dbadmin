@@ -221,6 +221,15 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `link`");
   mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `new_window` `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0'");
 
+  // Run the following queries to create/update the structure for the relationships table.
+  // Any queries to create existing fields will automatically fail.
+  mysqli_query($db,"CREATE TABLE `dba_relationships` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `relationship_name` VARCHAR( 63 ) NOT NULL AFTER `table_name`");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `relationship_name` `relationship_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `relationship_name`)");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `query` VARCHAR( 127 ) NOT NULL AFTER `relationship_name`");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 127 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+
   /*
   Create views for displaying orphan records. Do not use the 'create_view_structure'
   function, as the child class definitions are pre-defined in classes.php.

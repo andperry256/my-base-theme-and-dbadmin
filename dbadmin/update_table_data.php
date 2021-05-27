@@ -227,8 +227,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `relationship_name` VARCHAR( 63 ) NOT NULL AFTER `table_name`");
   mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `relationship_name` `relationship_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
   mysqli_query($db,"ALTER TABLE `dba_relationships` DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `relationship_name`)");
-  mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `query` VARCHAR( 127 ) NOT NULL AFTER `relationship_name`");
-  mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 127 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `query` VARCHAR( 255 ) NOT NULL AFTER `relationship_name`");
+  mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 255 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
 
   /*
   Create views for displaying orphan records. Do not use the 'create_view_structure'

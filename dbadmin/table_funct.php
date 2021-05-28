@@ -558,10 +558,11 @@ function display_table($params)
 				$matches = array();
 				while (preg_match('/[ =\']\$[A-Za-z0-9_]+/',$query,$matches))
 				{
+					$leading_char = substr($matches[0],0,1);
 					$field_name = substr($matches[0],2);
 					$value = addslashes($row[$field_name]);
 					$value = str_replace('$','\\$',$value);
-					$query = str_replace(substr($matches[0],1),$value,$query);
+					$query = str_replace($matches[0],"$leading_char$value",$query);
 				}
 				$query_result3 = mysqli_query($db,$query);
 				if (mysqli_num_rows($query_result3) > 0)

@@ -556,26 +556,27 @@ function display_table($params)
 				*/
 				$query = $row2['query'];
 				$matches = array();
-				while (preg_match('/\$[A-Za-z0-9_]+/',$query,$matches))
+				while (preg_match('/[ =\']\$[A-Za-z0-9_]+/',$query,$matches))
 				{
-					$field_name = ltrim($matches[0],'$');
+					$field_name = substr($matches[0],2);
 					$value = addslashes($row[$field_name]);
-					$query = str_replace($matches[0],$value,$query);
-					$query_result3 = mysqli_query($db,$query);
-					if (mysqli_num_rows($query_result3) > 0)
+					$value = str_replace('$','\\$',$value);
+					$query = str_replace(substr($matches[0],1),$value,$query);
+				}
+				$query_result3 = mysqli_query($db,$query);
+				if (mysqli_num_rows($query_result3) > 0)
+				{
+					$uc_query = strtoupper($query);
+					$pos1 = strpos($uc_query,' FROM ');
+					$pos2 = strpos($uc_query,' WHERE ');
+					if ($pos !== false)
 					{
-						$uc_query = strtoupper($query);
-						$pos1 = strpos($uc_query,' FROM ');
-						$pos2 = strpos($uc_query,' WHERE ');
-						if ($pos !== false)
-						{
-							$tempstr =  trim(substr($query,$pos1+6));
-							$target_table = strtok($tempstr,' ');
-							$where_clause = trim(substr($query,$pos2+7));
-							$where_par = urlencode($where_clause);
-							print("&nbsp;&nbsp;<a href=\"./?-table=$target_table&-where=$where_par\" target=\"_blank\">{$row2['relationship_name']}</a>");
-						}
+						$tempstr =  trim(substr($query,$pos1+6));
+						$target_table = strtok($tempstr,' ');
+						$where_clause = trim(substr($query,$pos2+7));
+						$where_par = urlencode($where_clause);
 					}
+					print("&nbsp;&nbsp;<a href=\"./?-table=$target_table&-where=$where_par\" target=\"_blank\">{$row2['relationship_name']}</a>");
 				}
 			}
 			print("</td></tr>\n");

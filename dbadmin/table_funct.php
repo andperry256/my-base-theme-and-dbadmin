@@ -43,7 +43,7 @@ Function page_link_url
 */
 //==============================================================================
 
-function page_link_url($page_no)
+function page_link_url($page_no,$relationships='')
 {
 	global $BaseURL, $RelativePath;
 	global $PageURLTable,$PageURLListSize,$PageURLSearchString,$PageURLSortField,$PageURLSortOrder;
@@ -61,6 +61,14 @@ function page_link_url($page_no)
 	if (!empty($PageURLSortOrder))
 	{
 		$url .= "&-sortorder=$PageURLSortOrder";
+	}
+	if ($relationships == 'show')
+	{
+		$url .= "&-showrelationships";
+	}
+	elseif ($relationships == 'hide')
+	{
+		$url .= "&-hiderelationships";
 	}
 	return $url;
 }
@@ -80,6 +88,10 @@ function display_table($params)
 	global $display_table;
 	$db = admin_db_connect();
 	print("<style>\n".file_get_contents("$DBAdminDir/page_link_styles.css")."</style>\n");
+
+	//============================================================================
+	// Part 1 - Data Initialisation
+	//============================================================================
 
 	// Interpret the URL parameters
 	if (!isset($_GET['-table']))
@@ -141,12 +153,28 @@ function display_table($params)
 	{
 		$start_offset = 0;
 	}
+	if (isset($_GET['-showrelationships']))
+	{
+		update_session_var('show_relationships',true);
+	}
+	elseif (isset($_GET['-hiderelationships']))
+	{
+		update_session_var('show_relationships',false);
+	}
 
 	/*
 	Set up the display filters (for search and sort) apart from the creation of
 	a new search filter, which is done later on when processing a post with a
 	search string.
+	Also if the '-where' URL parameter is set, which happens if the page is
+	invoked via a relationship link, the search filter is used for the associated
+	WHERE clause,
 	*/
+	if (isset($_GET['-where']))
+	{
+		$where_clause = stripslashes($_GET['-where']);
+		update_session_var('search_clause',"WHERE $where_clause");
+	}
 	if (!session_var_is_set('filtered_table'))
 	{
 		update_session_var('filtered_table','');
@@ -154,8 +182,19 @@ function display_table($params)
 	if ((isset($_GET['-showall'])) || ($table != get_session_var('filtered_table')))
 	{
 		// Clear all filters
-		update_session_var('search_clause','');
+		if (!isset($_GET['-where']))
+		{
+			update_session_var('search_clause','');
+		}
 		update_session_var('sort_clause','');
+		update_session_var('show_relationships',false);
+
+		// Do not allow an outstanding action to proceed, in case another window has
+		// altered the filters for the current session.
+		if (isset($_POST['submitted']))
+		{
+			unset($_POST['submitted']);
+		}
 	}
 	else
 	{
@@ -188,7 +227,11 @@ function display_table($params)
 
 	$display_table = true;
 	$form_started = false;
-	//print('<br>*'.get_session_var('search_clause').'*<br>');
+
+	//============================================================================
+	// Part 2 - Processing of Actions
+	//============================================================================
+
 	if (isset($_POST['submitted']))
 	{
 		// Not quite sure yet why we need this, but it seems to prevent problems
@@ -282,7 +325,10 @@ function display_table($params)
 		}
 	}
 
-	//print('<br>*'.get_session_var('search_clause').'*<br>');
+	//============================================================================
+	// Part 3 - Generation of Page
+	//============================================================================
+
 	if (!$display_table)
 	{
 		print("<div style=\"display:none\">\n");
@@ -326,7 +372,22 @@ function display_table($params)
 	print("<p class=\"small\">Found $table_size records");
 	print("&nbsp;&nbsp;&nbsp;Showing&nbsp;<input class=\"small\" name=\"listsize2\" value=$list_size size=4>&nbsp;results&nbsp;per&nbsp;page");
 	print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Apply\" onClick=\"submitForm(this.form)\"/></p>");
-	print("<p>$page_links</p>\n");
+	print("<p>$page_links");
+	$query_result = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'SELECT%'");
+	if (mysqli_num_rows($query_result) > 0)
+	{
+		// One or more select relationships are defined for the given table
+		print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+		if (get_session_var('show_relationships'))
+		{
+			print("<a class=\"admin-link\" href=\"".page_link_url($current_page,'hide')."\">Hide Relationships</a>");
+		}
+		else
+		{
+			print("<a class=\"admin-link\" href=\"".page_link_url($current_page,'show')."\">Show Relationships</a>");
+		}
+	}
+	print("</p>\n");
 	print("<table class=\"table-top-navigation\"><tr>\n");
 	if ($access_level == 'full')
 	{
@@ -337,7 +398,7 @@ function display_table($params)
 	{
 		print($params['additional_links']);
 	}
-	print("<td><input type=\"text\" size=\"24\" name=\"search_string\"/>");
+  print("<td><input type=\"text\" size=\"24\" name=\"search_string\"/>");
 	print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></td>");
 	print("</tr></table>\n");
 
@@ -409,6 +470,7 @@ function display_table($params)
 	print("<td class=\"table-listing-header\"><input type=\"checkbox\" name=\"select_all\"  onclick=\"checkAll(this)\"></td>");
 	foreach ($fields as $f => $ord)
 	{
+		// Output the field name with a sort link
 		if ((isset($sort_field)) && ($sort_field == $f))
 		{
 			// There is already a sort order in force on the given field.
@@ -480,6 +542,44 @@ function display_table($params)
 			print("<td class=\"$style\"><a href=\"$BaseURL/$RelativePath/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></td>");
 		}
 		print("\n</tr>\n");
+		if (get_session_var('show_relationships'))
+		{
+			$colspan = count($fields) + 1;
+			print("<tr><td class=\"$style\" style=\"font-size:0.8em\" colspan=\"$colspan\">");
+			$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table'");
+			while ($row2 = mysqli_fetch_assoc($query_result2))
+			{
+				/*
+				Add a link for the given relationship. Scan the relationship query for
+				variables of type $<field_name> and replace each such variable with the
+				corresponding fields value from the current record.
+				*/
+				$query = $row2['query'];
+				$matches = array();
+				while (preg_match('/\$[A-Za-z0-9_]+/',$query,$matches))
+				{
+					$field_name = ltrim($matches[0],'$');
+					$value = addslashes($row[$field_name]);
+					$query = str_replace($matches[0],$value,$query);
+					$query_result3 = mysqli_query($db,$query);
+					if (mysqli_num_rows($query_result3) > 0)
+					{
+						$uc_query = strtoupper($query);
+						$pos1 = strpos($uc_query,' FROM ');
+						$pos2 = strpos($uc_query,' WHERE ');
+						if ($pos !== false)
+						{
+							$tempstr =  trim(substr($query,$pos1+6));
+							$target_table = strtok($tempstr,' ');
+							$where_clause = trim(substr($query,$pos2+7));
+							$where_par = urlencode($where_clause);
+							print("&nbsp;&nbsp;<a href=\"./?-table=$target_table&-where=$where_par\" target=\"_blank\">{$row2['relationship_name']}</a>");
+						}
+					}
+				}
+			}
+			print("</td></tr>\n");
+		}
 	}
 
 	print("</table>\n");

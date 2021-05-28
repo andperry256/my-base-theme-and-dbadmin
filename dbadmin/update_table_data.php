@@ -515,6 +515,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
 
+  // Set other misceallaneous fields for built-in-tables
+  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_relationships' AND field_name='table_name'");
+
   print("Operation completed.$eol");
   if ($mode == 'web')
   {

@@ -202,9 +202,13 @@ function session_var_is_set($name,$name2='')
 
 //================================================================================
 
-function get_session_var($name,$name2='')
+function get_session_var($name,$name2='',$check=true)
 {
 	global $GlobalSessionVars;
+	if (($check) && (!session_var_is_set($name,$name2)))
+	{
+		return false;
+	}
 	if (isset($GlobalSessionVars))
 	{
 		if (empty($name2))

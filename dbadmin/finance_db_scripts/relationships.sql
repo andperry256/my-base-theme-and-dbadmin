@@ -1,0 +1,12 @@
+INSERT INTO dba_relationships VALUES ('categories','Update Funds (Exp)',"UPDATE funds SET default_expense_cat='$name' WHERE default_expense_cat='$$name'");
+INSERT INTO dba_relationships VALUES ('categories','Update Funds (Inc)',"UPDATE funds SET default_income_cat='$name' WHERE default_income_cat='$$name'");
+INSERT INTO dba_relationships VALUES ('categories','Update Payees',"UPDATE payees SET default_cat='$name' WHERE default_cat='$$name'");
+INSERT INTO dba_relationships VALUES ('categories','Update Splits',"UPDATE splits SET category='$name' WHERE category='$$name'");
+INSERT INTO dba_relationships VALUES ('categories','Update Transactions',"UPDATE transactions SET category='$name' WHERE category='$$name'");
+INSERT INTO dba_relationships VALUES ('funds','Update Payees',"UPDATE payees SET default_fund='$name' WHERE default_fund='$$name'");
+INSERT INTO dba_relationships VALUES ('funds','Update Splits',"UPDATE splits SET fund='$name' WHERE fund='$$name'");
+INSERT INTO dba_relationships VALUES ('funds','Update Transactions',"UPDATE transactions SET fund='$name' WHERE fund='$$name'");
+INSERT INTO dba_relationships VALUES ('payees','Transactions',"	SELECT * FROM transactions WHERE payee='$name'");
+INSERT INTO dba_relationships VALUES ('payees','Update Transactions',"UPDATE transactions SET payee='$name' WHERE payee='$$name'");
+INSERT INTO dba_relationships VALUES ('transactions','Delete Splits',"DELETE FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+INSERT INTO dba_relationships VALUES ('transactions','Splits',"SELECT * from splits WHERE transact_seq_no=$seq_no");

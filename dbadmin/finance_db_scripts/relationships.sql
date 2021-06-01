@@ -1,3 +1,7 @@
+INSERT INTO dba_relationships VALUES ('accounts','Update Splits',"UPDATE splits SET account=REPLACE('$name',' ','_') WHERE account=REPLACE('$$name',' ','_')");
+INSERT INTO dba_relationships VALUES ('accounts','Update Transactions (Main)',"UPDATE transactions SET account=REPLACE('$name',' ','_') WHERE account=REPLACE('$$name',' ','_')");
+INSERT INTO dba_relationships VALUES ('accounts','Update Transactions (Source)',"UPDATE transactions SET source_account=REPLACE('$name',' ','_') WHERE source_account=REPLACE('$$name',' ','_')");
+INSERT INTO dba_relationships VALUES ('accounts','Update Transactions (Target)',"UPDATE transactions SET target_account=REPLACE('$name',' ','_') WHERE target_account=REPLACE('$$name',' ','_')");
 INSERT INTO dba_relationships VALUES ('categories','Update Funds (Exp)',"UPDATE funds SET default_expense_cat='$name' WHERE default_expense_cat='$$name'");
 INSERT INTO dba_relationships VALUES ('categories','Update Funds (Inc)',"UPDATE funds SET default_income_cat='$name' WHERE default_income_cat='$$name'");
 INSERT INTO dba_relationships VALUES ('categories','Update Payees',"UPDATE payees SET default_cat='$name' WHERE default_cat='$$name'");

@@ -409,6 +409,100 @@ function report_error($message)
 
 //==============================================================================
 /*
+Function run_relationship_update_queries
+*/
+//==============================================================================
+
+function run_relationship_update_queries($record)
+{
+	$db = admin_db_connect();
+	$table = $record->table;
+	$action = $record->action;
+	if (($action == 'edit') || ($action == 'update'))
+	{
+		$base_table = get_base_table($table);
+		$query_result = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'UPDATE%'");
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			$query = $row['query'];
+			$matches = array();
+
+			/*
+			Substitute variable names of type $$name. Only valid for primary key fields
+			and works on the original value of the field.
+			*/
+			while (preg_match('/[ =<>\']\$\$[A-Za-z0-9_]+/',$query,$matches))
+			{
+				$leading_char = substr($matches[0],0,1);
+				$field_name = substr($matches[0],3);
+				$value = addslashes($record->OldPKVal($field_name));
+				$value = str_replace('$','\\$',$value);
+				$query = str_replace($matches[0],"$leading_char$value",$query);
+			}
+
+			/*
+			Substitute variable names of type $name. Works on the final value of the field.
+			*/
+			while (preg_match('/[ =<>\']\$[A-Za-z0-9_]+/',$query,$matches))
+			{
+				$leading_char = substr($matches[0],0,1);
+				$field_name = substr($matches[0],2);
+				$value = addslashes($record->FieldVal($field_name));
+				$value = str_replace('$','\\$',$value);
+				$query = str_replace($matches[0],"$leading_char$value",$query);
+			}
+			mysqli_query($db,$query);
+		}
+	}
+	else
+	{
+		/*
+		No action - this function will only operate where an existing record is
+		being updated, as opposed to the creation of a new record.
+		*/
+	}
+}
+
+//==============================================================================
+/*
+Function run_relationship_delete_queries
+*/
+//==============================================================================
+
+function run_relationship_delete_queries($record)
+{
+	$db = admin_db_connect();
+	$table = $record->table;
+	$base_table = get_base_table($table);
+	$query_result = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'DELETE%'");
+	while ($row = mysqli_fetch_assoc($query_result))
+	{
+		$query = $row['query'];
+		$matches = array();
+
+		/*
+		Handle a query definition starting with 'DELETE/UPDATE'. This indicates that
+		it is an actually update query but running on the result of a deletion.
+		*/
+		$query = preg_replace('/DELETE\/UPDATE/i','DELETE',$query);
+
+		/*
+		Substitute variable names of type $name.
+		*/
+		while (preg_match('/[ =<>\']\$[A-Za-z0-9_]+/',$query,$matches))
+		{
+			$leading_char = substr($matches[0],0,1);
+			$field_name = substr($matches[0],2);
+			$value = addslashes($record->FieldVal($field_name));
+			$value = str_replace('$','\\$',$value);
+			$query = str_replace($matches[0],"$leading_char$value",$query);
+		}
+		mysqli_query($db,$query);
+	}
+}
+
+//==============================================================================
+/*
 Function save_record
 */
 //==============================================================================
@@ -633,6 +727,11 @@ function save_record($record,$old_record_id,$new_record_id)
 			$table_obj->afterSave($record);
 		}
 	}
+	/*
+	Run any update queries specified in the relationship records for the
+	associated table, but only where an existing record is being updated.
+	*/
+	run_relationship_update_queries($record);
 
 	if (isset($main_query_result))
 	{
@@ -1046,6 +1145,11 @@ function delete_record($record,$record_id)
 			}
 		}
 	}
+	/*
+	Run any delete or delete/update queries specified in the relationship
+	records for the associatedtable.
+	*/
+	run_relationship_delete_queries($record);
 	return true;
 }
 

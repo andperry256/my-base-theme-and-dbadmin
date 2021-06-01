@@ -505,6 +505,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1 WHERE table_name='dba_table_info' AND field_name='auto_dump'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_group'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
+  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=0 WHERE table_name='dba_relationships' AND field_name='query'");
 
   // Set sequencing info for built-in tables
   mysqli_query($db,"UPDATE dba_table_info SET sort_1_field='table_name',seq_no_field='display_order',seq_method='repeat',renumber_enabled=1 WHERE table_name='dba_table_fields'");

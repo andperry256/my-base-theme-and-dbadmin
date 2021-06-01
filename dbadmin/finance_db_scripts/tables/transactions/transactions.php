@@ -125,9 +125,10 @@ class tables_transactions
 		$date = $record->FieldVal('date');
 		$target_account = $record->FieldVal('target_account');
 		$target_seq_no = $record->FieldVal('target_seq_no');
-		mysqli_query($db,"DELETE FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 		if (!empty($target_account))
+		{
 			unlink_transaction($target_account,$target_seq_no);
+		}
 		update_account_balances($account,$date);
 	}
 

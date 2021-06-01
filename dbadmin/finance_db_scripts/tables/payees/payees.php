@@ -19,19 +19,7 @@ class tables_payees
 
 	function afterSave($record)
 	{
-		$db = admin_db_connect();
-		$action = $record->action;
-		$table = $record->table;
-		if (!empty($record->OldPKVal('name')))
-		{
-			$old_name = addslashes($record->OldPKVal('name'));
-			$name = addslashes($record->FieldVal('name'));
-			if ($name != $old_name)
-			{
-				// Apply name change to existing transactions
-				mysqli_query($db,"UPDATE transactions SET payee='$name' WHERE payee='$old_name'");
-			}
-		}
+
 
 	}
 }

@@ -377,7 +377,10 @@ function display_table($params)
 	if (mysqli_num_rows($query_result) > 0)
 	{
 		// One or more select relationships are defined for the given table
-		print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+		if (!empty($page_links))
+		{
+			print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+		}
 		if (get_session_var('show_relationships'))
 		{
 			print("<a class=\"admin-link\" href=\"".page_link_url($current_page,'hide')."\">Hide Relationships</a>");
@@ -546,7 +549,7 @@ function display_table($params)
 		{
 			$colspan = count($fields) + 1;
 			print("<tr><td class=\"$style\" style=\"font-size:0.8em\" colspan=\"$colspan\">");
-			$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table'");
+			$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'SELECT%'");
 			while ($row2 = mysqli_fetch_assoc($query_result2))
 			{
 				/*

@@ -5,11 +5,13 @@ if (!function_exists('sync_databases'))
 //==============================================================================
 function sync_databases($local_db_name)
 {
-	global $Location, $RelativePath, $local_site_dir, $Localhost_ID, $DBAdminURL, $db_master_location;
+	global $Location, $CustomPagesPath, $RelativePath, $local_site_dir, $Localhost_ID, $DBAdminURL, $db_master_location;
 
 	set_time_limit(300);
 	print("<h1>Synchronise Databases</h1>\n");
 	print("<h2 style=\"margin-bottom:0.5em\">($local_site_dir/$RelativePath)</h2>\n");
+	$relationships_script_file = "$CustomPagesPath/$RelativePath/relationships.sql";
+	$db = admin_db_connect();
 
 	if ($Location == 'local')
 	{
@@ -43,31 +45,69 @@ function sync_databases($local_db_name)
 
 			if (isset($_POST['submitted']))
 			{
-				$cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
-				if ($_POST['sync_mode'] == 'backup')
+				switch ($_POST['sync_mode'])
 				{
-					$cmd .= " -b $Localhost_ID";
+					case ('save-rlshps'):
+						if (is_file($relationships_script_file))
+						{
+							$contents = file($relationships_script_file);
+							if (substr($contents[0],0,12) == '## LOCKED ##')
+							{
+								print("<p>ERROR - Script file is locked.</p>\n");
+								break;
+							}
+						}
+						$ofp = fopen($relationships_script_file,'w');
+						fprintf($ofp,"## LOCKED ##\n");
+						$count = 0;
+						$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships");
+						while ($row2 = mysqli_fetch_assoc($query_result2))
+						{
+							$relationship_name_par = addslashes($row2['relationship_name']);
+							$line = "INSERT INTO dba_relationships VALUES ('{$row2['table_name']}','$relationship_name_par',\"{$row2['query']}\");";
+							$line = str_replace('%','%%',$line);
+							fprintf($ofp,"$line\n");
+							$count++;
+						}
+						fclose($ofp);
+						if ($count == 1)
+						{
+							print("<p>$count Query saved to relationships.sql.</p>\n");
+						}
+						else
+						{
+							print("<p>$count Queries saved to relationships.sql.</p>\n");
+						}
+						break;
+
+					default:
+						$cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
+						if ($_POST['sync_mode'] == 'backup')
+						{
+							$cmd .= " -b $Localhost_ID";
+						}
+						elseif ($_POST['sync_mode'] == 'restore')
+						{
+							$cmd .= " -r $Localhost_ID";
+						}
+						elseif ($_POST['sync_mode'] == $sync_direction)
+						{
+							$cmd .= " -s -force";
+						}
+						else
+						{
+							$cmd .= " -rs -force";
+						}
+						$start_time = time();
+						exec("$cmd > '__temp_.txt'");
+						$duration = time() - $start_time;
+						$output = implode(file('__temp_.txt'));
+						$output = str_replace("\n","<br />\n",$output);
+						print("$output");
+						print("Execution time: $duration seconds.<br />\n");
+						unlink ('__temp_.txt');
+						break;
 				}
-				elseif ($_POST['sync_mode'] == 'restore')
-				{
-					$cmd .= " -r $Localhost_ID";
-				}
-				elseif ($_POST['sync_mode'] == $sync_direction)
-				{
-					$cmd .= " -s -force";
-				}
-				else
-				{
-					$cmd .= " -rs -force";
-				}
-				$start_time = time();
-				exec("$cmd > '__temp2_.txt'");
-				$duration = time() - $start_time;
-				$output = implode(file('__temp2_.txt'));
-				$output = str_replace("\n","<br />\n",$output);
-				print("$output");
-				print("Execution time: $duration seconds.<br />\n");
-				unlink ('__temp2_.txt');
 			}
 			else
 			{
@@ -89,6 +129,7 @@ function sync_databases($local_db_name)
 				print("></td><td>Upload local DB to online DB</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"backup\"></td><td>Back up local DB (locally)</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"restore\"></td><td>Restore local DB (locally)</td></tr>\n");
+				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"save-rlshps\"></td><td>Save relationships (locally)</td></tr>\n");
 				print("<tr><td colspan=\"2\"><input value=\"Run\" type=\"submit\"></td></tr>\n");
 				print("</table>\n");
 				print("<input type=\"hidden\" name=\"submitted\" value=\"TRUE\" />\n");

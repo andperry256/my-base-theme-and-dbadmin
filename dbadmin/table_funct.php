@@ -170,6 +170,9 @@ function display_table($params)
 	invoked via a relationship link, the search filter is used for the associated
 	WHERE clause,
 	*/
+	$lc_search_string = '';
+	$sort_field = '';
+	$sort_order = '';
 	if (isset($_GET['-where']))
 	{
 		$where_clause = stripslashes($_GET['-where']);
@@ -474,7 +477,7 @@ function display_table($params)
 	foreach ($fields as $f => $ord)
 	{
 		// Output the field name with a sort link
-		if ((isset($sort_field)) && ($sort_field == $f))
+		if ($sort_field == $f)
 		{
 			// There is already a sort order in force on the given field.
 			if (strtolower($sort_order) == 'asc')
@@ -559,7 +562,7 @@ function display_table($params)
 				*/
 				$query = $row2['query'];
 				$matches = array();
-				while (preg_match('/[ =<>\']\$[A-Za-z0-9_]+/',$query,$matches))
+				while (preg_match('/[ =<>*+\'\^\)\}]\$[A-Za-z0-9_]+/',$query,$matches))
 				{
 					$leading_char = substr($matches[0],0,1);
 					$field_name = substr($matches[0],2);
@@ -568,12 +571,12 @@ function display_table($params)
 					$query = str_replace($matches[0],"$leading_char$value",$query);
 				}
 				$query_result3 = mysqli_query($db,$query);
-				if (mysqli_num_rows($query_result3) > 0)
+				if (($query_result3 !== false) && (mysqli_num_rows($query_result3) > 0))
 				{
 					$uc_query = strtoupper($query);
 					$pos1 = strpos($uc_query,' FROM ');
 					$pos2 = strpos($uc_query,' WHERE ');
-					if ($pos !== false)
+					if ($pos2 !== false)
 					{
 						$tempstr =  trim(substr($query,$pos1+6));
 						$target_table = strtok($tempstr,' ');

@@ -562,7 +562,7 @@ function display_table($params)
 				*/
 				$query = $row2['query'];
 				$matches = array();
-				while (preg_match('/[ =<>*+\'\^\)\}]\$[A-Za-z0-9_]+/',$query,$matches))
+				while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query,$matches))
 				{
 					$leading_char = substr($matches[0],0,1);
 					$field_name = substr($matches[0],2);

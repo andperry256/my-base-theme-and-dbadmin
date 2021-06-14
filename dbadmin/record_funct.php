@@ -431,7 +431,7 @@ function run_relationship_update_queries($record)
 			Substitute variable names of type $$name. Only valid for primary key fields
 			and works on the original value of the field.
 			*/
-			while (preg_match('/[ =<>\']\$\$[A-Za-z0-9_]+/',$query,$matches))
+			while (preg_match(RELATIONSHIP_VARIABLE_MATCH_2,$query,$matches))
 			{
 				$leading_char = substr($matches[0],0,1);
 				$field_name = substr($matches[0],3);
@@ -443,7 +443,7 @@ function run_relationship_update_queries($record)
 			/*
 			Substitute variable names of type $name. Works on the final value of the field.
 			*/
-			while (preg_match('/[ =<>\']\$[A-Za-z0-9_]+/',$query,$matches))
+			while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query,$matches))
 			{
 				$leading_char = substr($matches[0],0,1);
 				$field_name = substr($matches[0],2);
@@ -466,8 +466,65 @@ function run_relationship_update_queries($record)
 //==============================================================================
 /*
 Function run_relationship_delete_queries
+(with sub-function run_relationship_delete_query)
 */
 //==============================================================================
+
+function run_relationship_delete_query($query,$remainder)
+{
+	$db = admin_db_connect();
+  $query = preg_replace('/DELETE\/UPDATE/i','UPDATE',$query);
+  $words = preg_split("/[\s]+/", $query);
+  switch ($words[0])
+  {
+    case 'UPDATE':
+      /*
+      This is a 'DELETE/UPDATE' query, which indicates that it is actually an
+      update query but running on the result of a deletion. This is handled as
+      the end of the line - i.e. no further queries will be executed.
+      */
+      mysqli_query($db,$query);
+      return;
+
+    case 'DELETE':
+      if (!empty($remainder))
+      {
+        if (strtoupper($words[1]) == 'FROM')
+        {
+          $next_query = strtok($remainder,';');
+          $next_remainder = trim(substr($remainder,strlen($next_query)),'; ');
+
+          // Run a SELECT query on the set of records that are due to be
+          // deleted by the current query.
+          $query_result = mysqli_query($db,preg_replace('/DELETE FROM/i','SELECT * FROM',$query));
+          while ($row = mysqli_fetch_assoc($query_result))
+          {
+        		// Substitute variable names of type $name.
+            $matches = array();
+						$query2 = $next_query;
+        		while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query2,$matches))
+        		{
+        			$leading_char = substr($matches[0],0,1);
+        			$field_name = substr($matches[0],2);
+        			$value = addslashes($row[$field_name]);
+        			$value = str_replace('$','\\$',$value);
+        			$query2 = str_replace($matches[0],"$leading_char$value",$query2);
+        		}
+
+            // Run the next query in line against the individual record from the
+            // SELECT query (via a recursive function call).
+            run_relationship_delete_query($query2,$next_remainder);
+          }
+        }
+      }
+      // Run the current query.
+      mysqli_query($db,$query);
+      return;
+
+    default:
+      return;
+  }
+}
 
 function run_relationship_delete_queries($record)
 {
@@ -477,19 +534,12 @@ function run_relationship_delete_queries($record)
 	$query_result = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'DELETE%'");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
-		$query = $row['query'];
-		$matches = array();
+		$query = strtok($row['query'],';');
+    $remainder = trim(substr($row['query'],strlen($query)),'; ');
 
-		/*
-		Handle a query definition starting with 'DELETE/UPDATE'. This indicates that
-		it is an actually update query but running on the result of a deletion.
-		*/
-		$query = preg_replace('/DELETE\/UPDATE/i','DELETE',$query);
-
-		/*
-		Substitute variable names of type $name.
-		*/
-		while (preg_match('/[ =<>\']\$[A-Za-z0-9_]+/',$query,$matches))
+		// Substitute variable names of type $name.
+    $matches = array();
+		while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query,$matches))
 		{
 			$leading_char = substr($matches[0],0,1);
 			$field_name = substr($matches[0],2);
@@ -497,7 +547,9 @@ function run_relationship_delete_queries($record)
 			$value = str_replace('$','\\$',$value);
 			$query = str_replace($matches[0],"$leading_char$value",$query);
 		}
-		mysqli_query($db,$query);
+
+    // Run the query and any sub-queries.
+		run_relationship_delete_query($query,$remainder);
 	}
 }
 

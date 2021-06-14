@@ -519,6 +519,18 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   // Set other misceallaneous fields for built-in-tables
   mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_relationships' AND field_name='table_name'");
 
+  // Add relationships for built-in tables
+  mysqli_query($db,"DELETE FROM dba_relationships WHERE table_name LIKE 'dba_%'");
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables\',"SELECT * FROM dba_table_info WHERE parent_table=\'$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables - Delete\',"# Do not include (too complex)")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables - Update\',"UPDATE dba_table_info SET parent_table=\'$table_name WHERE parent_table=\'$$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Fields\',"SELECT * FROM dba_table_fields WHERE table_name=\'$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Fields - Delete\',"DELETE FROM dba_table_fields WHERE table_name=\'$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Fields - Update\',"UPDATE dba_table_fields SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Relationships\',"SELECT * FROM dba_relationships WHERE table_name=\'$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Relationships - Delete\',"DELETE FROM dba_relationships WHERE table_name=\'$table_name\'")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Relationships - Update\',"UPDATE dba_relationships SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'")');
+
   print("Operation completed.$eol");
   if ($mode == 'web')
   {

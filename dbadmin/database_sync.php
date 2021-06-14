@@ -48,7 +48,7 @@ function sync_databases($local_db_name)
 				switch ($_POST['sync_mode'])
 				{
 					case ('save-rlshps'):
-						if (is_file($relationships_script_file))
+						if ((!isset($_POST['force-save-rlshps'])) && (is_file($relationships_script_file)))
 						{
 							$contents = file($relationships_script_file);
 							if (substr($contents[0],0,12) == '## LOCKED ##')
@@ -60,7 +60,7 @@ function sync_databases($local_db_name)
 						$ofp = fopen($relationships_script_file,'w');
 						fprintf($ofp,"## LOCKED ##\n");
 						$count = 0;
-						$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships");
+						$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name NOT LIKE '%dba_%'");
 						while ($row2 = mysqli_fetch_assoc($query_result2))
 						{
 							$relationship_name_par = addslashes($row2['relationship_name']);
@@ -129,7 +129,8 @@ function sync_databases($local_db_name)
 				print("></td><td>Upload local DB to online DB</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"backup\"></td><td>Back up local DB (locally)</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"restore\"></td><td>Restore local DB (locally)</td></tr>\n");
-				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"save-rlshps\"></td><td>Save relationships (locally)</td></tr>\n");
+				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"save-rlshps\"></td><td>Save relationships (locally)<br />");
+				print("<input type=\"checkbox\" name=\"force-save-rlshps\">&nbsp;Force&nbsp;update</td></tr>\n");
 				print("<tr><td colspan=\"2\"><input value=\"Run\" type=\"submit\"></td></tr>\n");
 				print("</table>\n");
 				print("<input type=\"hidden\" name=\"submitted\" value=\"TRUE\" />\n");

@@ -27,11 +27,17 @@ class tables_transactions
 		$action = $record->action;
 		$table = $record->table;
 		if (!empty($record->OldPKVal('account')))
+		{
 			$old_account = $record->OldPKVal('account');
+		}
 		elseif (substr($table,0,14) == "_view_account_")
+		{
 			$old_account = substr($table,14,strlen($table)-14);
+		}
 		else
+		{
 			$old_account = '';
+		}
 		$account = $record->FieldVal('account');
 		if (($account != $old_account) && ($value != NEXT_SEQ_NO_INDICATOR))
 		{
@@ -43,8 +49,10 @@ class tables_transactions
 
 	function acct_month__validate($record, $value)
 	{
-		if (empty($value))
+		if (empty($value))#
+		{
 			return true;
+		}
 		$year = (int)substr($value,0,4);
 		$separator = substr($value,4,1);
 		$month = (int)substr($value,5,2);
@@ -53,7 +61,9 @@ class tables_transactions
 			return report_error("Invalid accounting month.");
 		}
 		else
+		{
 			return true;
+		}
 	}
 
 	function credit_amount__validate($record, $value)
@@ -73,7 +83,9 @@ class tables_transactions
 			return report_error("Invalid debit amount.");
 		}
 		else
+		{
 			return true;
+		}
 	}
 
 	function target_account__validate($record, $value)
@@ -113,7 +125,9 @@ class tables_transactions
 			return report_error("Cannot delete record here - please do so by unlinking transfer from other side.");
 		}
 		else
+		{
 			return true;
+		}
 	}
 
 	function afterDelete($record)
@@ -142,6 +156,7 @@ class tables_transactions
 		$credit_amount = $record->FieldVal('credit_amount');
 		$debit_amount = $record->FieldVal('debit_amount');
 		$target_account = $record->FieldVal('target_account');
+		$copy_to_date = $record->FieldVal('copy_to_date');
 
 		$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 		if ($row = mysqli_fetch_assoc($query_result))
@@ -167,7 +182,9 @@ class tables_transactions
 			$source_account = $record->FieldVal('source_account');
 			$source_seq_no = $record->FieldVal('source_seq_no');
 			if ((empty($target_account)) && (!empty($target_seq_no)))
+			{
 				return report_error("Target sequence number set without an account.");
+			}
 		}
 
 		// Check for various error conditions
@@ -177,7 +194,9 @@ class tables_transactions
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    ($row['reconciled'] ) &&
 			    (($row['credit_amount']!= $debit_amount) || ($row['debit_amount']!= $credit_amount)))
-			return report_error("Amount conflicts with reconciled record at other end of transfer.");
+			{
+				return report_error("Amount conflicts with reconciled record at other end of transfer.");
+			}
 		}
 		if (!empty($source_account))
 		{
@@ -185,20 +204,34 @@ class tables_transactions
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    ($row['reconciled'] ) &&
 			    (($row['credit_amount']!= $debit_amount) || ($row['debit_amount']!= $credit_amount)))
-			return report_error("Amount conflicts with reconciled record at other end of transfer.");
+			{
+				return report_error("Amount conflicts with reconciled record at other end of transfer.");
+			}
 		}
 		if (($credit_amount != 0) && ($debit_amount != 0))
+		{
 			return report_error("Credit and debit amounts both specified.");
+		}
 		elseif ((!empty($target_account)) && (!empty($source_account)))
+		{
 			return report_error("Attempt to set both source and target accounts.");
+		}
 		elseif ((!empty($old_target_account)) && (!empty($old_target_seq_no)) &&
 		    (($target_account != $old_target_account) || ($target_seq_no != $old_target_seq_no)) &&
 			((!empty($target_account)) || (!empty($target_seq_no))))
+		{
 			return report_error("Attempt to modify transfer link - please break then re-create.");
+		}
+		elseif ((!empty($source_account)) && (!empty($copy_to_date)))
+		{
+			return report_error("Attempt to copy transaction that is at the target end of a transfer.");
+		}
 
 		// All error checks passed - OK to make permanent changes
 		if ((!empty($old_target_account)) && (empty($target_account)))
+		{
 			unlink_transaction($old_target_account,$old_target_seq_no);
+		}
 	}
 
 	function afterSave($record)
@@ -230,6 +263,7 @@ class tables_transactions
 		$target_seq_no = $record->FieldVal('target_seq_no');
 		$source_account = $record->FieldVal('source_account');
 		$source_seq_no = $record->FieldVal('source_seq_no');
+		$copy_to_date = $record->FieldVal('copy_to_date');
 		$delete_record = $record->FieldVal('delete_record');
 
 		$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
@@ -264,19 +298,27 @@ class tables_transactions
 		// Re-link any splits if the transaction primary keys have changed.
 		// Can leave the split sequence numbers intact as they are specific to the individual transaction.
 		if (($account != $old_account) || ($seq_no != $old_seq_no))
+		{
 			mysqli_query($db,"UPDATE splits SET account='$account',transact_seq_no=$seq_no WHERE account='$old_account' AND transact_seq_no=$old_seq_no");
+		}
 
 		// Get account currency
 		$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'");
 		if ($row = mysqli_fetch_assoc($query_result))
+		{
 			$account_currency = $row['currency'];
+		}
 		else
+		{
 			exit("This should not occur");
+		}
 
 		// Add payee to payees table
 		$query_result = mysqli_query($db,"SELECT * FROM payees WHERE name='$payee'");
 		if (mysqli_num_rows($query_result) == 0)
+		{
 			mysqli_query($db,"INSERT INTO payees (name) VALUES ('$payee')");
+		}
 
 		// Adjust credit/debit amounts as necessary.
 		if ($auto_total)
@@ -389,17 +431,25 @@ class tables_transactions
 		}
 
 		if ((empty($acct_month)) || ($change_acct_month == 0))
+		{
 			$acct_month = accounting_month($date);
+		}
 
 		if ($table == '_ctab_new_transaction')
 		{
 			// Save record in main table
 			if (empty($credit_amount))
+			{
 				$credit_amount = 0;
+			}
 			if (empty($debit_amount))
+			{
 				$debit_amount = 0;
+			}
 			if (empty($sched_count))
+			{
 				$sched_count = 0;
+			}
 			$query = "INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,target_account,sched_freq,sched_count,save_defaults) VALUES ('$account',$seq_no,'$date','$account_currency','$payee',$credit_amount,$debit_amount,'$fund','$category','$memo','$acct_month','$target_account','$sched_freq',$sched_count,$save_defaults)";
 			if (!empty($chq_no))
 			{
@@ -413,7 +463,9 @@ class tables_transactions
 			// Re-update record
 			mysqli_query($db,"UPDATE transactions SET seq_no=$seq_no,currency='$account_currency',credit_amount=$credit_amount,debit_amount=$debit_amount,auto_total=0,fund='$fund',category='$category',acct_month='$acct_month',save_defaults=0 WHERE account='$account' AND seq_no=$seq_no");
 			if ($sched_freq != '#')
+			{
 				mysqli_query($db,"UPDATE transactions SET cleared_balance=0.00,full_balance=0.00 WHERE account='$account' AND seq_no=$seq_no");
+			}
 		}
 
 		// Update account balances
@@ -429,6 +481,13 @@ class tables_transactions
 		{
 			mysqli_query($db,"UPDATE transactions SET date='$date',credit_amount=$debit_amount,debit_amount=$credit_amount,fund='$fund',acct_month='$acct_month' WHERE account='$source_account' AND seq_no=$source_seq_no");
 			update_account_balances($source_account,$date);
+		}
+
+		if (!empty($copy_to_date))
+		{
+			// Make copy of transaction
+			copy_transaction($account,$seq_no,$copy_to_date);
+			mysqli_query($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
 		}
 
 		if ($sched_freq == '#')

@@ -269,17 +269,17 @@ function year_end($date)
 
 //==============================================================================
 
-function record_scheduled_transaction($account,$seq_no)
+function copy_transaction($account,$seq_no,$new_date)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no AND sched_freq<>'#' and sched_count<>0");
+	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$date = $row['date'];
-		$acct_month = $row['acct_month'];
-		$sched_freq = $row['sched_freq'];
-		$sched_count = $row['sched_count'];
-		$last_day = $row['last_day'];
+		if (!empty($row['source_account']))
+		{
+			// Do not allow copy on the target of a transfer
+			return false;
+		}
 
 		// Create copy of transaction using new sequence number
 		mysqli_query($db,"DELETE TABLE IF EXISTS temp_transactions");
@@ -289,14 +289,11 @@ function record_scheduled_transaction($account,$seq_no)
 		mysqli_query($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
 		mysqli_query($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 		$new_seq_no = next_seq_no($account);
-		mysqli_query($db,"UPDATE temp_transactions SET seq_no=$new_seq_no");
+		mysqli_query($db,"UPDATE temp_transactions SET date='$new_date',seq_no=$new_seq_no,reconciled=0");
 		mysqli_query($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
 		mysqli_query($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no");
 		mysqli_query($db,"INSERT INTO splits SELECT * FROM temp_splits");
-
-		// Update new record
-		mysqli_query($db,"UPDATE transactions SET sched_freq='#',sched_count=-1 WHERE account='$account' AND seq_no=$new_seq_no");
-		update_account_balances($account,$date);
+		update_account_balances($account,$new_date);
 
 		// Create transfer if required
 		if (!empty($row['target_account']))
@@ -309,6 +306,33 @@ function record_scheduled_transaction($account,$seq_no)
 			update_account_balances($target_account,$date);
 			mysqli_query($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$new_seq_no");
 		}
+		return $new_seq_no;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+//==============================================================================
+
+function record_scheduled_transaction($account,$seq_no)
+{
+	$db = admin_db_connect();
+	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no AND sched_freq<>'#' and sched_count<>0");
+	if ($row = mysqli_fetch_assoc($query_result))
+	{
+		$date = $row['date'];
+		$acct_month = $row['acct_month'];
+		$sched_freq = $row['sched_freq'];
+		$sched_count = $row['sched_count'];
+		$last_day = $row['last_day'];
+
+		// Copy scheduled transaction to new transaction and remove schedule from
+		// the latter
+		$new_seq_no = copy_transaction($account,$seq_no,$date);
+		mysqli_query($db,"UPDATE transactions SET sched_freq='#',sched_count=-1 WHERE account='$account' AND seq_no=$new_seq_no");
+		update_account_balances($account,$new_date);
 
 		// Update schedule count if appliable
 		if ($sched_count > 0)

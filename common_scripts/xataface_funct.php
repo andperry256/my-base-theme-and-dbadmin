@@ -12,12 +12,12 @@ if (!defined('DEFAULT_XATAFACE_LIST_SIZE'))
 	define('DEFAULT_XATAFACE_LIST_SIZE',30);
 if (isset($BaseDir))
 {
-	if (is_file("$BaseDir/_link_to_common/date_funct.php"))
-		require_once("$BaseDir/_link_to_common/date_funct.php");
+	if (is_file("$BaseDir/common_scripts/date_funct.php"))
+		require_once("$BaseDir/common_scripts/date_funct.php");
 	if (is_file("$BaseDir/page_content.php"))
 		require_once("$BaseDir/page_content.php");
-	if (is_file("$BaseDir/_link_to_common/mysql_mysqli.inc.php"))
-		require_once("$BaseDir/_link_to_common/mysql_mysqli.inc.php");
+	if (is_file("$BaseDir/common_scripts/mysql_mysqli.inc.php"))
+		require_once("$BaseDir/common_scripts/mysql_mysqli.inc.php");
 }
 
 //==============================================================================

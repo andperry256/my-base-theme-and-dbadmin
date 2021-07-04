@@ -8,7 +8,7 @@
 
 // Variables $local_site_dir and $RelativePath must be set up beforehand
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-require_once("$BaseDir/_link_to_common/date_funct.php");
+require_once("$BaseDir/common_scripts/date_funct.php");
 require_once("$PrivateScriptsDir/mysql_connect.php");
 require("$CustomPagesPath/$RelativePath/db_funct.php");
 $db = admin_db_connect();

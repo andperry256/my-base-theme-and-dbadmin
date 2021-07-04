@@ -47,10 +47,10 @@ foreach($argv as $key => $value)
 }
 
 require("$PrivateScriptsDir/mysql_connect.php");
-require("$BaseDir/_link_to_common/dbadmin/widget_types.php");
-require("$BaseDir/_link_to_common/dbadmin/table_funct.php");
-require("$BaseDir/_link_to_common/dbadmin/record_funct.php");
-require("$BaseDir/_link_to_common/dbadmin/update_table_data.php");
+require("$BaseDir/common_scripts/dbadmin/widget_types.php");
+require("$BaseDir/common_scripts/dbadmin/table_funct.php");
+require("$BaseDir/common_scripts/dbadmin/record_funct.php");
+require("$BaseDir/common_scripts/dbadmin/update_table_data.php");
 if ($RelativePath == '+')
 {
   // Process all databases

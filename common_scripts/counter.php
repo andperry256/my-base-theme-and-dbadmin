@@ -17,7 +17,7 @@
 
 	if (!function_exists('DayName'))
 	{
-		require("$BaseDir/_link_to_common/date_funct.php");
+		require("$BaseDir/common_scripts/date_funct.php");
 	}
 	if (!function_exists('db_connect'))
 	{

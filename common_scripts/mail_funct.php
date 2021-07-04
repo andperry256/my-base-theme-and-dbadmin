@@ -415,7 +415,7 @@ Function email_previous_day_log
 */
 //================================================================================
 
-require_once("$BaseDir/_link_to_common/date_funct.php");
+require_once("$BaseDir/common_scripts/date_funct.php");
 function email_previous_day_mail_log($station_id,$from_addr)
 {
 	global $MailLogDir;

@@ -302,8 +302,10 @@ function copy_transaction($account,$seq_no,$new_date)
 			$target_seq_no = next_seq_no($target_account);
 			$payee = addslashes($row['payee']);
 			$memo = addslashes($row['memo']);
-			mysqli_query($db,"INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no) VALUES ('$target_account',$target_seq_no,'$date','$payee',{$row['debit_amount']},{$row['credit_amount']},'{$row['fund']}','-transfer-','$memo','$acct_month','$account',$new_seq_no)");
-			update_account_balances($target_account,$date);
+			$query = "INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no)";
+			$query .= " VALUES ('$target_account',$target_seq_no,'$new_date','$payee',{$row['debit_amount']},{$row['credit_amount']},'{$row['fund']}','-transfer-','$memo','$acct_month','$account',$new_seq_no)";
+			mysqli_query($db,$query);
+			update_account_balances($target_account,$new_date);
 			mysqli_query($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$new_seq_no");
 		}
 		return $new_seq_no;

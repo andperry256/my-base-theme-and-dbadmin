@@ -108,9 +108,13 @@ function next_seq_no($account)
 	$db = admin_db_connect();
 	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' ORDER BY seq_no DESC LIMIT 1");
 	if ($row = mysqli_fetch_assoc($query_result))
+	{
 		$seq_no = $row['seq_no'] + 10;
+	}
 	else
+	{
 		$seq_no = 10;
+	}
 	return $seq_no;
 }
 
@@ -121,9 +125,13 @@ function next_split_no($account,$transact_seq_no)
 	$db = admin_db_connect();
 	$query_result = mysqli_query($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no ORDER BY split_no DESC LIMIT 1");
 	if ($row = mysqli_fetch_assoc($query_result))
+	{
 		$split_no = $row['split_no'] + 10;
+	}
 	else
+	{
 		$split_no = 10;
+	}
 	return $split_no;
 }
 
@@ -138,9 +146,13 @@ function unlink_transaction($account,$seq_no)
 	{
 		// Delete transaction if not reconciled. Otherwise update it to break the link with the transfer source.
 		if (!$row['reconciled'])
+		{
 			mysqli_query($db,"DELETE FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+		}
 		else
+		{
 			mysqli_query($db,"UPDATE transactions SET source_account='',source_seq_no='',category='-none-' WHERE account='$account' AND seq_no=$seq_no");
+		}
 	}
 }
 
@@ -169,48 +181,70 @@ function rationalise_transaction($account,$seq_no)
 		// Check status of fund and category in relation to splits.
 		if (($split_count > 0) || ($source_split_count > 0))
 		{
-			// Ensure that the fund and category are set to split in the transaction and at the other end of any transfer.
+			// Ensure that the fund and category are set to 'split' in the transaction and at the other end of any transfer.
 			mysqli_query($db,"UPDATE transactions SET fund='-split-',category='-split-' WHERE account='$account' AND seq_no=$seq_no");
 			if (!empty($target_account))
+			{
 				mysqli_query($db,"UPDATE transactions SET fund='-split-',category='-split-' WHERE account='$target_account' AND seq_no=$target_seq_no");
+			}
 		}
 		else
 		{
-			// Ensure that the fund is not set to split in the transaction and at the other end of any transfer.
+			// Ensure that the fund is not set to 'split' in the transaction and at the other end of any transfer.
 			mysqli_query($db,"UPDATE transactions SET fund='-none-' WHERE account='$account' AND seq_no=$seq_no AND fund='-split-'");
 			if (!empty($target_account))
+			{
 				mysqli_query($db,"UPDATE transactions SET fund='-none-' WHERE account='$target_account' AND seq_no=$target_seq_no AND fund='-split-'");
+			}
 
-			// Ensure that the category is not set to split in the transaction and at the other end of any transfer.
+			// Ensure that the category is not set to 'split' in the transaction and at the other end of any transfer.
 			mysqli_query($db,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND categort='-split-'");
 			if (!empty($target_account))
+			{
 				mysqli_query($db,"UPDATE transactions SET category='-none-' WHERE account='$target_account' AND seq_no=$target_seq_no AND category='-split-'");
+			}
 		}
 
 		// Check status of category in relation to transfers.
 		if (((!empty($row['target_account'])) || (!empty($row['source_account']))) &&
 		     ($row['category'] != '-split-'))
+		{
 			mysqli_query($db,"UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no");
+		}
 		elseif ($row['category'] == '-transfer-')
+		{
 			mysqli_query($db,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no");
+		}
 
 		// Process associated splits
+		$splits_total = 0.00;
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			$split_no = $row2['split_no'];
+			$splits_total = subtract_money(add_money($splits_total,$row2['credit_amount']),$row2['debit_amount']);
 
 			// Ensure that fund and category are not set to indicate a split.
 			if ($row2['fund'] == '-split-')
+			{
 				mysqli_query($db,"UPDATE splits SET fund='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+			}
 			if ($row2['category'] == '-split-')
+			{
 				mysqli_query($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+			}
 
 			// Check status of category in relation to transfers.
 			if ((!empty($row['target_account'])) || (!empty($row['source_account'])))
+			{
 				mysqli_query($db,"UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+			}
 			elseif ($row['category'] == '-transfer-')
+			{
 				mysqli_query($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+			}
 		}
+		$splits_discrepancy = subtract_money(add_money($splits_total,$row['debit_amount']),$row['credit_amount']);
+		mysqli_query($db,"UPDATE transactions SET splits_discrepancy=$splits_discrepancy WHERE account='$account' AND seq_no=$seq_no");
 	}
 }
 
@@ -241,7 +275,9 @@ function year_start($date)
 	$month = (int)substr($accounting_month,5,2);
 	$year = (int)substr($accounting_month,0,4);
 	if ($month < YEAR_START_MONTH)
+	{
 		$year--;
+	}
 	return sprintf("%04d-%02d",$year,YEAR_START_MONTH);
 }
 
@@ -263,8 +299,9 @@ function year_end($date)
 		return sprintf("%04d-%02d",$year,$month);
 	}
 	else
+	{
 		return sprintf("%04d-%02d",$year,YEAR_START_MONTH-1);
-
+	}
 }
 
 //==============================================================================
@@ -386,12 +423,18 @@ function record_scheduled_transaction($account,$seq_no)
 		}
 		$days_in_month = DaysInMonth($month,$year);
 		if (($day > $days_in_month) || (($day >= 28) && ($last_day)))
+		{
 			$day = $days_in_month;
+		}
 		$date = sprintf("%04d-%02d-%02d",$year,$month,$day);
 		if (isset($new_acct_month))
+		{
 			$acct_month = $new_acct_month;
+		}
 		else
+		{
 			$acct_month = accounting_month($date);
+		}
 		mysqli_query($db,"UPDATE transactions SET date='$date',acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no");
 		mysqli_query($db,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$seq_no");
 
@@ -399,9 +442,13 @@ function record_scheduled_transaction($account,$seq_no)
 		if (!empty($row['email_alert_id']))
 		{
 			if ($row['debit_amount'] > 0)
+			{
 				send_email_alert($row['email_alert_id'],$row['date'],$row['debit_amount']);
+			}
 			else
+			{
 				send_email_alert($row['email_alert_id'],$row['date'],$row['credit_amount']);
+			}
 		}
 	}
 }

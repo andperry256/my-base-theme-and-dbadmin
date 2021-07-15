@@ -388,7 +388,7 @@ body {
 }
 
 /*
-The styles for mobile/desktop only items are defined here against a single 
+The styles for mobile/desktop only items are defined here against a single
 breakpoint of 40.0em. To make use of an intemediate width (normally from
 40.01em to 60.0em), the necessary styles will need to be redefined in the
 child theme.

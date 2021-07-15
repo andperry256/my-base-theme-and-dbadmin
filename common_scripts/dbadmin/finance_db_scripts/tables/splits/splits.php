@@ -206,6 +206,9 @@ class tables_splits
 			// Create remote record for transfer
 		}
 
+		// Update parent transaction
+		rationalise_transaction($account,$transact_seq_no);
+
 		// Re-update record
 		mysqli_query($db,"UPDATE splits SET split_no=$split_no,credit_amount=$credit_amount,debit_amount=$debit_amount,auto_amount=0,fund='$fund',category='$category',acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$old_split_no");
 

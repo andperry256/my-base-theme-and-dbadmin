@@ -1,128 +1,6 @@
 <?php
 //================================================================================
 
-function set_default_header_image_paths()
-{
-	$image_file_exts = array( 'png', 'jpg' );
-	global $desktop_header_image_path;
-	global $desktop_header_image_url;
-	global $intermediate_header_image_path;
-	global $intermediate_header_image_url;
-	global $mobile_header_image_path;
-	global $mobile_header_image_url;
-	$current_theme_dir = get_stylesheet_directory();
-	$current_theme_url = get_stylesheet_directory_uri();
-
-	$desktop_header_image_path = '';
-	$desktop_header_image_url = '';
-	foreach ($image_file_exts as $ext)
-	{
-		if (is_file("$current_theme_dir/header_image.$ext"))
-		{
-			$desktop_header_image_path = "$current_theme_dir/header_image.$ext";
-			$desktop_header_image_url = "$current_theme_url/header_image.$ext";
-			break;
-		}
-	}
-
-	$intermediate_desktop_header_image_path = $desktop_header_image_path;
-	$intermediate_desktop_header_image_url = $desktop_header_image_url;
-	foreach ($image_file_exts as $ext)
-	{
-		if (is_file("$current_theme_dir/heaheader_image_intermediateder_image.$ext"))
-		{
-			$intermediate_desktop_header_image_path = "$current_theme_dir/header_image_intermediate.$ext";
-			$intermediate_desktop_header_image_url = "$current_theme_url/header_image_intermediate.$ext";
-			break;
-		}
-	}
-
-	$mobile_desktop_header_image_path = $intermediate_desktop_header_image_path;
-	$mobile_desktop_header_image_url = $intermediate_desktop_header_image_url;
-	foreach ($image_file_exts as $ext)
-	{
-		if (is_file("$current_theme_dir/header_image_mobile.$ext"))
-		{
-			$mobile_desktop_header_image_path = "$current_theme_dir/header_image_mobile.$ext";
-			$mobile_desktop_header_image_url = "$current_theme_url/header_image_mobile.$ext";
-			break;
-		}
-	}
-}
-
-//================================================================================
-
-function set_header_image_paths($dir,$url)
-{
-	$image_file_exts = array( 'png', 'jpg' );
-	global $desktop_header_image_path;
-	global $desktop_header_image_url;
-	global $intermediate_header_image_path;
-	global $intermediate_header_image_url;
-	global $mobile_header_image_path;
-	global $mobile_header_image_url;
-	if (!session_var_is_set('header_image_no'))
-	{
-		update_session_var('header_image_no',1);
-	}
-
-	foreach ($image_file_exts as $ext)
-	{
-		if (is_file("$dir/header_image.$ext"))
-		{
-			// Select desktop header image file
-			if (!is_file("$dir/header_image_".get_session_var('header_image_no').".$ext"))
-			{
-				update_session_var('header_image_no',1);
-			}
-			if (get_session_var('header_image_no') == 1)
-			{
-				$desktop_header_image_path = "$dir/header_image.$ext";
-				$desktop_header_image_url = "$url/header_image.$ext";
-			}
-			else
-			{
-				$desktop_header_image_path = "$dir/header_image_".get_session_var('header_image_no').".$ext";
-				$desktop_header_image_url = "$url/header_image_".get_session_var('header_image_no').".$ext";
-			}
-			$next_header_image_no = get_session_var('header_image_no') + 1;
-			if (is_file("$dir/header_image_$next_header_image_no.$ext"))
-			{
-				update_session_var('header_image_no',(int)get_session_var('header_image_no')+1);
-			}
-			else
-			{
-				update_session_var('header_image_no',1);
-			}
-			break;
-		}
-	}
-
-	foreach ($image_file_exts as $ext)
-	{
-		if (is_file("$dir/header_image_intermediate.$ext"))
-		{
-			// Select intermediate header image file
-			$intermediate_header_image_path = "$dir/header_image_intermediate.$ext";
-			$intermediate_header_image_url = "$url/header_image_intermediate.$ext";
-			break;
-		}
-	}
-
-	foreach ($image_file_exts as $ext)
-	{
-		if (is_file("$dir/header_image_mobile.$ext"))
-		{
-			// Select mobile header image file
-			$mobile_header_image_path = "$dir/header_image_mobile.$ext";
-			$mobile_header_image_url = "$url/header_image_mobile.$ext";
-			break;
-		}
-	}
-}
-
-//================================================================================
-
 global $my_base_theme_mode;
 global $site_path_defs_path;
 global $meta_description;
@@ -171,10 +49,6 @@ if (!is_file($site_path_defs_path))
 	$custom_categories_path = "$CustomScriptsPath/categories";
 	$custom_categories_url = "$CustomScriptsURL/categories";
 	require("$CustomPagesPath/select_menu.php");
-	if (!session_var_is_set('header_no'))
-	{
-		update_session_var('header_no',1);
-	}
 	$page_uri = get_page_uri(get_the_ID());
 	if (is_file("$CustomScriptsPath/functions.php"))
 	{
@@ -182,7 +56,7 @@ if (!is_file($site_path_defs_path))
 	}
 
 	// Use header image file(s) in top level of the custom scripts directory as the default.
-	set_header_image_paths($CustomScriptsPath,$CustomScriptsURL);
+	set_default_header_image_paths();
 
 	//================================================================================
 
@@ -195,9 +69,8 @@ if (!is_file($site_path_defs_path))
 		$custom_footer_script = '';
 	}
 
-	if ((is_page()) || (is_404()))
+	if (is_page())
 	{
-		set_header_image_paths($CustomPagesPath,$CustomPagesURL);
 		$minimum_access_level = '';
 		if (is_file("$CustomPagesPath/init.php"))
 		{
@@ -219,7 +92,7 @@ if (!is_file($site_path_defs_path))
 		{
 			$uri_sub_path .= "/$key";
 			$subpath = ltrim($uri_sub_path,'/');
-			set_header_image_paths("$CustomPagesPath/$uri_sub_path","$CustomPagesURL/$uri_sub_path");
+			set_header_image_paths($subpath,'page');
 			if (is_file("$CustomPagesPath/$uri_sub_path/footer.php"))
 			{
 				// Select custom footer script
@@ -286,27 +159,25 @@ if (!is_file($site_path_defs_path))
 			{
 				$supercategory = 'none';
 			}
-			$uri_sub_path = $tok;
 			while ($tok !== false)
 			{
-				set_header_image_paths("$custom_categories_path/$uri_sub_path","$custom_categories_url/$uri_sub_path");
-				if (is_file("$CustomPagesPath/$uri_sub_path/footer.php"))
+				set_header_image_paths($tok,'category');
+				if (is_file("$CustomPagesPath/$tok/footer.php"))
 				{
 					// Select custom footer script
-					$custom_footer_script = "$custom_categories_path/$uri_sub_path/footer.php";
+					$custom_footer_script = "$custom_categories_path/$tok/footer.php";
 				}
-				if (is_file("$custom_categories_path/$uri_sub_path/select_menu.php"))
+				if (is_file("$custom_categories_path/$tok/select_menu.php"))
 				{
 					// Select menu
-					include("$custom_categories_path/$uri_sub_path/select_menu.php");
+					include("$custom_categories_path/$tok/select_menu.php");
 				}
 				if (is_file("$custom_categories_path/$uri_sub_path/styles.css"))
 				{
 					// Add stylesheet to hierarchy
-					output_stylesheet_link($custom_categories_url,$uri_sub_path);
+					output_stylesheet_link($custom_categories_url,$tok);
 				}
 				$tok = strtok('/');
-				$uri_sub_path = $tok;
 			}
 		}
 
@@ -339,55 +210,11 @@ if (!is_file($site_path_defs_path))
 
 	elseif (is_archive())
 	{
-		set_header_image_paths("$CustomScriptsPath/archives","$CustomScriptsURL/archives");
+		set_header_image_paths('','archive');
 	}
 
 	//================================================================================
 
-	if (!session_var_is_set('header_no'))
-	{
-		update_session_var('header_no',1);
-	}
-	$header_no = get_session_var('header_no');
-	$next_header_no = $header_no + 1;
-	$alt_desktop_header_image_path = str_replace(".png","_$header_no.png",$desktop_header_image_path);
-	$alt_desktop_header_image_path = str_replace(".jpg","_$header_no.jpg",$alt_desktop_header_image_path);
-	$alt_desktop_header_image_url = str_replace(".png","_$header_no.png",$desktop_header_image_url);
-	$alt_desktop_header_image_url = str_replace(".jpg","_$header_no.jpg",$alt_desktop_header_image_url);
-	$alt_mobile_header_image_path = str_replace(".png","_$header_no.png",$mobile_header_image_path);
-	$alt_mobile_header_image_path = str_replace(".jpg","_$header_no.jpg",$alt_mobile_header_image_path);
-	$alt_mobile_header_image_url = str_replace(".png","_$header_no.png",$mobile_header_image_url);
-	$alt_mobile_header_image_url = str_replace(".jpg","_$header_no.jpg",$alt_mobile_header_image_url);
-	$next_alt_desktop_header_image_path = str_replace("_$header_no","_$next_header_no",$alt_desktop_header_image_path);
-	if (is_file($alt_desktop_header_image_path))
-	{
-		// Select alternative desktop header image
-		$desktop_header_image_path = $alt_desktop_header_image_path;
-		$desktop_header_image_url = $alt_desktop_header_image_url;
-	}
-	if (is_file($alt_mobile_header_image_path))
-	{
-		// Select alternative mobile header image
-		$mobile_header_image_path = $alt_mobile_header_image_path;
-		$mobile_header_image_url = $alt_mobile_header_image_url;
-	}
-	if (is_file($next_alt_desktop_header_image_path))
-	{
-		// Next image found - increment header number
-		update_session_var('header_no',(int)get_session_var('header_no')+1);
-	}
-	else
-	{
-		// Next image not found - reset header number to 1
-		update_session_var('header_no',1);
-	}
-
-	// Set mobile header image to desktop header image if separate item not found.
-	if (!isset($mobile_header_image_path))
-	{
-		$mobile_header_image_path = $desktop_header_image_path;
-		$mobile_header_image_url = $desktop_header_image_url;
-	}
 
 	//================================================================================
 

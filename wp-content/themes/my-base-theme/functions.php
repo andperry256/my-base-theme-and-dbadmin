@@ -335,3 +335,71 @@ require get_template_directory() . '/inc/jetpack.php';
  */
 require get_template_directory() . '/shared/functions.php';
 add_action( 'init', 'run_session', 1);
+
+//================================================================================
+
+function set_default_header_image_paths()
+{
+	$image_file_exts = array( 'png', 'jpg' );
+	global $desktop_header_image_path;
+	global $desktop_header_image_url;
+	global $intermediate_header_image_path;
+	global $intermediate_header_image_url;
+	global $mobile_header_image_path;
+	global $mobile_header_image_url;
+	$current_theme_dir = get_stylesheet_directory();
+	$current_theme_url = get_stylesheet_directory_uri();
+
+	$desktop_header_image_path = '';
+	$desktop_header_image_url = '';
+	foreach ($image_file_exts as $ext)
+	{
+		if (is_file("$current_theme_dir/header_image.$ext"))
+		{
+			$desktop_header_image_path = "$current_theme_dir/header_image.$ext";
+			$desktop_header_image_url = "$current_theme_url/header_image.$ext";
+			break;
+		}
+	}
+
+	$intermediate_header_image_path = $desktop_header_image_path;
+	$intermediate_header_image_url = $desktop_header_image_url;
+	foreach ($image_file_exts as $ext)
+	{
+		if (is_file("$current_theme_dir/header_image_intermediate.$ext"))
+		{
+			$intermediate_header_image_path = "$current_theme_dir/header_image_intermediate.$ext";
+			$intermediate_header_image_url = "$current_theme_url/header_image_intermediate.$ext";
+			break;
+		}
+	}
+
+	$mobile_header_image_path = $intermediate_header_image_path;
+	$mobile_header_image_url = $intermediate_header_image_url;
+	foreach ($image_file_exts as $ext)
+	{
+		if (is_file("$current_theme_dir/header_image_mobile.$ext"))
+		{
+			$mobile_header_image_path = "$current_theme_dir/header_image_mobile.$ext";
+			$mobile_header_image_url = "$current_theme_url/header_image_mobile.$ext";
+			break;
+		}
+	}
+}
+
+//================================================================================
+
+function set_header_image_paths($slug,$type)
+{
+	if (function_exists('set_custom_header_image_paths'))
+	{
+		// Call child theme function
+		set_custom_header_image_paths($slug,$type);
+	}
+	else
+	{
+		// No action - the default paths will apply
+	}
+}
+
+//================================================================================

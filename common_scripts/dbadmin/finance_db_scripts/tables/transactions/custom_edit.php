@@ -9,6 +9,7 @@ if (!isset($record_id))
 $primary_keys = decode_record_id($record_id);
 $account = $primary_keys['account'];
 $seq_no = $primary_keys['seq_no'];
+rationalise_transaction($account,$seq_no);
 $query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 if ($row = mysqli_fetch_assoc($query_result))
 {
@@ -42,7 +43,6 @@ if ($row = mysqli_fetch_assoc($query_result))
   else
   {
     // Display summary & splits screen
-    rationalise_transaction($account,$seq_no);
 
     $sched_freq = $row['sched_freq'];
     if ($sched_freq == '#')
@@ -99,6 +99,10 @@ if ($row = mysqli_fetch_assoc($query_result))
     }
 
     // Print main transaction detail
+    if ($row['splits_discrepancy'] != 0)
+    {
+    	print("<p><b>WARNING</b> - There is a split discrepancy of {$row['splits_discrepancy']}</p>\n");
+    }
     print("<table>\n");
 
     // Row 1 - Account Name
@@ -273,11 +277,6 @@ if ($row = mysqli_fetch_assoc($query_result))
       {
         print("<p>NONE</p>\n");
       }
-    }
-    elseif ($split_total != $transaction_total)
-    {
-    	$discrepancy = sprintf("%01.2f", subtract_money($split_total,$transaction_total));
-    	print("<p><b>WARNING</b> - There is a split discrepancy of $discrepancy</p>\n");
     }
   }
 }

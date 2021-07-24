@@ -128,7 +128,7 @@ if (!is_file($site_path_defs_path))
 
 	//================================================================================
 
-	elseif ((is_single()) || (is_category()))
+	elseif (is_single())
 	{
 		if (is_file("$custom_categories_path/select_menu.php"))
 		{
@@ -204,6 +204,36 @@ if (!is_file($site_path_defs_path))
 			}
 		}
 		*/
+	}
+
+	//================================================================================
+
+	elseif (is_category())
+	{
+		$category = get_queried_object();
+		$id = $category->term_id;
+		$hierarchy = get_category_parents($id, false, '/', true);
+		$tok = strtok($hierarchy,'/');
+		while ($tok !== false)
+		{
+			set_header_image_paths($tok,'category');
+			if (is_file("$CustomPagesPath/$tok/footer.php"))
+			{
+				// Select custom footer script
+				$custom_footer_script = "$custom_categories_path/$tok/footer.php";
+			}
+			if (is_file("$custom_categories_path/$tok/select_menu.php"))
+			{
+				// Select menu
+				include("$custom_categories_path/$tok/select_menu.php");
+			}
+			if (is_file("$custom_categories_path/$uri_sub_path/styles.css"))
+			{
+				// Add stylesheet to hierarchy
+				output_stylesheet_link($custom_categories_url,$tok);
+			}
+			$tok = strtok('/');
+		}
 	}
 
 	//================================================================================

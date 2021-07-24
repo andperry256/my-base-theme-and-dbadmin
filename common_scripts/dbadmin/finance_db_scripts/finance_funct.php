@@ -243,7 +243,14 @@ function rationalise_transaction($account,$seq_no)
 				mysqli_query($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
 			}
 		}
-		$splits_discrepancy = subtract_money(add_money($splits_total,$row['debit_amount']),$row['credit_amount']);
+		if ($split_count == 0)
+		{
+			$splits_discrepancy = 0;
+		}
+		else
+		{
+			$splits_discrepancy = subtract_money(add_money($splits_total,$row['debit_amount']),$row['credit_amount']);
+		}
 		mysqli_query($db,"UPDATE transactions SET splits_discrepancy=$splits_discrepancy WHERE account='$account' AND seq_no=$seq_no");
 	}
 }

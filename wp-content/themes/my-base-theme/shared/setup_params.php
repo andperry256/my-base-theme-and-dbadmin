@@ -14,6 +14,7 @@ global $intermediate_header_image_path, $intermediate_header_image_url;
 global $mobile_header_image_path, $mobile_header_image_url;
 global $PrivateScriptsDir, $DBMode, $Location;
 global $custom_footer_script;
+global $wpdb;
 
 $themes_dir = get_theme_root();
 $site_path_defs_path = "$themes_dir/site_path_defs.php";
@@ -54,8 +55,6 @@ if (!is_file($site_path_defs_path))
 	{
 		include("$CustomScriptsPath/functions.php");
 	}
-
-	// Use header image file(s) in top level of the custom scripts directory as the default.
 	set_default_header_image_paths();
 
 	//================================================================================
@@ -177,33 +176,24 @@ if (!is_file($site_path_defs_path))
 					// Add stylesheet to hierarchy
 					output_stylesheet_link($custom_categories_url,$tok);
 				}
+				if ((isset($enable_supercategories)) && ($enable_supercategories))
+				{
+					// Set the supercategory
+					$row = $wpdb->get_row($wpdb->prepare("SELECT term_taxonomy_id FROM wp_term_taxonomy LEFT JOIN wp_terms ON (wp_term_taxonomy.term_id=wp_terms.term_id) WHERE taxonomy='supercategory' AND slug='$supercategory'"));
+					if (!empty($row))
+					{
+						$post_id = get_the_ID();
+						$taxonomy_id = $row->term_taxonomy_id;
+						$row2 = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_term_relationships WHERE object_id='$post_id' AND term_taxonomy_id='$taxonomy_id'"));
+						if (empty($row2))
+						{
+							$wpdb->get_row($wpdb->prepare("INSERT INTO wp_term_relationships VALUES ($post_id, $taxonomy_id, 0)"));
+						}
+					}
+				}
 				$tok = strtok('/');
 			}
 		}
-
-		/*
-		This code is temporarily disabled. The call to db_connect_with_params is
-		currently being called with a database ID of 1, which may not be correct
-		for all sites. The use of supercategories needs to be reviewed anyway.
-
-		if ((is_single()) && (isset($enable_supercategories)) && ($enable_supercategories))
-		{
-			// Automatically assign required supercategory.
-			require("$PrivateScriptsDir/mysql_connect.php");
-			$db = db_connect_with_params(1,$DBMode,$Location);
-			$query_result = mysqli_query($db,"SELECT term_taxonomy_id FROM wp_term_taxonomy LEFT JOIN wp_terms ON (wp_term_taxonomy.term_id=wp_terms.term_id) WHERE taxonomy='supercategory' AND slug='$supercategory'");
-			if ($row = mysqli_fetch_assoc($query_result))
-			{
-				$post_id = get_the_ID();
-				$taxonomy_id = $row['term_taxonomy_id'];
-				$query_result2 = mysqli_query($db,"SELECT * FROM wp_term_relationships WHERE object_id='$post_id' AND term_taxonomy_id='$taxonomy_id'");
-				if (mysqli_num_rows($query_result2) == 0)
-				{
-					mysqli_query($db,"INSERT INTO wp_term_relationships VALUES ($post_id, $taxonomy_id, 0)");
-				}
-			}
-		}
-		*/
 	}
 
 	//================================================================================

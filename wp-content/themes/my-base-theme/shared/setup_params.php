@@ -15,6 +15,7 @@ global $mobile_header_image_path, $mobile_header_image_url;
 global $PrivateScriptsDir, $DBMode, $Location;
 global $custom_footer_script;
 global $wpdb;
+global $favicon_path;
 
 $themes_dir = get_theme_root();
 $site_path_defs_path = "$themes_dir/site_path_defs.php";
@@ -116,6 +117,12 @@ if (!is_file($site_path_defs_path))
 			{
 				// Include any meta tag variables
 				include("$CustomPagesPath/$uri_sub_path/metadata.php");
+			}
+			if (is_file("$CustomPagesPath/$uri_sub_path/favicon.png"))
+			{
+				// Add favicon link
+				$favicon_path = $uri_sub_path;
+				print("<link rel=\"icon\" href=\"$CustomPagesURL/$uri_sub_path/favicon.png?v=$link_version\" type=\"image/x-icon\" />\n");
 			}
 			if (is_file("$CustomPagesPath/$uri_sub_path/init.php"))
 			{

@@ -203,22 +203,14 @@ function display_main_content($mode)
   global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath;
   $db = admin_db_connect();
 
-  if ($mode == 'mobile')
-  {
-    // Mobile mode - generate 'shortcuts' button to open the sidebar
-    $sidebar_url = './?showsidebar';
-    foreach ($_GET as $key => $value)
-    {
-      $par = urlencode($value);
-      $sidebar_url .= "&$key=$par";
-    }
-    print("<p><a href=\"$sidebar_url\"><button>Shortcuts</button></a></p>\n");
-  }
-
   // Process the URL parameters
   if (isset($_GET['-action']))
   {
     $action = $_GET['-action'];
+  }
+  elseif (isset($_POST['-action']))
+  {
+    $action = $_POST['-action'];
   }
   if (isset($_GET['-table']))
   {
@@ -417,65 +409,38 @@ if ((isset($_GET['-table'])) && (is_file("$CustomPagesPath/$RelativePath/tables/
 }
 
 $return_url = cur_url_par();
-if (isset($_COOKIE['viewing_mode']))
-{
-  $viewing_mode = $_COOKIE['viewing_mode'];
-}
-elseif (session_var_is_set('viewing_mode'))
-{
-  $viewing_mode = get_session_var('viewing_mode');
-}
-else
-{
-  $viewing_mode = 'desktop';
-}
+print("<div id=\"dbadmin-main\">\n");
 
-print("<div id=\"desktop-content\">\n");
-if ($viewing_mode  == 'desktop')
+// Mobile sidebar (hidden in desktop mode)
+print("<div id=\"dbadmin-mobile-sidebar\">\n");
+if (isset($_GET['showsidebar']))
 {
-  // Run desktop mode
-  print("<table width=100%><tr><td class=\"dbadmin-sidebar\">\n");
-  display_sidebar_content('desktop');
-  print("</td><td class=\"dbadmin-main\">\n");
-  display_main_content('desktop');
-  print("</td></tr></table>\n");
+  display_sidebar_content('mobile');
 }
 else
 {
-  // Request desktop mode
-  print("<fieldset>\n");
-  print("<form method=\"post\" action=\"$DBAdminURL/load_viewing_mode.php?view=desktop&returnurl=$return_url\">\n");
-  print("<p><input type=\"Submit\" value =\"Load Desktop View\"></p>\n");
-  print("<p><input type=\"checkbox\" name=\"save_setting\"> Remember setting on this computer (uses a cookie)</p>\n");
-  print("</form>\n");
-  print("</fieldset>\n");
+  $sidebar_url = './?showsidebar';
+  foreach ($_GET as $key => $value)
+  {
+    $par = urlencode($value);
+    $sidebar_url .= "&$key=$par";
+  }
+  print("<p><a href=\"$sidebar_url\"><button>Shortcuts</button></a></p>\n");
 }
-print("</div>\n");
+print("</div> <!--#dbadmin-mobile-sidebar-->\n");
 
-print("<div id=\"mobile-content\">\n");
-if ($viewing_mode  == 'mobile')
-{
-  // Run mobile mode
-  if (isset($_GET['showsidebar']))
-  {
-    display_sidebar_content('mobile');
-  }
-  else
-  {
-    display_main_content('mobile');
-  }
-}
-else
-{
-  // Request mobile mode
-  print("<fieldset>\n");
-  print("<form method=\"post\" action=\"$DBAdminURL/load_viewing_mode.php?view=mobile&returnurl=$return_url\">\n");
-  print("<p><input type=\"Submit\" value =\"Load Mobile View\"></p>\n");
-  print("<p><input type=\"checkbox\" name=\"save_setting\"> Remember setting on this device (uses a cookie)</p>\n");
-  print("</form>\n");
-  print("</fieldset>\n");
-}
-print("</div>\n");
+// Desktop sidebar (hidden in mobile mode)
+print("<div id=\"dbadmin-desktop-sidebar\">\n");
+display_sidebar_content('desktop');
+print("</div> <!--#dbadmin-desktop-sidebar-->\n");
+
+// Main content
+print("<div id=\"dbadmin-content\">\n");
+display_main_content('desktop');
+print("</div> <!--#dbadmin-content-->\n");
+
+print("</div> <!--#dbadmin-main-->\n");
+
 
 // Output common links at foot of page
 print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");

@@ -15,6 +15,7 @@ global $mobile_header_image_path, $mobile_header_image_url;
 global $PrivateScriptsDir, $DBMode, $Location;
 global $custom_footer_script;
 global $wpdb;
+global $favicon_loaded;
 global $favicon_path;
 
 $themes_dir = get_theme_root();
@@ -121,6 +122,7 @@ if (!is_file($site_path_defs_path))
 			if (is_file("$CustomPagesPath/$uri_sub_path/favicon.png"))
 			{
 				// Add favicon link
+				$favicon_loaded = true;
 				$favicon_path = $uri_sub_path;
 				print("<link rel=\"icon\" href=\"$CustomPagesURL/$uri_sub_path/favicon.png?v=$link_version\" type=\"image/x-icon\" />\n");
 			}

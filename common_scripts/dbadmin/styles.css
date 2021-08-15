@@ -59,47 +59,39 @@ td {
 #dbadmin-main {
 	display: grid;
 }
-#dbadmin-desktop-sidebar {
-  padding: 10px;
-  border: solid 1px #ccc;
-	vertical-align: top;
-}
-#dbadmin-mobile-sidebar {
-	padding: 10px;
-}
-#dbadmin-content {
-	padding: 0.4em;
-	padding-top: 0;
-	vertical-align: top;
-}
 @media screen and (max-width: 60.0em) {
+	#dbadmin-main {
+		grid-template-areas: "sidebar"
+		                     "content";
+	}
 	#dbadmin-mobile-sidebar {
-		grid-row: 1;
-		grid-column: 1;
+		grid-area: sidebar;
+		padding: 10px;
 	}
 	#dbadmin-desktop-sidebar {
 		display: none;
-	}
-	#dbadmin-content {
-		grid-row: 2;
-		grid-column: 1;
 	}
 }
 @media screen and (min-width: 60.01em) {
 	#dbadmin-main {
-		grid-template-columns: 150px auto;
+		grid-template-areas: "sidebar content";
+		grid-template-columns: 150px 1fr;
 	}
 	#dbadmin-mobile-sidebar {
 		display: none;
 	}
 	#dbadmin-desktop-sidebar {
-		grid-row: 1;
-		grid-column: 1;
+		grid-area: sidebar;
+		padding: 10px;
+	  border: solid 1px #ccc;
+		vertical-align: top;
 	}
-	#dbadmin-content {
-		grid-row: 1;
-		grid-column: 2;
-	}
+}
+#dbadmin-content {
+	grid-area: content;
+	padding: 0.4em;
+	padding-top: 0;
+	vertical-align: top;
 }
 
 /* ============ Styles for sidebar ============ */

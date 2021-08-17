@@ -164,7 +164,7 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
 
 		if ($current_page != 1)
 		{
-			$result .= "<a class=\"$other_page_link_style\" href=\"".$url_function($current_page-1)."\">Prev</a>";
+			$result .= " <a class=\"$other_page_link_style\" href=\"".$url_function($current_page-1)."\">Prev</a>";
 		}
 		if ($current_page == 1)
 		{
@@ -174,12 +174,12 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
 		{
 			$class = $other_page_link_style;
 		}
-		$result .= "<a class=\"$class\" href=\"".$url_function(1)."\">1</a>";
+		$result .= " <a class=\"$class\" href=\"".$url_function(1)."\">1</a>";
 		if ($current_page != 1)
 		{
 			if ($first_linked_page > 2)
 			{
-				$result .= "&hellip;";
+				$result .= " &hellip;";
 			}
 		}
 		for ($page = $first_linked_page; $page <= $last_linked_page; $page++)
@@ -192,11 +192,11 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
 			{
 				$class = $other_page_link_style;
 			}
-			$result .= "<a class=\"$class\" href=\"".$url_function($page)."\">$page</a>";
+			$result .= " <a class=\"$class\" href=\"".$url_function($page)."\">$page</a>";
 		}
 		if ($last_linked_page < $page_count-1)
 		{
-			$result .= "&hellip;";
+			$result .= " &hellip;";
 		}
 		if ($current_page == $page_count)
 		{
@@ -206,10 +206,10 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
 		{
 			$class = $other_page_link_style;
 		}
-		$result .= "<a  class=\"$class\" href=\"".$url_function($page_count)."\">$page_count</a>";
+		$result .= " <a class=\"$class\" href=\"".$url_function($page_count)."\">$page_count</a>";
 		if ($current_page != $page_count)
 		{
-			$result .= "<a  class=\"$other_page_link_style\" href=\"".$url_function($current_page+1)."\">Next</a>";
+			$result .= " <a class=\"$other_page_link_style\" href=\"".$url_function($current_page+1)."\">Next</a>";
 		}
 	}
 	return $result;

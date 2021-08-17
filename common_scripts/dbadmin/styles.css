@@ -93,6 +93,26 @@ td {
 	padding-top: 0;
 	vertical-align: top;
 }
+@media screen and (max-width: 60.0em) {
+	#select-mobile {
+		display: block;
+	}
+	#select-desktop {
+		display: none;
+	}
+}
+@media screen and (min-width: 60.01em) {
+	#select-mobile {
+		display: none;
+	}
+	#select-desktop {
+		display: block;
+	}
+}
+#select-desktop, #select-mobile {
+	float: left;
+	text-align: center;
+}
 
 /* ============ Styles for sidebar ============ */
 

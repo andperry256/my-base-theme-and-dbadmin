@@ -5,11 +5,15 @@ a.current-page-link, a.other-page-link {
 	text-decoration: none;
 	line-height: 3.0em;
 }
-a.current-page-link {
+a.current-page-link:link,
+a.current-page-link:hover,
+a.current-page-link:visited {
 	color: #fff;
 	background-color: steelblue;
 }
-a.other-page-link {
+a.other-page-link:link,
+a.other-page-link:hover,
+a.other-page-link:visited {
 	color: steelblue;
 	background-color: #fff;
 }

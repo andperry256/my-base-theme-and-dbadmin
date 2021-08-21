@@ -17,10 +17,10 @@ if ($row = mysqli_fetch_assoc($query_result))
   {
     // Display record edit screen
     $params = array();
-    $params['additional_links'] = "<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=$table&-recordid=$record_id&summary\">Summary&nbsp;&amp;&nbsp;Splits</a>";
+    $params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=$table&-recordid=$record_id&summary\">Summary&nbsp;&amp;&nbsp;Splits</a></div>\n";
     if (get_table_access_level('transactions') != 'read-only')
     {
-      $params['additional_links'] .= "<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a>";
+      $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
     }
     if (!empty($row['target_account']))
     {
@@ -28,7 +28,7 @@ if ($row = mysqli_fetch_assoc($query_result))
       $primary_keys2['account'] = $row['target_account'];
       $primary_keys2['seq_no'] = $row['target_seq_no'];
       $record_id2 = encode_record_id($primary_keys2);
-      $params['additional_links'] .= "<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['target_account']}&-recordid=$record_id2\">Target&nbsp;Transaction</a>";
+      $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['target_account']}&-recordid=$record_id2\">Target&nbsp;Transaction</a></div>\n";
     }
     if (!empty($row['source_account']))
     {
@@ -36,7 +36,7 @@ if ($row = mysqli_fetch_assoc($query_result))
       $primary_keys2['account'] = $row['source_account'];
       $primary_keys2['seq_no'] = $row['source_seq_no'];
       $record_id2 = encode_record_id($primary_keys2);
-      $params['additional_links'] .= "<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['source_account']}&-recordid=$record_id2\">Source&nbsp;Transaction</a>";
+      $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['source_account']}&-recordid=$record_id2\">Source&nbsp;Transaction</a></div>\n";
     }
     handle_record('edit',$params);
   }
@@ -48,17 +48,16 @@ if ($row = mysqli_fetch_assoc($query_result))
     if ($sched_freq == '#')
     {
     	print("<h1>Transaction Record (Account)</h1>\n");
-      print("<p>");
-      print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=list&-table=_view_account_$account\">Show All</a>");
-      print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=_view_account_$account\">New Record</a>");
-      print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a>");
+      print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=list&-table=_view_account_$account\">Show All</a></div>");
+      print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=_view_account_$account\">New Record</a></div>");
+      print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>");
       if (!empty($row['target_account']))
       {
         $primary_keys2 = array();
         $primary_keys2['account'] = $row['target_account'];
         $primary_keys2['seq_no'] = $row['target_seq_no'];
         $record_id2 = encode_record_id($primary_keys2);
-        print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['target_account']}&-recordid=$record_id2&summary\">Target Transaction</a>");
+        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['target_account']}&-recordid=$record_id2&summary\">Target Transaction</a></div>");
       }
       if (!empty($row['source_account']))
       {
@@ -66,9 +65,9 @@ if ($row = mysqli_fetch_assoc($query_result))
         $primary_keys2['account'] = $row['source_account'];
         $primary_keys2['seq_no'] = $row['source_seq_no'];
         $record_id2 = encode_record_id($primary_keys2);
-        print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['source_account']}&-recordid=$record_id2&summary\">Source Transaction</a>");
+        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['source_account']}&-recordid=$record_id2&summary\">Source Transaction</a></div>");
       }
-      print("</p>\n");
+      print("<div style=\"clear:both\"></div>\n");
     	$view = "_view_account_$account";
     }
     else

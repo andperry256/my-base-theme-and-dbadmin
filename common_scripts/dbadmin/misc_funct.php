@@ -88,7 +88,7 @@ function next_seq_number($table,$sort_1_value)
 
 	// Search for sequencing information in table dba_table_info, starting with
 	// the table itself and working back to the base table.
-	for ($i=5; $i>0; $i--)
+	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
 		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
 		if ($row = mysqli_fetch_assoc($query_result))
@@ -156,6 +156,24 @@ Function time_compare
 function time_compare($time1,$time2)
 {
 	return (strtotime($time1)) - (strtotime($time2));
+}
+
+//==============================================================================
+/*
+Function get_viewing_mode
+*/
+//==============================================================================
+
+function get_viewing_mode()
+{
+	if (isset($_COOKIE['viewing_mode']))
+	{
+		return $_COOKIE['viewing_mode'];
+	}
+	else
+	{
+		return 'desktop';
+	}
 }
 
 //==============================================================================

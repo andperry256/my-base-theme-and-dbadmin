@@ -199,7 +199,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE `dba_table_fields` SET `display_group`='-default-' WHERE display_group='0' OR display_group='' OR display_group IS NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `display_order` INT( 11 ) NOT NULL DEFAULT '0' AFTER `display_group`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `display_order` `display_order` INT( 11 ) NOT NULL DEFAULT '0'");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `relative_path` VARCHAR( 63 ) NULL AFTER `display_order`");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `grid_coords` VARCHAR( 15 ) NOT NULL DEFAULT 'auto' AFTER `display_order`");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `grid_coords` `grid_coords` VARCHAR( 15 ) NOT NULL DEFAULT 'auto'");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `relative_path` VARCHAR( 63 ) NULL AFTER `grid_position`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `relative_path` `relative_path` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `allowed_filetypes` VARCHAR( 63 ) NULL AFTER `relative_path`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `allowed_filetypes` `allowed_filetypes` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
@@ -515,6 +517,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
+  mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Grid Co-ordinates' WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
+  $query = "UPDATE dba_table_fields SET description='";
+  $query .= "In format <em>row/col/span</em> where the column and span are optional (both default to 1).<br />";
+  $query .= "Set all field records for a given table to <em>auto</em> to format as one field per row.";
+  $query .= "' WHERE table_name='dba_table_fields' AND field_name='grid_coords'";
+  mysqli_query($db,$query);
 
   // Set other misceallaneous fields for built-in-tables
   mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_relationships' AND field_name='table_name'");
@@ -522,7 +530,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   // Add relationships for built-in tables
   mysqli_query($db,"DELETE FROM dba_relationships WHERE table_name LIKE 'dba_%'");
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables\',"SELECT * FROM dba_table_info WHERE parent_table=\'$table_name\'")');
-  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables - Delete\',"# Do not include (too complex)")');
+  mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables - Delete\',"#'.' Do not include (too complex)")');  // Split string due to problem in Atom code highlighting.
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Child Tables - Update\',"UPDATE dba_table_info SET parent_table=\'$table_name WHERE parent_table=\'$$table_name\'")');
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Fields\',"SELECT * FROM dba_table_fields WHERE table_name=\'$table_name\'")');
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Fields - Delete\',"DELETE FROM dba_table_fields WHERE table_name=\'$table_name\'")');

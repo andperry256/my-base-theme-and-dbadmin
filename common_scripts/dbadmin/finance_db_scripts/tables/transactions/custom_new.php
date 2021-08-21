@@ -17,7 +17,7 @@
     $params['additional_links'] = '';
     if (get_table_access_level('transactions') != 'read-only')
     {
-      $params['additional_links'] .= "<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a>";
+      $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
     }
   }
   handle_record('new',$params)

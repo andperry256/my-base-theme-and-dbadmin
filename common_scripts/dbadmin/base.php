@@ -1,3 +1,12 @@
+<?php
+  require("classes.php");
+  require("functions.php");
+  require("datepicker_include.php");
+  require("widget_types.php");
+  require("$RootDir/maintenance/db_master_location.php");
+  $return_url = cur_url_par();
+  $dummy = '{';  // To remove false positive from syntax checker
+?>
 <script type="text/javascript" language="javascript">
 //==============================================================================
 
@@ -20,6 +29,16 @@ function submitForm(form)
   element = document.getElementById("submitted");
   element.value = '#';
   form.submit();
+}
+
+// Functions to select desktop/mobile mode
+function selectDesktopMode()
+{
+  window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
+}
+function selectMobileMode()
+{
+  window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
 }
 
 // Function to apply a search to the table
@@ -97,15 +116,7 @@ function runCopy(form)
 <?php
 //==============================================================================
 
-require("classes.php");
-require("functions.php");
-require("datepicker_include.php");
-require("widget_types.php");
-require("$RootDir/maintenance/db_master_location.php");
-
-//==============================================================================
-
-function display_sidebar_content($mode)
+function display_sidebar_content()
 {
   global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath;
   $db = admin_db_connect();
@@ -169,31 +180,34 @@ function display_sidebar_content($mode)
       }
     }
     print("</table>");
-    if ($mode == 'mobile')
+  }
+}
+
+//==============================================================================
+
+function display_mobile_close_sidebar_button()
+{
+  global $BaseURL,$RelativePath;
+  $return_url = "$BaseURL/$RelativePath";
+  $par_processed = false;
+  foreach ($_GET as $key => $value)
+  {
+    if ($key != 'showsidebar')
     {
-      // Mobile mode - Generate 'close' button to return to main page
-      $return_url = "$BaseURL/$RelativePath";
-      $par_processed = false;
-      foreach ($_GET as $key => $value)
+      if (!$par_processed)
       {
-        if ($key != 'showsidebar')
-        {
-          if (!$par_processed)
-          {
-            $return_url .= '?';
-            $par_processed = true;
-          }
-          else
-          {
-            $return_url .= '&';
-          }
-          $par = urlencode($value);
-          $return_url .= "$key=$par";
-        }
+        $return_url .= '?';
+        $par_processed = true;
       }
-      print("<p><a href=\"$return_url\"><button>Close</button></a></p>\n");
+      else
+      {
+        $return_url .= '&';
+      }
+      $par = urlencode($value);
+      $return_url .= "$key=$par";
     }
   }
+  print("<p><a href=\"$return_url\"><button>Close</button></a></p>\n");
 }
 
 //==============================================================================
@@ -408,14 +422,14 @@ if ((isset($_GET['-table'])) && (is_file("$CustomPagesPath/$RelativePath/tables/
   require("$CustomPagesPath/$RelativePath/tables/{$_GET['-table']}/{$_GET['-table']}.php");
 }
 
-$return_url = cur_url_par();
 print("<div id=\"dbadmin-main\">\n");
 
 // Mobile sidebar (hidden in desktop mode)
 print("<div id=\"dbadmin-mobile-sidebar\">\n");
 if (isset($_GET['showsidebar']))
 {
-  display_sidebar_content('mobile');
+  display_sidebar_content();
+  display_mobile_close_sidebar_button();
 }
 else
 {
@@ -431,16 +445,35 @@ print("</div> <!--#dbadmin-mobile-sidebar-->\n");
 
 // Desktop sidebar (hidden in mobile mode)
 print("<div id=\"dbadmin-desktop-sidebar\">\n");
-display_sidebar_content('desktop');
+display_sidebar_content();
 print("</div> <!--#dbadmin-desktop-sidebar-->\n");
 
 // Main content
 print("<div id=\"dbadmin-content\">\n");
-display_main_content('desktop');
+
+// Display button to select desktop or mobile mode
+$mode = get_viewing_mode();
+if ($mode == 'mobile')
+{
+  print("<div id=select-desktop>\n");
+  print("<p><button onclick=\"selectDesktopMode()\">Select Desktop Mode</button><br />");
+  print("<span style=\"font-size:0.8em\">(uses a cookie)</span></p>\n");
+  print("</div> <!--#select-desktop -->\n");
+  print("<div style=\"clear:both\"></div>\n");
+}
+else
+{
+  print("<div id=select-mobile>\n");
+  print("<p><button onclick=\"selectMobileMode()\">Select Mobile Mode</button><br />");
+  print("<span style=\"font-size:0.8em\">(uses a cookie)</span><p>\n");
+  print("</div> <!--#select-mobile -->\n");
+  print("<div style=\"clear:both\"></div>\n");
+}
+display_main_content($mode);
+
 print("</div> <!--#dbadmin-content-->\n");
 
 print("</div> <!--#dbadmin-main-->\n");
-
 
 // Output common links at foot of page
 print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");

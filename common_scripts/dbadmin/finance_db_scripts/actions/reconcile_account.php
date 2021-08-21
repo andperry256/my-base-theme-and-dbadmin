@@ -19,7 +19,7 @@ else
 	$account_name = '';  // This should not occur
 }
 print("<h1>Reconcile Account ($account_name)</h1>\n");
-print("<p><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=_view_account_$account\">All&nbsp;Transactions</a></p>");
+print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
 
 if (isset($_POST['submitted']))
 {

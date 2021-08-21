@@ -54,7 +54,28 @@ td {
 	}
 }
 
-/* ============ Styles for main layout table ============ */
+@media screen and (max-width: 60.0em) {
+	#select-mobile {
+		display: block;
+	}
+	#select-desktop {
+		display: none;
+	}
+}
+@media screen and (min-width: 60.01em) {
+	#select-mobile {
+		display: none;
+	}
+	#select-desktop {
+		display: block;
+	}
+}
+#select-desktop, #select-mobile {
+	float: left;
+	text-align: center;
+}
+
+/* ============ Styles for main layout ============ */
 
 #dbadmin-main {
 	display: grid;
@@ -93,26 +114,6 @@ td {
 	padding-top: 0;
 	vertical-align: top;
 }
-@media screen and (max-width: 60.0em) {
-	#select-mobile {
-		display: block;
-	}
-	#select-desktop {
-		display: none;
-	}
-}
-@media screen and (min-width: 60.01em) {
-	#select-mobile {
-		display: none;
-	}
-	#select-desktop {
-		display: block;
-	}
-}
-#select-desktop, #select-mobile {
-	float: left;
-	text-align: center;
-}
 
 /* ============ Styles for sidebar ============ */
 
@@ -135,13 +136,11 @@ p.sidebar-item {
 
 /* ============ Styles for table listing screen ============ */
 
-table.table-top-navigation {
-	table-layout: auto;
-	width: auto;
-}
-table.table-top-navigation td {
-	padding: 0.15em 0.5em;
-	border: solid 1px #ccc;
+.top-navigation-item {
+	display: inline-block;
+	float: left;
+	height: 2.0em;
+	margin: 0.1em;
 }
 
 table.table-listing {
@@ -152,6 +151,8 @@ td.table-listing-header {
 	font-size: 0.9em;
 	padding: 0.15em;
 	padding: 5px;
+}
+.table-listing-header {
 	background-color: #ccc;
 	border: solid 1px #999;
 }
@@ -170,6 +171,17 @@ td.table-listing-odd-row, td.table-listing-even-row {
 table.table-listing a {
 	text-decoration: none;
 }
+div.table-listing {
+	display: grid;
+	justify-content: left;
+	width: 100%;
+	grid-gap: 0.1em;
+	margin-bottom: 0.1em;
+}
+div.table-listing-cell {
+	padding: 0.1em;
+	border: solid 1px #ccc;
+}
 
 /* ============ Styles for record edit screen ============ */
 
@@ -177,18 +189,15 @@ table.table-record {
 	table-layout: auto;
 	width: auto;
 }
-
 table.table-record a {
 	text-decoration: none;
 }
-
-table.table-record a.required {
+table.table-record a.required,
+div.edit-field-cell a.required {
 	color: #c00;
 }
-
 table.table-record a.not-required {
 }
-
 table.table-record  td {
 	border: solid 1px #ccc;
 	padding: 0.15em;
@@ -202,6 +211,24 @@ table.table-record  td {
 .widget-image {
 	max-width: 200px;
 	max-height: 150px;
+}
+
+div.edit-field {
+	display: grid;
+	width: 100%;
+	grid-gap: 0.1em;
+	margin-bottom: 0.1em;
+}
+div.edit-field-cell {
+	padding: 0.1em;
+	border: solid 1px #ccc;
+}
+div.edit-field-name {
+	grid-row: 1;
+	background-color: #eee;
+}
+div.edit-field-value {
+	grid-row: 2;
 }
 
 /* ============ Styles for table update screen ============ */
@@ -221,6 +248,30 @@ td.update-selection {
 	font-size: 0.9em;
 	padding: 0.15em;
 	border: solid 1px #ccc;
+}
+div.update-field {
+	display: grid;
+	width: 100%;
+	grid-template-columns: 1.5em 1fr;
+	grid-gap: 0.1em;
+	margin-bottom: 0.1em;
+}
+div.update-field-cell {
+	padding: 0.1em;
+	border: solid 1px #ccc;
+}
+div.update-field-select {
+	grid-row: 1 / 3;
+	grid-column: 1;
+}
+div.update-field-name {
+	grid-row: 1;
+	grid-column: 2;
+	background-color: #eee;
+}
+div.update-field-value {
+	grid-row: 2;
+	grid-column: 2;
 }
 
 /* ============ Miscellaneous styles ============ */
@@ -261,6 +312,6 @@ a.admin-link {
 	font-size: 0.9em;
 	border: solid 1px #999;
 	padding: 0.3em;
-	margin-right: 0.3em;
 	text-decoration: none;
+	line-height: 2.2em;
 }

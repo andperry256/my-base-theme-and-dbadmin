@@ -64,13 +64,14 @@ function generate_widget($table,$field_name,$field_value)
 {
 	global $BaseDir, $BaseURL, $DBAdminURL, $NewDateStartYear;
 	$db = admin_db_connect();
+	$mode = get_viewing_mode();
 	/*
 	Although in the vast majority of cases, the widget information will come from
 	the base table for the given table, we nevertheless need to work backwards
 	from the table itself in case there are any overriding definitions.
 	*/
 	$base_table = $table;
-	for ($i=5; $i>0; $i--)
+	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
 		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'");
 		if ($row = mysqli_fetch_assoc($query_result))
@@ -110,7 +111,16 @@ function generate_widget($table,$field_name,$field_value)
 				break;
 
 			case 'input-text':
-				print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\" size=\"64\"");
+				print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\" size=\"");
+				if ($mode == 'desktop')
+				{
+					print("64");
+				}
+				else
+				{
+					print("30");
+				}
+				print("\"");
 				if ((!empty($row['vocab_table'])) && (!empty($row['vocab_field'])))
 				{
 					print("list=\"list_$field_name\">");
@@ -811,6 +821,7 @@ function handle_record($action,$params)
 {
 	global $BaseURL, $BaseDir, $DBAdminURL, $RelativePath, $Location, $presets;
 	$db = admin_db_connect();
+	$mode = get_viewing_mode();
 
 	// Interpret the URL parameters
 	if (isset($_GET['-table']))
@@ -882,19 +893,18 @@ function handle_record($action,$params)
 	}
 
 	// Output top navigation
-	print("<p>");
 	if ($access_level == 'full')
 	{
-		print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a>");
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></div>");
 	}
-	print("<a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table\">Show&nbsp;All</a>");
+	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table\">Show&nbsp;All</a></div>");
 	if (isset($_GET['-returnurl']))
 	{
-		print("<a class=\"admin-link\" href=\"{$_GET['-returnurl']}\">Go&nbsp;Back</a>");
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"{$_GET['-returnurl']}\">Go&nbsp;Back</a></div>");
 	}
 	elseif (session_var_is_set('get_vars','-returnurl'))
 	{
-		print("<a class=\"admin-link\" href=\"".get_session_var('get_vars','-returnurl')."\">Go&nbsp;Back</a>");
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".get_session_var('get_vars','-returnurl')."\">Go&nbsp;Back</a></div>");
 	}
 	else
 	{
@@ -904,7 +914,7 @@ function handle_record($action,$params)
 	{
 		print($params['additional_links']);
 	}
-	print("</p>\n");
+	print("<div style=\"clear:both\">&nbsp;</div>\n");
 
 	$param_list = "-action=$action&-table=$table&-recordid=";
 	$param_list .= urlencode($record_id);
@@ -945,14 +955,20 @@ function handle_record($action,$params)
 				{
 					if (!empty($last_display_group))
 					{
-						print("</table>\n");
+						if ($mode == 'desktop')
+						{
+							print("</table>\n");
+						}
 						if ($display_group != '-default-')
 						{
 							print("<strong>$display_group</strong>\n");
 						}
 					}
 					$last_display_group = $display_group;
-					print("<table class=\"table-record\">\n");
+					if ($mode == 'desktop')
+					{
+						print("<table class=\"table-record\">\n");
+					}
 				}
 
 				$label = field_label($table,$field_name);
@@ -967,7 +983,7 @@ function handle_record($action,$params)
 				{
 					$temp_pk = array();
 					$temp_table = $table;
-					for ($i=5; $i>0; $i--)
+					for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 					{
 						$query_result4 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$temp_table'");
 						if ($row4 = mysqli_fetch_assoc($query_result4))
@@ -1067,34 +1083,72 @@ function handle_record($action,$params)
 				case 'update':
 					if ($access_level != 'read-only')
 					{
-						print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
-						print("<td>");
+						if ($mode == 'desktop')
+						{
+							print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
+							print("<td>");
+						}
+						else
+						{
+							print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\"><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></div>\n");
+							print("<div class=\"edit-field-cell edit-field-value\">");
+						}
 						generate_widget($table,$field_name,$value);
 						if (!empty($description))
 						{
 							print("<p class=\"field-description\">$description</p>");
 						}
-						print("</td></tr>\n");
+						if ($mode == 'desktop')
+						{
+							print("</td></tr>\n");
+						}
+						else
+						{
+							print("</div></div>\n");
+						}
 						break;
 					}
 					// Drop down to next case if access level is read-only.
 
 				case 'view':
-					print("<tr><td>$label</td>\n");
-					print("<td>{$row[$field_name]}</td></tr>\n");
+					if ($mode == 'desktop')
+					{
+						print("<tr><td>$label</td>\n");
+						print("<td>{$row[$field_name]}</td></tr>\n");
+					}
+					else
+					{
+						print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\">$label</div>\n");
+						print("<div class=\"edit-field-cell edit-field-value\">{$row[$field_name]}</div></div>\n");
+					}
 					break;
 
 				case 'new':
 					if ($access_level == 'full')
 					{
-						print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
-						print("<td>");
+						if ($mode == 'desktop')
+						{
+							print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
+							print("<td>");
+						}
+						else
+						{
+							print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\"><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></div>\n");
+							print("<div class=\"edit-field-cell edit-field-value\">");
+						}
 						generate_widget($table,$field_name,$value);
 						if (!empty($description))
 						{
 							print("<p class=\"field-description\">$description</p>");
 						}
-						print("</td></tr>\n");
+						if ($mode == 'desktop')
+						{
+							print("</td></tr>\n");
+						}
+						else
+						{
+							print("</div></div>\n");
+						}
 					}
 					else
 					{
@@ -1103,7 +1157,10 @@ function handle_record($action,$params)
 					break;
 			}
 		}
-		print("</table>\n");
+		if ($mode == 'desktop')
+		{
+			print("</table>\n");
+		}
 		if ($access_level != 'read-only')
 		{
 			if ($_GET['-action'] == 'edit')

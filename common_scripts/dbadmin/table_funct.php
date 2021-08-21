@@ -19,7 +19,7 @@ function get_base_table($table,$db=false)
 		controlled by a counter to prevent infinite loop execution in the case of
 		data error.
 	*/
-	for ($i=5; $i>0; $i--)
+	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
 		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
 		if ($row = mysqli_fetch_assoc($query_result))
@@ -75,6 +75,111 @@ function page_link_url($page_no,$relationships='')
 
 //==============================================================================
 /*
+Function generate_grid_styles()
+*/
+//==============================================================================
+
+function generate_grid_styles($table)
+{
+	$db = admin_db_connect();
+	$grid_coords = array();
+	$column_count = 0;
+	$auto_count = 0;
+	$result = '';
+
+	// Loop through the fields for the given table
+	$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
+	while ($row = mysqli_fetch_assoc($query_result))
+	{
+		$field_name = $row['Field'];
+		$base_table = $table;
+
+		// Find the table or view in the hierarchy for which the relevant field
+		// record is specified.
+		for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
+		{
+			$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'");
+			if ($row = mysqli_fetch_assoc($query_result))
+			{
+				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+				if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table'])))
+				{
+					break;
+				}
+				else
+				{
+					$base_table = $row['parent_table'];
+				}
+			}
+		}
+
+		// Extract and save the grid co-ordinates for the given field.
+		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name' AND list_mobile=1");
+		if ($row2 = mysqli_fetch_assoc($query_result2))
+		{
+			$grid_coords[$field_name] = $row2['grid_coords'];
+			$column_count++;
+			if ($grid_coords[$field_name] == 'auto')
+			{
+				$auto_count++;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+	$base_table = get_base_table($table);
+
+	if ($auto_count == $column_count)
+	{
+		/*
+			Co-ordinates all marked as 'auto'. Create styles to place the record
+			fields one per row in the grid. The cell containing the select box goes
+			into column 1 spanning all the rows. The cell containing relationship
+			links goes in a row at the bottomn spanning both columns.
+		*/
+		$result .= "<style>\n";
+		$result .= "div.table-listing {\n";
+		$result .= "  grid-template-columns: 1.5em 1fr\n";
+		$result .= "}\n";
+		$row_no = 1;
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND list_mobile=1 ORDER BY display_order ASC");
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			$result .= ".field-{$row['field_name']} {\n";
+			$result .= "  grid-row: $row_no;\n";
+			$result .= "  grid-column: 2;\n";
+			$result .= "}\n";
+			$row_no++;
+		}
+		$result .= ".record-select {\n";
+		$result .= "  grid-row: 1 / $row_no;\n";
+		$result .= "  grid-column: 1;\n";
+		$result .= "}\n";
+		$result .= ".relationships {\n";
+		$result .= "  grid-row: $row_no;\n";
+		$result .= "  grid-column: 1 / 3;\n";
+		$result .= "}\n";
+		$result .= "</style>\n";
+		return $result;
+	}
+	elseif ($auto_count == 0)
+	{
+		/*
+		Custom co-ordinates in use - functionality to be added.
+		*/
+		return false;
+	}
+	else
+	{
+		// Mixture of custom and auto co-ordinates (invalid)
+		return false;
+	}
+}
+
+//==============================================================================
+/*
 Function display_table
 */
 //==============================================================================
@@ -87,6 +192,7 @@ function display_table($params)
 	global $DBAdminDir;
 	global $display_table;
 	$db = admin_db_connect();
+	$mode = get_viewing_mode();
 	print("<style>\n".file_get_contents("$DBAdminDir/page_link_styles.css")."</style>\n");
 
 	//============================================================================
@@ -332,6 +438,19 @@ function display_table($params)
 	// Part 3 - Generation of Page
 	//============================================================================
 
+	if ($mode == 'mobile')
+	{
+		$result = generate_grid_styles($table);
+		if ($result == false)
+		{
+			print("<p class=\"highlight-error\">ERROR - Cannot resolve the grid co-ordinates. Please check the table field definitions for possible errors.</p>\n");
+			$display_table = false;
+		}
+		else
+		{
+			print($result);
+		}
+	}
 	if (!$display_table)
 	{
 		print("<div style=\"display:none\">\n");
@@ -380,33 +499,29 @@ function display_table($params)
 	if (mysqli_num_rows($query_result) > 0)
 	{
 		// One or more select relationships are defined for the given table
-		if (!empty($page_links))
-		{
-			print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
-		}
 		if (get_session_var('show_relationships'))
 		{
-			print("<a class=\"admin-link\" href=\"".page_link_url($current_page,'hide')."\">Hide Relationships</a>");
+			print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".page_link_url($current_page,'hide')."\">Hide Relationships</a></div>\n");
 		}
 		else
 		{
-			print("<a class=\"admin-link\" href=\"".page_link_url($current_page,'show')."\">Show Relationships</a>");
+			print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".page_link_url($current_page,'show')."\">Show Relationships</a></div>\n");
 		}
 	}
 	print("</p>\n");
-	print("<table class=\"table-top-navigation\"><tr>\n");
 	if ($access_level == 'full')
 	{
-		print("<td><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></td>");
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></div>\n");
 	}
-	print("<td><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-showall\">Show&nbsp;All</a></td>");
+	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-showall\">Show&nbsp;All</a></div>\n");
 	if (isset($params['additional_links']))
 	{
 		print($params['additional_links']);
 	}
-  print("<td><input type=\"text\" size=\"24\" name=\"search_string\"/>");
-	print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></td>");
-	print("</tr></table>\n");
+  print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
+	print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></div>\n");
+	print("<div style=\"clear:both\">&nbsp;</div>\n");
+	// End of top navigation
 
 	// Determine fields to be processed.
 	$fields = array();
@@ -414,14 +529,6 @@ function display_table($params)
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
-		if (isset($params['mode']))
-		{
-			$mode = $params['mode'];
-		}
-		else
-		{
-			$mode = 'desktop';
-		}
 
 		/*
 			Determine whether the field is to be displayed in the table listing.
@@ -429,7 +536,7 @@ function display_table($params)
 			base table.
 		*/
 		$tab = $table;
-		for ($i=5; $i>0; $i--)
+		for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 		{
 			$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$tab'");
 			if ($row2 = mysqli_fetch_assoc($query_result2))
@@ -471,9 +578,17 @@ function display_table($params)
 	}
 
 	// Output table header
-	print("<table class=\"table-listing\">\n");
-	print("<tr>\n");
-	print("<td class=\"table-listing-header\"><input type=\"checkbox\" name=\"select_all\"  onclick=\"checkAll(this)\"></td>");
+	if ($mode == 'desktop')
+	{
+		print("<table class=\"table-listing\">\n");
+		print("<tr>\n");
+		print("<td class=\"table-listing-header\"><input type=\"checkbox\" name=\"select_all\" onclick=\"checkAll(this)\"></td>");
+	}
+	else
+	{
+		print("<div class=\"table-listing\">\n");
+		print("<div class=\"table-listing-cell record-select table-listing-header\"><input type=\"checkbox\" name=\"select_$record_offset\" onclick=\"checkAll(this)\"></div> <!-- .table-listing-cell -->");
+	}
 	foreach ($fields as $f => $ord)
 	{
 		// Output the field name with a sort link
@@ -494,10 +609,25 @@ function display_table($params)
 			// Applying sort for first time to new field.
 			$new_sort_order = 'asc';
 		}
-		print("<td class=\"table-listing-header\"><a href=\"./?-table=$table&-reorder&-sortfield=$f&-sortorder=$new_sort_order\">");
-		print(field_label($table,$f)."</a></td>");
+		if ($mode == 'desktop')
+		{
+			print("<td class=\"table-listing-header\"><a href=\"./?-table=$table&-reorder&-sortfield=$f&-sortorder=$new_sort_order\">");
+			print(field_label($table,$f)."</a></td>");
+		}
+		else
+		{
+			print("<div class=\"table-listing-cell field-$f table-listing-header\"><a href=\"./?-table=$table&-reorder&-sortfield=$f&-sortorder=$new_sort_order\">");
+			print(field_label($table,$f)."</a></div <!-- .table-listing-cell -->");
+		}
 	}
-	print("\n</tr>\n");
+	if ($mode == 'desktop')
+	{
+		print("\n</tr>\n");
+	}
+	else
+	{
+		print("\n</div> <!-- .table-listing -->\n");
+	}  // End of table header
 
 	// Process table records
 	$record_offset = $start_offset;
@@ -513,7 +643,14 @@ function display_table($params)
 		{
 			$record_action = 'edit';
 		}
-		print("<tr>\n");
+		if ($mode == 'desktop')
+		{
+			print("<tr>\n");
+		}
+		else
+		{
+			print("<div class=\"table-listing\">\n");
+		}
 		if (($row_no % 2) == 1)
 		{
 			$style = 'table-listing-odd-row';
@@ -527,7 +664,14 @@ function display_table($params)
 		{
 			$primary_key[$f] = $row[$f];
 		}
-		print("<td class=\"$style\"><input type=\"checkbox\" name=\"select_$record_offset\"");
+		if ($mode == 'desktop')
+		{
+			print("<td class=\"$style\"><input type=\"checkbox\" name=\"select_$record_offset\"");
+		}
+		else
+		{
+			print("<div class=\"table-listing-cell record-select $style\"><input type=\"checkbox\" name=\"select_$record_offset\"");
+		}
 		if ((isset($submit_option)) &&
 		    (($submit_option == 'select_update') || ($submit_option == 'select_update_all') || ($submit_option == 'select_copy')) &&
 				(isset($_POST["select_$record_offset"])))
@@ -540,18 +684,48 @@ function display_table($params)
 			*/
 			print(" checked");
 		}
-		print("></td>");
+		if ($mode == 'desktop')
+		{
+			print("></td>");
+		}
+		else
+		{
+			print("></div> <!-- .table-listing-cell -->");
+		}
 		$record_offset++;
 		$record_id = encode_record_id($primary_key);
 		foreach ($fields as $f => $ord)
 		{
-			print("<td class=\"$style\"><a href=\"$BaseURL/$RelativePath/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></td>");
+			if ($mode == 'desktop')
+			{
+				print("<td class=\"$style\"><a href=\"$BaseURL/$RelativePath/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></td>");
+			}
+			else
+			{
+				print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$BaseURL/$RelativePath/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></div> <!-- .table-listing-cell -->");
+			}
 		}
-		print("\n</tr>\n");
+		print("\n");
+		if ($mode == 'desktop')
+		{
+			print("</tr>\n");
+		}
+		else
+		{
+			// Mobile mode - </div> is output below (after relationships)
+		}
+
 		if (get_session_var('show_relationships'))
 		{
-			$colspan = count($fields) + 1;
-			print("<tr><td class=\"$style\" style=\"font-size:0.8em\" colspan=\"$colspan\">");
+			if ($mode == 'desktop')
+			{
+				$colspan = count($fields) + 1;
+				print("<tr><td class=\"$style\" style=\"font-size:0.8em\" colspan=\"$colspan\">");
+			}
+			else
+			{
+				print("<div class=\"table-listing-cell relationships $style\" style=\"font-size:0.8em\">");
+			}
 			$query_result2 = mysqli_query($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'SELECT%'");
 			while ($row2 = mysqli_fetch_assoc($query_result2))
 			{
@@ -586,11 +760,35 @@ function display_table($params)
 					print("&nbsp;&nbsp;<a href=\"./?-table=$target_table&-where=$where_par\" target=\"_blank\">{$row2['relationship_name']}</a>");
 				}
 			}
-			print("</td></tr>\n");
+			if ($mode == 'desktop')
+			{
+				print("</td></tr>\n");
+			}
+			else
+			{
+				print("</div> <!-- .table-listing-cell -->\n");
+			}
+		}  // End of processing relationships
+
+		if ($mode == 'mobile')
+		{
+			print("</div> <!-- .table-listing -->\n");
 		}
+		else
+		{
+			// Desktop mode - </tr> was output above (before relationships)
+		}
+	}  // End of loop for table records
+
+	if ($mode == 'desktop')
+	{
+		print("</table>\n");
+	}
+	if (!$display_table)
+	{
+		print("</div> <!-- display:none -->\n");
 	}
 
-	print("</table>\n");
 	print("<p>$page_links</p>\n");
 	if ($access_level == 'full')
 	{
@@ -695,6 +893,7 @@ function select_update($table,$option)
 {
 	global $BaseURL, $RelativePath;
 	$db = admin_db_connect();
+	$mode = get_viewing_mode();
 	$base_table = get_base_table($table);
 	if ($option == 'selection')
 	{
@@ -737,31 +936,67 @@ function select_update($table,$option)
 			{
 				if (!empty($last_display_group))
 				{
-					print("</table>\n");
+					if ($mode == 'desktop')
+					{
+						print("</table>\n");
+					}
 					if ($display_group != '-default-')
 					{
 						print("<strong>$display_group</strong>\n");
 					}
 				}
-				print("<table class=\"update-selection\">\n");
-				print("<tr><td class=\"update-selection-header\">Select</td><td class=\"update-selection-header\">Field</td><td class=\"update-selection-header\">Value</td></tr>\n");
+				if ($mode == 'desktop')
+				{
+					print("<table class=\"update-selection\">\n");
+					print("<tr><td class=\"update-selection-header\">Select</td>");
+					print("<td class=\"update-selection-header\">Field</td>");
+					print("<td class=\"update-selection-header\">Value</td></tr>\n");
+				}
 				$last_display_group = $display_group;
 			}
-			print("<tr>");
-			print("<td class=\"update-selection\">");
+			if ($mode == 'desktop')
+			{
+				print("<tr>");
+				print("<td class=\"update-selection\">");
+			}
+			else
+			{
+				print("<div class=\"update-field\">");
+				print("<div class=\"update-field-cell update-field-select\">");
+			}
 			if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static'))
 			{
 				print("<input type=\"checkbox\" name=\"select_$field_name\">");
 			}
-			print("</td>");
+			if ($mode == 'desktop')
+			{
+				print("</td>");
+			}
+			else
+			{
+				print("</div>");
+			}
 			$label = field_label($table,$field_name);
-			print("<td class=\"update-selection\">$label</td>");
-			print("<td class=\"update-selection\">");
-			generate_widget($table,$field_name,false);
-			print("</td><tr>\n");
+			if ($mode == 'desktop')
+			{
+				print("<td class=\"update-selection\">$label</td>");
+				print("<td class=\"update-selection\">");
+				generate_widget($table,$field_name,false);
+				print("</td></tr>\n");
+			}
+			else
+			{
+				print("<div class=\"update-field-cell update-field-name\">$label</div>");
+				print("<div class=\"update-field-cell update-field-value\">");
+				generate_widget($table,$field_name,false);
+				print("</div></div>\n");
+			}
 		}
 	}
-	print("</table>\n");
+	if ($mode == 'desktop')
+	{
+		print("</table>\n");
+	}
 	if ($option == 'selection')
 	{
 		print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runUpdate(this.form)\"/>");
@@ -784,7 +1019,6 @@ Function run_update
 
 function run_update($table,$option)
 {
-	global $display_table;
 	$_POST = array_map( 'stripslashes_deep', $_POST );
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
@@ -937,10 +1171,6 @@ function run_update($table,$option)
 		}
 	}
 	print("<p class=\"highlight-success\">$success_count record(s) updated, $failure_count record(s) not updated.</p>\n");
-	if (!$display_table)
-	{
-		print("</div>\n");
-	}
 	return true;
 }
 
@@ -954,6 +1184,7 @@ function select_copy($table)
 {
 	global $BaseURL, $RelativePath;
 	$db = admin_db_connect();
+	$mode = get_viewing_mode();
 	$base_table = get_base_table($table);
 	$item_found = false;
 	foreach ($_POST as $key => $value)
@@ -986,18 +1217,34 @@ function select_copy($table)
 			{
 				if (!empty($last_display_group))
 				{
-					print("</table>\n");
+					if ($mode == 'desktop')
+					{
+						print("</table>\n");
+					}
 					if ($display_group != '-default-')
 					{
 						print("<strong>$display_group</strong>\n");
 					}
 				}
-				print("<table class=\"update-selection\">\n");
-				print("<tr><td class=\"update-selection-header\">Select</td><td class=\"update-selection-header\">Field</td><td class=\"update-selection-header\">Value</td></tr>\n");
+				if ($mode == 'desktop')
+				{
+					print("<table class=\"update-selection\">\n");
+					print("<tr><td class=\"update-selection-header\">Select</td>");
+					print("<td class=\"update-selection-header\">Field</td>");
+					print("<td class=\"update-selection-header\">Value</td></tr>\n");
+				}
 				$last_display_group = $display_group;
 			}
-			print("<tr>");
-			print("<td class=\"update-selection\">");
+			if ($mode == 'desktop')
+			{
+				print("<tr>");
+				print("<td class=\"update-selection\">");
+			}
+			else
+			{
+				print("<div class=\"update-field\">");
+				print("<div class=\"update-field-cell update-field-select\">");
+			}
 			if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static'))
 			{
 				print("<input type=\"checkbox\" name=\"select_$field_name\">");
@@ -1006,16 +1253,43 @@ function select_copy($table)
 					print("&nbsp;*");
 				}
 			}
-			print("</td>");
+			if ($mode == 'desktop')
+			{
+				print("</td>");
+			}
+			else
+			{
+				print("</div>");
+			}
 			$label = field_label($table,$field_name);
-			print("<td class=\"update-selection\">$label</td>");
-			print("<td class=\"update-selection\">");
-			generate_widget($table,$field_name,false);
-			print("</td><tr>\n");
+			if ($mode == 'desktop')
+			{
+				print("<td class=\"update-selection\">$label</td>");
+				print("<td class=\"update-selection\">");
+				generate_widget($table,$field_name,false);
+				print("</td></tr>\n");
+			}
+			else
+			{
+				print("<div class=\"update-field-cell update-field-name\">$label</div>");
+				print("<div class=\"update-field-cell update-field-value\">");
+				generate_widget($table,$field_name,false);
+				print("</div></div>\n");
+			}
 		}
 	}
-	print("</table>\n");
-	print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runCopy(this.form)\"/>");
+	if ($mode == 'desktop')
+	{
+		print("</table>\n");
+	}
+	if ($option == 'selection')
+	{
+		print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runCopy(this.form)\"/>");
+	}
+	elseif ($option == 'all')
+	{
+		print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runUpdateAll(this.form)\"/>");
+	}
 
 	// N.B. Do not generate the "submitted" input tag or the closing </form> tag
 	// at this point.
@@ -1151,10 +1425,6 @@ function run_copy($table)
 		}
 	}
 	print("<p class=\"highlight-success\">$success_count record(s) copied, $failure_count record(s) not copied.</p>\n");
-	if (!$display_table)
-	{
-		print("</div>\n");
-	}
 	return true;
 }
 
@@ -1173,7 +1443,7 @@ function renumber_records($table)
 
 	// Search for sequencing information in table dba_table_info, starting with
 	// the table itself and working back to the base table.
-	for ($i=5; $i>0; $i--)
+	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
 		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
 		if ($row = mysqli_fetch_assoc($query_result))

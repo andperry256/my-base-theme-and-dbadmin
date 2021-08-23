@@ -5,10 +5,6 @@
 		DEFINE('RELATIONSHIP_VARIABLE_MATCH_1','/[ =<>*+\'\^\)\}]\$[A-Za-z0-9_]+/');
 		DEFINE('RELATIONSHIP_VARIABLE_MATCH_2',str_replace('\\$','\\$\\$',RELATIONSHIP_VARIABLE_MATCH_1));
 	}
-	if (!defined('MAX_TABLE_NESTING_LEVEL'))
-	{
-		define('MAX_TABLE_NESTING_LEVEL',5);
-	}
 	require("update_table_data.php");
 	require("common_funct.php");
 	require("view_funct.php");

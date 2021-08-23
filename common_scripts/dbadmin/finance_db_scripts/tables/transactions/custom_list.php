@@ -7,6 +7,8 @@ $account = $table;
 if (substr($account,0,14) == '_view_account_')
 {
   $account = substr($account,14);
+  $row = mysqli_fetch_assoc(mysqli_query($db,"SELECT grid_columns FROM dba_table_info WHERE table_name='transactions'"));
+  mysqli_query($db,"UPDATE dba_table_info SET grid_columns='{$row['grid_columns']}' WHERE parent_table='transactions'");
 }
 $params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=go_to_date&-table=$table&account=$account\">Go&nbsp;to&nbsp;Date</a></div>\n";
 if (get_table_access_level('transactions') != 'read-only')

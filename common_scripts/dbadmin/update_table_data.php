@@ -158,7 +158,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `collation` VARCHAR( 31 ) NULL AFTER `character_set`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `collation` `collation` VARCHAR( 31 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '-auto-'");
   mysqli_query($db,"UPDATE dba_table_info SET collation='-auto-' WHERE collation='' OR collation IS NULL");
-  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `collation`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr' AFTER `collation`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `grid_columns` `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr'");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `grid_columns`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if ($new_installation)
   {
@@ -516,10 +518,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   // Set miscellaneous field descriptions for built-in tables
   mysqli_query($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
+  mysqli_query($db,"UPDATE dba_table_fields SET description='CSS grid column widths for mobile mode. Do NOT use the <em>repeat</em> construct.' WHERE table_name='dba_table_info' AND field_name='grid_columns'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
   mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Grid Co-ordinates' WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
   $query = "UPDATE dba_table_fields SET description='";
-  $query .= "In format <em>row/col/span</em> where the column and span are optional (both default to 1).<br />";
+  $query .= "In format <em>row/column/span</em><br />";
+  $query .= "Column is optional and defaults to 2; span is optional and defaults to 1.<br />";
   $query .= "Set all field records for a given table to <em>auto</em> to format as one field per row.";
   $query .= "' WHERE table_name='dba_table_fields' AND field_name='grid_coords'";
   mysqli_query($db,$query);
@@ -538,6 +542,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Relationships\',"SELECT * FROM dba_relationships WHERE table_name=\'$table_name\'")');
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Relationships - Delete\',"DELETE FROM dba_relationships WHERE table_name=\'$table_name\'")');
   mysqli_query($db,'INSERT INTO dba_relationships VALUES (\'dba_table_info\',\'Relationships - Update\',"UPDATE dba_relationships SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'")');
+
+  // Uncomment the following line to activate it
+  // mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name LIKE '_view_%'");
 
   print("Operation completed.$eol");
   if ($mode == 'web')

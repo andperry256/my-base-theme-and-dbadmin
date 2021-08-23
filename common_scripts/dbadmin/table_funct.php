@@ -1,10 +1,29 @@
 <?php
 //==============================================================================
+
 if (!function_exists('get_base_table'))
 {
+
+//==============================================================================
+
+/*
+The first three functions are responsible for scanning through the table
+hierarchy from a given table/view back to its base table. Typically there
+would only be a single iteration or at the very most two, but the definition
+of MAX_TABLE_NESTING_LEVEL provides a 'safety net' to prevent these functions
+from running into an infinte look in the case of a data error.
+*/
+if (!defined('MAX_TABLE_NESTING_LEVEL'))
+{
+	define('MAX_TABLE_NESTING_LEVEL',5);
+}
+
 //==============================================================================
 /*
 Function get_base_table
+
+This function scans the table hierarchy for a given table/view through to its
+origin (i.e. the base table)
 */
 //==============================================================================
 
@@ -14,11 +33,6 @@ function get_base_table($table,$db=false)
 	{
 		$db = admin_db_connect();
 	}
-	/*
-	  In practice the following loop should execute 2 times at the most. It is
-		controlled by a counter to prevent infinite loop execution in the case of
-		data error.
-	*/
 	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
 		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
@@ -26,7 +40,7 @@ function get_base_table($table,$db=false)
 		{
 			if (empty($row['parent_table']))
 			{
-				break;
+				return $table;
 			}
 			else
 			{
@@ -34,7 +48,74 @@ function get_base_table($table,$db=false)
 			}
 		}
 	}
-	return ($table);
+	return false;  // This should not occur
+}
+
+//==============================================================================
+/*
+Function get_table_for_field
+
+This function scans the table hierarchy from the given table back to the base
+table until it finds a record for a given table field in the table fields table.
+*/
+//==============================================================================
+
+function get_table_for_field($table,$field,$db=false)
+{
+	if ($db === false)
+	{
+		$db = admin_db_connect();
+	}
+	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
+	{
+	  $query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	  if ($row = mysqli_fetch_assoc($query_result))
+	  {
+	    $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field'");
+	    if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table'])))
+	    {
+	      return $table;
+	    }
+	    else
+	    {
+	      $table = $row['parent_table'];
+	    }
+	  }
+	}
+	return false;  // This should not occur
+}
+
+//==============================================================================
+/*
+Function get_table_for_info_field
+
+This function scans the table hierarchy from the given table back to the base
+table until it finds non-empty value for a given table info field.
+*/
+//==============================================================================
+
+function get_table_for_info_field($table,$info_field,$db=false)
+{
+	if ($db === false)
+	{
+		$db = admin_db_connect();
+	}
+	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
+	{
+	  $query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	  if ($row = mysqli_fetch_assoc($query_result))
+	  {
+	    if ((empty($row['parent_table'])) || (!empty($row[$info_field])))
+	    {
+	      return $table;
+	    }
+	    else
+	    {
+	      $table = $row['parent_table'];
+	    }
+	  }
+	}
+	return false;  // This should not occur
 }
 
 //==============================================================================
@@ -87,31 +168,18 @@ function generate_grid_styles($table)
 	$auto_count = 0;
 	$result = '';
 
+	$base_table = get_table_for_info_field($table,'grid_columns');
+	if ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'")))
+	{
+		$grid_columns = $row['grid_columns'];
+	}
+
 	// Loop through the fields for the given table
 	$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
-		$base_table = $table;
-
-		// Find the table or view in the hierarchy for which the relevant field
-		// record is specified.
-		for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-		{
-			$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'");
-			if ($row = mysqli_fetch_assoc($query_result))
-			{
-				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
-				if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table'])))
-				{
-					break;
-				}
-				else
-				{
-					$base_table = $row['parent_table'];
-				}
-			}
-		}
+		$base_table = get_table_for_field($table,$field_name);
 
 		// Extract and save the grid co-ordinates for the given field.
 		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name' AND list_mobile=1");
@@ -123,10 +191,6 @@ function generate_grid_styles($table)
 			{
 				$auto_count++;
 			}
-		}
-		else
-		{
-			return false;
 		}
 	}
 	$base_table = get_base_table($table);
@@ -140,18 +204,24 @@ function generate_grid_styles($table)
 			links goes in a row at the bottomn spanning both columns.
 		*/
 		$result .= "<style>\n";
-		$result .= "div.table-listing {\n";
-		$result .= "  grid-template-columns: 1.5em 1fr\n";
-		$result .= "}\n";
+		if (isset($grid_columns))
+		{
+			$result .= "div.table-listing {\n";
+			$result .= "  grid-template-columns: $grid_columns\n";
+			$result .= "}\n";
+		}
 		$row_no = 1;
-		$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND list_mobile=1 ORDER BY display_order ASC");
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' ORDER BY display_order ASC");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
-			$result .= ".field-{$row['field_name']} {\n";
-			$result .= "  grid-row: $row_no;\n";
-			$result .= "  grid-column: 2;\n";
-			$result .= "}\n";
-			$row_no++;
+			if (isset($grid_coords[$row['field_name']]))
+			{
+				$result .= ".field-{$row['field_name']} {\n";
+				$result .= "  grid-row: $row_no;\n";
+				$result .= "  grid-column: 2;\n";
+				$result .= "}\n";
+				$row_no++;
+			}
 		}
 		$result .= ".record-select {\n";
 		$result .= "  grid-row: 1 / $row_no;\n";
@@ -530,37 +600,15 @@ function display_table($params)
 	{
 		$field_name = $row['Field'];
 
-		/*
-			Determine whether the field is to be displayed in the table listing.
-			Search for a table field record going from the current table back to the
-			base table.
-		*/
-		$tab = $table;
-		for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
+		// Determine whether the field is to be displayed in the table listing.
+		$tab = get_table_for_field($table,$field_name);
+		$query_result3 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$tab' AND field_name='$field_name'");
+		if ($row3 = mysqli_fetch_assoc($query_result3))
 		{
-			$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$tab'");
-			if ($row2 = mysqli_fetch_assoc($query_result2))
+			// Table field found
+			if ($row3["list_$mode"] == 1)
 			{
-				$query_result3 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$tab' AND field_name='$field_name'");
-				if ($row3 = mysqli_fetch_assoc($query_result3))
-				{
-					// Table field found
-					if ($row3["list_$mode"] == 1)
-					{
-						$fields[$field_name] = $row3['display_order'];
-					}
-					break;
-				}
-				elseif (empty($row2['parent_table']))
-				{
-					// This should not normally occur as the previous condition should
-					// have been met if the base table has been reached.
-					break;
-				}
-				else
-				{
-					$tab = $row2['parent_table'];
-				}
+				$fields[$field_name] = $row3['display_order'];
 			}
 		}
 	}
@@ -1440,25 +1488,8 @@ function renumber_records($table)
 {
 	$db = admin_db_connect();
 	set_time_limit(30);
-
-	// Search for sequencing information in table dba_table_info, starting with
-	// the table itself and working back to the base table.
-	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-	{
-		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-		if ($row = mysqli_fetch_assoc($query_result))
-		{
-			if ((empty($row['parent_table'])) || (!empty($row['seq_no_field'])))
-			{
-				break;
-			}
-			else
-			{
-				$table = $row['parent_table'];
-			}
-		}
-	}
-
+	$table = get_table_for_info_field($table,'seq_no_field');
+	$row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
 	if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])) && ($row['renumber_enabled']))
 	{
 		// Set up basic query string according to sort method

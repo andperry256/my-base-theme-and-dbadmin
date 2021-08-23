@@ -85,25 +85,8 @@ function next_seq_number($table,$sort_1_value)
 		exit("Constant NEXT_SEQ_NO_INDICATOR not defined");
 	}
 	$db = admin_db_connect();
-
-	// Search for sequencing information in table dba_table_info, starting with
-	// the table itself and working back to the base table.
-	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-	{
-		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-		if ($row = mysqli_fetch_assoc($query_result))
-		{
-			if ((empty($row['parent_table'])) || (!empty($row['seq_no_field'])))
-			{
-				break;
-			}
-			else
-			{
-				$table = $row['parent_table'];
-			}
-		}
-	}
-
+	$table = get_table_for_info_field($table,'seq_no_field');
+	$row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
 	if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
 	{
 		// Calculate next sequence number, given:-

@@ -65,28 +65,7 @@ function generate_widget($table,$field_name,$field_value)
 	global $BaseDir, $BaseURL, $DBAdminURL, $NewDateStartYear;
 	$db = admin_db_connect();
 	$mode = get_viewing_mode();
-	/*
-	Although in the vast majority of cases, the widget information will come from
-	the base table for the given table, we nevertheless need to work backwards
-	from the table itself in case there are any overriding definitions.
-	*/
-	$base_table = $table;
-	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-	{
-		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'");
-		if ($row = mysqli_fetch_assoc($query_result))
-		{
-			$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
-			if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table'])))
-			{
-				break;
-			}
-			else
-			{
-				$base_table = $row['parent_table'];
-			}
-		}
-	}
+	$base_table = get_table_for_field($table,$field_name);
 
 	if ($field_value === false)
 	{
@@ -982,30 +961,7 @@ function handle_record($action,$params)
 				else
 				{
 					$temp_pk = array();
-					$temp_table = $table;
-					for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-					{
-						$query_result4 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$temp_table'");
-						if ($row4 = mysqli_fetch_assoc($query_result4))
-						{
-							$query_result5 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$temp_table' AND field_name='$field_name'");
-							if ((mysqli_num_rows($query_result5) != 0) || (empty($row4['parent_table'])))
-							{
-								/*
-								Stop searching when an associated table field record has been found.
-								The parent table link is checked as a precaution although the first
-								part of the above condition should become true when the parent table
-								is reached.
-								*/
-								break;
-							}
-							else
-							{
-								$temp_table = $row4['parent_table'];
-							}
-						}
-					}
-
+					$temp_table = get_table_for_field($table,$field_name);
 					$temp_pk['table_name'] = $temp_table;
 					$temp_pk['field_name'] = $field_name;
 					$edit_field_atts_url = "$BaseURL/$RelativePath/?-action=edit&-table=dba_table_fields&-recordid=".encode_record_id($temp_pk);

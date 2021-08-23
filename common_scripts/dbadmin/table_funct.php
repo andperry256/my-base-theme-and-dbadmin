@@ -164,9 +164,10 @@ function generate_grid_styles($table)
 {
 	$db = admin_db_connect();
 	$grid_coords = array();
-	$column_count = 0;
+	$field_count = 0;
 	$auto_count = 0;
 	$result = '';
+	$cells_used = array();
 
 	$base_table = get_table_for_info_field($table,'grid_columns');
 	if ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'")))
@@ -186,22 +187,71 @@ function generate_grid_styles($table)
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			$grid_coords[$field_name] = $row2['grid_coords'];
-			$column_count++;
+			$field_count++;
 			if ($grid_coords[$field_name] == 'auto')
 			{
+				// Co-ordinates set to 'auto' - update the count
 				$auto_count++;
+			}
+			else
+			{
+				// Custom co-ordinates in use - check that they are valid.
+				$row_no = trim(strtok($grid_coords[$field_name],'/'));
+				if (!is_numeric($row_no))
+				{
+					return false;
+				}
+				else
+				{
+					$col_no = trim(strtok('/'));
+					if (!is_numeric($col_no))
+					{
+						$col_no = 2;
+						$col_span = 1;
+					}
+					elseif ($col_no == 1)
+					{
+						return false;
+					}
+					else
+					{
+						$col_span = trim(strtok('/'));
+						if (!is_numeric($col_span))
+						{
+							$col_span = 1;
+						}
+					}
+				}
+
+				// Check that fields don't overlap in the layout.
+				$end_col = $col_no + $col_span;
+				if (!isset($cells_used[$row_no]))
+				{
+					$cells_used[$row_no] = array();
+				}
+				for ($i=$col_no; $i<$end_col; $i++)
+				{
+					if (isset($cells_used[$row_no][$i]))
+					{
+						return false;
+					}
+					else
+					{
+						$cells_used[$row_no][$i] = true;
+					}
+				}
 			}
 		}
 	}
 	$base_table = get_base_table($table);
 
-	if ($auto_count == $column_count)
+	if ($auto_count == $field_count)
 	{
 		/*
-			Co-ordinates all marked as 'auto'. Create styles to place the record
-			fields one per row in the grid. The cell containing the select box goes
-			into column 1 spanning all the rows. The cell containing relationship
-			links goes in a row at the bottomn spanning both columns.
+		Auto co-ordinates in use. Create styles to place the record fields one per
+		row in the grid. The cell containing the select box goes into column 1
+		spanning all the rows. The cell containing relationship links goes in a row
+		at the bottomn spanning both columns.
 		*/
 		$result .= "<style>\n";
 		if (isset($grid_columns))
@@ -237,9 +287,67 @@ function generate_grid_styles($table)
 	elseif ($auto_count == 0)
 	{
 		/*
-		Custom co-ordinates in use - functionality to be added.
+		Custom co-ordinates in use. Create styles to place each record field
+		according to its own custom co-ordinates. The cell containing the select box
+		goes into column 1 spanning all the rows. The cell containing relationship
+		links goes in a row at the bottomn spanning all the columns.
 		*/
-		return false;
+		$result .= "<style>\n";
+		if (isset($grid_columns))
+		{
+			$result .= "div.table-listing {\n";
+			$result .= "  grid-template-columns: $grid_columns\n";
+			$result .= "}\n";
+		}
+		$row_count = 1;
+		$col_count = 1;
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' ORDER BY display_order ASC");
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			if (isset($grid_coords[$row['field_name']]))
+			{
+				$row_no = trim(strtok($grid_coords[$row['field_name']],'/'));
+				$col_no = trim(strtok('/'));
+				if (!is_numeric($col_no))
+				{
+					$col_no = 2;
+					$col_span = 1;
+				}
+				else
+				{
+					$col_span = trim(strtok('/'));
+					if (!is_numeric($col_span))
+					{
+						$col_span = 1;
+					}
+				}
+				if ($row_no > $row_count)
+				{
+					$row_count = $row_no;
+				}
+				if ($col_no > $col_count)
+				{
+					$col_count = $col_no;
+				}
+				$result .= ".field-{$row['field_name']} {\n";
+				$result .= "  grid-row: $row_no;\n";
+				$col_end = $col_no + $col_span;
+				$result .= "  grid-column: $col_no / $col_end;\n";
+				$result .= "}\n";
+			}
+		}
+		$result .= ".record-select {\n";
+		$row_end = $row_count + 1;
+		$result .= "  grid-row: 1 / $row_end;\n";
+		$result .= "  grid-column: 1;\n";
+		$result .= "}\n";
+		$result .= ".relationships {\n";
+		$result .= "  grid-row: $row_no;\n";
+		$col_end = $col_count + 1;
+		$result .= "  grid-column: 1 / $col_end;\n";
+		$result .= "}\n";
+		$result .= "</style>\n";
+		return $result;
 	}
 	else
 	{

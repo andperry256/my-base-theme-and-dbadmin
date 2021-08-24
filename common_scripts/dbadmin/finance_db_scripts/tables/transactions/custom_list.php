@@ -7,7 +7,7 @@ $mode = get_viewing_mode();
 if ($mode == 'mobile')
 {
   $row = mysqli_fetch_assoc(mysqli_query($db,"SELECT grid_columns FROM dba_table_info WHERE table_name='transactions'"));
-  mysqli_query($db,"UPDATE dba_table_info SET grid_columns='{$row['grid_columns']}' WHERE parent_table='transactions'");
+  mysqli_query($db,"UPDATE dba_table_info SET grid_columns='{$row['grid_columns']}' WHERE parent_table='transactions' OR parent_table LIKE '_view_transactions%'");
 }
 $account = $table;
 if (substr($account,0,14) == '_view_account_')

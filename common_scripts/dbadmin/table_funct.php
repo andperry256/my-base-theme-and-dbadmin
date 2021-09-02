@@ -940,10 +940,6 @@ function display_table($params)
 	{
 		print("</table>\n");
 	}
-	if (!$display_table)
-	{
-		print("</div> <!-- display:none -->\n");
-	}
 
 	print("<p>$page_links</p>\n");
 	if ($access_level == 'full')
@@ -952,6 +948,10 @@ function display_table($params)
 		print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Update All\" onClick=\"selectUpdateAll(this.form)\"/>");
 		print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Copy Selected\" onClick=\"selectCopy(this.form)\"/>");
 		print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Delete Selected\" onClick=\"confirmDelete(this.form)\"/>");
+	}
+	if (!$display_table)
+	{
+		print("</div> <!-- display:none -->\n");
 	}
 	print("<input type=\"hidden\" name=\"submitted\" id=\"submitted\"/>");
 	print("</form>\n");

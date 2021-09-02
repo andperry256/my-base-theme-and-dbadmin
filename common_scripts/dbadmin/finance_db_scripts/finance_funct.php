@@ -333,7 +333,8 @@ function copy_transaction($account,$seq_no,$new_date)
 		mysqli_query($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
 		mysqli_query($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 		$new_seq_no = next_seq_no($account);
-		mysqli_query($db,"UPDATE temp_transactions SET date='$new_date',seq_no=$new_seq_no,reconciled=0");
+		$new_acct_month = accounting_month($new_date);
+		mysqli_query($db,"UPDATE temp_transactions SET seq_no=$new_seq_no,date='$new_date',acct_month='$new_acct_month',reconciled=0");
 		mysqli_query($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
 		mysqli_query($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no");
 		mysqli_query($db,"INSERT INTO splits SELECT * FROM temp_splits");
@@ -378,7 +379,7 @@ function record_scheduled_transaction($account,$seq_no)
 		// the latter
 		$new_seq_no = copy_transaction($account,$seq_no,$date);
 		mysqli_query($db,"UPDATE transactions SET sched_freq='#',sched_count=-1 WHERE account='$account' AND seq_no=$new_seq_no");
-		update_account_balances($account,$new_date);
+		update_account_balances($account,$date);
 
 		// Update schedule count if appliable
 		if ($sched_count > 0)
@@ -444,6 +445,7 @@ function record_scheduled_transaction($account,$seq_no)
 		}
 		mysqli_query($db,"UPDATE transactions SET date='$date',acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no");
 		mysqli_query($db,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$seq_no");
+
 
 		// Send e-mail alert if required
 		if (!empty($row['email_alert_id']))

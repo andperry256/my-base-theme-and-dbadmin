@@ -20,6 +20,7 @@ else
 }
 print("<h1>Reconcile Account ($account_name)</h1>\n");
 print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
+print("<div style=\"clear:both\"></div>\n");
 
 if (isset($_POST['submitted']))
 {

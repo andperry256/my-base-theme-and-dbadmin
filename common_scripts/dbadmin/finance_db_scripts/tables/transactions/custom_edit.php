@@ -98,7 +98,8 @@ if ($row = mysqli_fetch_assoc($query_result))
     }
 
     // Print main transaction detail
-    if ($row['splits_discrepancy'] != 0)
+    $splits_discrepancy = $row['splits_discrepancy'];
+    if ($splits_discrepancy != 0)
     {
     	print("<p><b>WARNING</b> - There is a split discrepancy of {$row['splits_discrepancy']}</p>\n");
     }
@@ -264,6 +265,10 @@ if ($row = mysqli_fetch_assoc($query_result))
     	print("");
     	print("</a></li>\n");
     	$split_count++;
+    }
+    if (($split_count != 0) && ($splits_discrepancy != 0))
+    {
+    	print("<li>Discrepancy: $splits_discrepancy</li>\n");
     }
     print("</ul>\n");
     if ($split_count == 0)

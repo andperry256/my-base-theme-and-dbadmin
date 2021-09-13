@@ -284,7 +284,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 		$query_result = mysqli_query($db,"SELECT * FROM report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
 		$row_count = mysqli_num_rows($query_result);
 		$row_no = 0;
-		while (($row = mysqli_fetch_assoc($query_result)) || ($row_no <= $row_count))
+		while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))
 		{
 			if ($row_count == 0)
 			{

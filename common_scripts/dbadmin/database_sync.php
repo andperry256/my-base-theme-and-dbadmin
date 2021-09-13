@@ -5,7 +5,8 @@ if (!function_exists('sync_databases'))
 //==============================================================================
 function sync_databases($local_db_name)
 {
-	global $Location, $CustomPagesPath, $RelativePath, $local_site_dir, $Localhost_ID, $DBAdminURL, $db_master_location;
+	global $Location, $CustomPagesPath, $RelativePath, $local_site_dir,
+	$Localhost_ID, $DBAdminURL, $db_master_location, $Server_Station_ID;
 
 	set_time_limit(300);
 	print("<h1>Synchronise Databases</h1>\n");
@@ -17,7 +18,7 @@ function sync_databases($local_db_name)
 	{
 		$sync_direction = 'in';  // Default direction
 		$db_sites = sites_db_connect();
-		$query_result = mysqli_query($db_sites,"SELECT * FROM dbases WHERE dbname='$local_db_name'");
+		$query_result = mysqli_query($db_sites,"SELECT * FROM dbases WHERE dbname='$local_db_name' AND domname='$Server_Station_ID'");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			switch ($row['mode'])

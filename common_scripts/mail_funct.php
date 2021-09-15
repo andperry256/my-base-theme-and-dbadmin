@@ -14,27 +14,20 @@
 //
 //================================================================================
 
+namespace PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-global $PHPMailerMainVersion;
 
 if (!is_dir($PHPMailerDir))
 {
 	exit("PHPMailer directory not defined");
 }
-elseif (is_file("$PHPMailerDir/class.phpmailer.php"))
+else
 {
-	$PHPMailerMainVersion = 5;
-	require_once("$PHPMailerDir/class.phpmailer.php");
-	require_once("$PHPMailerDir/class.smtp.php");
-}
-elseif (is_file("$PHPMailerDir/PHPMailer.php"))
-{
-	$PHPMailerMainVersion = 6;
-	require_once("$PHPMailerDir/PHPMailer.php");
-	require_once("$PHPMailerDir/SMTP.php");
-	require_once("$PHPMailerDir/Exception.php");
+	require_once("$PHPMailerDir/src/PHPMailer.php");
+	require_once("$PHPMailerDir/src/SMTP.php");
+	require_once("$PHPMailerDir/src/Exception.php");
 }
 
 //================================================================================

@@ -14,7 +14,7 @@
 //
 //================================================================================
 
-namespace MyBaseProject;
+namespace PHPMailer;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;

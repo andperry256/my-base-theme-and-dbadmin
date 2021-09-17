@@ -31,6 +31,13 @@ else
 }
 
 //================================================================================
+/*
+Functions getmsg and getpart
+
+These functions are for the processing of a message read from a mailbox via.
+IMAP. The information analysed, extracted and stored in global data.
+*/
+//================================================================================
 
 function getmsg($mbox,$mid,$noattach=false)
 {
@@ -200,87 +207,132 @@ function getpart($mbox,$mid,$part,$partno,$noattach=false)
 	}
 }
 
-//================================================================================
-
-function date_and_time_now()
-{
-	return date("Y-m-d H:i:s");
-}
-
-//================================================================================
+//==============================================================================
 /*
-Function log_message_details_to_file
+Function output_mail
+
+This function sends an email via SMTP.
+
+The following parameters are provided:-
+
+1. $mail_info - Array containing all the various data relating
+   to the message.
+2  $host - Mail host domain to be used to look up the required mail route.
+3. $attachments (optional) - Array containing path references to required
+   attachment files.
+
+Return values (partly from call to deliver_mail):-
+ 0 = Success
+ 1 = Unable to connect to database
+ 2 = Failed to send message
+11 = Originator name not specifed
+12 = Originator address not specified
+13 = Destination address not specified
+14 = Entry not found in mail route table
+15 = No subject
+16 = No content
+21 = Not used here but reserved for SMTP2GO event logged
 */
-//================================================================================
+//==============================================================================
 
-function log_message_details_to_file($error_code,$host,$details,$error_info)
+function output_mail($mail_info,$host,$attachments=array())
 {
-	global $MailLogDir;
-
-	if (!is_dir("$MailLogDir"))
-		return;
-	if (isset($details['message_id']))
-		$id = $details['message_id'];
-	else
-		$id = 0;
-	if (isset($details['from_name']))
-		$from_name = trim($details['from_name']);
-	else
-		$from_name = '';
-	if (isset($details['from_addr']))
-		$from_addr = trim($details['from_addr']);
-	else
-		$from_addr = '';
-	if (isset($details['to_name']))
-		$to_name = trim($details['to_name']);
-	else
-		$to_name = '';
-	if (isset($details['to_addr']))
-		$to_addr = trim($details['to_addr']);
-	else
-		$to_addr = '';
-	$log_file_name = 'mail-'.date('Y-m-d').'.log';
-	$ofp = fopen("$MailLogDir/$log_file_name",'a');
-	if ($ofp !== false)
+	// Check for mandatory data
+	if (!isset($mail_info['from_name']))
 	{
-		$line = date('H:i:s');
-		$line .= " EC=$error_code ID=$id";
-		$line .= "  MH=$host";
-		$line .= "  FN=$from_name";
-		$line .= "  FA=$from_addr";
-		$line .= "  TN=$to_name";
-		$line .= "  TA=$to_addr";
-		$line = str_replace("\n",'',$line);
-		$line = str_replace("\r",'',$line);
-		$line .= "\n";
-		fprintf($ofp,$line);
-		if (!empty($error_info))
-		{
-			$line = "   Error Info: $error_info\n";
-			fprintf($ofp,$line);
-		}
-		fclose($ofp);
+		return 11;
 	}
+	elseif (!isset($mail_info['from_addr']))
+	{
+		return 12;
+	}
+	elseif (!isset($mail_info['to_addr']))
+	{
+		return 13;
+	}
+	elseif (!isset($mail_info['subject']))
+	{
+		return 15;
+	}
+	elseif (!isset($mail_info['html_content']))
+	{
+		return 16;
+	}
+
+	// Send the message
+	$mail = new PHPMailer();
+	$mail->CharSet = 'UTF-8';
+	$mail->Subject = $mail_info['subject'];
+	if (!empty(trim($mail_info['html_content'])))
+	{
+		$mail->IsHTML(true);
+		$mail->Body = $mail_info['html_content'];
+		if (isset($mail_info['plain_content']))
+		{
+			$mail->AltBody = $mail_info['plain_content'];
+		}
+		else
+		{
+			$mail->AltBody = 'This e-mail must be viewed in an HTML compatible application';
+		}
+}
+	else
+	{
+		$mail->IsHTML(false);
+		if (!isset($mail_info['plain_content']))
+		{
+			return 16;
+		}
+		$mail->Body = $mail_info['plain_content'];
+	}
+	$message_details = array();
+	if (isset($mail_info['message_id']))
+	{
+		$message_details['message_id'] = $mail_info['message_id'];
+	}
+	else
+	{
+		$message_details['message_id'] = 0;
+	}
+	$message_details['from_addr'] = $mail_info['from_addr'];
+	$message_details['from_name'] = $mail_info['from_name'];
+	if (isset($mail_info['message_id']))
+	{
+		$message_details['reply_addr'] = $mail_info['reply_addr'];
+	}
+	else
+	{
+		$message_details['reply_addr'] = '';
+	}
+	$message_details['to_addr'] = $mail_info['to_addr'];
+	if (isset($mail_info['to_name']))
+	{
+		$message_details['to_name'] = $mail_info['to_name'];
+	}
+	else
+	{
+		$message_details['to_name'] = '';
+	}
+	foreach($attachments as $key => $value)
+	{
+		$mail->AddAttachment($key);
+	}
+	$error_code = deliver_mail($mail,$message_details,$host);
+	return $error_code;
 }
 
 //================================================================================
 /*
 Function deliver_mail
 
+N.B. This function may eventually be merged into output_mail.
+
 Parameters:-
 $mail    = PHPMailer object
 $details = Array containing originator and destination details
 $host    = Mail host domain to be used to look up the required mail route
 
-Return values:-
- 0 = Success
- 1 = Unable to connect to database
- 2 = Failed to send message
-11 = Message ID not specified
-12 = Originator address not specified
-13 = Destination address not specified
-14 = Entry not found in mail route table
-21 = Not used here but reserved for SMTP2GO event logged
+Return values - See output_mail
 */
 //================================================================================
 
@@ -399,6 +451,73 @@ function deliver_mail($mail,$details,$host)
 		// Cannot connect to remote DB
 		log_message_details_to_file(1,'',$details,'');
 		return 1;
+	}
+}
+
+//================================================================================
+/*
+Function date_and_time_now
+*/
+//================================================================================
+
+function date_and_time_now()
+{
+	return date("Y-m-d H:i:s");
+}
+
+//================================================================================
+/*
+Function log_message_details_to_file
+*/
+//================================================================================
+
+function log_message_details_to_file($error_code,$host,$details,$error_info)
+{
+	global $MailLogDir;
+
+	if (!is_dir("$MailLogDir"))
+		return;
+	if (isset($details['message_id']))
+		$id = $details['message_id'];
+	else
+		$id = 0;
+	if (isset($details['from_name']))
+		$from_name = trim($details['from_name']);
+	else
+		$from_name = '';
+	if (isset($details['from_addr']))
+		$from_addr = trim($details['from_addr']);
+	else
+		$from_addr = '';
+	if (isset($details['to_name']))
+		$to_name = trim($details['to_name']);
+	else
+		$to_name = '';
+	if (isset($details['to_addr']))
+		$to_addr = trim($details['to_addr']);
+	else
+		$to_addr = '';
+	$log_file_name = 'mail-'.date('Y-m-d').'.log';
+	$ofp = fopen("$MailLogDir/$log_file_name",'a');
+	if ($ofp !== false)
+	{
+		$line = date('H:i:s');
+		$line .= " EC=$error_code ID=$id";
+		$line .= "  MH=$host";
+		$line .= "  FN=$from_name";
+		$line .= "  FA=$from_addr";
+		$line .= "  TN=$to_name";
+		$line .= "  TA=$to_addr";
+		$line = str_replace("\n",'',$line);
+		$line = str_replace("\r",'',$line);
+		$line .= "\n";
+		fprintf($ofp,$line);
+		if (!empty($error_info))
+		{
+			$line = "   Error Info: $error_info\n";
+			fprintf($ofp,$line);
+		}
+		fclose($ofp);
 	}
 }
 

@@ -14,7 +14,7 @@
 //
 //================================================================================
 
-namespace PHPMailer;
+namespace MyBaseProject;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -215,242 +215,195 @@ This function sends an email via SMTP.
 
 The following parameters are provided:-
 
-1. $mail_info - Array containing all the various data relating
-   to the message.
-2  $host - Mail host domain to be used to look up the required mail route.
-3. $attachments (optional) - Array containing path references to required
-   attachment files.
+1. $mail_info - Array containing all the various data relating to the message.
 
-Return values (partly from call to deliver_mail):-
- 0 = Success
- 1 = Unable to connect to database
- 2 = Failed to send message
-11 = Originator name not specifed
-12 = Originator address not specified
-13 = Destination address not specified
-14 = Entry not found in mail route table
-15 = No subject
-16 = No content
-21 = Not used here but reserved for SMTP2GO event logged
+  Mandatory fields:-
+	Originator name.
+	Originator address.
+	Destination address.
+	Subject.
+	HTML and/or plain content.
+
+  Optional fields:-
+	Message ID - defaults to 0.
+	Destination name - defaults to destination address.
+	Reply address.
+
+2  $host - Mail host domain to be used to look up the required mail route.
+
+3. $attachments - Array containing path references to required attachment files.
+   Optional parameter defaulting to an empty array.
+
+Returns an array as follows:-
+
+Offset 0 = Error code
+   0 = Success
+   1 = Unable to connect to database
+   2 = Failed to send message
+  11 = Originator name not specifed
+  12 = Originator address not specified
+  13 = Destination address not specified
+  14 = Entry not found in mail route table
+  15 = No subject
+  16 = No content
+  21 = Not used here but reserved for SMTP2GO event logged
+
+Offset 1 = Additional error information
 */
 //==============================================================================
 
 function output_mail($mail_info,$host,$attachments=array())
 {
-	// Check for mandatory data
-	if (!isset($mail_info['from_name']))
-	{
-		return 11;
-	}
-	elseif (!isset($mail_info['from_addr']))
-	{
-		return 12;
-	}
-	elseif (!isset($mail_info['to_addr']))
-	{
-		return 13;
-	}
-	elseif (!isset($mail_info['subject']))
-	{
-		return 15;
-	}
-	elseif (!isset($mail_info['html_content']))
-	{
-		return 16;
-	}
-
-	// Send the message
-	$mail = new PHPMailer();
-	$mail->CharSet = 'UTF-8';
-	$mail->Subject = $mail_info['subject'];
-	if (!empty(trim($mail_info['html_content'])))
-	{
-		$mail->IsHTML(true);
-		$mail->Body = $mail_info['html_content'];
-		if (isset($mail_info['plain_content']))
-		{
-			$mail->AltBody = $mail_info['plain_content'];
-		}
-		else
-		{
-			$mail->AltBody = 'This e-mail must be viewed in an HTML compatible application';
-		}
-}
-	else
-	{
-		$mail->IsHTML(false);
-		if (!isset($mail_info['plain_content']))
-		{
-			return 16;
-		}
-		$mail->Body = $mail_info['plain_content'];
-	}
-	$message_details = array();
-	if (isset($mail_info['message_id']))
-	{
-		$message_details['message_id'] = $mail_info['message_id'];
-	}
-	else
-	{
-		$message_details['message_id'] = 0;
-	}
-	$message_details['from_addr'] = $mail_info['from_addr'];
-	$message_details['from_name'] = $mail_info['from_name'];
-	if (isset($mail_info['message_id']))
-	{
-		$message_details['reply_addr'] = $mail_info['reply_addr'];
-	}
-	else
-	{
-		$message_details['reply_addr'] = '';
-	}
-	$message_details['to_addr'] = $mail_info['to_addr'];
-	if (isset($mail_info['to_name']))
-	{
-		$message_details['to_name'] = $mail_info['to_name'];
-	}
-	else
-	{
-		$message_details['to_name'] = '';
-	}
-	foreach($attachments as $key => $value)
-	{
-		$mail->AddAttachment($key);
-	}
-	$error_code = deliver_mail($mail,$message_details,$host);
-	return $error_code;
-}
-
-//================================================================================
-/*
-Function deliver_mail
-
-N.B. This function may eventually be merged into output_mail.
-
-Parameters:-
-$mail    = PHPMailer object
-$details = Array containing originator and destination details
-$host    = Mail host domain to be used to look up the required mail route
-
-Return values - See output_mail
-*/
-//================================================================================
-
-function deliver_mail($mail,$details,$host)
-{
 	global $DefaultSenderEmail;
 	global $AltSenderEmail;
-	global $PHPMailerMainVersion;
-	$dummy_details = array();
+	foreach ($mail_info as $key => $value)
+	{
+		$mail_info[$key] = trim($value);
+	}
 
-	if (!isset($details['from_addr']))
+	// Check for mandatory data
+	if ((!isset($mail_info['from_name'])) || (empty($mail_info['from_name'])))
+	{
+		// No originator name
+		return array(11,'');
+	}
+	elseif ((!isset($mail_info['from_addr'])) || (empty($mail_info['from_addr'])))
 	{
 		// No originator address
-		log_message_details_to_file(12,'',$details,'');
-		return 12;
+		return array(12,'');
 	}
-	elseif (!isset($details['to_addr']))
+	elseif ((!isset($mail_info['to_addr'])) || (empty($mail_info['to_addr'])))
 	{
-		// No addressee
-		log_message_details_to_file(13,'',$details,'');
-		return 13;
+		// No destination address
+		return array(13,'');
+	}
+	elseif ((!isset($mail_info['subject'])) || (empty($mail_info['subject'])))
+	{
+		// No subject
+		return array(15,'');
+	}
+	elseif (((!isset($mail_info['html_content'])) || (empty($mail_info['html_content']))) &&
+	        ((!isset($mail_info['plain_content'])) || (empty($mail_info['plain_content']))))
+	{
+		// No content
+		return array(16,'');
 	}
 
-	if (!isset($details['from_name']))
+	// Process any default values
+	if ((!isset($mail_info['to_name'])) || (empty($mail_info['to_name'])))
 	{
-		$details['from_name'] = $details['from_addr'];
+		$mail_info['to_name'] = $mail_info['to_addr'];
 	}
-	if (!isset($details['to_name']))
+	if (!isset($mail_info['reply_addr']))
 	{
-		$details['to_name'] = $details['to_addr'];
+		$mail_info['reply_addr'] = '';
 	}
-	if (!isset($details['reply_addr']))
+	if (!isset($mail_info['message_id']))
 	{
-		$details['reply_addr'] = '';
+		$mail_info['message_id'] = 0;
 	}
-	$from_addr = trim($details['from_addr']);
-	if ((isset($DefaultSenderEmail)) && (isset($AltSenderEmail)) && ($from_addr == $DefaultSenderEmail))
-	{
-		$from_addr = $AltSenderEmail;
-	}
-	$from_name = trim($details['from_name']);
-	$tok = strtok($from_addr,'@');
-	$from_domain = strtok('@');
-	$to_addr = trim($details['to_addr']);
-	$to_name = trim($details['to_name']);
-	$reply_addr = trim($details['reply_addr']);
 
+	// Connect to database and request routing information
 	if ($db = mail_db_connect())
 	{
 		$query_result = mysqli_query($db,"SELECT * FROM mail_routes WHERE orig_domain='$host'");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
-			$mail2 = clone $mail;
-			$mail2->ClearAllRecipients();
-			if (!empty($reply_addr))
-			{
-				$mail2->AddReplyTo($reply_addr,$from_name);
-			}
-			if ($to_addr != '*')
-			{
-				$mail2->AddAddress($to_addr,$to_name);
-			}
-			$mail2->SetFrom($from_addr,$from_name);
-			$mail2->IsSMTP();
-			$mail2->SMTPDebug = false;
-			$mail2->SMTPAuth = true;
-			$mail2->Mailer = 'smtp';
-			$mail2->SMTPSecure = 'tls';
-			$mail2->Host = $row['mail_server'];
-			$mail2->Username = $row['username'];
-			$mail2->Password = $row['passwd'];
-			$mail2->Port = $row['port_no'];
+			// Create PHPMailer object
+			$mail = new PHPMailer();
+			$mail->CharSet = 'UTF-8';
 
-			$send_retval = $mail2->Send();
+			// Process message content
+			if ((isset($mail_info['html_content'])) && (!empty($mail_info['html_content'])))
+			{
+				// HTML content present
+				$mail->IsHTML(true);
+				$mail->Body = $mail_info['html_content'];
+				if ((isset($mail_info['plain_content'])) && (!empty($mail_info['plain_content'])))
+				{
+					$mail->AltBody = $mail_info['plain_content'];
+				}
+				else
+				{
+					$mail->AltBody = 'This e-mail must be viewed in an HTML compatible application.';
+				}
+			}
+			else
+			{
+				// No HTML content
+				$mail->IsHTML(false);
+				$mail->Body = $mail_info['plain_content'];
+			}
 
+			// Process any attachments
+			foreach($attachments as $key => $value)
+			{
+				$mail->AddAttachment($key);
+			}
+
+			// Process remaining info
+			$mail->Subject = $mail_info['subject'];
+			if (!empty($mail_info['reply_addr']))
+			{
+				$mail->AddReplyTo($mail_info['reply_addr'],$mail_info['from_name']);
+			}
+			$mail->AddAddress($mail_info['to_addr'],$mail_info['to_name']);
+			$mail->SetFrom($mail_info['from_addr'],$mail_info['from_name']);
+			$mail->IsSMTP();
+			$mail->SMTPDebug = false;
+			$mail->SMTPAuth = true;
+			$mail->Mailer = 'smtp';
+			$mail->SMTPSecure = 'tls';
+			$mail->Host = $row['mail_server'];
+			$mail->Username = $row['username'];
+			$mail->Password = $row['passwd'];
+			$mail->Port = $row['port_no'];
+
+			// Send message and process result
+			$send_retval = $mail->Send();
 			$error_info = '';
 			if ($send_retval === false)
 			{
 				// Make a 2nd attempt to send
-				$send_retval = $mail2->Send();
+				$send_retval = $mail->Send();
 				if ($send_retval !== false)
 				{
 					// Success
-					log_message_details_to_file(0,$mail2->Host,$details,$error_info);
-					return 0;
+					log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
+					return array(0,'');
 				}
 
 				// Send failure
-				if (isset($mail2->ErrorInfo))
+				if (isset($mail->ErrorInfo))
 				{
-					$error_info = $mail2->ErrorInfo;
+					$error_info = $mail->ErrorInfo;
 				}
 				else
 				{
 					$error_info = '';
 				}
-				log_message_details_to_file(2,$mail2->Host,$details,$error_info);
-				return 2;
+				log_message_info_to_file(2,$mail->Host,$mail_info,$error_info);
+				return array(2,$error_info);
 			}
 			else
 			{
 				// Success
-				log_message_details_to_file(0,$mail2->Host,$details,$error_info);
-				return 0;
+				log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
+				return array(0,'');
 			}
 		}
 		else
 		{
 			// Mail route not found
-			log_message_details_to_file(14,'',$details,'');
-			return 14;
+			log_message_info_to_file(14,'',$mail_info,'');
+			return array(14,'');
 		}
 	}
 	else
 	{
 		// Cannot connect to remote DB
-		log_message_details_to_file(1,'',$details,'');
-		return 1;
+		log_message_info_to_file(1,'',$mail_info,'');
+		return array(1,'');
 	}
 }
 
@@ -467,34 +420,34 @@ function date_and_time_now()
 
 //================================================================================
 /*
-Function log_message_details_to_file
+Function log_message_info_to_file
 */
 //================================================================================
 
-function log_message_details_to_file($error_code,$host,$details,$error_info)
+function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
 {
 	global $MailLogDir;
 
 	if (!is_dir("$MailLogDir"))
 		return;
-	if (isset($details['message_id']))
-		$id = $details['message_id'];
+	if (isset($mail_info['message_id']))
+		$id = $mail_info['message_id'];
 	else
 		$id = 0;
-	if (isset($details['from_name']))
-		$from_name = trim($details['from_name']);
+	if (isset($mail_info['from_name']))
+		$from_name = trim($mail_info['from_name']);
 	else
 		$from_name = '';
-	if (isset($details['from_addr']))
-		$from_addr = trim($details['from_addr']);
+	if (isset($mail_info['from_addr']))
+		$from_addr = trim($mail_info['from_addr']);
 	else
 		$from_addr = '';
-	if (isset($details['to_name']))
-		$to_name = trim($details['to_name']);
+	if (isset($mail_info['to_name']))
+		$to_name = trim($mail_info['to_name']);
 	else
 		$to_name = '';
-	if (isset($details['to_addr']))
-		$to_addr = trim($details['to_addr']);
+	if (isset($mail_info['to_addr']))
+		$to_addr = trim($mail_info['to_addr']);
 	else
 		$to_addr = '';
 	$log_file_name = 'mail-'.date('Y-m-d').'.log';
@@ -535,23 +488,22 @@ function email_previous_day_mail_log($station_id,$from_addr)
 	$log_file = "$MailLogDir/mail-"."$yesterday_date.log";
 	if (is_file($log_file))
 	{
-		$mail = new PHPMailer;
-		$mail->Subject = "Mail Log File for $station_id on $yesterday_date";
-		$message_text = "See attachment.\n";
-		$mail->IsHTML(false);
-		$mail->Body = $message_text;
-		$mail->AddAttachment($log_file);
-		$message_details = array();
-		$message_details['message_id'] = 0;
-		$message_details['from_addr'] = $from_addr;
-		$message_details['from_name'] = $station_id;
-		$message_details['to_addr'] = 'domains@andperry.com';
-		$message_details['to_name'] = '';
-		$error_code = deliver_mail($mail,$message_details,$station_id);
-		unset($mail);
-		return $error_code;
+		$message_info = array();
+		$message_info['subject'] = "Mail Log File for $station_id on $yesterday_date";
+		$message_info['plain_content'] = "See attachment.\n";
+		$message_info['from_addr'] = $from_addr;
+		$message_info['from_name'] = $station_id;
+		$message_info['to_addr'] = 'domains@andperry.com';
+		$message_info['to_name'] = '';
+		$attachments = array();
+		$attachments[$log_file] = true;
+		$error_info = output_mail($message_info,$station_id,$attachments);
+		return $error_info[0];
 	}
-	return -1;
+	else
+	{
+		return -1;
+	}
 }
 
 //==============================================================================

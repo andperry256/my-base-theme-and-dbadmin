@@ -365,6 +365,7 @@ function copy_transaction($account,$seq_no,$new_date)
 
 function record_scheduled_transaction($account,$seq_no)
 {
+	global $DBAdminURL, $local_site_dir, $FinanceDBId;
 	$db = admin_db_connect();
 	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no AND sched_freq<>'#' and sched_count<>0");
 	if ($row = mysqli_fetch_assoc($query_result))
@@ -450,45 +451,17 @@ function record_scheduled_transaction($account,$seq_no)
 		// Send e-mail alert if required
 		if (!empty($row['email_alert_id']))
 		{
+			$url = "$DBAdminURL/finance_db_scripts/send_email_alert.php";
+			$url .= "?site=$local_site_dir&recid={$row['email_alert_id']}&dt={$row['date']}";
 			if ($row['debit_amount'] > 0)
 			{
-				send_email_alert($row['email_alert_id'],$row['date'],$row['debit_amount']);
+				$dummy = file_get_contents("$url&amt={$row['debit_amount']}");
 			}
 			else
 			{
-				send_email_alert($row['email_alert_id'],$row['date'],$row['credit_amount']);
+				$dummy = file_get_contents("$url&amt={$row['credit_amount']}");
 			}
 		}
-	}
-}
-
-//==============================================================================
-
-function send_email_alert($rec_id,$date,$amount)
-{
-	global $MailHost;
-	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM email_alerts WHERE rec_id='$rec_id'");
-	if ($row = mysqli_fetch_assoc($query_result))
-	{
-		$mail = new PHPMailer();
-		$mail->Subject = $row['subject'];
-		$plain_text = $row['content'];
-		$plain_text = str_replace('{date}',title_date($date,0),$plain_text);
-		$plain_text = str_replace('{amount}',sprintf("%01.2f",$amount),$plain_text);
-		$html_text = str_replace("\n","<br />",$plain_text);
-		$html_text = str_replace("[","<b>",$html_text);
-		$html_text = str_replace("]","</b>",$html_text);
-		$mail->MsgHTML($html_text);
-		$mail->AltBody = $plain_text;
-		$message_details = array();
-		$message_details['message_id'] = 0;
-		$message_details['from_addr'] = $row['from_address'];
-		$message_details['from_name'] = $row['from_name'];
-		$message_details['to_addr'] = $row['to_address'];
-		$message_details['to_name'] = '';
-		$error_code = deliver_mail($mail,$message_details,$MailHost);
-		unset($mail);
 	}
 }
 

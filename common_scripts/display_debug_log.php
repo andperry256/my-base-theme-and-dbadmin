@@ -16,14 +16,14 @@
   {
     // Local server
     $debug_file_path[0] = "$RootDir/logs/php_error.log";
-    $debug_file_path[1] = "$BaseDir/wp-content/debug.log";
+    $debug_file_path[2] = "$RootDir/maintenance/wp_debug.log";
   }
   else
   {
     // Online site
     $debug_file_path[0] = "$RootDir/logs/php_error.log";
     $debug_file_path[1] = "$RootDir/logs/".str_replace('.','_',$MainDomain).'.php.error.log';
-    $debug_file_path[2] = "$BaseDir/wp-content/debug.log";
+    $debug_file_path[2] = "$RootDir/maintenance/wp_debug.log";
   }
 
   if (isset($_GET['clear']))
@@ -36,11 +36,11 @@
         unlink($file);
       }
     }
-    header("Location: ./load_display_debug_log.php?site={$_GET['site']}");
+    header("Location: ./load_display_debug_log.php?site=$local_site_dir");
     exit;
   }
-  $links = "<a href=\"./load_display_debug_log.php?site={$_GET['site']}\">Reload</a>";
-  $links .= " | <a href=\"./display_debug_log.php?site={$_GET['site']}&clear\">Clear</a>";
+  $links = "<a href=\"./load_display_debug_log.php?site=$local_site_dir\">Reload</a>";
+  $links .= " | <a href=\"./display_debug_log.php?site=$local_site_dir&clear\">Clear</a>";
 
   print("$links<br />\n");
   $files_found = false;

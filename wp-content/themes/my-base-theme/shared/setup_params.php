@@ -167,8 +167,10 @@ if (!is_file($site_path_defs_path))
 			{
 				$supercategory = 'none';
 			}
+			$uri_sub_path = '';
 			while ($tok !== false)
 			{
+				$uri_sub_path .= "/$tok";
 				set_header_image_paths($tok,'category');
 				if (is_file("$CustomPagesPath/$tok/footer.php"))
 				{
@@ -213,8 +215,10 @@ if (!is_file($site_path_defs_path))
 		$id = $category->term_id;
 		$hierarchy = get_category_parents($id, false, '/', true);
 		$tok = strtok($hierarchy,'/');
+		$uri_sub_path = '';
 		while ($tok !== false)
 		{
+			$uri_sub_path .= "/$tok";
 			set_header_image_paths($tok,'category');
 			if (is_file("$CustomPagesPath/$tok/footer.php"))
 			{

@@ -20,14 +20,14 @@
   {
     // Local server
     $debug_file_path[0] = "$RootDir/logs/php_error.log";
-    $debug_file_path[2] = "$RootDir/maintenance/wp_debug.log";
+    $debug_file_path[2] = "$RootDir/logs/wp_debug.log";
   }
   else
   {
     // Online site
     $debug_file_path[0] = "$RootDir/logs/php_error.log";
     $debug_file_path[1] = "$RootDir/logs/".str_replace('.','_',$MainDomain).'.php.error.log';
-    $debug_file_path[2] = "$RootDir/maintenance/wp_debug.log";
+    $debug_file_path[2] = "$RootDir/logs/wp_debug.log";
   }
 
   if (isset($_GET['clear']))

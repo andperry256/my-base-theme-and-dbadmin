@@ -386,6 +386,30 @@ function delete_session_var($name,$name2='')
 }
 
 //================================================================================
+
+function save_php_error_log()
+{
+	global $RootDir;
+	if (is_file("$RootDir/logs/php_error.log"))
+	{
+		copy("$RootDir/logs/php_error.log","$RootDir/logs/php_error.log.sav");
+	}
+}
+
+function restore_php_error_log()
+{
+	global $RootDir;
+	if (is_file("$RootDir/logs/php_error.log"))
+	{
+		unlink("$RootDir/logs/php_error.log");
+	}
+	if (is_file("$RootDir/logs/php_error.log.sav"))
+	{
+		rename("$RootDir/logs/php_error.log.sav","$RootDir/logs/php_error.log");
+	}
+}
+
+//================================================================================
 }
 //================================================================================
 ?>

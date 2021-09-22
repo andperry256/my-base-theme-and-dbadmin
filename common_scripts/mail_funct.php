@@ -48,7 +48,7 @@ function getmsg($mbox,$mid,$noattach=false)
 	$attachments = array();
 
 	// Header
-	$header = imap_header($mbox,$mid);
+	$header = imap_headerinfo($mbox,$mid);
 
 	// Body
 	$struct = imap_fetchstructure($mbox,$mid);

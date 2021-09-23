@@ -336,7 +336,7 @@ function copy_transaction($account,$seq_no,$new_date)
 		$new_acct_month = accounting_month($new_date);
 		mysqli_query($db,"UPDATE temp_transactions SET seq_no=$new_seq_no,date='$new_date',acct_month='$new_acct_month',reconciled=0");
 		mysqli_query($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
-		mysqli_query($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no");
+		mysqli_query($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no,acct_month='$new_acct_month'");
 		mysqli_query($db,"INSERT INTO splits SELECT * FROM temp_splits");
 		update_account_balances($account,$new_date);
 

@@ -29,8 +29,95 @@
     $debug_file_path[1] = "$RootDir/logs/".str_replace('.','_',$MainDomain).'.php.error.log';
     $debug_file_path[2] = "$RootDir/logs/wp_debug.log";
   }
+  $config = file("$BaseDir/wp-config.php");
+  $debug = false;
+  $debug_log = false;
+  $debug_display = false;
+  $ofp = fopen("$BaseDir/wp-config.new",'w');
+  foreach($config as $line)
+  {
+    if (substr($line,0,18) == "define('WP_DEBUG',")
+    {
+      if (isset($_POST['debug']))
+      {
+        $debug = true;
+      }
+      elseif (isset($_POST['submitted']))
+      {
+        $debug = false;
+      }
+      else
+      {
+        $debug = (trim(strtok(substr($line,18),')')) == 'true');
+      }
+      if ($debug)
+      {
+        fprintf($ofp,"define('WP_DEBUG', true);\n");
+      }
+      else
+      {
+        fprintf($ofp,"define('WP_DEBUG', false);\n");
+      }
+    }
+    elseif(substr($line,0,22) == "define('WP_DEBUG_LOG',")
+    {
+      $debug_log = trim(strtok(substr($line,22),')')," '");
+      fprintf($ofp,"$line");
+    }
+    elseif(substr($line,0,26) == "define('WP_DEBUG_DISPLAY',")
+    {
+      if (isset($_POST['debug_display']))
+      {
+        $debug_display = true;
+      }
+      elseif (isset($_POST['submitted']))
+      {
+        $debug_display = false;
+      }
+      else
+      {
+        $debug_display = (trim(strtok(substr($line,26),')')) == 'true');
+      }
+      if ($debug_display)
+      {
+        fprintf($ofp,"define('WP_DEBUG_DISPLAY', true);\n");
+      }
+      else
+      {
+        fprintf($ofp,"define('WP_DEBUG_DISPLAY', false);\n");
+      }
+    }
+    else
+    {
+      fprintf($ofp,str_replace('%','%%',$line));
+    }
+  }
+  fclose($ofp);
+  $config1 = file_get_contents("$BaseDir/wp-config.php");
+  $config2 = file_get_contents("$BaseDir/wp-config.new");
+  $config1a = file("$BaseDir/wp-config.php");
+  $config2a = file("$BaseDir/wp-config.new");
+  if (($config2 != $config1) && (count($config1a) == count($config2a)))
+  {
+    // Debug status has changed - update wp-config.php.
+    unlink("$BaseDir/wp-config.php");
+    rename("$BaseDir/wp-config.new","$BaseDir/wp-config.php");
+  }
+?>
+<fieldset>
+  <form method="post">
+    <p>WP_DEBUG:&nbsp;<input type="checkbox" name="debug" <?php if ($debug) echo " checked"; ?> />
+       &nbsp;&nbsp;&nbsp; WP_DEBUG_LOG:&nbsp;<?php if (!empty($debug_log)) echo "$debug_log"; ?>
+       &nbsp;&nbsp;&nbsp; WP_DEBUG_DISPLAY:&nbsp;<input type="checkbox" name="debug_display" <?php if ($debug_display) echo " checked"; ?> /></p>
+    <p>Clear&nbsp;Logs:&nbsp;<input type="checkbox" name="clear" /><p>
+    <p><input type="submit" value="Update/Reload"</p>
+    <input type="hidden" name="submitted" />
+  </form>
+</fieldset>
+<?php
 
-  if (isset($_GET['clear']))
+
+  if (isset($_POST['clear']))
   {
     foreach($debug_file_path as $file)
     {
@@ -40,13 +127,8 @@
         unlink($file);
       }
     }
-    header("Location: ./load_display_debug_log.php?site=$local_site_dir");
-    exit;
   }
-  $links = "<a href=\"./load_display_debug_log.php?site=$local_site_dir\">Reload</a>";
-  $links .= " | <a href=\"./display_debug_log.php?site=$local_site_dir&clear\">Clear</a>";
 
-  print("$links<br />\n");
   $files_found = false;
   foreach($debug_file_path as $file)
   {
@@ -64,11 +146,7 @@
     }
   }
   print("<br />\n");
-  if ($files_found)
-  {
-    print("$links<br />\n");
-  }
-  else
+  if (!$files_found)
   {
     print("No debug logs found\n");
   }

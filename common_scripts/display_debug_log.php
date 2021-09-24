@@ -103,6 +103,10 @@
     unlink("$BaseDir/wp-config.php");
     rename("$BaseDir/wp-config.new","$BaseDir/wp-config.php");
   }
+  else
+  {
+    unlink("$BaseDir/wp-config.new");
+  }
 ?>
 <fieldset>
   <form method="post">

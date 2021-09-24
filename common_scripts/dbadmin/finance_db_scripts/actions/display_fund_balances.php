@@ -41,11 +41,15 @@ function print_global_fund_balance_line($col1_style,$col2_style,$fund,$is_superf
 
 //==============================================================================
 
-$db = admin_db_connect();
-$table_cell_style = "padding:3px;vertical-align:top;";
+if (!isset($db))
+{
+	$db = admin_db_connect();
+}
+$table_style = "border-spacing:0; border-collapse:collapse;";
+$table_cell_style = "border:solid 1px #ccc;padding:0.2em;vertical-align:top;";
 $table_cell_style_ra = $table_cell_style. "text-align:right;";
-$table_cell_style_total = $table_cell_style_ra. "border-top-style:solid;border-bottom-style:solid;border-width:1px;border-color:steelblue";
-$table_filler_line = "line-height:10px;";
+$table_cell_style_total = $table_cell_style_ra. "border-color:steelblue";
+$table_filler_line = "line-height:0.7em;";
 
 $error = false;
 if (isset($_POST['submitted']))
@@ -105,7 +109,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 	{
 		$balances[$row['label']] = 0;
 	}
-	print("<table>\n");
+	print("<table style=\"$table_style\">\n");
 	$superfund = '';
 	$superfund_balance = 0;
 	$query_result = mysqli_query($db,"SELECT * FROM funds WHERE type='localised'");
@@ -196,7 +200,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 
 	// Process global funds
 	print("<h2>Global Funds</h2>\n");
-	print("<table>\n");
+	print("<table style=\"$table_style\">\n");
 	$superfund = '';
 	$superfund_balance = 0;
 	$query_result = mysqli_query($db,"SELECT * FROM funds WHERE type='global'");
@@ -248,52 +252,57 @@ if ((isset($_POST['submitted'])) && (!$error))
 	print("<h2>&nbsp;</h2>\n");
 }
 else
+{
 	print("<h1>Fund Balances</h1>\n");
+}
 
-// Generate form to input balance date
-print("<form method=\"post\">\n");
-print("<table cellpadding=\"5\">\n");
-print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"now\" checked></td><td>Now</td></tr>\n");
-print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"last_month\"></td><td>Last month</td></tr>\n");
-print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"last_year\"></td><td>Last year</td></tr>\n");
-print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"select\"></td><td>Select</td></tr>\n");
-print("</table>\n");
-print("<table cellpadding=\"5\">\n");
-print("<tr><td>Month:</td>\n");
-print("<td><select name=\"end_month\">\n");
-print("<option value=\"now\" selected>Now</option>\n");
-for ($month = 1; $month <= 12; $month++)
+if (!isset($NoForm))
 {
-	$month_name = monthName($month);
-	print("<option value=\"$month\">$month_name</option>\n");
-}
-print("</select></td>\n");
-print("<td><select name=\"end_year\">\n");
-print("<option value=\"now\" selected>Now</option>\n");
-$this_year = (int)date('Y');
-for ($year = START_YEAR; $year <= $this_year; $year++)
-{
-	print("<option value=\"$year\">$year</option>\n");
-}
-print("</select></td></tr>\n");
-print("<tr><td>Currency:</td>\n");
-print("<td colspan=2><select name=\"currency\">\n");
-$query_result = mysqli_query($db,"SELECT * FROM currencies ORDER BY id ASC");
-while($row = mysqli_fetch_assoc($query_result))
-{
-	$id = $row['id'];
-	print("<option value=\"$id\"");
-	if ($id == 'GBP')
+	// Generate form to input balance date
+	print("<form method=\"post\">\n");
+	print("<table cellpadding=\"5\">\n");
+	print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"now\" checked></td><td>Now</td></tr>\n");
+	print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"last_month\"></td><td>Last month</td></tr>\n");
+	print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"last_year\"></td><td>Last year</td></tr>\n");
+	print("<tr><td><input type=\"radio\" name=\"balance_date\" value=\"select\"></td><td>Select</td></tr>\n");
+	print("</table>\n");
+	print("<table cellpadding=\"5\">\n");
+	print("<tr><td>Month:</td>\n");
+	print("<td><select name=\"end_month\">\n");
+	print("<option value=\"now\" selected>Now</option>\n");
+	for ($month = 1; $month <= 12; $month++)
 	{
-		print(" SELECTED");
+		$month_name = monthName($month);
+		print("<option value=\"$month\">$month_name</option>\n");
 	}
-	print(">$id</option>\n");
-}
-print("</select></td>\n");
-print("<tr><td>&nbsp;</td><td colspan=\"2\"><input type=\"submit\" name=\"submitted\" value=\"Show\"></td></tr>\n");
+	print("</select></td>\n");
+	print("<td><select name=\"end_year\">\n");
+	print("<option value=\"now\" selected>Now</option>\n");
+	$this_year = (int)date('Y');
+	for ($year = START_YEAR; $year <= $this_year; $year++)
+	{
+		print("<option value=\"$year\">$year</option>\n");
+	}
+	print("</select></td></tr>\n");
+	print("<tr><td>Currency:</td>\n");
+	print("<td colspan=2><select name=\"currency\">\n");
+	$query_result = mysqli_query($db,"SELECT * FROM currencies ORDER BY id ASC");
+	while($row = mysqli_fetch_assoc($query_result))
+	{
+		$id = $row['id'];
+		print("<option value=\"$id\"");
+		if ($id == 'GBP')
+		{
+			print(" SELECTED");
+		}
+		print(">$id</option>\n");
+	}
+	print("</select></td>\n");
+	print("<tr><td>&nbsp;</td><td colspan=\"2\"><input type=\"submit\" name=\"submitted\" value=\"Show\"></td></tr>\n");
 
-print("</table>\n");
-print("</form>\n");
+	print("</table>\n");
+	print("</form>\n");
+}
 
 //==============================================================================
 ?>

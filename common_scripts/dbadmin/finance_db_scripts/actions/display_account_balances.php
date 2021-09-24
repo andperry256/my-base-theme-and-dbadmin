@@ -1,11 +1,15 @@
 <?php
 //==============================================================================
 
-$db = admin_db_connect();
-$table_cell_style = "padding:3px;vertical-align:top;";
+if (!isset($db))
+{
+	$db = admin_db_connect();
+}
+$table_style = "border-spacing:0; border-collapse:collapse;";
+$table_cell_style = "border:solid 1px #ccc;padding:0.2em;vertical-align:top;";
 $table_cell_style_ra = $table_cell_style. "text-align:right;";
-$table_cell_style_total = $table_cell_style_ra. "border-top-style:solid;border-bottom-style:solid;border-width:1px;border-color:steelblue";
-$table_filler_line = "line-height:10px;";
+$table_cell_style_total = $table_cell_style_ra. "border-color:steelblue";
+$table_filler_line = "line-height:0.7em;";
 
 $ofp = fopen("./templates/result.html", "w");
 
@@ -74,7 +78,8 @@ while ($row = mysqli_fetch_assoc($query_result))
 }
 
 // Output the information
-print("<table>\n");
+print("<h1>Account Balances</h1>\n");
+print("<table style=\"$table_style\">\n");
 $query_result = mysqli_query($db,"SELECT * FROM accounts ORDER BY sort_order ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {

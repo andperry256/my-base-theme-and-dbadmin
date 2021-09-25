@@ -121,7 +121,7 @@
 <?php
 
 
-  if (isset($_POST['clear']))
+  if ((isset($_POST['clear'])) || (isset($_GET['clear'])))
   {
     foreach($debug_file_path as $file)
     {

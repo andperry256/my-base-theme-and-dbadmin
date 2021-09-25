@@ -95,7 +95,12 @@ if ((isset($_POST['submitted'])) && (!$error))
 {
 	$currency=$_POST['currency'];
 	$end_date = MonthName((int)substr($end_month,5,2)).' '.substr($end_month,0,4);
-	print("<h1>Fund Balances - $end_date</h1>\n");
+	print("<h1>Fund Balances");
+	if (!isset($OffScreen))
+	{
+		print(" - $end_date");
+	}
+	print("</h1>\n");
 	if ($currency != 'GBP')
 	{
 		print("<h2>Currency - $currency</h2>\n");
@@ -256,7 +261,7 @@ else
 	print("<h1>Fund Balances</h1>\n");
 }
 
-if (!isset($NoForm))
+if (!isset($OffScreen))
 {
 	// Generate form to input balance date
 	print("<form method=\"post\">\n");

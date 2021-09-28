@@ -32,20 +32,30 @@ else
 
 //================================================================================
 /*
-Functions getmsg and getpart
+Function get_imap_message (and sub-function get_message_part)
 
-These functions are for the processing of a message read from a mailbox via.
-IMAP. The information analysed, extracted and stored in global data.
+This function is for the processing of a message read from a mailbox via IMAP.
+
+The function returns an array with the following elements:-
+  header (structure as returned by imap_headerinfo)
+	plain_content (as UTF-8)
+	html_content (as UTF-8)
+	charset
+
+In order to handle attachments, the following global variables need to be
+declared and used by the calling software:-
+	$AttachmentsDir
+	$TotalAttachmentSize
 */
 //================================================================================
 
-function getmsg($mbox,$mid,$noattach=false)
+function get_imap_message($mbox,$mid,$noattach=false)
 {
-	// Global data to be populated with message information.
-	// The main message may be plain text, HTML or both.
-	global $header,$htmlmsg,$plainmsg,$charset,$attachments;
+	global $TotalAttachmentSize;
+	global $htmlmsg,$plainmsg,$charset,$attachments;
 	$htmlmsg = $plainmsg = $charset = '';
 	$attachments = array();
+	$TotalAttachmentSize = 0;
 
 	// Header
 	$header = imap_headerinfo($mbox,$mid);
@@ -55,21 +65,31 @@ function getmsg($mbox,$mid,$noattach=false)
 	if ((!isset($struct->parts)) || (!$struct->parts))
 	{
 		// Not multipart
-		getpart($mbox,$mid,$struct,0,$noattach);
+		get_message_part($mbox,$mid,$struct,0,$noattach);
 	}
 	else
 	{
 		// Multipart: iterate through each part
 		foreach ($struct->parts as $partno0=>$part)
 		{
-			getpart($mbox,$mid,$part,$partno0+1,$noattach);
+			get_message_part($mbox,$mid,$part,$partno0+1,$noattach);
 		}
 	}
+
+	$return_info = array();
+	$return_info['header'] = $header;
+	if (strtolower($charset) == 'iso-8859-1')
+	{
+		$plainmsg = utf8_encode($plainmsg);
+		$htmlmsg = utf8_encode($htmlmsg);
+	}
+	$return_info['html_content'] = $htmlmsg;
+	$return_info['plain_content'] = $plainmsg;
+	$return_info['charset'] = $charset;
+	return $return_info;
 }
 
-//================================================================================
-
-function getpart($mbox,$mid,$part,$partno,$noattach=false)
+function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
 {
 	global $AttachmentsDir;
 	global $TotalAttachmentSize;
@@ -166,11 +186,7 @@ function getpart($mbox,$mid,$part,$partno,$noattach=false)
 				rename("$AttachmentsDir/$filename","$AttachmentsDir/$filename.bmp");
 			}
 		}
-
-		if (isset($TotalAttachmentSize))
-		{
-			$TotalAttachmentSize += filesize("$AttachmentsDir/$filename");
-		}
+		$TotalAttachmentSize += filesize("$AttachmentsDir/$filename");
 		fclose($ofp);
 	}
 
@@ -202,7 +218,7 @@ function getpart($mbox,$mid,$part,$partno,$noattach=false)
 	{
 		foreach ($part->parts as $partno0=>$subpart)
 		{
-			getpart($mbox,$mid,$subpart,$partno.'.'.($partno0+1));
+			get_message_part($mbox,$mid,$subpart,$partno.'.'.($partno0+1));
 		}
 	}
 }
@@ -409,17 +425,6 @@ function output_mail($mail_info,$host,$attachments=array())
 
 //================================================================================
 /*
-Function date_and_time_now
-*/
-//================================================================================
-
-function date_and_time_now()
-{
-	return date("Y-m-d H:i:s");
-}
-
-//================================================================================
-/*
 Function log_message_info_to_file
 */
 //================================================================================
@@ -504,68 +509,6 @@ function email_previous_day_mail_log($station_id,$from_addr)
 	{
 		return -1;
 	}
-}
-
-//==============================================================================
-/*
-Function handle_replaceable_utf8_characters
-
-This function is used to process UTF8 characters that can be replaced with a
-simplified alternative, thus avoiding potential problems that may occur with
-character set conversion.
-
-N.B. This function should be viewed as a workaround and not as a permanent
-substitute for the correct handling of character sets.
-*/
-//==============================================================================
-
-function handle_replaceable_utf8_characters($text)
-{
-	$text = str_replace(
-		array("\xe2\x80\x98",  // Left single smart quote
-		      "\xe2\x80\x99",  // Right single smart quote
-					"\xe2\x80\x9c",  // Left double smart quote
-					"\xe2\x80\x9d",  // Right double smart quote
-					"\xe2\x80\x93",  // EN-dash
-					"\xe2\x80\x94",  // EM-dash
-					"\xe2\x80\xa6",  // horizontal elipsis
-					"\xe2\x82\xac",  // Euro sign
-					"\xc2\xa0",      // non-breaking space
-					"\xc2\xa9",      // copyright symbol
-				),
-		array("'",
-		      "'",
-					'"',
-					'"',
-					'-',
-					'--',
-					'...',
-					'&euro;',
-					'&nbsp;',
-					'&copy;',
-				 ),
-		$text
-	);
-	return $text;
-}
-
-//==============================================================================
-/*
-Function convert_html_codes_to_plain_text
-
-This function is used to convert any HTML codes returned from calling
-handle_replaceable_utf8_characters into plain text equivalents.
-*/
-//================================================================================
-
-function convert_html_codes_to_plain_text($text)
-{
-	$text = str_replace(
-		array('&euro;','&nbsp;','&copy;'),
-		array('EUR',' ','(c)'),
-		$text
-	);
-	return $text;
 }
 
 //================================================================================

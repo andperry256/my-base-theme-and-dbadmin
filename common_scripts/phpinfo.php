@@ -1,7 +1,8 @@
 <?php
-	if (($_SERVER['REMOTE_ADDR'] != '212.159.74.141') && ($_SERVER['REMOTE_ADDR'] != '81.133.202.101') && (substr($_SERVER['REMOTE_ADDR'],0,10) != '192.168.0.'))
+	require("allowed_hosts.php");
+	if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (substr($_SERVER['REMOTE_ADDR'],0,10) != '192.168.0.'))
 	{
-		exit("Authentication Failure");
+		exit("Authentication failure");
 	}
 	phpinfo();
 ?>

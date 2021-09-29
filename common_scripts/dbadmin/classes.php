@@ -22,7 +22,14 @@ class db_record
 
   function FieldVal($field_name)
   {
-    return $this->fields[$field_name];
+    if (isset($this->fields[$field_name]))
+    {
+      return $this->fields[$field_name];
+    }
+    else
+    {
+      return false;
+    }
   }
 
   function FieldIsSet($field_name)
@@ -40,7 +47,14 @@ class db_record
 
   function OldPKVal($field_name)
   {
-    return $this->old_primary_keys[$field_name];
+    if (isset($this->old_primary_keys[$field_name]))
+    {
+      return $this->old_primary_keys[$field_name];
+    }
+    else
+    {
+      return false;
+    }
   }
 
   function SaveCustomVar($key,$val)
@@ -50,7 +64,14 @@ class db_record
 
   function CustomVarVal($key)
   {
-    return $this->$custom_vars[$key];
+    if (isset($this->$custom_vars[$key]))
+    {
+      return $this->$custom_vars[$key];
+    }
+    else
+    {
+      return false;
+    }
   }
 }
 

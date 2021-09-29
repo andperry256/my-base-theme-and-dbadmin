@@ -11,10 +11,16 @@
   {
     require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
   }
+  else
+  {
+    exit("Path definitions script not found");
+  }
   if (!isset($local_site_dir))
   {
     exit("Site not specified");
   }
+
+  // Set up debug file paths
   $debug_file_path = array();
   if (is_file("/Config/localhost.php"))
   {
@@ -29,6 +35,24 @@
     $debug_file_path[1] = "$RootDir/logs/".str_replace('.','_',$MainDomain).'.php.error.log';
     $debug_file_path[2] = "$RootDir/logs/wp_debug.log";
   }
+
+  // Clear logs if required
+  $clear_time_file_path = "$RootDir/maintenance/debug_log_clear_time.txt";
+  if ((isset($_POST['clear'])) || (isset($_GET['clear'])))
+  {
+    foreach($debug_file_path as $file)
+    {
+      if (is_file($file))
+      {
+        unlink($file);
+      }
+    }
+    $ofp = fopen($clear_time_file_path,'w');
+    fprintf($ofp,date('Y-m-d H:i:s'));
+    fclose($ofp);
+  }
+
+  // Manage debug settings in wp-config.php
   $config = file("$BaseDir/wp-config.php");
   $debug = false;
   $debug_log = false;
@@ -113,26 +137,19 @@
     <p>WP_DEBUG:&nbsp;<input type="checkbox" name="debug" <?php if ($debug) echo " checked"; ?> />
        &nbsp;&nbsp;&nbsp; WP_DEBUG_LOG:&nbsp;<?php if (!empty($debug_log)) echo "$debug_log"; ?>
        &nbsp;&nbsp;&nbsp; WP_DEBUG_DISPLAY:&nbsp;<input type="checkbox" name="debug_display" <?php if ($debug_display) echo " checked"; ?> /></p>
-    <p>Clear&nbsp;Logs:&nbsp;<input type="checkbox" name="clear" /><p>
+    <p>Clear&nbsp;Logs:&nbsp;<input type="checkbox" name="clear" />
+      <?php
+        if (is_file($clear_time_file_path))
+        {
+          print("&nbsp;&nbsp;&nbsp; [Last cleared ".trim(file_get_contents($clear_time_file_path)."]"));
+        }
+      ?>
+    </p>
     <p><input type="submit" value="Update/Reload"</p>
     <input type="hidden" name="submitted" />
   </form>
 </fieldset>
 <?php
-
-
-  if ((isset($_POST['clear'])) || (isset($_GET['clear'])))
-  {
-    foreach($debug_file_path as $file)
-    {
-      if (is_file($file))
-      {
-        // Delete log file
-        unlink($file);
-      }
-    }
-  }
-
   $files_found = false;
   foreach($debug_file_path as $file)
   {

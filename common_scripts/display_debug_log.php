@@ -27,18 +27,18 @@
   {
     // Local server
     $debug_file_path[0] = "$RootDir/logs/php_error.log";
-    $debug_file_path[2] = "$RootDir/logs/wp_debug.log";
+    $debug_file_path[1] = "$RootDir/logs/wp_debug.log";
   }
   else
   {
     // Online site
     $debug_file_path[0] = "$RootDir/logs/php_error.log";
-    $debug_file_path[1] = "$RootDir/logs/".str_replace('.','_',$MainDomain).'.php.error.log';
-    $debug_file_path[2] = "$RootDir/logs/wp_debug.log";
+    $debug_file_path[1] = "$RootDir/logs/wp_debug.log";
+    $debug_file_path[2] = "$BaseDir/error_log";
   }
 
   // Clear logs if required
-  $clear_time_file_path = "$RootDir/maintenance/debug_log_clear_time.txt";
+  $clear_time_file_path = "$RootDir/logs/debug_log_clear_time.txt";
   if ((isset($_POST['clear'])) || (isset($_GET['clear'])))
   {
     foreach($debug_file_path as $file)

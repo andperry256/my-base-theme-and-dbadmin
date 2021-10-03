@@ -387,6 +387,15 @@ function delete_session_var($name,$name2='')
 
 //================================================================================
 
+function include_inline_stylesheet($path)
+{
+	print("<style>\n");
+	include($path);
+	print("</style>\n");
+}
+
+//================================================================================
+
 function save_php_error_log()
 {
 	global $RootDir;

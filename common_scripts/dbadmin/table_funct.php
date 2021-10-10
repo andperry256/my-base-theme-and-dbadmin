@@ -976,16 +976,19 @@ function delete_record_set($table)
 			$record_offset = substr($key,7);
 
 			// Build up array of deletions indexed by record ID.
-			$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
-			if ($row = mysqli_fetch_assoc($query_result))
+			if (is_numeric($record_offset))
 			{
-				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
-				while ($row2 = mysqli_fetch_assoc($query_result2))
+				$query_result = mysqli_query($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
+				if ($row = mysqli_fetch_assoc($query_result))
 				{
-					$field_name = $row2['field_name'];
-					$primary_keys[$field_name] = $row[$field_name];
+					$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
+					while ($row2 = mysqli_fetch_assoc($query_result2))
+					{
+						$field_name = $row2['field_name'];
+						$primary_keys[$field_name] = $row[$field_name];
+					}
+					$deletions[$record_offset] = encode_record_id($primary_keys);
 				}
-				$deletions[$record_offset] = encode_record_id($primary_keys);
 			}
 		}
 	}

@@ -10,7 +10,7 @@ $table_cell_style = "border:solid 1px #ccc;padding:0.2em;vertical-align:top;";
 $table_cell_style_ra = $table_cell_style. "text-align:right;";
 $table_cell_style_total = $table_cell_style_ra. "border-color:steelblue";
 $table_filler_line = "line-height:0.7em;";
-$account_exclusions = select_excluded_accounts();
+$account_exclusions = select_excluded_accounts('label');
 
 // Initialise the balances array
 $balances = array();

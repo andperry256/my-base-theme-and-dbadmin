@@ -470,14 +470,13 @@ function record_scheduled_transaction($account,$seq_no)
 Function select_excluded_accounts
 
 This function generates the clause to be inserted into a MySQL query in order
-to exclude those accounts that are above the current user access level. It
-operates on the 'label' field as in the 'accounts' table, but this will need to
-be globally replaced with 'account' in the returned string when dealing with
-transactions.
+to exclude those accounts that are above the current user access level. The
+parameter $field_name indicates the field containing the account name in the
+query which is to be applied.
 */
 //==============================================================================
 
-function select_excluded_accounts()
+function select_excluded_accounts($field_name)
 {
 	$db1 = main_admin_db_connect();
 	$db2 = admin_db_connect();
@@ -491,7 +490,7 @@ function select_excluded_accounts()
 		{
 			if ($row2['access_level'] > $row['access_level'])
 			{
-					$result .= " AND label<>'{$row2['label']}'";
+					$result .= " AND $field_name<>'{$row2['label']}'";
 			}
 		}
 	}
@@ -503,14 +502,13 @@ function select_excluded_accounts()
 Function select_excluded_funds
 
 This function generates the clause to be inserted into a MySQL query in order
-to exclude those funds that are above the current user access level. It
-operates on the 'name' field as in the 'funs' table, but this will need to
-be globally replaced with 'fund' in the returned string when dealing with
-transactions or splits.
+to exclude those funds that are above the current user access level. The
+parameter $field_name indicates the field containing the fund name in the
+query which is to be applied.
 */
 //==============================================================================
 
-function select_excluded_funds()
+function select_excluded_funds($field_name)
 {
 	$db1 = main_admin_db_connect();
 	$db2 = admin_db_connect();
@@ -524,7 +522,7 @@ function select_excluded_funds()
 		{
 			if ($row2['access_level'] > $row['access_level'])
 			{
-					$result .= " AND name<>'{$row2['name']}'";
+					$result .= " AND $field_name<>'{$row2['name']}'";
 			}
 		}
 	}

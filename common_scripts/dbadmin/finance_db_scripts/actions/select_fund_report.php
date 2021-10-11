@@ -5,7 +5,7 @@ $db = admin_db_connect();
 
 print("<h1>Fund Report</h1>\n");
 print("<p>Please select the required fund:-</p>\n");
-$fund_exclusions = select_excluded_funds();
+$fund_exclusions = select_excluded_funds('name');
 
 $previous_superfund = '';
 $query_result = mysqli_query($db,"SELECT * FROM funds WHERE (type<>'built-in' OR name='-none-') $fund_exclusions");

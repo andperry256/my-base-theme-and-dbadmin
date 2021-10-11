@@ -8,8 +8,8 @@ $csv_file = 'report_'.date('Ymd').'_'.date('His').'.csv';
 $ofp2 = fopen("$BaseDir/admin_data/finances/$csv_file", "w");
 fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
 print("<h1>Transaction Report</h1>\n");
-$account_exclusions = str_replace('label','account',select_excluded_accounts());
-$fund_exclusions = str_replace('name','fund',select_excluded_funds());
+$account_exclusions = select_excluded_accounts('account');
+$fund_exclusions = select_excluded_funds('fund');
 
 // Account filter
 if (!isset($_GET['account']))

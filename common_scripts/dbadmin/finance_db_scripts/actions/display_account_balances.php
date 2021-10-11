@@ -10,12 +10,11 @@ $table_cell_style = "border:solid 1px #ccc;padding:0.2em;vertical-align:top;";
 $table_cell_style_ra = $table_cell_style. "text-align:right;";
 $table_cell_style_total = $table_cell_style_ra. "border-color:steelblue";
 $table_filler_line = "line-height:0.7em;";
-
-$ofp = fopen("./templates/result.html", "w");
+$account_exclusions = select_excluded_accounts();
 
 // Initialise the balances array
 $balances = array();
-$query_result = mysqli_query($db,"SELECT * FROM accounts");
+$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
@@ -29,7 +28,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 }
 
 // Calculate the balances
-$query_result = mysqli_query($db,"SELECT * FROM accounts ORDER BY sort_order ASC");
+$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions ORDER BY sort_order ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
@@ -80,7 +79,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 // Output the information
 print("<h1>Account Balances</h1>\n");
 print("<table style=\"$table_style\">\n");
-$query_result = mysqli_query($db,"SELECT * FROM accounts ORDER BY sort_order ASC");
+$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label IS NOT NULl $account_exclusions ORDER BY sort_order ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];

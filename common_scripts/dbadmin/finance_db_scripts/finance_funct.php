@@ -466,4 +466,70 @@ function record_scheduled_transaction($account,$seq_no)
 }
 
 //==============================================================================
+/*
+Function select_excluded_accounts
+
+This function generates the clause to be inserted into a MySQL query in order
+to exclude those accounts that are above the current user access level. It
+operates on the 'label' field as in the 'accounts' table, but this will need to
+be globally replaced with 'account' in the returned string when dealing with
+transactions.
+*/
+//==============================================================================
+
+function select_excluded_accounts()
+{
+	$db1 = main_admin_db_connect();
+	$db2 = admin_db_connect();
+	$user = get_session_var('user');
+	$result = '';
+	$query_result = mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
+	if ($row = mysqli_fetch_assoc($query_result))
+	{
+		$query_result2 = mysqli_query($db2,"SELECT * FROM accounts");
+		while ($row2 = mysqli_fetch_assoc($query_result2))
+		{
+			if ($row2['access_level'] > $row['access_level'])
+			{
+					$result .= " AND label<>'{$row2['label']}'";
+			}
+		}
+	}
+	return $result;
+}
+
+//==============================================================================
+/*
+Function select_excluded_funds
+
+This function generates the clause to be inserted into a MySQL query in order
+to exclude those funds that are above the current user access level. It
+operates on the 'name' field as in the 'funs' table, but this will need to
+be globally replaced with 'fund' in the returned string when dealing with
+transactions or splits.
+*/
+//==============================================================================
+
+function select_excluded_funds()
+{
+	$db1 = main_admin_db_connect();
+	$db2 = admin_db_connect();
+	$user = get_session_var('user');
+	$result = '';
+	$query_result = mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
+	if ($row = mysqli_fetch_assoc($query_result))
+	{
+		$query_result2 = mysqli_query($db2,"SELECT * FROM funds");
+		while ($row2 = mysqli_fetch_assoc($query_result2))
+		{
+			if ($row2['access_level'] > $row['access_level'])
+			{
+					$result .= " AND name<>'{$row2['name']}'";
+			}
+		}
+	}
+	return $result;
+}
+
+//==============================================================================
 ?>

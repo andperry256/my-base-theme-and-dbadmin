@@ -50,6 +50,7 @@ $table_cell_style = "border:solid 1px #ccc;padding:0.2em;vertical-align:top;";
 $table_cell_style_ra = $table_cell_style. "text-align:right;";
 $table_cell_style_total = $table_cell_style_ra. "border-color:steelblue";
 $table_filler_line = "line-height:0.7em;";
+$fund_exclusions = select_excluded_funds();
 
 $error = false;
 if (isset($_POST['submitted']))
@@ -117,7 +118,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 	print("<table style=\"$table_style\">\n");
 	$superfund = '';
 	$superfund_balance = 0;
-	$query_result = mysqli_query($db,"SELECT * FROM funds WHERE type='localised'");
+	$query_result = mysqli_query($db,"SELECT * FROM funds WHERE type='localised' $fund_exclusions");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		foreach ($balances as $label => $value)
@@ -208,7 +209,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 	print("<table style=\"$table_style\">\n");
 	$superfund = '';
 	$superfund_balance = 0;
-	$query_result = mysqli_query($db,"SELECT * FROM funds WHERE type='global'");
+	$query_result = mysqli_query($db,"SELECT * FROM funds WHERE type='global' $fund_exclusions");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$fund = $row['name'];

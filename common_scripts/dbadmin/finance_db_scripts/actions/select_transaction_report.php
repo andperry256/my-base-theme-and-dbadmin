@@ -4,6 +4,8 @@
 global $CustomPagesURL, $RelativePath;
 
 $db = admin_db_connect();
+$account_exclusions = select_excluded_accounts();
+$fund_exclusions = select_excluded_funds();
 
 print("<h1>Transaction Report</h1>\n");
 
@@ -14,7 +16,7 @@ print("<table cellpadding=\"10\">\n");
 print("<tr><td>Account:</td><td>\n");
 print("<select name=\"account\">\n");
 print("<option value=\"\">--all--</option>\n");
-$query_result = mysqli_query($db,"SELECT * FROM accounts ORDER BY name ASC");
+$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions ORDER BY name ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	print("<option value=\"{$row['label']}\">{$row['name']}</option>\n");
@@ -27,7 +29,7 @@ $previous_superfund = '';
 print("<tr><td>Fund:</td><td>\n");
 print("<select name=\"fund\">\n");
 print("<option value=\"\">--all--</option>\n");
-$query_result = mysqli_query($db,"SELECT * FROM funds ORDER BY name ASC");
+$query_result = mysqli_query($db,"SELECT * FROM funds WHERE name IS NOT NULL $fund_exclusions ORDER BY name ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$fund = $row['name'];

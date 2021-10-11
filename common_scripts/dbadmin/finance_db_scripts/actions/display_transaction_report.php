@@ -8,6 +8,8 @@ $csv_file = 'report_'.date('Ymd').'_'.date('His').'.csv';
 $ofp2 = fopen("$BaseDir/admin_data/finances/$csv_file", "w");
 fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
 print("<h1>Transaction Report</h1>\n");
+$account_exclusions = str_replace('label','account',select_excluded_accounts());
+$fund_exclusions = str_replace('name','fund',select_excluded_funds());
 
 // Account filter
 if (!isset($_GET['account']))
@@ -164,7 +166,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	mysqli_query($db,"CREATE TEMPORARY TABLE report LIKE transaction_report");
 
 	$payee_name = addslashes($payee_name);
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' AND fund LIKE '$fund_name' AND category LIKE '$category_name' AND payee LIKE '$payee_name' AND sched_freq='#'");
+	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND fund LIKE '$fund_name' AND category LIKE '$category_name' AND payee LIKE '$payee_name' AND sched_freq='#'");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		// Add transaction with matching parameters into the table
@@ -188,11 +190,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Fund and/or category has been specified. Process any splits relating
 		// to the given fund/category.
-		$query_result = mysqli_query($db,"SELECT * FROM splits WHERE fund LIKE '$fund_name' AND category LIKE '$category_name'");
+		$query_result = mysqli_query($db,"SELECT * FROM splits WHERE fund LIKE '$fund_name' $fund_exclusions AND category LIKE '$category_name'");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
-			$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
+			$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
@@ -211,7 +213,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			}
 
 			// Check for transaction at opposite end of transfer
-			$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' AND source_account='{$row['account']}' AND source_seq_no={$row['transact_seq_no']}");
+			$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND source_account='{$row['account']}' AND source_seq_no={$row['transact_seq_no']}");
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
@@ -234,11 +236,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Account has been specified. All funds and categories are included.
 		// Process all associated splits.
-		$query_result = mysqli_query($db,"SELECT * FROM splits");
+		$query_result = mysqli_query($db,"SELECT * FROM splits WHERE name IS NOT NULL $fund_exclusions");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
-			$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
+			$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table

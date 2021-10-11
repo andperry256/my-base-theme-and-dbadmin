@@ -4,8 +4,8 @@
 global $CustomPagesURL, $RelativePath;
 
 $db = admin_db_connect();
-$account_exclusions = select_excluded_accounts();
-$fund_exclusions = select_excluded_funds();
+$account_exclusions = select_excluded_accounts('label');
+$fund_exclusions = select_excluded_funds('name');
 
 print("<h1>Transaction Report</h1>\n");
 

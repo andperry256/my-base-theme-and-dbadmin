@@ -419,6 +419,32 @@ function restore_php_error_log()
 }
 
 //================================================================================
+
+function output_to_access_log($user='',$add_info='')
+{
+	global $AccessLogsDir;
+	if (is_dir($AccessLogsDir))
+	{
+		$date = date('Y-m-d');
+		$ofp = fopen("$AccessLogsDir/$date.log",'a');
+		$time = date('H:i:s');
+		$addr_str = substr("{$_SERVER['REMOTE_ADDR']}        ",0,15);
+		$uri_str = str_replace('%','%%',$_SERVER['REQUEST_URI']);
+		fprintf($ofp,"$date $time ".'-'." $addr_str $uri_str");
+		if (!empty($user))
+		{
+			fprintf($ofp," [user = $user]");
+		}
+		if (!empty($add_info))
+		{
+			fprintf($ofp," [$add_info]");
+		}
+		fprintf($ofp,"\n");
+	}
+	fclose($ofp);
+}
+
+//================================================================================
 }
 //================================================================================
 ?>

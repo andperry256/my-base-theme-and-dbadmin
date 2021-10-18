@@ -638,7 +638,7 @@ function save_record($record,$old_record_id,$new_record_id)
 			$query .= " $field={$new_mysql_fields[$field]}";
 		}
 		$query_result = mysqli_query($db,$query);
-		if (mysqli_num_rows($query_result) > 0)
+		if (($query_result !== false) && (mysqli_num_rows($query_result) > 0))
 		{
 			return report_error("Unable to save due to duplicate record ID.\n");
 		}

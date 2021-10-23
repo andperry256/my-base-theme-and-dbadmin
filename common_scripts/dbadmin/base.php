@@ -121,7 +121,11 @@ function display_sidebar_content()
   global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath;
   $db = admin_db_connect();
 
-  if (is_file("$CustomPagesPath/$RelativePath/page_logo.png"))
+  if (is_file("$CustomPagesPath/$RelativePath/page_logo.php"))
+  {
+    include("$CustomPagesPath/$RelativePath/page_logo.php");
+  }
+  elseif (is_file("$CustomPagesPath/$RelativePath/page_logo.png"))
   {
     print("<a href=\"$BaseURL/$RelativePath\"><img src=\"$CustomPagesURL/$RelativePath/page_logo.png\" /></a>\n");
   }

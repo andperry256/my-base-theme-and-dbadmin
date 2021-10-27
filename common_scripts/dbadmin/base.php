@@ -460,7 +460,7 @@ $mode = get_viewing_mode();
 if ($mode == 'mobile')
 {
   print("<div id=select-desktop>\n");
-  print("<p><button onclick=\"selectDesktopMode()\">Select Desktop Mode</button><br />");
+  print("<p><button style=\"background-color:gold;\" onclick=\"selectDesktopMode()\">Select Desktop Mode</button><br />");
   print("<span style=\"font-size:0.8em\">(uses a cookie)</span></p>\n");
   print("</div> <!--#select-desktop -->\n");
   print("<div style=\"clear:both\"></div>\n");
@@ -468,7 +468,7 @@ if ($mode == 'mobile')
 else
 {
   print("<div id=select-mobile>\n");
-  print("<p><button onclick=\"selectMobileMode()\">Select Mobile Mode</button><br />");
+  print("<p><button style=\"background-color:gold;\" onclick=\"selectMobileMode()\">Select Mobile Mode</button><br />");
   print("<span style=\"font-size:0.8em\">(uses a cookie)</span><p>\n");
   print("</div> <!--#select-mobile -->\n");
   print("<div style=\"clear:both\"></div>\n");

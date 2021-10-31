@@ -53,13 +53,13 @@ if (!is_file($site_path_defs_path))
 	$custom_categories_url = "$CustomScriptsURL/categories";
 	require("$CustomPagesPath/select_menu.php");
 	$page_uri = get_page_uri(get_the_ID());
+
+	require("$themes_dir/my-base-theme/shared/functions.php");
 	if (is_file("$CustomScriptsPath/functions.php"))
 	{
 		include("$CustomScriptsPath/functions.php");
 	}
 	set_default_header_image_paths();
-
-	//================================================================================
 
 	if (is_file("$CustomScriptsPath/footer.php"))
 	{
@@ -69,6 +69,8 @@ if (!is_file($site_path_defs_path))
 	{
 		$custom_footer_script = '';
 	}
+
+	//================================================================================
 
 	if (is_page())
 	{
@@ -106,8 +108,13 @@ if (!is_file($site_path_defs_path))
 			}
 			if (is_file("$CustomPagesPath/$uri_sub_path/styles.css"))
 			{
-				// Add stylesheet to hierarchy
+				// Add linked stylesheet
 				output_stylesheet_link($CustomPagesURL,$uri_sub_path);
+			}
+			if (is_file("$CustomPagesPath/$uri_sub_path/inline-styles.css"))
+			{
+				// Add inline stylesheet
+				include_inline_stylesheet("$CustomPagesPath/$uri_sub_path/inline-styles.css");
 			}
 			if (is_file("$CustomPagesPath/$uri_sub_path/authentication.php"))
 			{
@@ -184,8 +191,13 @@ if (!is_file($site_path_defs_path))
 				}
 				if (is_file("$custom_categories_path/$uri_sub_path/styles.css"))
 				{
-					// Add stylesheet to hierarchy
+					// Add linked stylesheet
 					output_stylesheet_link($custom_categories_url,$tok);
+				}
+				if (is_file("$custom_categories_path/$tok/inline-styles.css"))
+				{
+					// Add inline stylesheet
+					include_inline_stylesheet("$custom_categories_path/$tok/inline-styles.css");
 				}
 				if ((isset($enable_supercategories)) && ($enable_supercategories))
 				{
@@ -232,8 +244,13 @@ if (!is_file($site_path_defs_path))
 			}
 			if (is_file("$custom_categories_path/$uri_sub_path/styles.css"))
 			{
-				// Add stylesheet to hierarchy
+				// Add linked stylesheet
 				output_stylesheet_link($custom_categories_url,$tok);
+			}
+			if (is_file("$custom_categories_path/$tok/inline-styles.css"))
+			{
+				// Add inline stylesheet
+				include_inline_stylesheet("$custom_categories_path/$tok/inline-styles.css");
 			}
 			$tok = strtok('/');
 		}

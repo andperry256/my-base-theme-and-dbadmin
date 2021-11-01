@@ -54,7 +54,6 @@ if (!is_file($site_path_defs_path))
 	require("$CustomPagesPath/select_menu.php");
 	$page_uri = get_page_uri(get_the_ID());
 
-	require("$themes_dir/my-base-theme/shared/functions.php");
 	if (is_file("$CustomScriptsPath/functions.php"))
 	{
 		include("$CustomScriptsPath/functions.php");

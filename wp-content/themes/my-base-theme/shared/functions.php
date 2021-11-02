@@ -202,7 +202,7 @@ function run_session()
  		$name = array($name,'');
  	}
 
- 	if (count($name) > 2)
+ 	if (count($name) != 2)
  	{
  		return false;  // This should not occur
  	}
@@ -237,7 +237,7 @@ function run_session()
  		$name = array($name,'');
  	}
 
- 	if (count($name) > 2)
+ 	if (count($name) != 2)
  	{
  		return false;  // This should not occur
  	}
@@ -290,7 +290,7 @@ function run_session()
  		$name = array($name,'');
  	}
 
- 	if (count($name) > 2)
+ 	if (count($name) != 2)
  	{
  		return false;  // This should not occur
  	}
@@ -379,7 +379,7 @@ function run_session()
  		$name = array($name,'');
  	}
 
- 	if (count($name) > 2)
+ 	if (count($name) != 2)
  	{
  		return false;  // This should not occur
  	}

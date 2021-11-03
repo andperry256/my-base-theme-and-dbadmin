@@ -21,7 +21,7 @@
 ?>
 
 <!DOCTYPE html>
-<html <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?> >
 <head>
 <meta charset="<?php bloginfo( 'charset' ); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,9 +35,10 @@
 ?>
 </head>
 
-<body <?php body_class(); ?>>
+<body <?php body_class(); ?> >
 
 <div id="super-container">
+
 <header id="masthead" class="site-header" role="banner">
 	<div class="site-branding">
 		<?php
@@ -60,20 +61,21 @@
 			<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
 		<?php else : ?>
 			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
-		<?php
-			endif;
+		<?php endif; ?>
 
+		<?php
 			$description = get_bloginfo( 'description', 'display' );
-			if ( $description || is_customize_preview() ) : ?>
-				<p class="site-description"><?php echo $description; /* WPCS: xss ok. */
+			if ( $description || is_customize_preview() ) :
 		?>
-		</p>
+			<p class="site-description"><?php echo $description;?> </p>  /* WPCS: xss ok. */
 		<?php endif; ?>
 	</div><!-- .site-branding -->
 
 	<?php
 		if (isset($CustomThemePath))
 		{
+			// The main stylesheet (style.css) is included by default. Include the associated
+			// light/dark theme stylesheet here if applicable.
 			if ((is_file("$CustomThemePath/style-light.css")) && (get_session_var('theme_mode') == 'light'))
 			{
 				print("<link rel='stylesheet' id='-home-styles-css'  href='$CustomThemeURL/style-light.css?v=$link_version' type='text/css' media='all' />");
@@ -86,14 +88,15 @@
 	?>
 
 	<?php if ($menu_id != 'none'): ?>
-	<nav id="site-navigation" class="main-navigation" role="navigation">
-		<div id="main-menu">
-		<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( $menu_description, 'my-base-theme' ); ?></button>
-		<?php wp_nav_menu( array( 'menu' => $menu_id,  'menu_class' => 'main-navigation', 'theme_location' => 'menu-1', 'menu_id' => 'primary-menu' ) ); ?>
-		</div>
-	</nav><!-- #site-navigation -->
+		<nav id="site-navigation" class="main-navigation" role="navigation">
+			<div id="main-menu">
+			<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( $menu_description, 'my-base-theme' ); ?></button>
+			<?php wp_nav_menu( array( 'menu' => $menu_id,  'menu_class' => 'main-navigation', 'theme_location' => 'menu-1', 'menu_id' => 'primary-menu' ) ); ?>
+			</div>
+		</nav><!-- #site-navigation -->
 	<?php endif; ?>
 </header><!-- #masthead -->
+
 <div id="page" class="site">
 	<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'my-base-theme' ); ?></a>
 	<div id="content" class="site-content">

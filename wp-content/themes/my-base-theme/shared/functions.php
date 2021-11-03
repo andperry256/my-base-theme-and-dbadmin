@@ -1,10 +1,12 @@
 <?php
 //================================================================================
 /*
- * My Base Theme functions and definitions.
+ * My Base Theme - Additional Functions
  *
- * Additional functions that may need to be accessed by scripts running
- * outside the WordPress environment.
+ * Includes functions that may need to be accessed:-
+ * 1. By scripts running outside the WordPress environment.
+ * 2. By scripts in the wp-custom-scripts directory.
+ * 3. By child theme scripts.
  */
 //================================================================================
 
@@ -188,7 +190,7 @@ function run_session()
  * or whether they have been saved to $GlobalSessionVars and the PHP session
  * closed.
  *
- * Each function takes a parameter $name which can be one of:-
+ * Each function takes a parameter '$name' which can be one of:-
  * 1. A single name to index a simple array.
  * 2. An array of two names to index a 2-dimensional array.
  */
@@ -204,7 +206,7 @@ function run_session()
 
  	if (count($name) != 2)
  	{
- 		return false;  // This should not occur
+ 		return false;
  	}
  	elseif (isset($GlobalSessionVars))
  	{
@@ -239,7 +241,7 @@ function run_session()
 
  	if (count($name) != 2)
  	{
- 		return false;  // This should not occur
+ 		return false;
  	}
  	elseif (($check) && (!session_var_is_set($name[0],$name[1])))
  	{
@@ -281,7 +283,6 @@ function run_session()
  		}
  		else
  		{
- 			// This should not occur
  			exit("ERROR - Unable to connect to WP database.");
  		}
  	}
@@ -292,7 +293,7 @@ function run_session()
 
  	if (count($name) != 2)
  	{
- 		return false;  // This should not occur
+ 		return false;
  	}
  	elseif (isset($GlobalSessionVars))
  	{
@@ -370,7 +371,6 @@ function run_session()
  		}
  		else
  		{
- 			// This should not occur
  			exit("ERROR - Unable to connect to WP database.");
  		}
  	}
@@ -381,7 +381,7 @@ function run_session()
 
  	if (count($name) != 2)
  	{
- 		return false;  // This should not occur
+ 		return false;
  	}
  	elseif (isset($GlobalSessionVars))
  	{
@@ -518,7 +518,6 @@ function set_header_image_paths($slug,$type)
  * Function output_page_header
  *
  * This function is used to output the main title header of the current page.
- * It is dependent upon the installation of the 'Secondary Title' plugin.
  */
 //================================================================================
 
@@ -544,7 +543,7 @@ function output_page_header()
  *
  * This function is used extract and output a given portion of the page content
  * and is for use when the content section of a page is being built using a custom
- * PHP script. A numeric part number is passed as a paramaeter and this indicates
+ * PHP script. A numeric part number is passed as a parameter and this indicates
  * that the text is to be extracted from between the following tags in the
  * WordPress page content:-
  *

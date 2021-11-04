@@ -447,7 +447,7 @@ function run_session()
 
 function set_default_header_image_paths()
 {
-	$image_file_exts = array( 'png', 'jpg' );
+	$image_file_exts = array( 'svg', 'png', 'jpg' );
 	global $desktop_header_image_path;
 	global $desktop_header_image_url;
 	global $intermediate_header_image_path;

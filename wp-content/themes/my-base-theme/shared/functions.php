@@ -748,7 +748,7 @@ function output_to_access_log($user='',$add_info='')
 {
 	global $AccessLogsDir;
 	global $BaseDir;
-	require("$BaseDir/common_scripts/allowed_hosts.php");
+	include("$BaseDir/common_scripts/allowed_hosts.php");
 	if (is_dir($AccessLogsDir))
 	{
 		$date = date('Y-m-d');
@@ -775,8 +775,8 @@ function output_to_access_log($user='',$add_info='')
 			fprintf($ofp," [$add_info]");
 		}
 		fprintf($ofp,"\n");
+		fclose($ofp);
 	}
-	fclose($ofp);
 }
 
 //================================================================================

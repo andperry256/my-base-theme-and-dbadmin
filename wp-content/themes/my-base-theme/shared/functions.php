@@ -747,12 +747,23 @@ function restore_php_error_log()
 function output_to_access_log($user='',$add_info='')
 {
 	global $AccessLogsDir;
+	global $BaseDir;
+	require("$BaseDir/common_scripts/allowed_hosts.php");
 	if (is_dir($AccessLogsDir))
 	{
 		$date = date('Y-m-d');
 		$ofp = fopen("$AccessLogsDir/$date.log",'a');
 		$time = date('H:i:s');
-		$addr_str = substr("{$_SERVER['REMOTE_ADDR']}        ",0,15);
+		$addr_str = $_SERVER['REMOTE_ADDR'];
+		if (substr($addr_str,0,8) == '192.168.')
+		{
+			$addr_str = '[Local]';
+		}
+		elseif (isset($allowed_hosts[$addr_str]))
+		{
+			$addr_str = "[{$allowed_hosts[$addr_str]}]";
+		}
+		$addr_str = substr("$addr_str               ",0,15);
 		$uri_str = str_replace('%','%%',$_SERVER['REQUEST_URI']);
 		fprintf($ofp,"$date $time ".'-'." $addr_str $uri_str");
 		if (!empty($user))

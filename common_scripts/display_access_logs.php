@@ -1,29 +1,56 @@
-<?php
-//==============================================================================
-/*
- This is a common script to display access logs for the given site.
- It must be included by a DBAdmin action script display_access_logs.php
- within the given site.
-
- The following variables must be pre-set:-
- $AccessLogsDir
- $BaseURL
- $RelativePath
-*/
-//==============================================================================
-?>
+<html><head>
 <script>
-	function selectFile(dropdown,mode)
+	function selectFile(dropdown,site,mode)
 	{
 		var option_value = dropdown.options[dropdown.selectedIndex].value;
-		location.href = './?-action=display_access_logs&file=' + encodeURIComponent(option_value) + '&mode=' + mode;
+		location.href = './display_access_logs.php?site=' + site + '&file=' + encodeURIComponent(option_value) + '&mode=' + mode;
 	}
 </script>
+<style>
+	html {
+		font-size: 16px;
+		font-family: Arial,Helvetica,Sans-serif;
+	}
+	table {
+	  border-spacing: 0;
+	  border-collapse: collapse;
+	}	td {
+		padding: 0.7em;
+		border: solid 1px #ccc;
+	}
+</style>
+</head>
+<body>
 <?php
 //==============================================================================
 
-global $AccessLogsDir;
+require("allowed_hosts.php");
+if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
+{
+	exit("Authentication failure");
+}
+if (isset($_GET['site']))
+{
+	$local_site_dir = $_GET['site'];
+}
+if (is_file("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php"))
+{
+	require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+}
+else
+{
+	exit("Path definitions script not found");
+}
+if (!isset($local_site_dir))
+{
+	exit("Site not specified");
+}
+if ((!isset($AccessLogsDir)) || (!is_dir($AccessLogsDir)))
+{
+	exit("Access log directory not found");
+}
 
+require("date_funct.php");
 $today_date = date('Y-m-d');
 if (isset($_GET['file']))
 {
@@ -46,7 +73,7 @@ print("<h1>Display Access Logs</h1>\n");
 // Output the date selector
 $files = scandir($AccessLogsDir);
 arsort($files);
-$select1 = "<select name=\"file1\" onchange=\"selectFile(this,'count_summary')\">\n";
+$select1 = "<select name=\"file1\" onchange=\"selectFile(this,'$local_site_dir','count_summary')\">\n";
 $first_item_processed = false;
 foreach($files as $file)
 {
@@ -80,9 +107,9 @@ $select2 = str_replace('$file1','$file2',$select1);
 $select2 = str_replace('count_summary','full_log',$select2);
 print("<table>\n");
 print("<tr><td>Count Summary:</td><td>$select1</td>");
-print("<td><a href=\"$BaseURL/$RelativePath/?-action=display_access_logs&file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
+print("<td><a href=\"$BaseURL/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
 print("<tr><td>Full Log:</td><td>$select2</td>");
-print("<td><a href=\"$BaseURL/$RelativePath/?-action=display_access_logs&file=$current_file&mode=full_log\">Select</a></td></tr>\n");
+print("<td><a href=\"$BaseURL/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=full_log\">Select</a></td></tr>\n");
 print("</table>\n");
 
 // Output the access data for the given date
@@ -150,3 +177,4 @@ else
 
 //==============================================================================
 ?>
+</body></html>

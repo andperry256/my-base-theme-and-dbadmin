@@ -14,9 +14,14 @@
 	table {
 	  border-spacing: 0;
 	  border-collapse: collapse;
-	}	td {
+	}
+	td {
 		padding: 0.7em;
 		border: solid 1px #ccc;
+	}
+	a:link,
+	a:visited {
+		color: steelblue;
 	}
 </style>
 </head>

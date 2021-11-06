@@ -881,7 +881,7 @@ function handle_record($action,$params)
 	{
 		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"{$_GET['-returnurl']}\">Go&nbsp;Back</a></div>");
 	}
-	elseif (session_var_is_set('get_vars','-returnurl'))
+	elseif (session_var_is_set(array('get_vars','-returnurl')))
 	{
 		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".get_session_var('get_vars','-returnurl')."\">Go&nbsp;Back</a></div>");
 	}
@@ -906,7 +906,7 @@ function handle_record($action,$params)
 		$param_list .= "&-returnurl=";
 		$param_list .= urlencode($_GET['-returnurl']);
 	}
-	elseif (session_var_is_set('get_vars','-returnurl'))
+	elseif (session_var_is_set(array('get_vars','-returnurl')))
 	{
 		$param_list .= "&-returnurl=";
 		$param_list .= urlencode(get_session_var('get_vars','-returnurl'));
@@ -1004,7 +1004,7 @@ function handle_record($action,$params)
 					}
 					elseif ($widget_type == 'checkbox')
 					{
-						if (session_var_is_set('post_vars',"field_$field_name"))
+						if (session_var_is_set(array('post_vars',"field_$field_name")))
 						{
 							$value = 1;
 						}
@@ -1015,7 +1015,7 @@ function handle_record($action,$params)
 					}
 					else
 					{
-						$value = stripslashes(get_session_var('post_vars',"field_$field_name"));
+						$value = stripslashes(get_session_var(array('post_vars',"field_$field_name")));
 					}
 				}
 				elseif (($action == 'edit') || ($action == 'update'))
@@ -1233,9 +1233,9 @@ function load_return_url()
 			header("Location: {$_GET['-returnurl']}");
 			exit;
 		}
-		elseif (session_var_is_set('get_vars','-returnurl'))
+		elseif (session_var_is_set(array('get_vars','-returnurl')))
 		{
-			header("Location: ".get_session_var('get_vars','-returnurl'));
+			header("Location: ".get_session_var(array('get_vars','-returnurl')));
 			exit;
 		}
 	}

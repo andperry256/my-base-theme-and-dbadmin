@@ -87,7 +87,7 @@ if (session_var_is_set('get_vars'))
 }
 foreach ($_GET as $key => $value)
 {
-  update_session_var('get_vars',$value,$key);
+  update_session_var(array('get_vars',$key),$value);
 }
 if (session_var_is_set('post_vars'))
 {
@@ -95,7 +95,7 @@ if (session_var_is_set('post_vars'))
 }
 foreach ($_POST as $key => $value)
 {
-  update_session_var('post_vars',$value,$key);
+  update_session_var(array('post_vars',$key),$value);
 }
 if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
 {

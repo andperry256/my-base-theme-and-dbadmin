@@ -19,6 +19,11 @@
 		padding: 0.7em;
 		border: solid 1px #ccc;
 	}
+	th {
+		padding: 0.7em;
+		border: solid 1px #ccc;
+		background-color: #ddd;
+	}
 	a:link,
 	a:visited {
 		color: steelblue;
@@ -173,9 +178,50 @@ if ($display_mode == 'count_summary')
 else
 {
 	print("<table>\n");
+	print("<tr><th>Time</th><th>Originator</th><th>URL</th><th>User</th><th>Referrer</th><th>Additional Info</th></tr>\n");
 	foreach($content as $line)
 	{
-		print("<tr><td>$line</td></tr>\n");
+		$time = substr($line,11,8);
+		$originator = trim(strtok(substr($line,19),'/'),'- ');
+		$line = '/'.strtok("\n");
+		$start_pos = strpos($line,'[user');
+		if ($start_pos !== false)
+		{
+			$tempstr = substr($line,$start_pos);
+			$end_pos = strpos($line,']',$start_pos);
+			$user = substr($line,$start_pos+8,$end_pos-$start_pos-8);
+			$line = str_replace("[user = $user]",'',$line);
+		}
+		else
+		{
+			$user = '';
+		}
+		$start_pos = strpos($line,'[referrer');
+		if ($start_pos !== false)
+		{
+		  $tempstr = substr($line,$start_pos);
+		  $end_pos = strpos($line,']',$start_pos);
+		  $referrer = substr($line,$start_pos+12,$end_pos-$start_pos-12);
+			$line = str_replace("[referrer = $referrer]",'',$line);
+		}
+		else
+		{
+		  $referrer = '';
+		}
+		$start_pos = strpos($line,'[');
+		if ($start_pos !== false)
+		{
+		  $tempstr = substr($line,$start_pos);
+		  $end_pos = strpos($line,']',$start_pos);
+		  $add_info = substr($line,$start_pos+1,$end_pos-$start_pos-1);
+			$line = str_replace("[$add_info]",'',$line);
+		}
+		else
+		{
+		  $add_info = '';
+		}
+		$url = trim($line);
+		print("<tr><td>$time</td><td>$originator</td><td>$url</td><td>$user</td><td>$referrer</td><td>$add_info</td></tr>\n");
 	}
 	print("</table>\n");
 }

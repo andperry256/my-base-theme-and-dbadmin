@@ -78,12 +78,21 @@ else
 {
 	$display_mode = "count_summary";
 }
+if (isset($_GET['exclude-me']))
+{
+	$incexc = 'exclude-me';
+}
+else
+{
+	$incexc = 'include-me';
+}
+
 print("<h1>Display Access Logs</h1>\n");
 
 // Output the date selector
 $files = scandir($AccessLogsDir);
 arsort($files);
-$select1 = "<select name=\"file1\" onchange=\"selectFile(this,'$local_site_dir','count_summary')\">\n";
+$select1 = "<select name=\"file1\" onchange=\"selectFile(this,'$local_site_dir','count_summary&$incexc')\">\n";
 $first_item_processed = false;
 foreach($files as $file)
 {
@@ -120,6 +129,16 @@ print("<tr><td>Count Summary:</td><td>$select1</td>");
 print("<td><a href=\"$BaseURL/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
 print("<tr><td>Full Log:</td><td>$select2</td>");
 print("<td><a href=\"$BaseURL/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=full_log\">Select</a></td></tr>\n");
+print("<tr><td colspan=3>");
+if ($incexc =='exclude-me')
+{
+	print("<a href=\"./display_access_logs.php?site=$local_site_dir&file=$current_file&mode=$display_mode&include-me\">Include Me</a>");
+}
+else
+{
+	print("<a href=\"./display_access_logs.php?site=$local_site_dir&file=$current_file&mode=$display_mode&exclude-me\">Exclude Me</a>");
+}
+print("</td></tr>");
 print("</table>\n");
 
 // Output the access data for the given date
@@ -182,46 +201,66 @@ else
 	foreach($content as $line)
 	{
 		$time = substr($line,11,8);
-		$originator = trim(strtok(substr($line,19),'/'),'- ');
-		$line = '/'.strtok("\n");
-		$start_pos = strpos($line,'[user');
-		if ($start_pos !== false)
+		$line = substr($line,21);
+		$originator = strtok($line,'/');
+		$originator = trim($originator,'[]- ');
+		if (($incexc == 'exclude-me') &&
+		   	(($originator == $_SERVER['REMOTE_ADDR']) ||
+			   ((isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && ($originator == $allowed_hosts[$_SERVER['REMOTE_ADDR']]))))
 		{
-			$tempstr = substr($line,$start_pos);
-			$end_pos = strpos($line,']',$start_pos);
-			$user = substr($line,$start_pos+8,$end_pos-$start_pos-8);
-			$line = str_replace("[user = $user]",'',$line);
+			// No action - client IP address is excluded
 		}
 		else
 		{
-			$user = '';
+			// Finish processing and output the line
+			$line = '/'.strtok("\n");
+
+			// Check for a user directive
+			$start_pos = strpos($line,'[user');
+			if ($start_pos !== false)
+			{
+				$tempstr = substr($line,$start_pos);
+				$end_pos = strpos($line,']',$start_pos);
+				$user = substr($line,$start_pos+8,$end_pos-$start_pos-8);
+				$line = str_replace("[user = $user]",'',$line);
+			}
+			else
+			{
+				$user = '';
+			}
+
+			// Check for a referrer directive
+			$start_pos = strpos($line,'[referrer');
+			if ($start_pos !== false)
+			{
+				$tempstr = substr($line,$start_pos);
+				$end_pos = strpos($line,']',$start_pos);
+				$referrer = substr($line,$start_pos+12,$end_pos-$start_pos-12);
+				$line = str_replace("[referrer = $referrer]",'',$line);
+			}
+			else
+			{
+				$referrer = '';
+			}
+
+			// Check for an additional info directive
+			$start_pos = strpos($line,'[');
+			if ($start_pos !== false)
+			{
+				$tempstr = substr($line,$start_pos);
+				$end_pos = strpos($line,']',$start_pos);
+				$add_info = substr($line,$start_pos+1,$end_pos-$start_pos-1);
+				$line = str_replace("[$add_info]",'',$line);
+			}
+			else
+			{
+				$add_info = '';
+			}
+
+			// The remainder of rhe line should constitute the page URL
+			$url = trim($line);
+			print("<tr><td>$time</td><td>$originator</td><td>$url</td><td>$user</td><td>$referrer</td><td>$add_info</td></tr>\n");
 		}
-		$start_pos = strpos($line,'[referrer');
-		if ($start_pos !== false)
-		{
-		  $tempstr = substr($line,$start_pos);
-		  $end_pos = strpos($line,']',$start_pos);
-		  $referrer = substr($line,$start_pos+12,$end_pos-$start_pos-12);
-			$line = str_replace("[referrer = $referrer]",'',$line);
-		}
-		else
-		{
-		  $referrer = '';
-		}
-		$start_pos = strpos($line,'[');
-		if ($start_pos !== false)
-		{
-		  $tempstr = substr($line,$start_pos);
-		  $end_pos = strpos($line,']',$start_pos);
-		  $add_info = substr($line,$start_pos+1,$end_pos-$start_pos-1);
-			$line = str_replace("[$add_info]",'',$line);
-		}
-		else
-		{
-		  $add_info = '';
-		}
-		$url = trim($line);
-		print("<tr><td>$time</td><td>$originator</td><td>$url</td><td>$user</td><td>$referrer</td><td>$add_info</td></tr>\n");
 	}
 	print("</table>\n");
 }

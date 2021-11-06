@@ -770,6 +770,11 @@ function output_to_access_log($user='',$add_info='')
 		{
 			fprintf($ofp," [user = $user]");
 		}
+		if ((isset($_SERVER['HTTP_REFERER'])) && (!empty($_SERVER['HTTP_REFERER'])))
+		{
+			$referrer_str = str_replace('%','%%',$_SERVER['HTTP_REFERER']);
+			fprintf($ofp,$referrer_str);
+		}
 		if (!empty($add_info))
 		{
 			fprintf($ofp," [$add_info]");

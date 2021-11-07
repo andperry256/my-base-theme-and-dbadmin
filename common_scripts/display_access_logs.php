@@ -157,6 +157,10 @@ if ($display_mode == 'count_summary')
 	{
 		$ip = substr($line,22,15);
 		$page = strtok(substr($line,38),' ');
+		$pattern = "/wp-includes.*$BaseURL";
+		$pattern = str_replace('/','\\/',$pattern);
+		$page = preg_replace("/$pattern/",'',$page);
+		$page = str_replace($BaseURL,'',$page);
 		$page_accesses["$ip $page"] = true;
 		$page_counts[$page] = 0;
 	}
@@ -257,8 +261,13 @@ else
 				$add_info = '';
 			}
 
-			// The remainder of rhe line should constitute the page URL
+			// The remainder of the line should constitute the page URL
 			$url = trim($line);
+			$url = str_replace($BaseURL,"<br/>",$url);
+			if (substr($url,0,5) == '<br/>')
+			{
+				$url = substr($url,5);
+			}
 			print("<tr><td>$time</td><td>$originator</td><td>$url</td><td>$user</td><td>$referrer</td><td>$add_info</td></tr>\n");
 		}
 	}

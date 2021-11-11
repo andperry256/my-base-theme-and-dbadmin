@@ -883,7 +883,7 @@ function handle_record($action,$params)
 	}
 	elseif (session_var_is_set(array('get_vars','-returnurl')))
 	{
-		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".get_session_var('get_vars','-returnurl')."\">Go&nbsp;Back</a></div>");
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".get_session_var(array('get_vars','-returnurl'))."\">Go&nbsp;Back</a></div>");
 	}
 	else
 	{
@@ -909,7 +909,7 @@ function handle_record($action,$params)
 	elseif (session_var_is_set(array('get_vars','-returnurl')))
 	{
 		$param_list .= "&-returnurl=";
-		$param_list .= urlencode(get_session_var('get_vars','-returnurl'));
+		$param_list .= urlencode(get_session_var(array('get_vars','-returnurl')));
 	}
 	print("<form method=\"post\" action=\"$DBAdminURL/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
 	$last_display_group = '';

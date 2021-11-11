@@ -47,6 +47,10 @@ function get_base_table($table,$db=false)
 				$table = $row['parent_table'];
 			}
 		}
+		else
+		{
+			return $table;
+		}
 	}
 	return false;  // This should not occur
 }

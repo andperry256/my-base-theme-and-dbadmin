@@ -28,130 +28,31 @@ else
 }
 
 $rewrite_rules = array();
-foreach ($dirs as $link => $id)
+foreach ($dirs as $dir)
 {
-	print("$eol*** Processing $id ***$eol");
-	if (is_dir("$BaseDir/$id"))
+	print("$eol*** Processing $dir ***$eol");
+	$dir_path = "$FilesSubdomainDir/$dir";
+	$dirlist = scandir($dir_path);
+	foreach ($dirlist as $file)
 	{
-		$dir = "$BaseDir/$id";
-		print("$dir$eol");
-
-		// Find existing storage and links directories
-		$old_links_dir = '';
-		$old_storage_dir = '';
-		$dirlist = scandir($dir);
-		foreach($dirlist as $file)
+		if (substr($file,0,8)  == 'storage-')
 		{
-			if (substr($file,0,8) == 'storage-')
-			{
-				$old_storage_dir = $file;
-			}
-			elseif (substr($file,0,6) == 'links-')
-			{
-				$old_links_dir = $file;
-			}
-		}
-
-		if (($location == 'real') && (empty($old_storage_dir)))
-		{
-			print ("Error - storage directory not found$eol");
-		}
-		else
-		{
-			// Rename/regenerate links directory
-			$key1 = generate_hex_key(date('Ymdhis'),32);
-			$new_links_dir = 'links-'.$key1;
-			if ((!empty($old_links_dir)) &&
-			    ((is_dir("$dir/$old_links_dir")) || (is_link("$dir/$old_links_dir"))))
-			{
-				rename("$dir/$old_links_dir","$dir/$new_links_dir");
-			}
-			elseif ($Location == 'local')
-			{
-				symlink("$RootDir/$id","$dir/$new_links_dir");
-				print ("Symlink re-established$eol");
-			}
-			else
-			{
-				mkdir($dir/$new_links_dir);
-			}
-			print ("Links directory is now $new_links_dir$eol");
-
-			// Establish storage directory name
-			if ($old_storage_dir == 'storage-000000')
-			{
-				// Rename if name is in initial state
-				$key2 = generate_hex_key($key1,32);
-				$new_storage_dir = 'storage-'.$key2;
-				rename("$dir/$old_storage_dir","$dir/$new_storage_dir");
-				print ("Storage directory is now $new_storage_dir$eol");
-			}
-			else
-			{
-				$new_storage_dir = $old_storage_dir;
-			}
-
-			// Re-generate path definitions file
-			if (!empty($new_links_dir))
-			{
-				$ofp = fopen("$dir/paths.php",'w');
-				fprintf($ofp,"<?php$eol");
-				$id2 = str_replace('_',' ',$id);
-				$id2 = ucwords($id2);
-				$id2 = str_replace(' ','',$id2);
-				fprintf($ofp,"  \$$id2"."LinksDir = \"$BaseDir/$id/"."$new_links_dir\";$eol");
-				fprintf($ofp,"  \$$id2"."LinksURL = \"$BaseURL/$id/"."$new_links_dir\";$eol");
-				fprintf($ofp,"?>$eol");
-				fclose($ofp);
-			}
-			else
-			{
-				$ofp = fopen("$dir/paths.php",'w');
-				fprintf($ofp,"<?php ?>$eol");
-				fclose($ofp);
-			}
-
-			// Re-generate symlinks if required
-			if (($Location == 'real') && (!is_link("$RootDir/$id")))
-			{
-				symlink("$dir/$new_storage_dir","$RootDir/$id");
-				print ("Symlink re-established$eol");
-			}
-
-			// Save .htaccess rewrite rule
-			$rewrite_rules[$id] = "RewriteRule ^$id/$new_links_dir(.*)\$ $id/$new_storage_dir/\$1";
+			$storage_dir = $file;
+			break;
 		}
 	}
-}
-print($eol);
-
-// Update .htaccess file
-if ($Location == 'real')
-{
-	$htaccess = file("$BaseDir/.htaccess");
-	$ofp = fopen("$BaseDir/.htaccess2","w");
-	foreach ($htaccess as $line)
-	{
-		if ((strpos($line,'links-') === false) && (strpos($line,'storage-') === false))
-		{
-			$line = str_replace('%','%%',$line);
-			fprintf($ofp,"$line");
-		}
-		if (substr($line,0,11) == "RewriteBase")
-		{
-			foreach ($rewrite_rules as $id => $rule)
-			{
-				fprintf($ofp,"$rule$eol");
-			}
-		}
-	}
+	$key = password_hash($key,PASSWORD_DEFAULT);
+	$key = md5($key);
+	$key = substr($key,0,32);
+	$links_path = "links-$key";
+	$content = file_get_contents("$dir_path/paths.php");
+	$content = preg_replace('/links-[0-9a-f]+/',"links-$links_path",$content);
+	file_put_contents("$dir_path/paths.php",$content);
+	$ofp = fopen("$dir_path/.htaccess",'w');
+	fprintf($ofp,"RewriteEngine On\nRewriteRule ^$links_path/(.*)\$ $storage_dir/\$1\n");
 	fclose($ofp);
-	chmod("$BaseDir/.htaccess2",0644);
-	unlink("$BaseDir/.htaccess");
-	rename("$BaseDir/.htaccess2","$BaseDir/.htaccess");
-	print ("Re-write rules updated in .htaccess$eol");
+	print("Links directory is now $links_path$eol");
 }
-
 print("Operation completed$eol");
 
 //==============================================================================

@@ -1,7 +1,6 @@
 <?php
-  $redundant_table_prefixes = array ('wp_duplicator', 'wp_itsec');
   require("allowed_hosts.php");
-  if ((isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
+  if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
   {
   	exit("Authentication Failure");
   }
@@ -36,25 +35,13 @@
     {
       $table = $row[$table_field];
       $table_deleted = false;
-      foreach ($redundant_table_prefixes as $t)
+      if (mysqli_query($db,"OPTIMIZE TABLE $table"))
       {
-        if (substr($table,0,strlen($t)) == $t)
-        {
-          mysqli_query($db,"DROP TABLE $table");
-          print("Table $table deleted<br />\n");
-          $table_deleted = true;
-        }
+        print("Table $table optimised<br />\n");
       }
-      if (!$table_deleted)
+      else
       {
-        if (mysqli_query($db,"OPTIMIZE TABLE $table"))
-        {
-          print("Table $table optimised<br />\n");
-        }
-        else
-        {
-          print("Unable to optimise table $table<br />\n");
-        }
+        print("Unable to optimise table $table<br />\n");
       }
     }
   }

@@ -46,7 +46,7 @@ foreach ($dirs as $dir)
 	$key = substr($key,0,32);
 	$links_path = "links-$key";
 	$content = file_get_contents("$dir_path/paths.php");
-	$content = preg_replace('/links-[0-9a-f]+/',"links-$links_path",$content);
+	$content = preg_replace('/links-[0-9a-f]+/',"$links_path",$content);
 	file_put_contents("$dir_path/paths.php",$content);
 	$ofp = fopen("$dir_path/.htaccess",'w');
 	fprintf($ofp,"RewriteEngine On\nRewriteRule ^$links_path/(.*)\$ $storage_dir/\$1\n");

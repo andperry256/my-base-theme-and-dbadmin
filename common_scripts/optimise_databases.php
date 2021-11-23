@@ -17,6 +17,7 @@
   }
   require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
   require("$PrivateScriptsDir/mysql_connect.php");
+  $add_tags = (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'wget') === false);
   foreach ($dbinfo as $dbid => $info)
   {
     if ($Location == 'local')
@@ -27,7 +28,16 @@
     {
       $dbname = $info[1];
     }
-    print("<h1>Optimising Database $dbname</h1>\n");
+    print("\n");
+    if ($add_tags)
+    {
+      print('<h1>');
+    }
+    print("Optimising Database $dbname\n");
+    if ($add_tags)
+    {
+      print('</h1>');
+    }
     $db = db_connect($dbid);
     $table_field = "Tables_in_$dbname";
     $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type<>'VIEW'");
@@ -37,11 +47,19 @@
       $table_deleted = false;
       if (mysqli_query($db,"OPTIMIZE TABLE $table"))
       {
-        print("Table $table optimised<br />\n");
+        print("Table $table optimised\n");
+        if ($add_tags)
+        {
+          print('<br />');
+        }
       }
       else
       {
-        print("Unable to optimise table $table<br />\n");
+        print("Unable to optimise table $table\n");
+        if ($add_tags)
+        {
+          print('<br />');
+        }
       }
     }
   }

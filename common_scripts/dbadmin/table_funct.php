@@ -1448,14 +1448,7 @@ function select_copy($table)
 	{
 		print("</table>\n");
 	}
-	if ($option == 'selection')
-	{
-		print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runCopy(this.form)\"/>");
-	}
-	elseif ($option == 'all')
-	{
-		print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runUpdateAll(this.form)\"/>");
-	}
+	print("&nbsp;&nbsp;<input type=\"button\" value=\"Copy\" onClick=\"runCopy(this.form)\"/>");
 
 	// N.B. Do not generate the "submitted" input tag or the closing </form> tag
 	// at this point.

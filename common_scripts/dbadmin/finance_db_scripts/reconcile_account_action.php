@@ -107,7 +107,7 @@
         }
       }
       $seq_no = next_seq_no($account);
-      mysqli_query($db,"INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount) VALUES ('$account',$seq_no,'$date','$payee',$credit_amount,$debit_amount)");
+      mysqli_query($db,"INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,bank_import_id) VALUES ('$account',$seq_no,'$date','$payee',$credit_amount,$debit_amount,$bank_rec_id)");
 
       // Go to the record edit screen.
       $primary_keys = array();

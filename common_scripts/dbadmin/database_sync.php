@@ -85,11 +85,11 @@ function sync_databases($local_db_name)
 						$cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
 						if ($_POST['sync_mode'] == 'backup')
 						{
-							$cmd .= " -b $Localhost_ID";
+							$cmd .= " -b -host=$Localhost_ID";
 						}
 						elseif ($_POST['sync_mode'] == 'restore')
 						{
-							$cmd .= " -r $Localhost_ID";
+							$cmd .= " -r -host=$Localhost_ID";
 						}
 						elseif ($_POST['sync_mode'] == $sync_direction)
 						{

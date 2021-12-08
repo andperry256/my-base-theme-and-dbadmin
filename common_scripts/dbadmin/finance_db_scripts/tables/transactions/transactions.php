@@ -263,6 +263,7 @@ class tables_transactions
 		$target_seq_no = $record->FieldVal('target_seq_no');
 		$source_account = $record->FieldVal('source_account');
 		$source_seq_no = $record->FieldVal('source_seq_no');
+		$bank_import_id = $record->FieldVal('bank_import_id');
 		$copy_to_date = $record->FieldVal('copy_to_date');
 		$delete_record = $record->FieldVal('delete_record');
 
@@ -466,6 +467,19 @@ class tables_transactions
 			{
 				mysqli_query($db,"UPDATE transactions SET cleared_balance=0.00,full_balance=0.00 WHERE account='$account' AND seq_no=$seq_no");
 			}
+		}
+
+		// Handle auto-reconciliation if record has been created via the reconcile screen
+		if ($bank_import_id != 0 )
+		{
+			$query_result = mysqli_query($db,"SELECT * FROM bank_import WHERE rec_id=$bank_import_id");
+			if (($row = mysqli_fetch_assoc($query_result)) &&
+			    (($row['amount'] = $credit_amount) || ($row['amount'] = -$debit_amount)))
+			{
+				mysqli_query($db,"UPDATE transactions SET reconciled=1 WHERE account='$account' AND seq_no=$seq_no");
+				mysqli_query($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_import_id");
+			}
+			mysqli_query($db,"UPDATE transactions SET bank_import_id=0 WHERE account='$account' AND seq_no=$seq_no");
 		}
 
 		// Update account balances

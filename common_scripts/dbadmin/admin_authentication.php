@@ -4,6 +4,7 @@ if (!function_exists('db_connect'))
 {
 	require_once("$PrivateScriptsDir/mysql_connect.php");
 }
+require_once("$DBAdminDir/common_funct.php");
 $db = db_connect($AuthDBID);
 
 // Determine whether access is internal to the local network
@@ -46,27 +47,9 @@ else
 }
 
 // Process result of login form
-if ((!$UserAuthenticated) && (isset($_POST['submitted'])))
+if (isset($_GET['noauth']))
 {
-	// Authenticate using any site name and password from the site admin database
-	$username = mysqli_real_escape_string($db,$_POST['username']);
-	$password = mysqli_real_escape_string($db,$_POST['password']);
-	$query_result = mysqli_query($db,"SELECT * FROM admin_passwords WHERE username='$username'");
-	if ($row = mysqli_fetch_assoc($query_result))
-	{
-		if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))
-		{
-			$UserAuthenticated = true;
-		}
-	}
-	if ($UserAuthenticated)
-	{
-		update_session_var('user',$username);
-	}
-	else
-	{
-		print("<p><b>Invalid login - please try again.</b></p>");
-	}
+	print("<p><b>Invalid login - please try again.</b></p>");
 }
 
 // Output login form is no user authenicated
@@ -78,7 +61,7 @@ if (!$UserAuthenticated):
 			font-size: 12pt;
 		}
 	</style>
-	<form method="post">
+	<form method="post" action="<?php echo "$DBAdminURL/login_action.php?returnurl=".cur_url_par(); ?>">
 		<fieldset>
 			<br />
 			<table width="500" cellpadding=5><tr>

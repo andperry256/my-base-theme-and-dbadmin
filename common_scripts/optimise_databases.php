@@ -17,7 +17,7 @@
   }
   require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
   require("$PrivateScriptsDir/mysql_connect.php");
-  $add_tags = (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'wget') === false);
+  $add_tags = ((isset($_SERVER['HTTP_USER_AGENT'])) && (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'wget') === false));
   foreach ($dbinfo as $dbid => $info)
   {
     if ($Location == 'local')

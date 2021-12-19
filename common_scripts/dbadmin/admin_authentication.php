@@ -61,7 +61,7 @@ if (!$UserAuthenticated):
 			font-size: 12pt;
 		}
 	</style>
-	<form method="post" action="<?php echo "$DBAdminURL/login_action.php?returnurl=".cur_url_par(); ?>">
+	<form method="post" action="<?php echo "$DBAdminURL/login_action.php?site=$local_site_dir&returnurl=".cur_url_par(); ?>">
 		<fieldset>
 			<br />
 			<table width="500" cellpadding=5><tr>

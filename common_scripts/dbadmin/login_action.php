@@ -18,7 +18,10 @@
     {
       // User authorised
       $_SESSION['user'] = $username;
-      $_SESSION['access_level'] = $row['access_level'];
+      if (isset($row['access_level']))
+      {
+        $_SESSION['access_level'] = $row['access_level'];
+      }
       header("Location: {$_GET['returnurl']}");
       exit;
     }

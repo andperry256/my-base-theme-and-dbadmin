@@ -5,24 +5,12 @@ if (!defined('TODAY_DATE'))
 {
 	DEFINE ('TODAY_DATE',date('Y-m-d'));
 }
-global $BaseDir;
-if (!isset($BaseDir))
-{
-	// Why are we doing this????
-	// $local_site_dir = 'andperry.co.uk';
-	// $NoAuth = true;
-	// require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-}
 
-if (is_file("alt_date_funct.php"))
+if (is_file(__DIR__."../alt_date_funct.php"))
 {
-	require("alt_date_funct.php");
+	require(__DIR__."../alt_date_funct.php");
 }
-elseif (is_file("../alt_date_funct.php"))
-{
-	require("../alt_date_funct.php");
-}
-elseif (is_file("$BaseDir/alt_date_funct.php"))
+elseif( (isset($BaseDir)) &&  (is_file("$BaseDir/alt_date_funct.php")))
 {
 	require("$BaseDir/alt_date_funct.php");
 }
@@ -34,7 +22,7 @@ if (!function_exists('DayName'))
 	function DayName($day)
 	{
 		$Name = array("Sunday","Monday","Tuesday","Wednesday",
-					  "Thursday","Friday","Saturday");
+		              "Thursday","Friday","Saturday");
 		return $Name[$day];
 	}
 }
@@ -83,8 +71,8 @@ if (!function_exists('MonthName'))
 	function MonthName($month)
 	{
 		$Name = array("","January","February","March","April",
-						 "May","June","July","August","September",
-						 "October","November","December");
+		              "May","June","July","August","September",
+		              "October","November","December");
 		return $Name[$month];
 	}
 }
@@ -96,7 +84,7 @@ if (!function_exists('ShortMonthName'))
 	function ShortMonthName($month)
 	{
 		$Name = array("","Jan","Feb","Mar","Apr","May","Jun",
-						 "Jul","Aug","Sep","Oct","Nov","Dec");
+		              "Jul","Aug","Sep","Oct","Nov","Dec");
 		return $Name[$month];
 	}
 }
@@ -157,9 +145,9 @@ if (!function_exists('LeapYearDays'))
 
 if (!function_exists('IsLeapYear'))
 {
-	function IsLeapYear($year)
+	function IsLeapYear($year,$calendar=CAL_GREGORIAN)
 	{
-		if ((($year % 100) == 0) && (($year % 400) != 0))
+		if (($calendar == CAL_GREGORIAN) && (($year % 100) == 0) && (($year % 400) != 0))
 		{
 			return 0;
 		}
@@ -178,16 +166,10 @@ if (!function_exists('IsLeapYear'))
 
 if (!function_exists('DaysInMonth'))
 {
-	function DaysInMonth($month,$year)
+
+	function DaysInMonth($month,$year,$calendar=CAL_GREGORIAN)
 	{
-		if (IsLeapYear($year))
-		{
-			return LeapYearDays($month);
-		}
-		else
-		{
-			return NonLeapYearDays($month);
-		}
+		return cal_days_in_month($calendar, $month, $year);
 	}
 }
 

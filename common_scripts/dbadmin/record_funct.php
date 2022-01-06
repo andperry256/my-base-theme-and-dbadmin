@@ -952,6 +952,15 @@ function handle_record($action,$params)
 
 				$label = field_label($table,$field_name);
 				$description = $row3['description'];
+				if (substr($description,0,1) == '@')
+				{
+					$linked_field = strtok(substr($description,1)," \n");
+					if ($row4 = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$linked_field'")))
+					{
+						// Copy description from other field
+						$description = str_replace("@$linked_field",$row4['description'],$description);
+					}
+				}
 
 				// Create the URL to edit the field attributes in table dba_table_fields
 				if ($table == 'dba_table_fields')

@@ -205,7 +205,7 @@ if (!function_exists('GregorianDoW'))
 		}
 		$result += $GregorianCenturyAdjust[floor(($year % 400) / 100)];
 		$result %= 7;
-		return($result);
+		return $result;
 	}
 }
 
@@ -227,6 +227,17 @@ if (!function_exists('DMYToDoW'))
 	{
 		$date = sprintf("%04d-%02d-%02d",$year,$month,$day);
 		return date('w',strtotime($date));
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('JulianDoW'))
+{
+	function JulianDoW($day,$month,$year)
+	{
+		$julian_day = juliantojd($month,$day,$year);
+		return jddayofweek($julian_day);
 	}
 }
 

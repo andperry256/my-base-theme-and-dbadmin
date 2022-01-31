@@ -1,0 +1,17 @@
+#!/bin/bash
+themes_dir="$root_dir/public_html/wp-content/themes"
+default_theme="twentytwelve"
+redundant_themes="twentynineteen twentytwenty twentytwentyone twentytwentytwo"
+
+if [ -d "$themes_dir/$default_theme" ]; then
+  for theme in $redundant_themes; do
+    if [ -d  "$themes_dir/$theme" ]; then
+      echo "  Removing theme $theme"
+      rm -rf "$themes_dir/$theme"
+    fi
+    if [ -L  "$themes_dir/$theme" ]; then
+      echo "  Unlinking theme $theme"
+      rm "$themes_dir/$theme"
+    fi
+  done
+fi

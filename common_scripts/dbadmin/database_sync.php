@@ -97,7 +97,7 @@ function sync_databases($local_db_name)
 						}
 						else
 						{
-							$cmd .= " -rs -force";
+							$cmd .= " -rs=yes -force";
 						}
 						$start_time = time();
 						exec("$cmd > '__temp_.txt'");

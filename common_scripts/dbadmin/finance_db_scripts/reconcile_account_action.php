@@ -80,6 +80,10 @@
   		}
   	}
   }
+  elseif (($bank_transaction == 'IMPORT') || ($account_transaction == 'IMPORT'))
+  {
+    // No action
+  }
   elseif ($account_transaction == 'NONE')
   {
     // Bank transaction not to be matched

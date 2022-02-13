@@ -68,6 +68,14 @@ if (!is_file($site_path_defs_path))
 	{
 		$custom_footer_script = '';
 	}
+	if (!defined('SV_USER'))
+	{
+		define('SV_USER', 'user');
+	}
+	if (!defined('SV_ACCESS_LEVEL'))
+	{
+		define('SV_ACCESS_LEVEL', 'access_level');
+	}
 
 	//================================================================================
 

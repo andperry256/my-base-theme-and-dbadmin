@@ -77,7 +77,7 @@ Function user_is_authenticated
 
 function user_is_authenticated()
 {
-	if ((session_var_is_set('user')) && (!empty(get_session_var('user'))))
+	if ((session_var_is_set(SV_USER)) && (!empty(get_session_var(SV_USER))))
 	{
 		return true;
 	}

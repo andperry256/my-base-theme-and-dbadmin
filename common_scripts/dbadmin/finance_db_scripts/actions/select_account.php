@@ -7,9 +7,9 @@ $db2 = admin_db_connect();
 print("<h1>Select Account</h1>\n");
 print("<p>Please select the required account:-</p>\n");
 $user_access_level = 9;
-if (session_var_is_set('user'))
+if (session_var_is_set(SV_USER))
 {
-	$user = get_session_var('user');
+	$user = get_session_var(SV_USER);
 	if ($row = mysqli_fetch_assoc(mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'")))
 	{
 		$user_access_level = $row['access_level'];

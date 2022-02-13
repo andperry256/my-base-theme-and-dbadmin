@@ -480,7 +480,7 @@ function select_excluded_accounts($field_name)
 {
 	$db1 = main_admin_db_connect();
 	$db2 = admin_db_connect();
-	$user = get_session_var('user');
+	$user = get_session_var(SV_USER);
 	$result = '';
 	$query_result = mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
 	if ($row = mysqli_fetch_assoc($query_result))
@@ -512,7 +512,7 @@ function select_excluded_funds($field_name)
 {
 	$db1 = main_admin_db_connect();
 	$db2 = admin_db_connect();
-	$user = get_session_var('user');
+	$user = get_session_var(SV_USER);
 	$result = '';
 	$query_result = mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
 	if ($row = mysqli_fetch_assoc($query_result))

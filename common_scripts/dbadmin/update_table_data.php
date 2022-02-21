@@ -490,6 +490,18 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
             print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
           }
         }
+
+        // Delete redundant table field records
+        $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
+        while ($row2 = mysqli_fetch_assoc($query_result2))
+        {
+          $field_name = $row2['field_name'];
+          if (!isset($field_list[$field_name]))
+          {
+            mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+            print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
+          }
+        }
       }
 
       /*

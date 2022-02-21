@@ -484,6 +484,7 @@ print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_c
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_table_info\">Table&nbsp;Info</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=_view_dba_table_fields\">Table&nbsp;Fields</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_relationships\">Relationships</a>");
+print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_change_log\">Change Log</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=export_table\">Export&nbsp;Table(s)</a>");

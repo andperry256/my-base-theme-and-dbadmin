@@ -234,6 +234,15 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `query` VARCHAR( 255 ) NOT NULL AFTER `relationship_name`");
   mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 255 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
 
+  // Run the following queries to create/update the structure for the change log table.
+  // Any queries to create existing fields will automatically fail.
+  mysqli_query($db,"CREATE TABLE `dba_change_log` ( `date_and_time` char(19) COLLATE $default_collation NOT NULL, PRIMARY KEY (`date_and_time`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+  mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `table_name` VARCHAR( 63 ) NOT NULL AFTER `date_and_time`");
+  mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `action` ENUM( 'New','Edit','Delete' ) NOT NULL AFTER `table_name`");
+  mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `record_id` VARCHAR( 511 ) NOT NULL AFTER `action`");
+  mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `details` MEDIUMTEXT NULL AFTER `record_id`");
+  mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `delete_record` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `details`");
+
   /*
   Create views for displaying orphan records. Do not use the 'create_view_structure'
   function, as the child class definitions are pre-defined in classes.php.
@@ -327,10 +336,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
         $last_display_order = 0;
 
         // Loop through the table fields
+        $field_list = array();
         $query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table");
         while ($row2 = mysqli_fetch_assoc($query_result2))
         {
           $field_name = $row2['Field'];
+          $field_list[$field_name] = true;
           $field_type = strtok($row2['Type'],'(');
           $field_size = strtok(')');
           if ($row2['Key'] == 'PRI')
@@ -511,6 +522,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
       */
       mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_table_fields' AND field_name='table_name'");
       mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_table_fields' AND (field_name='field_name' OR field_name='is_primary' OR field_name='required')");
+      mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_change_log' AND field_name<>'delete_record'");
     }
   }
 
@@ -524,6 +536,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=0 WHERE table_name='dba_relationships' AND field_name='query'");
+  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='table_name'");
+  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='action'");
+  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='record_id'");
 
   // Set sequencing info for built-in tables
   mysqli_query($db,"UPDATE dba_table_info SET sort_1_field='table_name',seq_no_field='display_order',seq_method='repeat',renumber_enabled=1 WHERE table_name='dba_table_fields'");
@@ -535,12 +550,15 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET description='CSS grid column widths for mobile mode. Do NOT use the <em>repeat</em> construct.' WHERE table_name='dba_table_info' AND field_name='grid_columns'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
   mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Grid Co-ordinates' WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
+  mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Date & Time' WHERE table_name='dba_change_log' AND field_name='date_and_time'");
+  mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Record ID' WHERE table_name='dba_change_log' AND field_name='record_id'");
   $query = "UPDATE dba_table_fields SET description='";
   $query .= "In format <em>row/column/span</em><br />";
   $query .= "Column is optional and defaults to 2; span is optional and defaults to 1.<br />";
   $query .= "Set all field records for a given table to <em>auto</em> to format as one field per row.";
   $query .= "' WHERE table_name='dba_table_fields' AND field_name='grid_coords'";
   mysqli_query($db,$query);
+  mysqli_query($db,"UPDATE dba_table_fields SET description='Set flag to delete record on save.' WHERE table_name='dba_change_log' AND field_name='delete_record'");
 
   // Set other misceallaneous fields for built-in-tables
   mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_relationships' AND field_name='table_name'");

@@ -225,6 +225,25 @@ class tables__view_orphan_table_field_records extends tables_dba_table_fields {}
 
 //==============================================================================
 
+class tables_dba_change_log
+{
+
+	function afterSave($record)
+	{
+    $db = admin_db_connect();
+    $date_and_time = $record->FieldVal('date_and_time');
+		$delete_record = $record->FieldVal('delete_record');
+    if ($delete_record)
+    {
+			// Delete flag is set
+			$query_result = mysqli_query($db,"DELETE FROM dba_change_log WHERE date_and_time='$date_and_time'");
+			return;
+    }
+	}
+}
+
+//==============================================================================
+
 class tables_admin_passwords
 {
 	function beforeSave($record)

@@ -1271,7 +1271,7 @@ function pre_change_snapshot($record)
 	$pre_change_snapshot_fields['-action'] = $action;
 	$pre_change_snapshot_fields['-recordid'] = '^';
 
-	if ($action == 'edit')
+	if(($action == 'edit') || ($action == 'delete'))
 	{
 		// Build query to select old record
 		$query = "SELECT * FROM $table WHERE ";
@@ -1279,7 +1279,14 @@ function pre_change_snapshot($record)
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			$field_name = $row['field_name'];
-			$field_value = $record->OldPKVal($field_name);
+			if ($action == 'edit')
+			{
+				$field_value = $record->OldPKVal($field_name);
+			}
+			else
+			{
+				$field_value = $record->FieldVal($field_name);
+			}
 			if (is_numeric($field_value))
 			{
 				$query .= "$field_name=$field_value AND ";

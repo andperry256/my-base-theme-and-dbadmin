@@ -1251,6 +1251,140 @@ function load_return_url()
 }
 
 //==============================================================================
+
+function pre_change_snapshot($record)
+{
+	global $pre_change_snapshot_fields;
+	$pre_change_snapshot_fields = array();
+	$db = admin_db_connect();
+	$table = $record->table;
+	$action = $record->action;
+	if ($action == 'update')
+	{
+		$action = 'edit';
+	}
+	elseif ($action == 'copy')
+	{
+		$action = 'new';
+	}
+	$pre_change_snapshot_fields['-table'] = $table;
+	$pre_change_snapshot_fields['-action'] = $action;
+	$pre_change_snapshot_fields['-recordid'] = '^';
+
+	if ($action == 'edit')
+	{
+		// Build query to select old record
+		$query = "SELECT * FROM $table WHERE ";
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND is_primary=1");
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			$field_name = $row['field_name'];
+			$field_value = $record->OldPKVal($field_name);
+			if (is_numeric($field_value))
+			{
+				$query .= "$field_name=$field_value AND ";
+			}
+			else
+			{
+				$field_value = addslashes($field_value);
+				$query .= "$field_name='$field_value' AND ";
+			}
+		}
+		$query = rtrim($query,' AND');
+
+		if ($row = mysqli_fetch_assoc(mysqli_query($db,$query)))
+		{
+			// Add record field details to the snapshot array and build the
+			// record ID string.
+			$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' ORDER BY display_order ASC");
+			while ($row2 = mysqli_fetch_assoc($query_result2))
+			{
+				$pre_change_snapshot_fields[$row2['field_name']] = $row[$row2['field_name']];
+				if ($row2['is_primary'])
+				{
+					$pre_change_snapshot_fields['-recordid'] .= "{$pre_change_snapshot_fields[$row2['field_name']]}^";
+				}
+			}
+		}
+	}
+}
+
+//==============================================================================
+
+function post_change_snapshot($record)
+{
+	global $pre_change_snapshot_fields;
+	$post_change_snapshot_fields = array();
+	$db = admin_db_connect();
+	$table = $record->table;
+	$action = ucwords($record->action);
+	if ($action == 'Update')
+	{
+		$action = 'Edit';
+	}
+	elseif ($action == 'Copy')
+	{
+		$action = 'New';
+	}
+	$record_id = '^';
+	$record_changed = false;
+	if (($action == 'New') || ($action == 'Edit'))
+	{
+		// Add record field details to the snapshot array, check for changes on an
+		// edit and build the record ID string.
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' ORDER BY display_order ASC");
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			$post_change_snapshot_fields[$row['field_name']] = $record->FieldVal($row['field_name']);
+			if (($action == 'Edit') && ($post_change_snapshot_fields[$row['field_name']] != $pre_change_snapshot_fields[$row['field_name']]))
+			{
+				$record_changed = true;
+			}
+			if ($row['is_primary'])
+			{
+				$record_id .= "{$post_change_snapshot_fields[$row['field_name']]}^";
+			}
+		}
+	}
+
+	if (($record_changed) || ($action != 'Edit'))
+	{
+		$details = '';
+		if ($action != 'Delete')
+		{
+			// Format details of new/changed fields
+			$details .= "<style>strong {color:steelblue;}</style>\n";
+			$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
+			while ($row = mysqli_fetch_assoc($query_result))
+			{
+				if ($action == 'New')
+				{
+					$details .= "Field: <strong>{$row['Field']}</strong><br />\n";
+					$details .= "Value: {$post_change_snapshot_fields[$row['Field']]}<br />\n";
+				}
+				elseif (($action == 'Edit') && ($post_change_snapshot_fields[$row['Field']] != $pre_change_snapshot_fields[$row['Field']]))
+				{
+					$details .= "Field: <strong>{$row['Field']}</strong><br />\n";
+					$details .= "Old: {$pre_change_snapshot_fields[$row['Field']]}<br />\n";
+					$details .= "New: {$post_change_snapshot_fields[$row['Field']]}<br />\n";
+				}
+			}
+		}
+
+		// Add record to change log
+		$date_and_time = date('Y-m-d H:i:s');
+		$details = addslashes($details);
+		if ($action == 'Delete')
+		{
+			$record_id = $pre_change_snapshot_fields['-recordid'];
+		}
+		$query = "INSERT INTO dba_change_log (date_and_time,table_name,action,record_id,details)";
+		$query .= " VALUES ('$date_and_time','$table','$action','$record_id','$details')";
+		mysqli_query($db,$query);
+	}
+}
+
+//==============================================================================
 }
 //==============================================================================
 ?>

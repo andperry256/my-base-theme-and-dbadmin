@@ -1257,7 +1257,7 @@ function pre_change_snapshot($record)
 	global $pre_change_snapshot_fields;
 	$pre_change_snapshot_fields = array();
 	$db = admin_db_connect();
-	$table = $record->table;
+	$table = get_base_table($record->table);
 	$action = $record->action;
 	if ($action == 'update')
 	{
@@ -1323,7 +1323,7 @@ function post_change_snapshot($record)
 	global $pre_change_snapshot_fields;
 	$post_change_snapshot_fields = array();
 	$db = admin_db_connect();
-	$table = $record->table;
+	$table = get_base_table($record->table);
 	$action = ucwords($record->action);
 	if ($action == 'Update')
 	{

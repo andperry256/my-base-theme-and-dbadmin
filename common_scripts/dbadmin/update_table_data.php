@@ -236,7 +236,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
 
   // Run the following queries to create/update the structure for the change log table.
   // Any queries to create existing fields will automatically fail.
-  mysqli_query($db,"CREATE TABLE `dba_change_log` ( `date_and_time` char(19) COLLATE $default_collation NOT NULL, PRIMARY KEY (`date_and_time`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+  mysqli_query($db,"CREATE TABLE `dba_change_log` ( `seq_no` INT(11) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`seq_no`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+  mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `date_and_time` CHAR( 19 ) NOT NULL AFTER `seq_no`");
   mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `table_name` VARCHAR( 63 ) NOT NULL AFTER `date_and_time`");
   mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `action` ENUM( 'New','Edit','Delete' ) NOT NULL AFTER `table_name`");
   mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `record_id` VARCHAR( 511 ) NOT NULL AFTER `action`");
@@ -536,6 +537,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=0 WHERE table_name='dba_relationships' AND field_name='query'");
+  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='date_and_time'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='table_name'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='action'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='record_id'");

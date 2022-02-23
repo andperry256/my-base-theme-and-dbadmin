@@ -17,7 +17,7 @@
     if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))
     {
       // User authorised
-      $_SESSION['user'] = $username;
+      $_SESSION[SV_USER] = $username;
       if (isset($row['access_level']))
       {
         $_SESSION['access_level'] = $row['access_level'];

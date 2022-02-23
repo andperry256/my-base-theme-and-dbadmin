@@ -26,7 +26,7 @@ if (($Location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
 {
 	/*
 	Access is internal to the local network and there is no logged on user
-	but with no active logout (i.e. where $_SESSION['user'] is set but empty).
+	but with no active logout (i.e. where $_SESSION[SV_USER] is set but empty).
 	Automatically log on as the default user.
 	*/
 	if (!isset($DefaultLocalUser))

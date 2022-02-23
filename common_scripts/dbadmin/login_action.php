@@ -11,7 +11,7 @@
   $username = $_POST['username'];
   $password = $_POST['password'];
   $UserAuthenticated = false;
-  if ((preg_match("/^[A-Z0-9]*$/i", $username)) &&
+  if ((preg_match("/^[A-Z0-9.]*$/i", $username)) &&
       ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM admin_passwords WHERE username='$username'"))))
   {
     if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))

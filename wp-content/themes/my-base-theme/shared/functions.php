@@ -461,10 +461,10 @@ function set_default_header_image_paths()
 	$desktop_header_image_url = '';
 	foreach ($image_file_exts as $ext)
 	{
-		if (is_file("$current_theme_dir/header_image.$ext"))
+		if (is_file("$current_theme_dir/header_image_desktop.$ext"))
 		{
-			$desktop_header_image_path = "$current_theme_dir/header_image.$ext";
-			$desktop_header_image_url = "$current_theme_url/header_image.$ext";
+			$desktop_header_image_path = "$current_theme_dir/header_image_desktop.$ext";
+			$desktop_header_image_url = "$current_theme_url/header_image_desktop.$ext";
 			break;
 		}
 	}

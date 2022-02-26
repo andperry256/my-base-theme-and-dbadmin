@@ -146,7 +146,8 @@ while ($row = mysqli_fetch_assoc($query_result))
       }
       $record->SetField($field_name,addslashes($field_value));
     }
-    else
+    elseif ((($row2['widget_type'] == 'file') && (isset($_POST["field_$field_name"]))) ||
+            ($row2['widget_type'] != 'file'))
     {
       $record->SetField($field_name,stripslashes($_POST["field_$field_name"]));
     }

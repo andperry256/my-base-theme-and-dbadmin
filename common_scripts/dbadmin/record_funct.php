@@ -287,6 +287,12 @@ function handle_file_widget_before_save(&$record,$field)
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
+
+	// Ensure that all data for the field is initialised
+	$filename = '';
+	$record->SetField($field,$filename);
+	update_session_var(array('file_fields',$field),'');
+
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
@@ -299,32 +305,26 @@ function handle_file_widget_before_save(&$record,$field)
 				return report_error("File <em>$filename</em> already exists and <em>overwrite</em> option not selected.");
 			}
 		}
+		// Add the new filename to the record
+		$record->SetField($field,$filename);
 	}
-	$record->SetField($field,$filename);
 
-	/*
-	// MAKE SURE THAT THE FOLLOWING CODE IS NOW REDUNDANT
-	// Copy the stored filename into the record
-	$field_processed = false;
+	// Save the old filename.
 	$query = "SELECT * FROM $table WHERE";
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$pk_field = $row['field_name'];
 		$pk_value = $record->FieldVal($pk_field);
-		if ($field_processed)
-		{
-			$query .= " AND";
-		}
-		$field_processed = true;
 		$query .= " $pk_field='".addslashes($pk_value)."'";
+		$query .= " AND";
+		$query = rtrim($query,' AND');
 	}
 	$query_result = mysqli_query($db,$query);
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$record->SetField($field,$row[$field]);
+		update_session_var(array('file_fields',$field),$row[$field]);
 	}
-	*/
 }
 
 //==============================================================================
@@ -339,49 +339,57 @@ function handle_file_widget_after_save($record,$field)
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
+	$filename = $record->FieldVal('filename');
+	$old_filename = get_session_var(array('file_fields',$field));
 
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$filename = basename($_FILES["field_$field"]['name']);
-		if (!empty($filename))
+		$old_target_file = "$BaseDir/{$row['relative_path']}/$old_filename";
+		$new_target_file = "$BaseDir/{$row['relative_path']}/$filename";
+		$upload_filename = basename($_FILES["field_$field"]['name']);
+		if (!empty($upload_filename))
 		{
-			$target_file = "$BaseDir/{$row['relative_path']}/$filename";
-			if (is_file($target_file))
+			// A new file is being uploaded. Delete the old file if present and
+			// move the new file to the destination.
+			if (is_file($old_target_file))
 			{
-				// Delete any existing file of the same name. The 'allow overwrite' option
-				// must have been selected by the user in order to get to this point.
-				unlink($target_file);
-				if (is_file($target_file))
+				unlink($old_target_file);
+				if (is_file($old_target_file))
 				{
-					return report_error("Unable to delete existing file <em>$filename</em>.");
+					return report_error("Unable to delete existing file <em>$old_filename</em>.");
 				}
 			}
-			// Copy the file to the destination
-			$result = move_uploaded_file($_FILES["field_$field"]['tmp_name'],$target_file);
+			$result = move_uploaded_file($_FILES["field_$field"]['tmp_name'],$new_target_file);
 			if ($result === false)
 			{
 				return report_error("File <em>$filename</em> could not be uploaded.");
 			}
-
-			// Update the record field to contain the filename
-			$field_processed = false;
-			$query = "UPDATE $table SET $field='$filename' WHERE";
-			$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1");
-			while ($row = mysqli_fetch_assoc($query_result))
-			{
-				$pk_field = $row['field_name'];
-				$pk_value = $record->FieldVal($pk_field);
-				if ($field_processed)
-				{
-					$query .= " AND";
-				}
-				$field_processed = true;
-				$query .= " $pk_field='".addslashes($pk_value)."'";
-			}
-			mysqli_query($db,$query);
+		}
+		else
+		{
+			// No file is being uploaded, so revert to the original filename.
+			$filename = $old_filename;
 		}
 	}
+	else
+	{
+		// This should not occur.
+		$filename = $old_filename;
+	}
+
+	// Update record with the filename.
+	$query = "UPDATE $table SET $field='$filename' WHERE";
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1");
+	while ($row = mysqli_fetch_assoc($query_result))
+	{
+		$pk_field = $row['field_name'];
+		$pk_value = $record->FieldVal($pk_field);
+		$query .= " $pk_field='".addslashes($pk_value)."'";
+		$query .= " AND";
+		$query = rtrim($query,' AND');
+	}
+	mysqli_query($db,$query);
 }
 
 //==============================================================================
@@ -1021,6 +1029,10 @@ function handle_record($action,$params)
 						{
 							$value = 0;
 						}
+					}
+					elseif (($widget_type == 'file') && (!session_var_is_set(array('post_vars',"field_$field_name"))))
+					{
+						$value = '';
 					}
 					else
 					{

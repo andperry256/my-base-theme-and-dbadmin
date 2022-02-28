@@ -339,7 +339,7 @@ function handle_file_widget_after_save($record,$field)
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
-	$filename = $record->FieldVal('filename');
+	$filename = $record->FieldVal($field);
 	$old_filename = get_session_var(array('file_fields',$field));
 
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");

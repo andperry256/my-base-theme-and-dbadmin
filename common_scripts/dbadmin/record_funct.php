@@ -580,6 +580,7 @@ function save_record($record,$old_record_id,$new_record_id)
 	$old_mysql_fields = array();
 	$new_mysql_fields = array();
 
+	$auto_inc_field_present = false;
 	$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
@@ -590,7 +591,9 @@ function save_record($record,$old_record_id,$new_record_id)
 			$field_value = $record->FieldVal($field_name);
 			if ($row2['widget_type'] == 'auto-increment')
 			{
-				// No action here as an auto-increment field needs to be omitted
+				// Auto-increment field needs to be omitted but need to note that there
+				// is one present.
+				$auto_inc_field_present = true;
 			}
 			elseif ((!is_numeric($field_value)) && (empty($field_value)))
 			{
@@ -631,20 +634,15 @@ function save_record($record,$old_record_id,$new_record_id)
 	}
 
 	// Determine whether the save operation involves a primary key change
-	if ($new_record_id != $old_record_id)
+	if (($new_record_id != $old_record_id) && (!$auto_inc_field_present))
 	{
 		// Check for duplicate record ID
 		$query = "SELECT * FROM $table WHERE";
-		$field_processed = false;
 		foreach ($new_primary_keys as $field => $val)
 		{
-			if ($field_processed)
-			{
-				$query .= " AND";
-			}
-			$field_processed = true;
-			$query .= " $field={$new_mysql_fields[$field]}";
+			$query .= " $field={$new_mysql_fields[$field]} AND";
 		}
+		$query = rtrim($query,' AND');
 		$query_result = mysqli_query($db,$query);
 		if (($query_result !== false) && (mysqli_num_rows($query_result) > 0))
 		{

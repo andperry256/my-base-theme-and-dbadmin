@@ -98,6 +98,8 @@ class tables_dba_table_info
 	}
 }
 
+class tables__view_orphan_table_info_records extends tables_dba_table_info {}
+
 //==============================================================================
 
 class tables_dba_table_fields
@@ -187,7 +189,7 @@ class tables_dba_table_fields
 	}
 }
 
-class tables__view_orphan_table_info_records extends tables_dba_table_info {}
+class tables__view_orphan_table_field_records extends tables_dba_table_fields {}
 
 //==============================================================================
 
@@ -220,8 +222,6 @@ class tables_dba_sidebar_config
     mysqli_query($db,"UPDATE dba_sidebar_config SET display_order=$new_display_order WHERE display_order=$default_seq_no");
 	}
 }
-
-class tables__view_orphan_table_field_records extends tables_dba_table_fields {}
 
 //==============================================================================
 

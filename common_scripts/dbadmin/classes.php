@@ -181,7 +181,7 @@ class tables_dba_table_fields
       $new_table_name = $record->FieldVal('table_name');
       if ($new_table_name != $old_table_name)
       {
-        return report_error("<p class=\"highlight-error\">Table name field cannot be changed in this context.</p>\n");
+        return report_error("<p class=\"highlight-error\">Table name field can only be modified in a COPY operation.</p>\n");
       }
     }
 	}

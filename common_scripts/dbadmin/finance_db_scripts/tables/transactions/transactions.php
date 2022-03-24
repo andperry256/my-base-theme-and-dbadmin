@@ -397,8 +397,11 @@ class tables_transactions
 		// otherwise use the global default value.
 		if ($fund == '-default-')
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM payees WHERE name='$payee'");
-			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_fund'])))
+			if (($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM payees WHERE name='$payee'"))) && (!empty($row['default_fund'])))
+			{
+				$fund = $row['default_fund'];
+			}
+			elseif (($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'"))) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
 			}

@@ -6,7 +6,8 @@ if (!function_exists('sync_databases'))
 function sync_databases($local_db_name)
 {
 	global $Location, $CustomPagesPath, $RelativePath, $local_site_dir,
-	$Localhost_ID, $DBAdminURL, $db_master_location, $Server_Station_ID;
+	$Localhost_ID, $DBAdminURL, $db_master_location, $Server_Station_ID,
+	$TableExportDir;
 
 	set_time_limit(300);
 	print("<h1>Synchronise Databases</h1>\n");
@@ -54,7 +55,7 @@ function sync_databases($local_db_name)
 							$contents = file($relationships_script_file);
 							if (substr($contents[0],0,12) == '## LOCKED ##')
 							{
-								print("<p>ERROR - Script file is locked.</p>\n");
+								print("<p>ERROR - Script file is locked (please refresh page to try again).</p>\n");
 								break;
 							}
 						}
@@ -91,6 +92,55 @@ function sync_databases($local_db_name)
 						{
 							$cmd .= " -r -host=$Localhost_ID";
 						}
+						elseif ($_POST['sync_mode'] == 'table_dump')
+						{
+							$cmd = '';
+							if (empty($_POST['table']))
+							{
+								$cmd = '';
+								print("<p>ERROR - no table selected (please refresh page to try again).</p>");
+							}
+							else
+							{
+								$table = $_POST['table'];
+								$pk_fields = '';
+								$field_added = false;
+								$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND is_primary=1 ORDER BY display_order ASC");
+								if (mysqli_num_rows($query_result) == 0)
+								{
+									print("<p>ERROR - table <em>$table</em> not found (please refresh page to try again).</p>\n");
+									return;
+								}
+								while ($row = mysqli_fetch_assoc($query_result))
+								{
+									if ($field_added)
+									{
+										$pk_fields .= ',';
+									}
+									$pk_fields .= ($row['field_name']);
+									$field_added = true;
+								}
+								$order_clause = "$pk_fields ASC";
+								export_table_to_csv("$TableExportDir/table_$table.csv",$db,$table,'','long','',$order_clause);
+								print("Table $table exported to CSV");
+							}
+						}
+						elseif (substr($_POST['sync_mode'],0,6) == 'table_')
+						{
+							if (empty($_POST['table']))
+							{
+								$cmd = '';
+								print("<p>ERROR - no table selected (please refresh page to try again).<p>");
+							}
+							elseif (substr($_POST['sync_mode'],6) == $sync_direction)
+							{
+								$cmd .= " -st={$_POST['table']}";
+							}
+							else
+							{
+								$cmd .= " -rst={$_POST['table']}";
+							}
+						}
 						elseif ($_POST['sync_mode'] == $sync_direction)
 						{
 							$cmd .= " -s -force";
@@ -99,14 +149,17 @@ function sync_databases($local_db_name)
 						{
 							$cmd .= " -rs=yes -force";
 						}
-						$start_time = time();
-						exec("$cmd > '__temp_.txt'");
-						$duration = time() - $start_time;
-						$output = implode(file('__temp_.txt'));
-						$output = str_replace("\n","<br />\n",$output);
-						print("$output");
-						print("Execution time: $duration seconds.<br />\n");
-						unlink ('__temp_.txt');
+						if (!empty($cmd))
+						{
+							$start_time = time();
+							exec("$cmd > '__temp_.txt'");
+							$duration = time() - $start_time;
+							$output = implode(file('__temp_.txt'));
+							$output = str_replace("\n","<br />\n",$output);
+							print("$output");
+							print("Execution time: $duration seconds.<br />\n");
+							unlink ('__temp_.txt');
+						}
 						break;
 				}
 			}
@@ -130,8 +183,20 @@ function sync_databases($local_db_name)
 				print("></td><td>Upload local DB to online DB</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"backup\"></td><td>Back up local DB (locally)</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"restore\"></td><td>Restore local DB (locally)</td></tr>\n");
+				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"table_in\"></td><td>Download table to local DB</td></tr>\n");
+				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"table_out\"></td><td>Upload table to online DB</td></tr>\n");
+				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"table_dump\"></td><td>Dump table to CSV</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"save-rlshps\"></td><td>Save relationships (locally)<br />");
 				print("<input type=\"checkbox\" name=\"force-save-rlshps\">&nbsp;Force&nbsp;update</td></tr>\n");
+				print("<tr><td>Table:</td><td><select name=\"table\">\n");
+				print("<option value=\"\">Please select...</option>\n");
+				$dbname = admin_db_name();
+				$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type<>'VIEW'");
+				while ($row = mysqli_fetch_assoc($query_result))
+				{
+					print("<option value=\"{$row["Tables_in_$dbname"]}\">{$row["Tables_in_$dbname"]}</option>\n");
+				}
+				print("</select>\n</td></tr>");
 				print("<tr><td colspan=\"2\"><input value=\"Run\" type=\"submit\"></td></tr>\n");
 				print("</table>\n");
 				print("<input type=\"hidden\" name=\"submitted\" value=\"TRUE\" />\n");

@@ -373,15 +373,6 @@ function display_main_content($mode)
         sync_databases(admin_db_name());
         break;
 
-      case 'export_table':
-        export_table();
-        print("<p><a href=\"./?-action=multi_export\">Multiple Export</a> (export all tables with the auto dump flag set)</p>\n");
-        break;
-
-      case 'multi_export':
-        export_multiple_tables();
-        break;
-
       default:
         if (is_file("$CustomPagesPath/$RelativePath/actions/$action.php"))
         {
@@ -487,7 +478,6 @@ print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_relationships\"
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_change_log\">Change Log</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
 print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=export_table\">Export&nbsp;Table(s)</a>");
 if ($Location == 'local')
 {
   print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=dbsync\">Sync&nbsp;Databases</a>");

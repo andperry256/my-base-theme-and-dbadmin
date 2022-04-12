@@ -156,8 +156,7 @@ class tables_dba_table_fields
         $valid_select = false;
         if ((!empty($vocab_table)) && (!empty($vocab_field)))
         {
-          $query_result = mysqli_query($db,"SELECT $vocab_field FROM $vocab_table");
-          if (mysqli_num_rows($query_result) > 0)
+          if (mysqli_query($db,"SELECT $vocab_field FROM $vocab_table"))
           {
             $valid_select = true;
           }

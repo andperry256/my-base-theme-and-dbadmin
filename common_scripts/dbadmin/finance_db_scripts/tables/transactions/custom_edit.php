@@ -209,7 +209,7 @@ if ($row = mysqli_fetch_assoc($query_result))
     }
     else
     {
-      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=_view_scheduled_transactions&account=$account&seq_no=$seq_no\"><button>Edit Transaction</button></a></td></tr>\n");
+      print("<tr><td><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=_view_scheduled_transactions&-recordid=$record_id\"><button>Edit Transaction</button></a></td></tr>\n");
     }
 
     // Row 17 (optional) - 'Go to Transfer' Button

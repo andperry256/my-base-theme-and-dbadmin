@@ -131,6 +131,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   {
     $new_installation = false;
   }
+  mysqli_query($db,"ALTER TABLE `dba_table_info` DROP `auto_dump`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `parent_table` VARCHAR( 63 ) NULL AFTER `table_name`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `parent_table` `parent_table` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
@@ -140,9 +141,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `real_access` `real_access` ENUM( $access_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_access_type'");
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `list_size` INT NOT NULL DEFAULT '100' AFTER `real_access`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `list_size` `list_size` INT( 11 ) NOT NULL DEFAULT '100'");
-  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `auto_dump` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `list_size`");
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `auto_dump` `auto_dump` TINYINT( 1 ) NOT NULL DEFAULT '0'");
-  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `sort_1_field` VARCHAR( 63 ) NULL AFTER `auto_dump`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `sort_1_field` VARCHAR( 63 ) NULL AFTER `list_size`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `sort_1_field` `sort_1_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `seq_no_field` VARCHAR( 63 ) NULL AFTER `sort_1_field`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `seq_no_field` `seq_no_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
@@ -532,7 +531,6 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_sidebar_config' AND field_name='label'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='parent_table'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='grid_columns'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1 WHERE table_name='dba_table_info' AND field_name='auto_dump'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_group'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
   mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='grid_coords'");

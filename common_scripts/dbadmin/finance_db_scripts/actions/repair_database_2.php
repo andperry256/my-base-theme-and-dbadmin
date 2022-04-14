@@ -3,22 +3,31 @@
 
 function show_count($value)
 {
-if ($value == 0)
-	return "[$value]";
-else
-	return "<span style=color:red>[$value]</span>";
+	if ($value == 0)
+	{
+		return "[$value]";
+	}
+	else
+	{
+		return "<span style=color:red>[$value]</span>";
+	}
 }
 
 function run_or_preview_query($ofp,$query,&$counter)
 {
-if (isset($_GET['preview']))
-	print("<p class=\"small\">$query</p>\n");
-else
-{
-	$db = admin_db_connect();
-	mysqli_query($db,$query);
-}
-$counter++;
+	if (isset($_GET['dry-run']))
+	{
+		print("<p class=\"small\">$query</p>\n");
+	}
+	else
+	{
+		$db = admin_db_connect();
+		if (!mysqli_query($db,$query))
+		{
+			print("<p class=\"small\">$query<br />ERROR - ".mysqli_error($db)."</p>\n");
+		}
+	}
+	$counter++;
 }
 
 //==============================================================================
@@ -26,8 +35,10 @@ $counter++;
 $db = admin_db_connect();
 
 print("<h1>Repair Database</h1>\n");
-if (isset($_GET['preview']))
-	print("<p>====== Preview Mode ======</p>\n");
+if (isset($_GET['dry-run']))
+{
+	print("<p>====== Dry Run ======</p>\n");
+}
 
 // Initialise Counters
 $dummy_count = 0;
@@ -40,9 +51,11 @@ $count_change_cat_to_split = 0;
 $count_dead_target_links = 0;
 $count_dead_source_links = 0;
 $count_delete_orphan_split = 0;
+$count_no_splits = 0;
 $count_missing_splits = 0;
 $count_surplus_splits = 0;
 $count_set_acct_month = 0;
+$dummy_count = 0;
 
 // BEGIN - Main loop for processing transactions
 $query_result = mysqli_query($db,"SELECT * FROM transactions");
@@ -59,30 +72,42 @@ while ($row = mysqli_fetch_assoc($query_result))
 	$source_account = $row['source_account'];
 	$source_seq_no = $row['source_seq_no'];
 	if ((!empty($source_account)) && (!empty($source_seq_no)))
+	{
 		$query_result2 = mysqli_query($db,"SELECT * FROM splits WHERE account='$source_account' AND transact_seq_no=$source_seq_no");
+	}
 	else
+	{
 		$query_result2 = mysqli_query($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+	}
 	$split_count = mysqli_num_rows($query_result2);
 
 	if ($split_count == 0)
 	{
 		// Check for a fund that wrongly indicates a split
 		if ($fund == '-split-')
+		{
 			run_or_preview_query($ofp,"UPDATE transactions SET fund='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_fund_from_split);
+		}
 
 		// Check for a category that wrongly indicates a split
 		if ($category == '-split-')
+		{
 			run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_split);
+		}
 	}
 	else
 	{
 		// Check for a fund that needs to be changed to a split
 		if ($fund != '-split-')
+		{
 			run_or_preview_query($ofp,"UPDATE transactions SET fund='-split-' WHERE account='$account' AND seq_no=$seq_no",$count_change_fund_to_split);
+		}
 
 		// Check for a category that needs to be changed to a split
 		if ($category != '-split-')
+		{
 			run_or_preview_query($ofp,"UPDATE transactions SET category='-split-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_split);
+		}
 	}
 
 	// Check for a transfer that is not categorised as such
@@ -91,13 +116,17 @@ while ($row = mysqli_fetch_assoc($query_result))
 		 ) &&
 		 ($category != '-transfer-') &&
 		 ($category != '-split-'))
-		run_or_preview_query($ofp,"UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_transfer);
+		 {
+			 run_or_preview_query($ofp,"UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_transfer);
+		 }
 
 	// Check for a transaction that is wrongly categorised as a transfer
 		if ( ((empty($target_account)) || (empty($target_seq_no))) &&
 		     ((empty($source_account)) || (empty($source_seq_no))) &&
 			 ($category == '-transfer-'))
-		run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_transfer);
+			 {
+				 run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_transfer);
+			 }
 
 	// Check for a dead target link
 	if ((!empty($target_account)) && (!empty($target_seq_no)))
@@ -109,7 +138,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 		}
 		else
 		{
-			run_or_preview_query($ofp,"UPDATE transactions SET target_account='',target_seq_no='' WHERE account='$account' AND seq_no=$seq_no",$count_dead_target_links);
+			run_or_preview_query($ofp,"UPDATE transactions SET target_account='',target_seq_no=NULL WHERE account='$account' AND seq_no=$seq_no",$count_dead_target_links);
 			run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND category='-transfer-'",$dummy_count);
 		}
 	}
@@ -124,7 +153,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 		}
 		else
 		{
-			run_or_preview_query($ofp,"UPDATE transactions SET source_account='',source_seq_no='' WHERE account='$account' AND seq_no=$seq_no",$count_dead_source_links);
+			run_or_preview_query($ofp,"UPDATE transactions SET source_account='',source_seq_no=NULL WHERE account='$account' AND seq_no=$seq_no",$count_dead_source_links);
 			run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND category='-transfer-'",$dummy_count);
 		}
 	}
@@ -135,6 +164,15 @@ while ($row = mysqli_fetch_assoc($query_result))
 		$acct_month = accounting_month($date);
 		run_or_preview_query($ofp,"UPDATE transactions SET acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no",$count_set_acct_month);
 	}
+
+	// Check for -split- fund with no splits present
+  if (($fund == '-split-') && (empty($source_account)) &&
+	    (mysqli_num_rows(mysqli_query($db,"SELECT * FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}")) == 0))
+  {
+    // Update the fund to '-nosplit-' and if applicable on the other side of the transfer
+    run_or_preview_query($ofp,"UPDATE transactions SET fund='-nosplit-' WHERE account='{$row['account']}' AND seq_no={$row['seq_no']},$count_no_splits");
+    run_or_preview_query($ofp,"UPDATE transactions SET fund='-nosplit-' WHERE fund='-split-' AND source_account='{$row['account']}' AND source_seq_no={$row['seq_no']},$dummy_count");
+  }
 
 	// Check for unmatching split total
 	$query_result2 = mysqli_query($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
@@ -203,13 +241,17 @@ while ($row = mysqli_fetch_assoc($query_result))
 			 ) &&
 			 ($category != '-transfer-') &&
 			 ($category != '-split-'))
-			run_or_preview_query($ofp,"UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_to_transfer);
+			 {
+				 run_or_preview_query($ofp,"UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_to_transfer);
+			 }
 
 		// Check for a split that is wrongly categorised as a transfer
 		if ( ((empty($target_account)) || (empty($target_seq_no))) &&
 		     ((empty($source_account)) || (empty($source_seq_no))) &&
 			 ($category == '-transfer-'))
-			run_or_preview_query($ofp,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_from_transfer);
+			 {
+				 run_or_preview_query($ofp,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_from_transfer);
+			 }
 
 		// Check for an empty accounting month
 		if (empty($acct_month))
@@ -223,10 +265,14 @@ while ($row = mysqli_fetch_assoc($query_result))
 }
 // END - Main loop for processing splits
 
-if (isset($_GET['preview']))
+if (isset($_GET['dry-run']))
+{
 	print("<p>The following errors will be corrected:-</p>\n");
+}
 else
+{
 	print("<p>The following errors were corrected:-</p>\n");
+}
 print("<table cellpadding=\"3\">\n");
 print("<tr><td>Transfers not set to <i>-transfer-</i> category</td><td>".show_count($count_change_cat_to_transfer)."</td></tr>\n");
 print("<tr><td>Non-transfers set to <i>-transfer-</i> category</td><td>".show_count($count_change_cat_from_transfer)."</td></tr>\n");
@@ -237,13 +283,20 @@ print("<tr><td>Category not set to <i>-split-</i> when required</td><td>".show_c
 print("<tr><td>Dead target links</td><td>".show_count($count_dead_target_links)."</td></tr>\n");
 print("<tr><td>Dead source links</td><td>".show_count($count_dead_source_links)."</td></tr>\n");
 print("<tr><td>Orphan splits</td><td>".show_count($count_delete_orphan_split)."</td></tr>\n");
+print("<tr><td>No splits</td><td>".show_count($count_no_splits)."</td></tr>\n");
 print("<tr><td>Missing splits</td><td>".show_count($count_missing_splits)."</td></tr>\n");
 print("<tr><td>Surplus splits</td><td>".show_count($count_surplus_splits)."</td></tr>\n");
 print("<tr><td>Accounting month missing</td><td>".show_count($count_set_acct_month)."</td></tr>\n");
 print("</table>\n");
 
-if (isset($_GET['preview']))
-	print("<p><a href=\"index.php?-action=repair_database_2\">Run Repair</a></p>\n");
+if (isset($_GET['dry-run']))
+{
+	print("<p><a href=\"index.php?-action=repair_database_2\"><button>Run Repair</button></a></p>\n");
+}
+else
+{
+	print("<p><a href=\"index.php?-action=repair_database_2&dry-run\"><button>Repeat Dry Run</button></a></p>\n");
+}
 
-	//==============================================================================
+//==============================================================================
 ?>

@@ -164,6 +164,7 @@ function rationalise_transaction($account,$seq_no)
 	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
+		$fund = $row['fund'];
 		$target_account = $row['target_account'];
 		$target_seq_no = $row['target_seq_no'];
 		$source_account = $row['source_account'];
@@ -176,7 +177,21 @@ function rationalise_transaction($account,$seq_no)
 			$source_split_count = mysqli_num_rows($query_result2);
 		}
 		else
+		{
 			$source_split_count = 0;
+		}
+
+		/*
+		Update the fund to '-nosplit-' if it is '-split-' and there are no splits
+		remaining. Do not act if the transaction is at the target end of a transfer,
+		but if it is at the source end of a transfer then update the transaction
+		record at the target end as well.
+		*/
+		if (($split_count == 0) && ($fund == '-split-') && (empty($source_account)))
+		{
+      mysqli_query($db,"UPDATE transactions SET fund='-nosplit-' WHERE account='$account' AND seq_no=$seq_no");
+      mysqli_query($db,"UPDATE transactions SET fund='-nosplit-' WHERE fund='-split-' AND source_account='$account' AND source_seq_no=$seq_no");
+		}
 
 		// Check status of fund and category in relation to splits.
 		if (($split_count > 0) || ($source_split_count > 0))

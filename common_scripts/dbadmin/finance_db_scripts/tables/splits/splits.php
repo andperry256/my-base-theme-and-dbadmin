@@ -43,6 +43,13 @@ class tables_splits
 		}
 	}
 
+	function afterDelete($record)
+	{
+		$account = $record->FieldVal('account');
+		$transact_seq_no = $record->FieldVal('transact_seq_no');
+		rationalise_transaction($account,$transact_seq_no);
+	}
+
 	function beforeSave($record)
 	{
 		$action = $record->action;

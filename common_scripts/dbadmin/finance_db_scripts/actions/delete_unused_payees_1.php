@@ -12,7 +12,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 		$query_result2 = mysqli_query($db,"SELECT * FROM transactions WHERE payee='$payee'");
 		$count = mysqli_num_rows($query_result2);
 		mysqli_query($db,"UPDATE payees SET instances=$count WHERE name='$payee'");
-		if ($count == 0)
+		if (($count == 0) && ($row['locked'] == 0))
 		{
 			print("<li>{$row['name']}</li>\n");
 		}

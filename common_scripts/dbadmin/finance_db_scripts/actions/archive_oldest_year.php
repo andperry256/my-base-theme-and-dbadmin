@@ -130,7 +130,7 @@ if (isset($_POST['new_start_date']))
     // Copy transaction data to archive tables
     print("Creating archive tables and copying transactions<br />\n");
     $year = substr($archive_end_date,0,4);
-    $acct_month = accounting_month($new_start_date);
+    $acct_month = accounting_month($archive_end_date);
     mysqli_query($db,"DROP TABLE IF EXISTS archived_transactions_$year");
     mysqli_query($db,"DROP TABLE IF EXISTS archived_splits_$year");
     mysqli_query($db,"CREATE TABLE archived_transactions_$year AS SELECT * FROM transactions WHERE date<='$archive_end_date'");

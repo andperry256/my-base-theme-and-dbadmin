@@ -102,7 +102,7 @@ function sync_databases($local_db_name)
 							}
 							else
 							{
-								$table = $_POST['table'];
+								$table = str_replace('V#','',$_POST['table']);
 								$pk_fields = '';
 								$field_added = false;
 								$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND is_primary=1 ORDER BY display_order ASC");
@@ -131,6 +131,11 @@ function sync_databases($local_db_name)
 							{
 								$cmd = '';
 								print("<p>ERROR - no table selected (please refresh page to try again).<p>");
+							}
+							elseif (substr($_POST['table'],0,2) == 'V#')
+							{
+								$cmd = '';
+								print("<p>ERROR - sync operations not valid for views.<p>");
 							}
 							elseif (substr($_POST['sync_mode'],6) == $sync_direction)
 							{
@@ -191,12 +196,18 @@ function sync_databases($local_db_name)
 				print("<tr><td>Table:</td><td><select name=\"table\">\n");
 				print("<option value=\"\">Please select...</option>\n");
 				$dbname = admin_db_name();
-				$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type<>'VIEW'");
+				$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
 				while ($row = mysqli_fetch_assoc($query_result))
 				{
 					print("<option value=\"{$row["Tables_in_$dbname"]}\">{$row["Tables_in_$dbname"]}</option>\n");
 				}
-				print("</select>\n</td></tr>");
+				$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='VIEW'");
+				while ($row = mysqli_fetch_assoc($query_result))
+				{
+					print("<option value=\"V#{$row["Tables_in_$dbname"]}\">[v] {$row["Tables_in_$dbname"]}</option>\n");
+				}
+				print("</select><br />");
+				print("<span class=\"small\">[v] = Item is a view - valid only with dump to CSV option.</span></td></tr>");
 				print("<tr><td colspan=\"2\"><input value=\"Run\" type=\"submit\"></td></tr>\n");
 				print("</table>\n");
 				print("<input type=\"hidden\" name=\"submitted\" value=\"TRUE\" />\n");

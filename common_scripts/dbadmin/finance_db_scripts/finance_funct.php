@@ -545,4 +545,93 @@ function select_excluded_funds($field_name)
 }
 
 //==============================================================================
+
+function initialise_archive_table_data($db)
+{
+	global $CustomPagesPath;
+	global $RelativePath;
+	$dbname = admin_db_name();
+	$directory_created = false;
+	$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname`");
+	while ($row = mysqli_fetch_assoc($query_result))
+	{
+		$table = $row["Tables_in_$dbname"];
+		if (substr($table,0,9) == 'archived_')
+		{
+			if (!is_dir("$CustomPagesPath/$RelativePath/tables/$table"))
+			{
+				// Create directory and class script for the table.
+				mkdir("$CustomPagesPath/$RelativePath/tables/$table",0755);
+				$ofp = fopen("$CustomPagesPath/$RelativePath/tables/$table/$table.php",'w');
+				fprintf($ofp,"<?php class tables_$table {} ?>\n");
+				fclose($ofp);
+				$directory_created = true;
+			}
+			if (substr($table,9,5) == 'trans')
+			{
+				// Create view and splits relationship for archived transactions.
+				create_view_structure("_view_$table",$table,"account IS NOT NULL ORDER BY account ASC, date DESC, seq_no DESC");
+				set_primary_key_on_view("$table",'account');
+				set_primary_key_on_view("$table",'seq_no');
+				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='transactions'");
+				while ($row2 = mysqli_fetch_assoc($query_result2))
+				{
+					mysqli_query($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
+				}
+				$splits_table = str_replace('transactions','splits',$table);
+				mysqli_query($db,"INSERT INTO dba_relationships VALUES ('$table','Splits','SELECT * FROM $splits_table WHERE transact_seq_no=$"."seq_no')");
+			}
+			elseif (substr($table,9,5) == 'split')
+			{
+				// Create view for archived splits.
+				create_view_structure("_view_$table",$table,"account IS NOT NULL ORDER BY account ASC, transact_seq_no DESC, split_no ASC");
+				set_primary_key_on_view("$table",'account');
+				set_primary_key_on_view("$table",'transact_seq_no');
+				set_primary_key_on_view("$table",'split_no');
+				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='splits'");
+				while ($row2 = mysqli_fetch_assoc($query_result2))
+				{
+					mysqli_query($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
+				}
+			}
+		}
+	}
+	// Make all archive tables read-only.
+	mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name LIKE 'archived_%'");
+
+	// Output warning if new tables have been added.
+	if ($directory_created)
+	{
+		print("<p><strong>NOTE</strong> - Please update table data for the database.</p>\n");
+	}
+}
+
+//==============================================================================
+
+function output_archive_table_links($db)
+{
+	$dbname = admin_db_name();
+	$archive_tables = array();
+	$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname`");
+	while ($row = mysqli_fetch_assoc($query_result))
+	{
+		if (substr($row["Tables_in_$dbname"],0,9) == 'archived_')
+		{
+			$table = $row["Tables_in_$dbname"];
+			$tok = strtok($table,'_');
+			$type = ucwords(strtok('_'));
+			$year = strtok('_');
+			$archive_tables["$year - $type"] = $table;
+		}
+	}
+	krsort($archive_tables);
+	print("<ul>\n");
+	foreach ($archive_tables as $description => $table)
+	{
+		print("<li><a href=\"./?-table=_view_$table\">$description</a></li>\n");
+	}
+	print("</ul>\n");
+}
+
+//==============================================================================
 ?>

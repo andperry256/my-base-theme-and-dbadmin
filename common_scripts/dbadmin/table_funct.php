@@ -1160,6 +1160,7 @@ function select_update($table,$option)
 	{
 		print("</table>\n");
 	}
+	print("<p>&nbsp;&nbsp;<input type=\"checkbox\" name=\"show_progress\">&nbsp;Show&nbsp;Progress</p>\n");
 	if ($option == 'selection')
 	{
 		print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runUpdate(this.form)\"/>");
@@ -1260,6 +1261,7 @@ function run_update($table,$option)
 
 		// Build the query to select the record
 		$primary_keys = fully_decode_record_id($record_id);
+		$pk_values = '^';
 		$query = "SELECT * FROM $table WHERE";
 		$field_processed = false;
 		foreach ($primary_keys as $field => $value)
@@ -1270,6 +1272,12 @@ function run_update($table,$option)
 			}
 			$field_processed = true;
 			$query .= " $field='".addslashes($value)."'";
+			$pk_values .= "$value^";
+		}
+		if (isset($_POST['show_progress']))
+		{
+			set_time_limit(30);
+			print("Processing record $pk_values<br />\n");
 		}
 
 		$query_result = mysqli_query($db,$query);
@@ -1336,7 +1344,15 @@ function run_update($table,$option)
 			$success_count++;
 		}
 	}
-	print("<p class=\"highlight-success\">$success_count record(s) updated, $failure_count record(s) not updated.</p>\n");
+	$alert_message = "$success_count record(s) updated, $failure_count record(s) not copied.";
+	if (isset($_POST['show_progress']))
+	{
+		print("<script>alert(\"$alert_message\")</script>\n");
+	}
+	else
+	{
+		print("<p class=\"highlight-success\">$alert_message</p>\n");
+	}
 	return true;
 }
 
@@ -1448,6 +1464,7 @@ function select_copy($table)
 	{
 		print("</table>\n");
 	}
+	print("<p>&nbsp;&nbsp;<input type=\"checkbox\" name=\"show_progress\">&nbsp;Show&nbsp;Progress</p>\n");
 	print("&nbsp;&nbsp;<input type=\"button\" value=\"Copy\" onClick=\"runCopy(this.form)\"/>");
 
 	// N.B. Do not generate the "submitted" input tag or the closing </form> tag
@@ -1532,6 +1549,12 @@ function run_copy($table)
 			}
 			$field_processed = true;
 			$query .= " $field='".addslashes($value)."'";
+			$pk_values .= "$value^";
+		}
+		if (isset($_POST['show_progress']))
+		{
+			set_time_limit(30);
+			print("Processing record $pk_values<br />\n");
 		}
 
 		$query_result = mysqli_query($db,$query);
@@ -1586,7 +1609,15 @@ function run_copy($table)
 			$success_count++;
 		}
 	}
-	print("<p class=\"highlight-success\">$success_count record(s) copied, $failure_count record(s) not copied.</p>\n");
+	$alert_message = "$success_count record(s) copied, $failure_count record(s) not copied.";
+	if (isset($_POST['show_progress']))
+	{
+		print("<script>alert(\"$alert_message\")</script>\n");
+	}
+	else
+	{
+		print("<p class=\"highlight-success\">$alert_message</p>\n");
+	}
 	return true;
 }
 

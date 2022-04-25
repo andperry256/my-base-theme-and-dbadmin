@@ -78,7 +78,7 @@ Function next_seq_number
 */
 //==============================================================================
 
-function next_seq_number($table,$sort_1_value)
+function next_seq_number($table,$sort_1_value,$interval=10)
 {
 	if (!defined('NEXT_SEQ_NO_INDICATOR'))
 	{
@@ -107,9 +107,9 @@ function next_seq_number($table,$sort_1_value)
 		$query .= " ORDER BY $seq_no_name DESC";
 		$query_result = mysqli_query($db,$query);
 		if ($row = mysqli_fetch_assoc($query_result))
-			return $row[$seq_no_name] + 10;
+			return $row[$seq_no_name] + $interval;
 		else
-			return 10;
+			return $interval;
 	}
 	else
 	{

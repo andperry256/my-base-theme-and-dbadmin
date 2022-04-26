@@ -34,6 +34,10 @@ if (($Location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
 		$DefaultLocalUser = 'local';
 	}
 	update_session_var(SV_USER,$DefaultLocalUser);
+	if (defined('SV_ACCESS_LEVEL'))
+	{
+		update_session_var(SV_ACCESS_LEVEL,9);
+	}
 }
 
 if ((session_var_is_set(SV_USER)) && (!empty(get_session_var(SV_USER))))

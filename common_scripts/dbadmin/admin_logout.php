@@ -8,7 +8,8 @@ Log the user off by clearing the username but leaving the $_SESSION[SV_USER]
 variable intact. This enables the user to be kept logged off in the local
 network environment, which may occasionally be required for testing purposes.
 
-The variables $PrivateScriptsDir and $dbid must be preset by the calling script.
+The variables from path_defs.php must be preset by the calling script along
+with $dbid which indicates the WordPress database.
 */
 require_once("$PrivateScriptsDir/mysql_connect.php");
 $db = db_connect($dbid);

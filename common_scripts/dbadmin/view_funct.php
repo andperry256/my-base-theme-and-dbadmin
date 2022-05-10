@@ -183,7 +183,7 @@ Function delete_child_table_structure
 
 function delete_child_table_structure($child,$parent)
 {
-	global $CustomPagesPath, $RelativePa;
+	global $CustomPagesPath, $RelativePath;
 	$db = admin_db_connect();
 
 	mysqli_query($db,"DROP TABLE $child");

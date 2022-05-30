@@ -90,8 +90,13 @@ function generate_widget($table,$field_name,$field_value)
 				break;
 
 			case 'input-text':
+			case 'input-text-small':
 				print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\" size=\"");
-				if ($mode == 'desktop')
+				if ($row['widget_type'] == 'input-text-small')
+				{
+					print("8");
+				}
+				elseif ($mode == 'desktop')
 				{
 					print("64");
 				}

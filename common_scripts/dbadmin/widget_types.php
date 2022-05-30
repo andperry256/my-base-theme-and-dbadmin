@@ -19,6 +19,7 @@ $WidgetTypes = array (
   'hidden' => false,
   'input-num' => false,
   'input-text' => true,
+  'input-text-small' => false,
   'password' => false,
   'select' => true,
   'static' => true,

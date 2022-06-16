@@ -9,6 +9,7 @@
     The following variables/constants need to be set prior to invoking this
     script:-
 
+    $local_site_dir
     $DBAdminURL
     $dbid
     PAGE_EDIT_KEYCODE
@@ -16,6 +17,10 @@
   if (!isset($wpdb))
   {
     exit("Script not valid outside WordPress environment.");
+  }
+  elseif (!isset($local_site_dir))
+  {
+    exit("Local site directory not set.");
   }
   elseif (!isset($DBAdminURL))
   {
@@ -62,6 +67,7 @@
     print("<textarea name=\"content\" rows=\"12\">{$row['post_content']}</textarea>\n");
     print("<input type=\"submit\" value=\"Save\" />\n");
     print("<input type=\"hidden\" name=\"post_name\" value=\"$page_slug\" />\n");
+    print("<input type=\"hidden\" name=\"local_site_dir\" value=\"$local_site_dir\" />\n");
     print("<input type=\"hidden\" name=\"dbid\" value=\"$dbid\" />\n");
     print("<input type=\"hidden\" name=\"keycode\" value=\"".PAGE_EDIT_KEYCODE."\" />\n");
     print("<input type=\"hidden\" name=\"returnurl\" value=\"$return_url\" />\n");

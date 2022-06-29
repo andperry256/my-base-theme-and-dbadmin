@@ -13,4 +13,5 @@
 	require("table_funct.php");
 	require("record_funct.php");
 	require("database_sync.php");
+	require("search_and_replace.php");
 ?>

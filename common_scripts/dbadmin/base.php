@@ -373,6 +373,10 @@ function display_main_content($mode)
         sync_databases(admin_db_name());
         break;
 
+      case 'search_and_replace':
+        search_and_replace(admin_db_name());
+        break;
+
       default:
         if (is_file("$CustomPagesPath/$RelativePath/actions/$action.php"))
         {
@@ -481,6 +485,7 @@ print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\
 if ($Location == 'local')
 {
   print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=dbsync\">Sync&nbsp;Databases</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=search_and_replace\">Search&nbsp;&amp;&nbsp;Replace</a>");
 }
 if ((is_file("$BaseDir/admin_logout.php")) && (!is_file("$CustomPagesPath/$RelativePath/logout.php")))
 {

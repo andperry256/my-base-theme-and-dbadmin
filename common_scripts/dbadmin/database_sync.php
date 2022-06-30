@@ -154,6 +154,10 @@ function sync_databases($local_db_name)
 						{
 							$cmd .= " -rs=yes -force";
 						}
+						if (isset($_POST['noadd']))
+						{
+							$cmd .= " -noadd";
+						}
 						if (!empty($cmd))
 						{
 							$start_time = time();
@@ -193,6 +197,7 @@ function sync_databases($local_db_name)
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"table_dump\"></td><td>Dump table to CSV</td></tr>\n");
 				print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"save-rlshps\"></td><td>Save relationships (locally)<br />");
 				print("<input type=\"checkbox\" name=\"force-save-rlshps\">&nbsp;Force&nbsp;update</td></tr>\n");
+				print("<tr><td><input type=\"checkbox\" name=\"noadd\"></td><td>Omit running of pre/post operation scripts<br />");
 				print("<tr><td>Table:</td><td><select name=\"table\">\n");
 				print("<option value=\"\">Please select...</option>\n");
 				$dbname = admin_db_name();

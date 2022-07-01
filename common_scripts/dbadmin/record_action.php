@@ -101,6 +101,10 @@ if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
 {
   require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
 }
+elseif (is_file("$AltIncludePath/tables/$table/$table.php"))
+{
+  require("$AltIncludePath/tables/$table/$table.php");
+}
 $base_table = get_base_table($table);
 $classname = "tables_$table";
 $base_classname = "tables_$base_table";

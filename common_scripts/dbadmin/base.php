@@ -260,6 +260,7 @@ function display_main_content($mode)
     }
     elseif (is_file("$CustomPagesPath/$RelativePath/actions/main.php"))
     {
+      output_page_header();
       include("$CustomPagesPath/$RelativePath/actions/main.php");
     }
     elseif (is_file("$AltIncludePath/actions/home.php"))
@@ -268,6 +269,7 @@ function display_main_content($mode)
     }
     elseif (is_file("$AltIncludePath/actions/main.php"))
     {
+      output_page_header();
       include("$AltIncludePath/actions/main.php");
     }
   }

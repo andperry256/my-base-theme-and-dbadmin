@@ -218,7 +218,7 @@ function display_mobile_close_sidebar_button()
 
 function display_main_content($mode)
 {
-  global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath;
+  global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath, $AltIncludePath;
   $db = admin_db_connect();
 
   // Process the URL parameters
@@ -260,8 +260,15 @@ function display_main_content($mode)
     }
     elseif (is_file("$CustomPagesPath/$RelativePath/actions/main.php"))
     {
-      output_page_header();
       include("$CustomPagesPath/$RelativePath/actions/main.php");
+    }
+    elseif (is_file("$AltIncludePath/actions/home.php"))
+    {
+      include("$AltIncludePath/actions/home.php");
+    }
+    elseif (is_file("$AltIncludePath/actions/main.php"))
+    {
+      include("$AltIncludePath/actions/main.php");
     }
   }
   elseif (isset($action))
@@ -287,6 +294,10 @@ function display_main_content($mode)
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_list.php");
         }
+        elseif (is_file("$AltIncludePath/tables/$table/custom_list.php"))
+        {
+          require("$AltIncludePath/tables/$table/custom_list.php");
+        }
         else
         {
           $params = array();
@@ -300,6 +311,10 @@ function display_main_content($mode)
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_edit.php");
         }
+        elseif (is_file("$AltIncludePath/tables/$table/custom_edit.php"))
+        {
+          require("$AltIncludePath/tables/$table/custom_edit.php");
+        }
         else
         {
           $params = array();
@@ -311,6 +326,10 @@ function display_main_content($mode)
         if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_new.php"))
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_new.php");
+        }
+        elseif (is_file("$AltIncludePath/tables/$table/custom_new.php"))
+        {
+          require("$AltIncludePath/tables/$table/custom_new.php");
         }
         else
         {
@@ -327,6 +346,10 @@ function display_main_content($mode)
         if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_view.php"))
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_view.php");
+        }
+        elseif (is_file("$AltIncludePath/tables/$table/custom_view.php"))
+        {
+          require("$AltIncludePath/tables/$table/custom_view.php");
         }
         else
         {
@@ -381,6 +404,10 @@ function display_main_content($mode)
         if (is_file("$CustomPagesPath/$RelativePath/actions/$action.php"))
         {
           include("$CustomPagesPath/$RelativePath/actions/$action.php");
+        }
+        elseif (is_file("$AltIncludePath/actions/$action.php"))
+        {
+          include("$AltIncludePath/actions/$action.php");
         }
         else
         {

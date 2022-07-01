@@ -34,7 +34,7 @@ function update_table_data_with_dbid($dbid,$update_charsets=false,$optimise=fals
 
 function update_table_data_main($dbid,$update_charsets,$optimise)
 {
-  global $CustomPagesPath, $RelativePath;
+  global $CustomPagesPath, $RelativePath, $AltIncludePath;
   global $WidgetTypes;
   global $argc;
   global $dbinfo, $Location;
@@ -330,7 +330,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
     mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
     if ($table == get_base_table($table,$db))
     {
-      if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) || (substr($table,0,4) == 'dba_'))
+      if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) ||
+          (is_dir("$AltIncludePath/tables/$table")) ||
+          (substr($table,0,4) == 'dba_'))
       {
         mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Will automatically fail if already present.
         $last_display_order = 0;

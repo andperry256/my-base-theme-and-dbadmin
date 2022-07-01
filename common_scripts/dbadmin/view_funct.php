@@ -38,7 +38,7 @@ Function create_view_structure
 
 function create_view_structure($view,$table,$conditions)
 {
-  global $CustomPagesPath, $RelativePath;
+  global $CustomPagesPath, $RelativePath, $AltIncludePath;
 	$db = admin_db_connect();
 
 	// Create the view and drop any old tables/views that may conflict with the
@@ -53,24 +53,32 @@ function create_view_structure($view,$table,$conditions)
 
 	// Add new class definition and symbolic link to directory if the directory
 	// for the table already exists.
-	if (is_dir("$CustomPagesPath/$RelativePath/tables/$table"))
+	if (!is_dir("$CustomPagesPath/$RelativePath/tables/$table"))
 	{
-		$file = "$CustomPagesPath/$RelativePath/tables/$table/$view.php";
-		if (!is_file($file))
-		{
-			$ofp = fopen($file,'w');
-			fprintf($ofp,"<?php\n");
-			fprintf($ofp,"include(\"\$CustomPagesPath/\$RelativePath/tables/$table/$table.php\");\n");
-			fprintf($ofp,"class tables_$view extends tables_$table {}\n");
-			fprintf($ofp,"?>\n");
-			fclose($ofp);
-		}
-		$link = "$CustomPagesPath/$RelativePath/tables/$view";
-		if (!is_link($link))
-	  {
-			symlink("$CustomPagesPath/$RelativePath/tables/$table","$link");
-	  }
+		mkdir("$CustomPagesPath/$RelativePath/tables/$table",0755);
 	}
+	$file = "$CustomPagesPath/$RelativePath/tables/$table/$view.php";
+	if (!is_file($file))
+	{
+		$ofp = fopen($file,'w');
+		fprintf($ofp,"<?php\n");
+		if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
+		{
+			fprintf($ofp,"include(\"\$CustomPagesPath/\$RelativePath/tables/$table/$table.php\");\n");
+		}
+		elseif (is_file("$AltIncludePath/tables/$table/$table.php"))
+		{
+			fprintf($ofp,"include(\"\$AltIncludePath/tables/$table/$table.php\");\n");
+		}
+		fprintf($ofp,"class tables_$view extends tables_$table {}\n");
+		fprintf($ofp,"?>\n");
+		fclose($ofp);
+	}
+	$link = "$CustomPagesPath/$RelativePath/tables/$view";
+	if (!is_link($link))
+  {
+		symlink("$CustomPagesPath/$RelativePath/tables/$table","$link");
+  }
 
 	// Set the parent table in the table info record for the view
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$view'");

@@ -158,6 +158,7 @@ function sync_databases($local_db_name)
 						{
 							$cmd .= " -noadd";
 						}
+						print("<p><em>$cmd</em></p>\n");
 						if (!empty($cmd))
 						{
 							$start_time = time();

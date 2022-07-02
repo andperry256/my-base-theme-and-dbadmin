@@ -233,6 +233,7 @@ function display_main_content($mode)
   if (isset($_GET['-table']))
   {
     $table = $_GET['-table'];
+    $base_table = get_base_table($table);
     if (!isset($action))
     {
       $action = 'list';
@@ -296,9 +297,9 @@ function display_main_content($mode)
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_list.php");
         }
-        elseif (is_file("$AltIncludePath/tables/$table/custom_list.php"))
+        elseif (is_file("$AltIncludePath/tables/$base_table/custom_list.php"))
         {
-          require("$AltIncludePath/tables/$table/custom_list.php");
+          require("$AltIncludePath/tables/$base_table/custom_list.php");
         }
         else
         {
@@ -313,9 +314,9 @@ function display_main_content($mode)
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_edit.php");
         }
-        elseif (is_file("$AltIncludePath/tables/$table/custom_edit.php"))
+        elseif (is_file("$AltIncludePath/tables/$base_table/custom_edit.php"))
         {
-          require("$AltIncludePath/tables/$table/custom_edit.php");
+          require("$AltIncludePath/tables/$base_table/custom_edit.php");
         }
         else
         {
@@ -329,9 +330,9 @@ function display_main_content($mode)
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_new.php");
         }
-        elseif (is_file("$AltIncludePath/tables/$table/custom_new.php"))
+        elseif (is_file("$AltIncludePath/tables/$base_table/custom_new.php"))
         {
-          require("$AltIncludePath/tables/$table/custom_new.php");
+          require("$AltIncludePath/tables/$base_table/custom_new.php");
         }
         else
         {
@@ -349,9 +350,9 @@ function display_main_content($mode)
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_view.php");
         }
-        elseif (is_file("$AltIncludePath/tables/$table/custom_view.php"))
+        elseif (is_file("$AltIncludePath/tables/$base_table/custom_view.php"))
         {
-          require("$AltIncludePath/tables/$table/custom_view.php");
+          require("$AltIncludePath/tables/$base_table/custom_view.php");
         }
         else
         {

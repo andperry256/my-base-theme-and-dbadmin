@@ -56,7 +56,7 @@ function search_and_replace($local_db_name)
 					$count = 0;
 					foreach ($content as $line)
 					{
-						if (substr($line,0,2) == "('")
+						if (substr($line,0,1) == "(")
 						{
 							$count += substr_count($line,$_POST['search']);
 						}
@@ -80,7 +80,7 @@ function search_and_replace($local_db_name)
 				$ofp = fopen($dumpfile,'w');
 				foreach ($content as $line)
 				{
-					if (substr($line,0,2) == "('")
+					if (substr($line,0,1) == "(")
 					{
 						$line = str_replace($search,$replace,$line,$sub_count);
 						$count += $sub_count;

@@ -206,7 +206,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `relative_path` `relative_path` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `allowed_filetypes` VARCHAR( 63 ) NULL AFTER `relative_path`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `allowed_filetypes` `allowed_filetypes` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `allowed_filetypes`");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `exclude_from_search` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `allowed_filetypes`");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `exclude_from_search` `exclude_from_search` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `exclude_from_search`");
   mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
 
   // Run the following queries to create/update the structure for the sidebar configuration table.

@@ -547,7 +547,7 @@ function display_table($params)
 						$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
 						if ($row2 = mysqli_fetch_assoc($query_result2))
 						{
-							if ($WidgetTypes[$row2['widget_type']])
+							if (($WidgetTypes[$row2['widget_type']]) && (!$row2['exclude_from_search']))
 							{
 								if ($field_processed)
 								{

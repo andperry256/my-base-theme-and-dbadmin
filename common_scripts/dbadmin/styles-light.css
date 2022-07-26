@@ -3,6 +3,11 @@
 		background-color: #ffc;
 	}
 }
+@media screen and (min-width: 60.01em) {
+	#dbadmin-desktop-sidebar {
+		background-color: #f4f4f4;
+	}
+}
 
 td.table-listing-header {
 	background-color: #ccc;

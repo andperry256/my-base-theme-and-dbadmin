@@ -557,6 +557,136 @@ function run_relationship_delete_queries($record)
 
 //==============================================================================
 /*
+Function previous_record_link
+*/
+//==============================================================================
+
+function previous_record_link($table,$record_id)
+{
+	global $BaseURL, $RelativePath;
+	$db = admin_db_connect();
+	$primary_keys = fully_decode_record_id($record_id);
+	$query = "SELECT * FROM $table WHERE";
+	if (!empty(get_session_var('search_clause')))
+	{
+		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).') AND (';
+	}
+	$first_field_processed = false;
+	foreach($primary_keys as $key => $value)
+	{
+		if ($first_field_processed)
+		{
+			$query .= " OR";
+		}
+		else
+		{
+			$first_field_processed = true;
+		}
+		$value_par = addslashes($value);
+		$query .= " $key<'$value_par'";
+	}
+	if (!empty(get_session_var('search_clause')))
+	{
+		$query .= ')';
+	}
+	$query .='  ORDER BY';
+	$first_field_processed = false;
+	foreach($primary_keys as $key => $value)
+	{
+		if ($first_field_processed)
+		{
+			$query .= ",";
+		}
+		else
+		{
+			$first_field_processed = true;
+		}
+		$query .= " $key DESC";
+	}
+	$query .= " LIMIT 1";
+	if ($row = mysqli_fetch_assoc(mysqli_query($db,$query)))
+	{
+		$prev_rec_primary_keys = array();
+		foreach($primary_keys as $key => $value)
+		{
+			$prev_rec_primary_keys[$key] = $row[$key];
+		}
+		$previous_record_id = encode_record_id($prev_rec_primary_keys);
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
+	}
+	else
+	{
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Previous</a></div>");
+	}
+}
+
+//==============================================================================
+/*
+Function next_record_link
+*/
+//==============================================================================
+
+function next_record_link($table,$record_id)
+{
+	global $BaseURL, $RelativePath;
+	$db = admin_db_connect();
+	$primary_keys = fully_decode_record_id($record_id);
+	$query = "SELECT * FROM $table WHERE";
+	if (!empty(get_session_var('search_clause')))
+	{
+		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).') AND (';
+	}
+	$first_field_processed = false;
+	foreach($primary_keys as $key => $value)
+	{
+		if ($first_field_processed)
+		{
+			$query .= " OR";
+		}
+		else
+		{
+			$first_field_processed = true;
+		}
+		$value_par = addslashes($value);
+		$query .= " $key>'$value_par'";
+	}
+	if (!empty(get_session_var('search_clause')))
+	{
+		$query .= ')';
+	}
+	$query .='  ORDER BY';
+	$first_field_processed = false;
+	foreach($primary_keys as $key => $value)
+	{
+		if ($first_field_processed)
+		{
+			$query .= ",";
+		}
+		else
+		{
+			$first_field_processed = true;
+		}
+		$query .= " $key ASC";
+	}
+	$query .= " LIMIT 1";
+	if ($row = mysqli_fetch_assoc(mysqli_query($db,$query)))
+	{
+		$next_rec_primary_keys = array();
+		foreach($primary_keys as $key => $value)
+		{
+			$next_rec_primary_keys[$key] = $row[$key];
+		}
+		$next_record_id = encode_record_id($next_rec_primary_keys);
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
+	}
+	else
+	{
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Next</a></div>");
+	}
+}
+
+//==============================================================================
+/*
 Function save_record
 */
 //==============================================================================
@@ -888,6 +1018,8 @@ function handle_record($action,$params)
 		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></div>");
 	}
 	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table\">Show&nbsp;All</a></div>");
+	previous_record_link($table,$record_id);
+	next_record_link($table,$record_id);
 	if (isset($_GET['-returnurl']))
 	{
 		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"{$_GET['-returnurl']}\">Go&nbsp;Back</a></div>");

@@ -149,7 +149,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `seq_method` `seq_method` ENUM( 'continuous', 'repeat' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT 'continuous'");
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `renumber_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `seq_method`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `renumber_enabled` `renumber_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0'");
-  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `engine` ENUM( 'InnoDB', 'MyISAM' ) NOT NULL DEFAULT '$default_engine' AFTER `renumber_enabled`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `alt_field_order` VARCHAR( 127 ) NULL AFTER `renumber_enabled`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `alt_field_order` `alt_field_order` VARCHAR( 127 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `engine` ENUM( 'InnoDB', 'MyISAM' ) NOT NULL DEFAULT '$default_engine' AFTER `alt_field_order`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `engine` `engine` ENUM( 'InnoDB', 'MyISAM' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_engine'");
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `character_set` VARCHAR( 15 ) NULL AFTER `engine`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `character_set` `character_set` VARCHAR( 15 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '-auto-'");
@@ -549,6 +551,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_info SET sort_1_field='',seq_no_field='display_order',seq_method='continuous',renumber_enabled=1 WHERE table_name='dba_sidebar_config'");
 
   // Set miscellaneous field descriptions for built-in tables
+  mysqli_query($db,"UPDATE dba_table_fields SET description='Alternate field order for sorting records when creating <em>Previous</em> and <em>Next</em> links. Comma separated list of field names.' WHERE table_name='dba_table_info' AND field_name='alt_field_order'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
   mysqli_query($db,"UPDATE dba_table_fields SET description='CSS grid column widths for mobile mode. Do NOT use the <em>repeat</em> construct.' WHERE table_name='dba_table_info' AND field_name='grid_columns'");

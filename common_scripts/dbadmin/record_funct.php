@@ -636,49 +636,52 @@ function previous_record_link($table,$record_id)
       $sort_field_list[$index++] = $key;
     }
   }
-  $current_record = mysqli_fetch_assoc(mysqli_query($db,$select_this_record));
-  $sort_field_count = count($sort_field_list);
-
-	// Build query
-	$query = "SELECT * FROM $table WHERE";
-	if (!empty(get_session_var('search_clause')))
+	$query_result = mysqli_query($db,$select_this_record);
+	if (($query_result) && ($current_record = mysqli_fetch_assoc($query_result)))
 	{
-		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
-	}
-  $value_par = addslashes($current_record[$sort_field_list[0]]);
-  $query .= " {$sort_field_list[0]}<='$value_par' ORDER BY";
-  for ($index=0; $index<$sort_field_count; $index++)
-  {
-    if ($index > 0)
-    {
-      $query .= ',';
-    }
-    $query .= " {$sort_field_list[$index]} DESC";
-  }
+		$sort_field_count = count($sort_field_list);
 
-  // Loop through table to find current and previous record
-  $query_result = mysqli_query($db,$query);
-  while ($row = mysqli_fetch_assoc($query_result))
-  {
-    if (isset($current_record_processed))
-    {
-      // Processing previous record
-      $prev_rec_primary_keys = array();
-  		foreach($primary_keys as $key => $value)
-  		{
-  			$prev_rec_primary_keys[$key] = $row[$key];
-  		}
-  		$previous_record_id = encode_record_id($prev_rec_primary_keys);
-  		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
-      return;
-    }
-    elseif (count(array_diff_assoc($row,$current_record)) == 0)
-    {
-      // Processing current record
-      $current_record_processed = true;
-    }
-  }
-	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Previous</a></div>");
+		// Build query
+		$query = "SELECT * FROM $table WHERE";
+		if (!empty(get_session_var('search_clause')))
+		{
+			$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
+		}
+		$value_par = addslashes($current_record[$sort_field_list[0]]);
+		$query .= " {$sort_field_list[0]}<='$value_par' ORDER BY";
+		for ($index=0; $index<$sort_field_count; $index++)
+		{
+			if ($index > 0)
+			{
+				$query .= ',';
+			}
+			$query .= " {$sort_field_list[$index]} DESC";
+		}
+
+		// Loop through table to find current and previous record
+		$query_result = mysqli_query($db,$query);
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			if (isset($current_record_processed))
+			{
+				// Processing previous record
+				$prev_rec_primary_keys = array();
+				foreach($primary_keys as $key => $value)
+				{
+					$prev_rec_primary_keys[$key] = $row[$key];
+				}
+				$previous_record_id = encode_record_id($prev_rec_primary_keys);
+				print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
+				return;
+			}
+			elseif (count(array_diff_assoc($row,$current_record)) == 0)
+			{
+				// Processing current record
+				$current_record_processed = true;
+			}
+		}
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Previous</a></div>");
+	}
 }
 
 //==============================================================================
@@ -714,49 +717,52 @@ function next_record_link($table,$record_id)
       $sort_field_list[$index++] = $key;
     }
   }
-  $current_record = mysqli_fetch_assoc(mysqli_query($db,$select_this_record));
-  $sort_field_count = count($sort_field_list);
-
-	// Build query
-	$query = "SELECT * FROM $table WHERE";
-	if (!empty(get_session_var('search_clause')))
+	$query_result = mysqli_query($db,$select_this_record);
+	if (($query_result) && ($current_record = mysqli_fetch_assoc($query_result)))
 	{
-		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
-	}
-  $value_par = addslashes($current_record[$sort_field_list[0]]);
-  $query .= " {$sort_field_list[0]}>='$value_par' ORDER BY";
-  for ($index=0; $index<$sort_field_count; $index++)
-  {
-    if ($index > 0)
-    {
-      $query .= ',';
-    }
-    $query .= " {$sort_field_list[$index]} ASC";
-  }
+		$sort_field_count = count($sort_field_list);
 
-  // Loop through table to find current and next record
-  $query_result = mysqli_query($db,$query);
-  while ($row = mysqli_fetch_assoc($query_result))
-  {
-    if (isset($current_record_processed))
-    {
-      // Processing next record
-      $next_rec_primary_keys = array();
-  		foreach($primary_keys as $key => $value)
-  		{
-  			$next_rec_primary_keys[$key] = $row[$key];
-  		}
-  		$next_record_id = encode_record_id($next_rec_primary_keys);
-  		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
-      return;
-    }
-    elseif (count(array_diff_assoc($row,$current_record)) == 0)
-    {
-      // Processing current record
-      $current_record_processed = true;
-    }
-  }
-	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Next</a></div>");
+		// Build query
+		$query = "SELECT * FROM $table WHERE";
+		if (!empty(get_session_var('search_clause')))
+		{
+			$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
+		}
+		$value_par = addslashes($current_record[$sort_field_list[0]]);
+		$query .= " {$sort_field_list[0]}>='$value_par' ORDER BY";
+		for ($index=0; $index<$sort_field_count; $index++)
+		{
+			if ($index > 0)
+			{
+				$query .= ',';
+			}
+			$query .= " {$sort_field_list[$index]} ASC";
+		}
+
+		// Loop through table to find current and next record
+		$query_result = mysqli_query($db,$query);
+		while ($row = mysqli_fetch_assoc($query_result))
+		{
+			if (isset($current_record_processed))
+			{
+				// Processing next record
+				$next_rec_primary_keys = array();
+				foreach($primary_keys as $key => $value)
+				{
+					$next_rec_primary_keys[$key] = $row[$key];
+				}
+				$next_record_id = encode_record_id($next_rec_primary_keys);
+				print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
+				return;
+			}
+			elseif (count(array_diff_assoc($row,$current_record)) == 0)
+			{
+				// Processing current record
+				$current_record_processed = true;
+			}
+		}
+		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Next</a></div>");
+	}
 }
 
 //==============================================================================

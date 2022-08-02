@@ -4,23 +4,71 @@ if (!function_exists('field_label'))
 {
 //==============================================================================
 /*
+Functions get_table_info_field and get_table_fields_field
+
+These functions operate on the dba_table_info and da_table_fields tables
+respectively, returning the appropriate value for a given field. It moves up
+through the hieracrchy from the current table/view to the base table until a
+value is found.
+*/
+//==============================================================================
+
+function get_table_info_field($table,$field_name)
+{
+	$db = admin_db_connect();
+	$count = 0;
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	while (($row = mysqli_fetch_assoc($query_result)) && ($count < 5))
+	{
+		if (!empty($row[$field_name]))
+		{
+			return $row[$field_name];
+		}
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='{$row['parent_table']}'");
+		$count++;
+	}
+	return '';
+}
+
+function get_table_fields_field($table,$field_name,$field)
+{
+	$db = admin_db_connect();
+	$count = 0;
+	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	while (($row = mysqli_fetch_assoc($query_result)) && ($count < 5))
+	{
+		if (($row2 = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='{$row['table_name']}' AND field_name='$field_name'"))) &&
+        (!empty($row2[$field])))
+		{
+			return $row2[$field];
+		}
+		$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='{$row['parent_table']}'");
+		$count++;
+	}
+	return '';
+}
+
+//==============================================================================
+/*
 Function field_label
+
+This function returns the label to be used for a given table field, using the
+alternate label if available, otherwise the standard label.
 */
 //==============================================================================
 
 function field_label($table,$field)
 {
 	$db = admin_db_connect();
-	$base_table = get_base_table($table);
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
-	if (($row=mysqli_fetch_assoc($query_result)) && (!empty($row['alt_label'])))
+	$label = get_table_fields_field($table,$field,'alt_label');
+	if (empty($label))
 	{
-		return $row['alt_label'];
+		$label = get_table_fields_field($table,$field,'field_name');
+		$label = str_replace('-',' ',$label);
+		$label = str_replace('_',' ',$label);
+		$label = ucwords($label);
 	}
-	$field = str_replace('-',' ',$field);
-	$field = str_replace('_',' ',$field);
-	$field = ucwords($field);
-	return $field;
+	return $label;
 }
 
 //==============================================================================
@@ -564,60 +612,73 @@ Function previous_record_link
 function previous_record_link($table,$record_id)
 {
 	global $BaseURL, $RelativePath;
+	global $select_this_record;
 	$db = admin_db_connect();
-	$primary_keys = fully_decode_record_id($record_id);
+  $primary_keys = fully_decode_record_id($record_id);
+  $sort_field_list = array();
+	$alt_order = get_table_info_field($table,'alt_field_order');
+  $index = 0;
+	if (!empty($alt_order))
+  {
+	    // Use alternate field order
+    $tok = strtok($alt_order,',');
+    while ($tok !== false)
+    {
+      $sort_field_list[$index++] = $tok;
+      $tok = strtok(',');
+    }
+  }
+  else
+  {
+    // Use primary keys
+    foreach ($primary_keys as $key => $value)
+    {
+      $sort_field_list[$index++] = $key;
+    }
+  }
+  $current_record = mysqli_fetch_assoc(mysqli_query($db,$select_this_record));
+  $sort_field_count = count($sort_field_list);
+
+	// Build query
 	$query = "SELECT * FROM $table WHERE";
 	if (!empty(get_session_var('search_clause')))
 	{
-		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).') AND (';
+		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
 	}
-	$first_field_processed = false;
-	foreach($primary_keys as $key => $value)
-	{
-		if ($first_field_processed)
-		{
-			$query .= " OR";
-		}
-		else
-		{
-			$first_field_processed = true;
-		}
-		$value_par = addslashes($value);
-		$query .= " $key<'$value_par'";
-	}
-	if (!empty(get_session_var('search_clause')))
-	{
-		$query .= ')';
-	}
-	$query .='  ORDER BY';
-	$first_field_processed = false;
-	foreach($primary_keys as $key => $value)
-	{
-		if ($first_field_processed)
-		{
-			$query .= ",";
-		}
-		else
-		{
-			$first_field_processed = true;
-		}
-		$query .= " $key DESC";
-	}
-	$query .= " LIMIT 1";
-	if ($row = mysqli_fetch_assoc(mysqli_query($db,$query)))
-	{
-		$prev_rec_primary_keys = array();
-		foreach($primary_keys as $key => $value)
-		{
-			$prev_rec_primary_keys[$key] = $row[$key];
-		}
-		$previous_record_id = encode_record_id($prev_rec_primary_keys);
-		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
-	}
-	else
-	{
-		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Previous</a></div>");
-	}
+  $value_par = addslashes($current_record[$sort_field_list[0]]);
+  $query .= " {$sort_field_list[0]}<='$value_par' ORDER BY";
+  for ($index=0; $index<$sort_field_count; $index++)
+  {
+    if ($index > 0)
+    {
+      $query .= ',';
+    }
+    $query .= " {$sort_field_list[$index]} DESC";
+  }
+
+  // Loop through table to find current and previous record
+  $query_result = mysqli_query($db,$query);
+  while ($row = mysqli_fetch_assoc($query_result))
+  {
+    if (isset($current_record_processed))
+    {
+      // Processing previous record
+      $prev_rec_primary_keys = array();
+  		foreach($primary_keys as $key => $value)
+  		{
+  			$prev_rec_primary_keys[$key] = $row[$key];
+  		}
+  		$previous_record_id = encode_record_id($prev_rec_primary_keys);
+  		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
+      return;
+    }
+    elseif (count(array_diff_assoc($row,$current_record)) == 0)
+    {
+      // Processing current record
+      $current_record_processed = true;
+    }
+  }
+	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Previous</a></div>");
 }
 
 //==============================================================================
@@ -629,60 +690,73 @@ Function next_record_link
 function next_record_link($table,$record_id)
 {
 	global $BaseURL, $RelativePath;
+	global $select_this_record;
 	$db = admin_db_connect();
-	$primary_keys = fully_decode_record_id($record_id);
+  $primary_keys = fully_decode_record_id($record_id);
+  $sort_field_list = array();
+	$alt_order = get_table_info_field($table,'alt_field_order');
+  $index = 0;
+	if (!empty($alt_order))
+  {
+    // Use alternate field order
+    $tok = strtok($alt_order,',');
+    while ($tok !== false)
+    {
+      $sort_field_list[$index++] = $tok;
+      $tok = strtok(',');
+    }
+  }
+  else
+  {
+    // Use primary keys
+    foreach ($primary_keys as $key => $value)
+    {
+      $sort_field_list[$index++] = $key;
+    }
+  }
+  $current_record = mysqli_fetch_assoc(mysqli_query($db,$select_this_record));
+  $sort_field_count = count($sort_field_list);
+
+	// Build query
 	$query = "SELECT * FROM $table WHERE";
 	if (!empty(get_session_var('search_clause')))
 	{
-		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).') AND (';
+		$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
 	}
-	$first_field_processed = false;
-	foreach($primary_keys as $key => $value)
-	{
-		if ($first_field_processed)
-		{
-			$query .= " OR";
-		}
-		else
-		{
-			$first_field_processed = true;
-		}
-		$value_par = addslashes($value);
-		$query .= " $key>'$value_par'";
-	}
-	if (!empty(get_session_var('search_clause')))
-	{
-		$query .= ')';
-	}
-	$query .='  ORDER BY';
-	$first_field_processed = false;
-	foreach($primary_keys as $key => $value)
-	{
-		if ($first_field_processed)
-		{
-			$query .= ",";
-		}
-		else
-		{
-			$first_field_processed = true;
-		}
-		$query .= " $key ASC";
-	}
-	$query .= " LIMIT 1";
-	if ($row = mysqli_fetch_assoc(mysqli_query($db,$query)))
-	{
-		$next_rec_primary_keys = array();
-		foreach($primary_keys as $key => $value)
-		{
-			$next_rec_primary_keys[$key] = $row[$key];
-		}
-		$next_record_id = encode_record_id($next_rec_primary_keys);
-		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
-	}
-	else
-	{
-		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Next</a></div>");
-	}
+  $value_par = addslashes($current_record[$sort_field_list[0]]);
+  $query .= " {$sort_field_list[0]}>='$value_par' ORDER BY";
+  for ($index=0; $index<$sort_field_count; $index++)
+  {
+    if ($index > 0)
+    {
+      $query .= ',';
+    }
+    $query .= " {$sort_field_list[$index]} ASC";
+  }
+
+  // Loop through table to find current and next record
+  $query_result = mysqli_query($db,$query);
+  while ($row = mysqli_fetch_assoc($query_result))
+  {
+    if (isset($current_record_processed))
+    {
+      // Processing next record
+      $next_rec_primary_keys = array();
+  		foreach($primary_keys as $key => $value)
+  		{
+  			$next_rec_primary_keys[$key] = $row[$key];
+  		}
+  		$next_record_id = encode_record_id($next_rec_primary_keys);
+  		print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
+      return;
+    }
+    elseif (count(array_diff_assoc($row,$current_record)) == 0)
+    {
+      // Processing current record
+      $current_record_processed = true;
+    }
+  }
+	print("<div class=\"top-navigation-item\"><a class=\"admin-link\" style=\"color:silver\" href=#>Next</a></div>");
 }
 
 //==============================================================================
@@ -940,6 +1014,7 @@ associated base table for widget information.
 function handle_record($action,$params)
 {
 	global $BaseURL, $BaseDir, $DBAdminURL, $RelativePath, $Location, $presets;
+	global $select_this_record;
 	$db = admin_db_connect();
 	$mode = get_viewing_mode();
 
@@ -978,8 +1053,8 @@ function handle_record($action,$params)
 	// Create query to select this record (used more than once)
 	$select_this_record = "SELECT * FROM $table WHERE ";
 	$field_added = false;
-	$primary_key = decode_record_id($record_id);
-	foreach ($primary_key as $field => $value)
+	$primary_keys = decode_record_id($record_id);
+	foreach ($primary_keys as $field => $value)
 	{
 		if ($field_added)
 		{

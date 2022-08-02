@@ -614,7 +614,7 @@ function previous_record_link($table,$record_id)
 	global $BaseURL, $RelativePath;
 	global $select_this_record;
 	$db = admin_db_connect();
-  $primary_keys = fully_decode_record_id($record_id);
+  $primary_keys = decode_record_id($record_id);
   $sort_field_list = array();
 	$alt_order = get_table_info_field($table,'alt_field_order');
   $index = 0;
@@ -695,7 +695,7 @@ function next_record_link($table,$record_id)
 	global $BaseURL, $RelativePath;
 	global $select_this_record;
 	$db = admin_db_connect();
-  $primary_keys = fully_decode_record_id($record_id);
+  $primary_keys = decode_record_id($record_id);
   $sort_field_list = array();
 	$alt_order = get_table_info_field($table,'alt_field_order');
   $index = 0;

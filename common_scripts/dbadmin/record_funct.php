@@ -645,7 +645,7 @@ function previous_record_link($table,$record_id)
 		$query = "SELECT * FROM $table WHERE";
 		if (!empty(get_session_var('search_clause')))
 		{
-			$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
+			$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).') AND';
 		}
 		$value_par = addslashes($current_record[$sort_field_list[0]]);
 		$query .= " {$sort_field_list[0]}<='$value_par' ORDER BY";
@@ -726,7 +726,7 @@ function next_record_link($table,$record_id)
 		$query = "SELECT * FROM $table WHERE";
 		if (!empty(get_session_var('search_clause')))
 		{
-			$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).')';
+			$query .= ' ('.str_replace('WHERE ','',get_session_var('search_clause')).') AND';
 		}
 		$value_par = addslashes($current_record[$sort_field_list[0]]);
 		$query .= " {$sort_field_list[0]}>='$value_par' ORDER BY";

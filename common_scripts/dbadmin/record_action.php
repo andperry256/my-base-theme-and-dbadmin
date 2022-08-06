@@ -150,11 +150,26 @@ while ($row = mysqli_fetch_assoc($query_result))
       }
       $record->SetField($field_name,addslashes($field_value));
     }
-    elseif ((($row2['widget_type'] == 'file') && (isset($_POST["field_$field_name"]))) ||
-            ($row2['widget_type'] != 'file'))
+    elseif ($row2['widget_type'] == 'file')
+    {
+      if (!empty(basename($_FILES["field_$field_name"]['name'])))
+      {
+        $record->SetField($field_name,basename($_FILES["field_$field_name"]['name']));
+      }
+      elseif (isset($_POST["existing_$field_name"]))
+      {
+        $record->SetField($field_name,stripslashes($_POST["existing_$field_name"]));
+      }
+      else
+      {
+        $record->SetField($field_name,'');
+      }
+    }
+    else
     {
       $record->SetField($field_name,stripslashes($_POST["field_$field_name"]));
     }
+
     if ($row2['is_primary'])
     {
       if (($action == 'new') && ($row2['widget_type'] == 'auto-increment'))
@@ -174,6 +189,21 @@ while ($row = mysqli_fetch_assoc($query_result))
       {
         $time = strtotime($_POST["field_$field_name"]);
         $new_primary_keys[$field_name] = date("H:i:s",$time);
+      }
+      elseif ($row2['widget_type'] == 'file')
+      {
+        if (!empty(basename($_FILES["field_$field_name"]['name'])))
+        {
+          $new_primary_keys[$field_name] = basename($_FILES["field_$field_name"]['name']);
+        }
+        elseif (isset($_POST["existing_$field_name"]))
+        {
+          $new_primary_keys[$field_name] = $_POST["existing_$field_name"];
+        }
+        else
+        {
+          $new_primary_keys[$field_name] = '';
+        }
       }
       else
       {

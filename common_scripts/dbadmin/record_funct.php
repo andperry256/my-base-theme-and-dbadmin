@@ -312,15 +312,19 @@ function generate_widget($table,$field_name,$field_value)
 					print("><br />");
 				}
 				print("<input type=\"checkbox\" name=\"overwrite_$field_name\">&nbsp;Allow overwrite");
-				$tempstr = strrev($field_value);
-				$fileext = strrev(strtok($tempstr,'.'));
-				if (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png'))
+				if (!empty($field_value))
 				{
-					$file_path = "$BaseDir/{$row['relative_path']}/$field_value";
-					if (is_file($file_path))
+					print("<br /><input type=\"hidden\" name=\"existing_$field_name\" value=\"$field_value\">");
+					$fileext = pathinfo($field_value,PATHINFO_EXTENSION);
+					if (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png'))
 					{
-						$file_url = "$BaseURL/{$row['relative_path']}/$field_value";
-						print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
+						// Output thumbnail image in widget
+						$file_path = "$BaseDir/{$row['relative_path']}/$field_value";
+						if (is_file($file_path))
+						{
+							$file_url = "$BaseURL/{$row['relative_path']}/$field_value";
+							print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
+						}
 					}
 				}
 				break;
@@ -340,6 +344,11 @@ function handle_file_widget_before_save(&$record,$field)
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
+
+	if ((empty(basename($_FILES["field_$field"]['name']))) && (isset($_POST["existing_$field"])))
+	{
+		return true;
+	}
 
 	// Ensure that all data for the field is initialised
 	$filename = '';
@@ -394,6 +403,11 @@ function handle_file_widget_after_save($record,$field)
 	$base_table = get_base_table($table);
 	$filename = $record->FieldVal($field);
 	$old_filename = get_session_var(array('file_fields',$field));
+
+	if ((empty(basename($_FILES["field_$field"]['name']))) && (isset($_POST["existing_$field"])))
+	{
+		return true;
+	}
 
 	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
 	if ($row = mysqli_fetch_assoc($query_result))
@@ -873,6 +887,7 @@ function save_record($record,$old_record_id,$new_record_id)
 		// Run any validate methods
 		foreach ($new_mysql_fields as $field => $value)
 		{
+			print("$field => $value<br>");
 			$result = check_field_status($table,$field,$record->FieldVal($field));
 			if ($result === false)
 			{
@@ -1237,22 +1252,15 @@ function handle_record($action,$params)
 					}
 					elseif ($widget_type == 'checkbox')
 					{
-						if (session_var_is_set(array('post_vars',"field_$field_name")))
-						{
-							$value = 1;
-						}
-						else
-						{
-							$value = 0;
-						}
+						$value = (session_var_is_set(array('post_vars',"field_$field_name")))
+							? 1
+							: 0;
 					}
-					elseif (($widget_type == 'file') && (!session_var_is_set(array('post_vars',"field_$field_name"))))
+					elseif ($widget_type == 'file')
 					{
-						$value = '';
-					}
-					else
-					{
-						$value = stripslashes(get_session_var(array('post_vars',"field_$field_name")));
+						$value = session_var_is_set(array('post_vars',"existing_$field_name"))
+							? get_session_var(array('post_vars',"existing_$field_name"))
+							: '';
 					}
 				}
 				elseif (($action == 'edit') || ($action == 'update'))

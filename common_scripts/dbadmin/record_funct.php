@@ -301,30 +301,26 @@ function generate_widget($table,$field_name,$field_value)
 				break;
 
 			case 'file':
-				print("$field_value<br />");
-				print("<input type=\"file\" name=\"field_$field_name\"");
-				if (!empty($row['allowed_filetypes']))
-				{
-					print(" accept=\"{$row['allowed_filetypes']}\"><br /><span class=\"small\">Allowed types:-&nbsp;&nbsp;{$row['allowed_filetypes']}</span><br />");
-				}
-				else
-				{
-					print("><br />");
-				}
-				print("<input type=\"checkbox\" name=\"overwrite_$field_name\">&nbsp;Allow overwrite");
 				if (!empty($field_value))
 				{
-					print("<br /><input type=\"hidden\" name=\"existing_$field_name\" value=\"$field_value\">");
-					$fileext = pathinfo($field_value,PATHINFO_EXTENSION);
-					if (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png'))
+					print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\">");
+					print("<input type=\"hidden\" name=\"existing_$field_name\" value=\"$field_value\">");
+				}
+				print("<br /><input type=\"file\" name=\"file_$field_name\"><br />");
+				if (!empty($row['allowed_filetypes']))
+				{
+					print("<span class=\"small\">Allowed types:-&nbsp;&nbsp;{$row['allowed_filetypes']}</span><br />");
+				}
+				print("<input type=\"checkbox\" name=\"overwrite_$field_name\">&nbsp;Allow overwrite");
+				if ((!empty($field_value)) && ($fileext = pathinfo($field_value,PATHINFO_EXTENSION)) &&
+				    (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png')))
+				{
+					// Output thumbnail image in widget
+					$file_path = "$BaseDir/{$row['relative_path']}/$field_value";
+					if (is_file($file_path))
 					{
-						// Output thumbnail image in widget
-						$file_path = "$BaseDir/{$row['relative_path']}/$field_value";
-						if (is_file($file_path))
-						{
-							$file_url = "$BaseURL/{$row['relative_path']}/$field_value";
-							print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
-						}
+						$file_url = "$BaseURL/{$row['relative_path']}/$field_value";
+						print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
 					}
 				}
 				break;
@@ -345,47 +341,68 @@ function handle_file_widget_before_save(&$record,$field)
 	$table = $record->table;
 	$base_table = get_base_table($table);
 
-	if ((empty(basename($_FILES["field_$field"]['name']))) && (isset($_POST["existing_$field"])))
+	if ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'")))
 	{
-		return true;
-	}
-
-	// Ensure that all data for the field is initialised
-	$filename = '';
-	$record->SetField($field,$filename);
-	update_session_var(array('file_fields',$field),'');
-
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
-	if ($row = mysqli_fetch_assoc($query_result))
-	{
-		$filename = basename($_FILES["field_$field"]['name']);
-		if (!empty($filename))
+		if ((empty(basename($_FILES["file_$field"]['name']))) && (isset($_POST["existing_$field"])))
 		{
-			$target_file = "$BaseDir/{$row['relative_path']}/$filename";
-			if ((is_file($target_file)) && (!isset($_POST["overwrite_$field"])))
+			// Existing file but no new file.
+			if ((!empty($_POST["field_$field"])) && ($_POST["field_$field"] != $_POST["existing_$field"]))
 			{
-				return report_error("File <em>$filename</em> already exists and <em>overwrite</em> option not selected.");
+				/*
+				File being renamed on server with no upload. No need to check the
+				overwrite flag, because if the required target file already exists, it is
+				either an orphan file or associated with a different record and therefore
+				cannot be dealt with automatically.
+				*/
+				$target_file = "$BaseDir/{$row['relative_path']}/{$_POST["field_$field"]}";
+				if (is_file($target_file))
+				{
+					return report_error("File of new name already exists on server.");
+				}
+			}
+			else
+			{
+				// No action required on file.
+				return true;
 			}
 		}
-		// Add the new filename to the record
-		$record->SetField($field,$filename);
+		else
+		{
+			$filename = basename($_FILES["file_$field"]['name']);
+			$fileext = pathinfo($filename,PATHINFO_EXTENSION);
+			$allowed_filetypes = $row['allowed_filetypes'];
+			$found = false;
+			$tok = strtok($allowed_filetypes,',');
+			while ($tok !== false)
+			{
+				if ($tok == $fileext)
+				{
+					$found = true;
+					break;
+				}
+				$tok = strtok(',');
+			}
+			if (!$found)
+			{
+				return report_error("Invalid file type.");
+			}
+			if (!empty($filename))
+			{
+				$target_file = (isset($_POST["existing_$field"]))
+				? "$BaseDir/{$row['relative_path']}/{$_POST["existing_$field"]}"
+				: "$BaseDir/{$row['relative_path']}/$filename";
+				if ((is_file($target_file)) && (!isset($_POST["overwrite_$field"])))
+				{
+					return report_error("File already exists on server and <em>overwrite</em> option not selected.");
+				}
+			}
+			// Add the new filename to the record.
+			$record->SetField($field,$filename);
+		}
 	}
-
-	// Save the old filename.
-	$query = "SELECT * FROM $table WHERE";
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1");
-	while ($row = mysqli_fetch_assoc($query_result))
+	else
 	{
-		$pk_field = $row['field_name'];
-		$pk_value = $record->FieldVal($pk_field);
-		$query .= " $pk_field='".addslashes($pk_value)."'";
-		$query .= " AND";
-		$query = rtrim($query,' AND');
-	}
-	$query_result = mysqli_query($db,$query);
-	if ($row = mysqli_fetch_assoc($query_result))
-	{
-		update_session_var(array('file_fields',$field),$row[$field]);
+		// This should not occur.
 	}
 }
 
@@ -402,61 +419,69 @@ function handle_file_widget_after_save($record,$field)
 	$table = $record->table;
 	$base_table = get_base_table($table);
 	$filename = $record->FieldVal($field);
-	$old_filename = get_session_var(array('file_fields',$field));
+	$old_filename = get_session_var(array('post_vars',"existing_$field"));
 
-	if ((empty(basename($_FILES["field_$field"]['name']))) && (isset($_POST["existing_$field"])))
-	{
-		return true;
-	}
-
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'");
-	if ($row = mysqli_fetch_assoc($query_result))
+	if ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field'")))
 	{
 		$old_target_file = "$BaseDir/{$row['relative_path']}/$old_filename";
 		$new_target_file = "$BaseDir/{$row['relative_path']}/$filename";
-		$upload_filename = basename($_FILES["field_$field"]['name']);
-		if (!empty($upload_filename))
+		if ((empty(basename($_FILES["file_$field"]['name']))) && (isset($_POST["existing_$field"])))
 		{
-			// A new file is being uploaded. Delete the old file if present and
-			// move the new file to the destination.
-			if (is_file($old_target_file))
+			// Existing file but no new file.
+			if ((!empty($_POST["field_$field"])) && ($_POST["field_$field"] != $_POST["existing_$field"]))
 			{
-				unlink($old_target_file);
-				if (is_file($old_target_file))
+				// File being renamed on server with no upload.
+				rename($old_target_file,$new_target_file);
+				if ((is_file($old_target_file)) || (!is_file($new_target_file)))
 				{
-					return report_error("Unable to delete existing file <em>$old_filename</em>.");
+					return report_error("Unable to rename file <em>$old_filename</em> to <em>$filename</em>.");
 				}
 			}
-			$result = move_uploaded_file($_FILES["field_$field"]['tmp_name'],$new_target_file);
-			if ($result === false)
+			else
 			{
-				return report_error("File <em>$filename</em> could not be uploaded.");
+				// No action required on file.
+				return true;
 			}
 		}
 		else
 		{
-			// No file is being uploaded, so revert to the original filename.
-			$filename = $old_filename;
+			if (!empty(basename($_FILES["file_$field"]['name'])))
+			{
+				// A new file is being uploaded. Delete the old file if present and
+				// move the new file to the destination.
+				if (is_file($old_target_file))
+				{
+					unlink($old_target_file);
+					if (is_file($old_target_file))
+					{
+						return report_error("Unable to delete existing file <em>$old_filename</em>.");
+					}
+				}
+				$result = move_uploaded_file($_FILES["file_$field"]['tmp_name'],$new_target_file);
+				if ($result === false)
+				{
+					return report_error("File <em>$filename</em> could not be uploaded.");
+				}
+
+				// Update record with the filename.
+				$query = "UPDATE $table SET $field='$filename' WHERE";
+				$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1");
+				while ($row = mysqli_fetch_assoc($query_result))
+				{
+					$pk_field = $row['field_name'];
+					$pk_value = $record->FieldVal($pk_field);
+					$query .= " $pk_field='".addslashes($pk_value)."'";
+					$query .= " AND";
+					$query = rtrim($query,' AND');
+				}
+				mysqli_query($db,$query);
+			}
 		}
 	}
 	else
 	{
 		// This should not occur.
-		$filename = $old_filename;
 	}
-
-	// Update record with the filename.
-	$query = "UPDATE $table SET $field='$filename' WHERE";
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1");
-	while ($row = mysqli_fetch_assoc($query_result))
-	{
-		$pk_field = $row['field_name'];
-		$pk_value = $record->FieldVal($pk_field);
-		$query .= " $pk_field='".addslashes($pk_value)."'";
-		$query .= " AND";
-		$query = rtrim($query,' AND');
-	}
-	mysqli_query($db,$query);
 }
 
 //==============================================================================
@@ -887,7 +912,6 @@ function save_record($record,$old_record_id,$new_record_id)
 		// Run any validate methods
 		foreach ($new_mysql_fields as $field => $value)
 		{
-			print("$field => $value<br>");
 			$result = check_field_status($table,$field,$record->FieldVal($field));
 			if ($result === false)
 			{
@@ -988,7 +1012,6 @@ function save_record($record,$old_record_id,$new_record_id)
 			}
 		}
 	}
-
 	/*
 	Save the new record ID as a session variable. This may be overridden
 	by an action in the afterSave function, thus allowing an updated record ID
@@ -1256,11 +1279,9 @@ function handle_record($action,$params)
 							? 1
 							: 0;
 					}
-					elseif ($widget_type == 'file')
+					else
 					{
-						$value = session_var_is_set(array('post_vars',"existing_$field_name"))
-							? get_session_var(array('post_vars',"existing_$field_name"))
-							: '';
+						$value = get_session_var(array('post_vars',"field_$field_name"));
 					}
 				}
 				elseif (($action == 'edit') || ($action == 'update'))

@@ -1412,6 +1412,10 @@ function handle_record($action,$params)
 //==============================================================================
 /*
 Function delete_record
+
+N.B. Where there is a file widget, the associated file is not deleted by default
+by this function. If deletion is required then this must be done in the
+afterDelete method for the associated table class.
 */
 //==============================================================================
 

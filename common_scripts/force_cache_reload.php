@@ -45,5 +45,7 @@
   fprintf($ofp,"  \$last_preset_link_version = '$last_preset_link_version';\n");
   fprintf($ofp,"?>\n");
   fclose($ofp);
-  print("Last preset link version set to <em>$last_preset_link_version</em>");
+  print("<p>Last preset link version set to <em>$last_preset_link_version</em></p>");
+  print("<p>Site =  <em>$local_site_dir</em></p>");
+  print("<p>Location =  <em>$Location</em></p>");
 ?>

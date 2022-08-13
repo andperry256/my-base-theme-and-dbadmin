@@ -68,6 +68,10 @@ if (!is_file($site_path_defs_path))
 	{
 		$custom_footer_script = '';
 	}
+	/*
+	The following constants are set to default values if site related values were
+	not	set when the path_defs.php script was invoked.
+	*/
 	if (!defined('SV_USER'))
 	{
 		define('SV_USER', 'user');

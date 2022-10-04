@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ "$1" == "" ]; then
+  echo "ERROR - User not specified"
+  exit
+fi
+root_dir=/home/$1
+if [ ! -d "$root_dir" ]; then
+  echo "Root directory not found"
+  exit
+fi
+df -h > $root_dir/maintenance/disc_storage.txt
+php $root_dir/maintenance/check_disc_storage.php

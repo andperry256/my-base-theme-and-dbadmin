@@ -16,19 +16,8 @@
   {
     exit("Local site directory not set\n");
   }
-  foreach($content as $line)
-  {
-    $tok = strtok($line,' ');
-    if ($tok == '/dev/sda1')
-    {
-      for ($i=0; $i<4; $i++)
-      {
-        $tok = strtok(' ');
-      }
-      $used_storage = (int)trim($tok,'%');
-      break;
-    }
-  }
+  $last_line = $content[count($content) -1];
+  $used_storage = strtok($last_line," \t");
   $date_and_time = date('YmdHis');
   $temp = file_get_contents("http://remote.andperry.com/report_disc_storage.php?site_path=$local_site_dir&datetime=$date_and_time&used_storage=$used_storage");
   print($temp);

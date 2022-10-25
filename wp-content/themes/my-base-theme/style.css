@@ -3,29 +3,30 @@ Theme Name: My Base Theme
 Theme URI:http://www.andperry.com
 Author: Andrew Perry
 Author URI: http://www.andperry.com
-Description: This theme is built upon the foundation of Underscores (an open source skeleton theme with no formatting). It is a base theme only and must be used in conjuction with a site-based child theme. One of the key features is in the ability to load a custom PHP script in place of the standard page content on selected pages. This functionality is essential for the correct operation of this site and must be accessed or imported by whatever active theme is in operation.
-Version: 1.1.0
+
+Description:
+This theme is built upon the foundation of Underscores (an open source skeleton theme with no formatting).
+It is a base theme only and must be used in conjuction with a site-based child theme. One of the key
+features is in the ability to load a custom PHP script in place of the standard page content on selected
+pages. This functionality is essential for the correct operation of this site and must be accessed or
+imported by whatever active theme is in operation.
+
+Version: 1.0.0
+This is an arbitrary version number. Changes are maintained at:-
+https://github.com/andperry256/my-base-theme-and-dbadmin
+
 License: GNU General Public License v2 or later
 License URI: LICENSE
 Text Domain: my-base-theme
 Tags:
 
 This theme, like WordPress, is licensed under the GPL.
-Use it to make something cool, have fun, and share what you've learned with others.
 
 My Base Theme is based on Underscores http://underscores.me/, (C) 2012-2016 Automattic, Inc.
 Underscores is distributed under the terms of the GNU GPL v2 or later.
 
 Normalizing styles have been helped along thanks to the fine work of
 Nicolas Gallagher and Jonathan Neal http://necolas.github.io/normalize.css/
-
---------------------------------------------------------------------------------
-
-CHANGE LOG
-
-Date		Version		Details
-
-2017-08-17	1.1.0  		Added support for supercategory taxonomy.
 
 --------------------------------------------------------------------------------
 */

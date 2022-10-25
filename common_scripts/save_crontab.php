@@ -17,7 +17,7 @@
     exit("Local site directory not set\n");
   }
   $temp = file_get_contents("http://remote.andperry.com/store_crontab.php?site_path=$local_site_dir&command=_delete_&datetime=$date_and_time");
-  print("$temp\n");
+  print($temp);
   foreach ($content as $line)
   {
     if (preg_match('/^[\*0-9]/',$line))
@@ -38,7 +38,7 @@
       $schedule = urlencode($schedule);
       $date_and_time = date('YmdHis');
       $temp = file_get_contents("http://remote.andperry.com/store_crontab.php?site_path=$local_site_dir&command=$command&schedule=$schedule&datetime=$date_and_time");
-      print("$temp\n");
+      print($temp);
     }
   }
 ?>

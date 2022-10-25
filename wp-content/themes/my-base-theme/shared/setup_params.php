@@ -169,22 +169,13 @@ if (!is_file($site_path_defs_path))
 
 			/*
 			Move down the category hierarchy to the given address, matching various
-			items along the way. Set the supercategory to the top level category in
-			the hierarchy.
+			items along the way.
 			CAUTION - If the post is allocated to multiple categories and there are
 			items to be processed in more than one line of ancestry, then the results
 			may be unpredictable as they could depend upon the order in which the
 			categories are processed.
 			*/
 			$tok = strtok($hierarchy,'/');
-			if (!empty($tok))
-			{
-				$supercategory = $tok;
-			}
-			else
-			{
-				$supercategory = 'none';
-			}
 			$uri_sub_path = '';
 			while ($tok !== false)
 			{
@@ -209,21 +200,6 @@ if (!is_file($site_path_defs_path))
 				{
 					// Add inline stylesheet
 					include_inline_stylesheet("$custom_categories_path/$tok/inline-styles.css");
-				}
-				if ((isset($enable_supercategories)) && ($enable_supercategories))
-				{
-					// Set the supercategory
-					$row = $wpdb->get_row($wpdb->prepare("SELECT term_taxonomy_id FROM wp_term_taxonomy LEFT JOIN wp_terms ON (wp_term_taxonomy.term_id=wp_terms.term_id) WHERE taxonomy='supercategory' AND slug='$supercategory'"));
-					if (!empty($row))
-					{
-						$post_id = get_the_ID();
-						$taxonomy_id = $row->term_taxonomy_id;
-						$row2 = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_term_relationships WHERE object_id='$post_id' AND term_taxonomy_id='$taxonomy_id'"));
-						if (empty($row2))
-						{
-							$wpdb->get_row($wpdb->prepare("INSERT INTO wp_term_relationships VALUES ($post_id, $taxonomy_id, 0)"));
-						}
-					}
 				}
 				$tok = strtok('/');
 			}

@@ -137,31 +137,6 @@ function my_base_theme_scripts()
 add_action( 'wp_enqueue_scripts', 'my_base_theme_scripts' );
 
 //================================================================================
-
-function define_supercategory_taxonomy()
-{
-	global $enable_supercategories;
-
-	if ((!isset($enable_supercategories)) || ($enable_supercategories !== false))
-	{
-		$labels = array (
-			'name' => 'Supercategories',
-			'singluar_name' => 'Supercategory',
-			'add_new_item' => 'Add New Supercategory',
-		);
-
-		$args = array (
-			'labels' => $labels,
-			'query_var' => true,
-			'rewrite' => true,
-		);
-
-		register_taxonomy( 'supercategory', 'post', $args );
-	}
-}
-add_action( 'init', 'define_supercategory_taxonomy' );
-
-//================================================================================
 /*
  * Remove login shake
  */

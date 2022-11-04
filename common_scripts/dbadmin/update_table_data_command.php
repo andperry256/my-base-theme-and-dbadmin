@@ -20,7 +20,7 @@ if (is_file("/Config/linux_pathdefs.php"))
 {
   // Local Server
   require_once("/Config/linux_pathdefs.php");
-  require_once("$Localhost_RootDir/Sites/$local_site_dir/public_html/path_defs.php");
+  require_once("$WWWRootDir/Sites/$local_site_dir/public_html/path_defs.php");
 }
 elseif (is_file("$OnlineRootDir/public_html/path_defs.php"))
 {

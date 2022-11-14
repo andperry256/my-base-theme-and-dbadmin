@@ -453,29 +453,32 @@ if ((isset($_GET['-table'])) && (is_file("$CustomPagesPath/$RelativePath/tables/
 
 print("<div id=\"dbadmin-main\">\n");
 
-// Mobile sidebar (hidden in desktop mode)
-print("<div id=\"dbadmin-mobile-sidebar\">\n");
-if (isset($_GET['showsidebar']))
+if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
 {
-  display_sidebar_content();
-  display_mobile_close_sidebar_button();
-}
-else
-{
-  $sidebar_url = './?showsidebar';
-  foreach ($_GET as $key => $value)
+  // Mobile sidebar (hidden in desktop mode)
+  print("<div id=\"dbadmin-mobile-sidebar\">\n");
+  if (isset($_GET['showsidebar']))
   {
-    $par = urlencode($value);
-    $sidebar_url .= "&$key=$par";
+    display_sidebar_content();
+    display_mobile_close_sidebar_button();
   }
-  print("<p><a href=\"$sidebar_url\"><button>Shortcuts</button></a></p>\n");
-}
-print("</div> <!--#dbadmin-mobile-sidebar-->\n");
+  else
+  {
+    $sidebar_url = './?showsidebar';
+    foreach ($_GET as $key => $value)
+    {
+      $par = urlencode($value);
+      $sidebar_url .= "&$key=$par";
+    }
+    print("<p><a href=\"$sidebar_url\"><button>Shortcuts</button></a></p>\n");
+  }
+  print("</div> <!--#dbadmin-mobile-sidebar-->\n");
 
-// Desktop sidebar (hidden in mobile mode)
-print("<div id=\"dbadmin-desktop-sidebar\">\n");
-display_sidebar_content();
-print("</div> <!--#dbadmin-desktop-sidebar-->\n");
+  // Desktop sidebar (hidden in mobile mode)
+  print("<div id=\"dbadmin-desktop-sidebar\">\n");
+  display_sidebar_content();
+  print("</div> <!--#dbadmin-desktop-sidebar-->\n");
+}
 
 // Main content
 print("<div id=\"dbadmin-content\">\n");
@@ -505,23 +508,26 @@ print("</div> <!--#dbadmin-content-->\n");
 print("</div> <!--#dbadmin-main-->\n");
 
 // Output common links at foot of page
-print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_table_info\">Table&nbsp;Info</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=_view_dba_table_fields\">Table&nbsp;Fields</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_relationships\">Relationships</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_change_log\">Change Log</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
-print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
-if ($Location == 'local')
+if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
 {
-  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=dbsync\">Sync&nbsp;Databases</a>");
-  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=search_and_replace\">Search&nbsp;&amp;&nbsp;Replace</a>");
+  print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_table_info\">Table&nbsp;Info</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=_view_dba_table_fields\">Table&nbsp;Fields</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_relationships\">Relationships</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_change_log\">Change Log</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
+  print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
+  if ($Location == 'local')
+  {
+    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=dbsync\">Sync&nbsp;Databases</a>");
+    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=search_and_replace\">Search&nbsp;&amp;&nbsp;Replace</a>");
+  }
+  if ((is_file("$BaseDir/admin_logout.php")) && (!is_file("$CustomPagesPath/$RelativePath/logout.php")))
+  {
+    print("&nbsp;&nbsp; <a href=\"$BaseURL/admin_logout.php\">Logout</a>");
+  }
+  print("</p>\n");
 }
-if ((is_file("$BaseDir/admin_logout.php")) && (!is_file("$CustomPagesPath/$RelativePath/logout.php")))
-{
-  print("&nbsp;&nbsp; <a href=\"$BaseURL/admin_logout.php\">Logout</a>");
-}
-print("</p>\n");
 
 //==============================================================================
 ?>

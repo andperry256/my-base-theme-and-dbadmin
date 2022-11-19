@@ -1344,7 +1344,7 @@ function run_update($table,$option)
 			$success_count++;
 		}
 	}
-	$alert_message = "$success_count record(s) updated, $failure_count record(s) not copied.";
+	$alert_message = "$success_count record(s) updated, $failure_count record(s) not updated.";
 	if (isset($_POST['show_progress']))
 	{
 		print("<script>alert(\"$alert_message\")</script>\n");

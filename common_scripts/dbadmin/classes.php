@@ -172,18 +172,13 @@ class tables_dba_table_fields
   function beforeSave($record)
 	{
     /*
-    Check to ensure that the table name field is not being altered. The widget
-    type is set to 'select' to allow this field to be modified in a 'copy'
-    operation, but otherwise it should be considered as non-editable.
+    Check to ensure that the table name field is not being altered unless the
+    record is being copied.
     */
-    if ($record->action != 'copy')
+    if (($record->FieldVal('table_name') != $record->OldPKVal('table_name')) &&
+        ($record->action != 'copy') && (!isset($_POST['save_as_new'])))
     {
-      $old_table_name = $record->OldPKVal('table_name');
-      $new_table_name = $record->FieldVal('table_name');
-      if ($new_table_name != $old_table_name)
-      {
-        return report_error("<p class=\"highlight-error\">Table name field can only be modified in a COPY operation.</p>\n");
-      }
+      return report_error("<p class=\"highlight-error\">Table name field can only be modified when creating a copy of the record.</p>\n");
     }
 	}
 }

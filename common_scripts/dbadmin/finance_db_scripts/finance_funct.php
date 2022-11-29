@@ -341,6 +341,7 @@ function copy_transaction($account,$seq_no,$new_date)
 		}
 
 		// Create copy of transaction using new sequence number
+		mysqli_query($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
 		mysqli_query($db,"DELETE TABLE IF EXISTS temp_transactions");
 		mysqli_query($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
 		mysqli_query($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");

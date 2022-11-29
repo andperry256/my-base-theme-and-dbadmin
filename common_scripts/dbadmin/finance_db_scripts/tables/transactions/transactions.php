@@ -504,7 +504,6 @@ class tables_transactions
 		{
 			// Make copy of transaction
 			copy_transaction($account,$seq_no,$copy_to_date);
-			mysqli_query($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
 		}
 
 		if ($sched_freq == '#')

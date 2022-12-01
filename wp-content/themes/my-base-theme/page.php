@@ -21,15 +21,14 @@ get_header(); ?>
 				if ($my_base_theme_mode == 'full')
 				{
 					require($site_path_defs_path);
-					$home_path = rtrim($BaseDir,'/');
 					$page_uri = trim(get_page_uri(get_the_ID()),'/');
-					if (is_file("$home_path/wp-custom-scripts/pages/$page_uri/_home.php"))
+					if (is_file("$CustomPagesPath/$page_uri/_home.php"))
 					{
-						$custom_script = "$home_path/wp-custom-scripts/pages/$page_uri/_home.php";
+						$custom_script = "$CustomPagesPath/$page_uri/_home.php";
 					}
 					else
 					{
-						$custom_script = "$home_path/wp-custom-scripts/pages/$page_uri.php";
+						$custom_script = "$CustomPagesPath/$page_uri.php";
 					}
 				}
 				if ((isset($custom_script)) && (is_file($custom_script)))

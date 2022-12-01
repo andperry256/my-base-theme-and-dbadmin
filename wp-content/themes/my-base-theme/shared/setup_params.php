@@ -45,10 +45,16 @@ if (!is_file($site_path_defs_path))
 
 	$my_base_theme_mode = 'full';
 	require($site_path_defs_path);
-	$CustomScriptsPath = "$BaseDir/wp-custom-scripts";
-	$CustomScriptsURL = "$BaseURL/wp-custom-scripts";
-	$CustomPagesPath = "$CustomScriptsPath/pages";
+	if (!isset($CustomScriptsPath))
+	{
+		$CustomScriptsPath = "$BaseDir/wp-custom-scripts";
+	}
+	if (!isset($CustomScriptsURL))
+	{
+		$CustomScriptsURL = "$BaseURL/wp-custom-scripts";
+	}
 	$CustomPagesURL = "$CustomScriptsURL/pages";
+	$CustomPagesPath = "$CustomScriptsPath/pages";
 	$custom_categories_path = "$CustomScriptsPath/categories";
 	$custom_categories_url = "$CustomScriptsURL/categories";
 	require("$CustomPagesPath/select_menu.php");

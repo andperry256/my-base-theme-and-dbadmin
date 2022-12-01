@@ -124,7 +124,12 @@ function my_base_theme_scripts()
 	{
 		$link_version = date('ym').'01';
 	}
-	wp_enqueue_style( 'my-base-theme-style', get_stylesheet_uri(), '', $link_version );
+	$stylesheet_uri = get_stylesheet_uri();
+	if (function_exists('url_to_static'))
+	{
+		$stylesheet_uri = url_to_static($stylesheet_uri);
+	}
+	wp_enqueue_style( 'my-base-theme-style', $stylesheet_uri, '', $link_version );
 
 	wp_enqueue_script( 'my-base-theme-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 

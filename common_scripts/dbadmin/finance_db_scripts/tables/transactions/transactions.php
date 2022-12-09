@@ -529,7 +529,7 @@ class tables_transactions
 				// Update links on source account in case this transaction has changed account
 				mysqli_query($db,"UPDATE transactions SET target_account='$account',target_seq_no=$seq_no WHERE account='$source_account' AND seq_no=$source_seq_no");
 			}
-			if (!headers_sent())
+			if ((!headers_sent()) && ($action != 'update') && ($action != 'copy'))
 			{
 				$record_id = encode_record_id($primary_keys);
 				header("Location: $BaseURL/$RelativePath/?-action=edit&-table=$table&-recordid=$record_id&summary");

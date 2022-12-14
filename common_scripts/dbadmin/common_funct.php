@@ -214,6 +214,24 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
 	}
 	return $result;
 }
+
+//================================================================================
+/*
+ * Function static_widget_warning
+ *
+ * This function returns a simple string containing an HTML comment line
+ * to warn that a widget needs to be set to static in order to operate
+ * correctly. This would typically be used when automatically setting a field
+ * with a clickable iink on saving a record. The text would show up on an
+ * editable widget but not on a static one.
+ */
+//================================================================================
+
+function static_widget_warning()
+{
+	return("<!--### Widget must be STATIC to view correctly ###-->\n");
+}
+
 //==============================================================================
 }
 //==============================================================================

@@ -524,17 +524,25 @@ function set_header_image_paths($slug,$type)
 function output_page_header()
 {
 	if (function_exists('get_secondary_title'))
+	{
 		$secondary_title = get_secondary_title();
+	}
 	else
+	{
 		$secondary_title = '';
+	}
 	if ($secondary_title == '#')
 	{
 		// No action
 	}
 	elseif (!empty($secondary_title))
+	{
 		echo("<h1>$secondary_title</h1>\n");
+	}
 	else
+	{
 		the_title( '<h1 class="entry-title">', '</h1>' );
+	}
 }
 
 //================================================================================
@@ -572,7 +580,9 @@ function get_content_part($part_no,$option='')
 		$pos1 = strpos($content,"[part$part_no]");
 		$pos2 = strpos($content,"[/part$part_no]");
 		if (($pos1 === false) || ($pos2 === false))
+		{
 			return "**** Unable to retrieve part $part_no from page ****";
+		}
 		$pos1 += strlen("[part$part_no]");
 		$content = substr($content,$pos1,$pos2-$pos1);
 		$content = apply_filters( 'the_content', $content );
@@ -612,7 +622,9 @@ function output_meta_data()
 	global $Location;
 
 	if ((isset($Location)) && ($Location == 'local'))
+	{
 		print("<meta name=\"robots\" content=\"noindex,nofollow\">\n");
+	}
 	else
 	{
 		if ((isset($meta_description)) && (!empty($meta_description)))
@@ -712,6 +724,20 @@ function include_inline_stylesheet($path)
 
 //================================================================================
 /*
+ * Function include_inline_javascript
+ *
+ */
+//================================================================================
+
+function include_inline_javascript($path)
+{
+	print("<script>\n");
+	include($path);
+	print("</script>\n");
+}
+
+//================================================================================
+/*
  * Functions save_php_error_log & restore_php_error_log
  */
 //================================================================================
@@ -799,6 +825,188 @@ function readable_markup($str)
 	$str = str_replace(">","&gt;",$str);
 	$str = str_replace("\n","<br />\n",$str);
 	return $str;
+}
+
+//================================================================================
+/*
+ * Function coded_text_to_html
+ *
+ * This function coverts a coded text file into readable HTML. The following
+ * syntax is used in the source:-
+ *
+ *   #*#<Text>#*#                        H1 Header
+ *   ##<Text>##                          H2 Header
+ *   ###<Text>###                        H3 Header
+ *   ####<Text>####                      H4 Header
+ *   **<Text>**                          Bold
+ *   ///<Text>///                        Italic
+ *   __<Text>__                          Underline
+ *   @@<Link Address>@@<Link Text>@@     Hyperlink (same tab/window)
+ *   @@<Link Address>@@@<Link Text>@@    Hyperlink (new tab/window)
+ *   #BL#                                Start of bulleted list
+ *   #*BL#                               End of bulleted list
+ *   #NL#                                Start of numbered list
+ *   #*NL#                               End of numbered list
+ *   *                                   Create new list item (when at start of
+ *                                       line inside a list)
+ *   <Blank Line>                        Create paragraph break (unless in
+ *                                       a list)
+ *   \                                   Escape character to override other
+ *                                       syntax
+ */
+//================================================================================
+
+function coded_text_to_html($url)
+{
+	/*
+	Define standard tag substitions.
+
+	The array $tag_substitutions defines string substitutions that are made to
+	generate HTML tags.
+
+	Each generated tag alternates between offsets 0 & 1 of the sub-array as
+	controlled by the corresponding value in the array $tag_status (0 or 1).
+
+	Offset 2 of the sub-array defines the pattern to be used in preg_replace.
+
+	The header tags must appear in descending order so that substitutions are
+	made in the correct order.
+	*/
+	$tag_substitutions = array (
+		'####' => array ('<h4>','</h4>','####'),
+		'###' => array ('<h3>','</h3>','###'),
+		'##' => array ('<h2>','</h2>','##'),
+		'#*#' => array ('<h1>','</h1>','#\*#'),
+		'**' => array ('<strong>','</strong>','\*\*'),
+		'///' => array ('<em>','</em>','\/\/\/'),
+		'__' => array ('<u>','</u>','__'),
+		'@@' => array ('<a>','<a>','@@'),
+		'#BL#' => array ('<ul>','<ul>','#BL#'),
+		'#*BL#' => array ('</ul>','</ul>','#\*BL#'),
+		'#NL#' => array ('<ol>','<ol>','#NL#'),
+		'#*NL#' => array ('</ol>','/<ol>','#\*NL#'),
+	);
+	$tag_status = array (
+		'####' => 0,
+		'###' => 0,
+		'##' => 0,
+		'#*#' => 0,
+		'**' => 0,
+		'///' => 0,
+		'__' => 0,
+		'@@' => 0,
+		'#BL#' => 0,
+		'#*BL#' => 0,
+		'#NL#' => 0,
+		'#*NL#' => 0,
+	);
+	$in_paragraph = false;
+	$list_level = 0;
+	$new_list = false;
+
+	$content = file($url);
+	$result = '';
+	if (empty($content))
+	{
+		return("###### INPUT TEXT NOT FOUND ######");
+	}
+	foreach ($content as $line)
+	{
+		$line = trim($line);
+		$original_line = $line;
+
+		// Perform standard tag substitutions
+		foreach ($tag_substitutions as $key => $values)
+		{
+			while (strpos($line,$key) !== false)
+			{
+				if ($key == '@@')
+				{
+					// Hyperlink
+					$pos1 = strpos($line,'@@');
+					if (($pos2 = strpos($line,'@@',$pos1+2)) && ($pos3 = strpos($line,'@@',$pos2+2)))
+					{
+						$link_address = substr($line,$pos1+2,$pos2-$pos1-2);
+						if (substr($line,$pos2+2,1) == '@')
+						{
+							// An extra '@' symbol inthe middle indicates open link in new tab/window
+							$options = ' target="_blank"';
+							$link_text = substr($line,$pos2+3,$pos3-$pos2-3);
+							$old_string = "@@$link_address@@@$link_text@@";
+						}
+						else
+						{
+							$options = '';
+							$link_text = substr($line,$pos2+2,$pos3-$pos2-2);
+							$old_string = "@@$link_address@@$link_text@@";
+						}
+					}
+					$line = str_replace($old_string,"<a href=\"$link_address\"$options>$link_text</a>",$line);
+				}
+				elseif (($key == '#BL#') || ($key == '#NL#'))
+				{
+					// Start of list
+					$list_level++;
+					$new_list = true;
+					if ($in_paragraph)
+					{
+						// Close the previous paragraph
+						$result .= "</p>\n";
+						$in_paragraph = false;
+					}
+				}
+				else
+				{
+					if (($list_level > 0) && (($key == '#*BL#') || ($key == '#*NL#')))
+					{
+						// End of list. Close the last list item.
+						$result .= "</li>\n";
+						$list_level--;
+					}
+					$line = preg_replace("/{$values[2]}/",$values[$tag_status[$key]],$line,1);
+					$tag_status[$key] = ($tag_status[$key] + 1 & 1);
+				}
+			}
+		}
+
+		if (($list_level > 0) && (substr($line,0,1) == '*'))
+		{
+			// Start of list item
+			if (!$new_list)
+			{
+				// Close the last list item
+				$result .= "</li>\n";
+			}
+			$new_list = false;
+			$line = preg_replace("/\*/",'<li>',$line,1);
+		}
+		elseif ((empty($line)) && ($in_paragraph))
+		{
+			// Handle blank line as a paragraph break
+			$line = "</p>";
+			$in_paragraph = false;
+		}
+		elseif (substr($original_line,0,1) != '#')
+		{
+			// Line contains ordinary text
+			if ($in_paragraph)
+			{
+				$result .= "<br />\n";
+			}
+			elseif ($list_level == 0)
+			{
+				$result .= "<p>";
+				$in_paragraph = true;
+			}
+		}
+
+		$result .= "$line\n";
+	}
+	if ($in_paragraph)
+	{
+		$result .= "</p>\n";
+	}
+	return stripslashes($result);
 }
 
 //================================================================================

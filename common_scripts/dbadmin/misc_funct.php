@@ -72,6 +72,7 @@ function hs()
 {
 	print("<div class=\"halfspace\">&nbsp</div>\n");
 }
+
 //==============================================================================
 /*
 Functions next_seq_number and update_seq_number

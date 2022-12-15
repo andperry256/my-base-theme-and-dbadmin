@@ -139,13 +139,21 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
 		$new_seq_no = next_seq_number($table,$sort_1_value,$interval);
 		$sort_1_name = $row['sort_1_field'];
 		$seq_no_name =  $row['seq_no_field'];
+		$primary_keys = array();
 		$query = "UPDATE $table SET $seq_no_name=$new_seq_no WHERE $seq_no_name=$seq_no";
 		if (!empty($sort_1_name))
 		{
+			$primary_keys[$sort_1_name] = $sort_1_value;
 			$sort_1_value = addslashes($sort_1_value);
 			$query .= " AND $sort_1_name='$sort_1_value'";
 		}
 		mysqli_query($db,$query);
+		if (function_exists('update_session_var'))
+		{
+			$primary_keys[$seq_no_name] = $new_seq_no;
+			$record_id = encode_record_id($primary_keys);
+			update_session_var('saved_record_id',$record_id);
+		}
 		return $new_seq_no;
 	}
 	else

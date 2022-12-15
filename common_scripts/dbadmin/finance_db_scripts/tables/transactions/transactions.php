@@ -280,16 +280,16 @@ class tables_transactions
 
 		if ($delete_record)
 		{
-			// Delete flag is set
+			// Delete record
 			$query_result = mysqli_query($db,"DELETE FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 			$this->afterDelete($record);
 			return;
 		}
-		elseif ($seq_no == NEXT_SEQ_NO_INDICATOR)
+		else
 		{
-			// New record or change of account
-			$seq_no = next_seq_number('transactions',$account);
-			mysqli_query($db,"UPDATE transactions SET seq_no=$seq_no WHERE account='$account' AND seq_no=".NEXT_SEQ_NO_INDICATOR);
+			// Re-update record
+			$seq_no = update_seq_number('transactions',$account,$seq_no);
+			$primary_keys['account'] = $account;
 			$primary_keys['seq_no'] = $seq_no;
 			update_session_var('saved_record_id',encode_record_id($primary_keys));
 		}

@@ -74,7 +74,16 @@ function hs()
 }
 //==============================================================================
 /*
-Function next_seq_number
+Functions next_seq_number and update_seq_number
+
+These functions are used to determine/set the value of the sequence number field
+for a new table record, interpreting the value of constant NEXT_SEQ_NO_INDICATOR
+as an indication to use the next number in sequence.
+
+The afterSave method for a given table class would typically call
+update_seq_number to perform the whole update operation for the sequence number.
+The next_seq_number function (apart from being called from within
+update_seq_number) would only be called in special circumstances.
 */
 //==============================================================================
 
@@ -99,22 +108,49 @@ function next_seq_number($table,$sort_1_value,$interval=10)
 		$query = "SELECT * FROM $table WHERE $seq_no_name<>$next_seq_no_indicator";
 		if ((!empty($sort_1_name)) && ($seq_type == 'repeat'))
 		{
-			if (empty($sort_1_value))
-				$query .= " AND  ($sort_1_name='' OR $sort_1_name IS NULL)";
-			else
-				$query .= " AND  $sort_1_name='$sort_1_value'";
+			$sort_1_value = addslashes($sort_1_value);
+			$query .= " AND  $sort_1_name='$sort_1_value'";
 		}
 		$query .= " ORDER BY $seq_no_name DESC";
 		$query_result = mysqli_query($db,$query);
-		if ($row = mysqli_fetch_assoc($query_result))
-			return $row[$seq_no_name] + $interval;
-		else
-			return $interval;
+		return ($row = mysqli_fetch_assoc($query_result))
+			? $row[$seq_no_name] + $interval
+			: $interval;
 	}
 	else
 	{
 		// This should not occur
 		return NEXT_SEQ_NO_INDICATOR;
+	}
+}
+
+function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
+{
+	if (!defined('NEXT_SEQ_NO_INDICATOR'))
+	{
+		exit("Constant NEXT_SEQ_NO_INDICATOR not defined");
+	}
+	$db = admin_db_connect();
+	$row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
+	if (($seq_no == NEXT_SEQ_NO_INDICATOR) && (isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
+	{
+		// Update record with new sequence number
+		$new_seq_no = next_seq_number($table,$sort_1_value,$interval);
+		$sort_1_name = $row['sort_1_field'];
+		$seq_no_name =  $row['seq_no_field'];
+		$query = "UPDATE $table SET $seq_no_name=$new_seq_no WHERE $seq_no_name=$seq_no";
+		if (!empty($sort_1_name))
+		{
+			$sort_1_value = addslashes($sort_1_value);
+			$query .= " AND $sort_1_name='$sort_1_value'";
+		}
+		mysqli_query($db,$query);
+		return $new_seq_no;
+	}
+	else
+	{
+		// No update required
+		return $seq_no;
 	}
 }
 

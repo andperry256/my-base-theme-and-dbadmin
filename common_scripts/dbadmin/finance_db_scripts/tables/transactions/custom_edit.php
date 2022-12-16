@@ -284,5 +284,13 @@ if ($row = mysqli_fetch_assoc($query_result))
     }
   }
 }
+else
+{
+  print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=list&-table=_view_account_$account\">Show All</a></div>");
+  print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=_view_account_$account\">New Record</a></div>");
+  print("<div style=\"clear:both\"></div>\n");
+  print("<p>Record not found.</p>\n");
+}
+
 //==============================================================================
 ?>

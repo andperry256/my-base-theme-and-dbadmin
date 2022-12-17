@@ -1223,6 +1223,17 @@ function handle_record($action,$params)
 						$description = str_replace("@$linked_field",$row4['description'],$description);
 					}
 				}
+				if ((defined('NEXT_SEQ_NO_INDICATOR')) &&
+				    ($row2['Default'] == NEXT_SEQ_NO_INDICATOR) &&
+					  ($row4 = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'"))) &&
+					  ($row4['seq_no_field'] == $field_name))
+				{
+					if (!empty($description))
+					{
+						$description .= "<br />";
+					}
+					$description .= NEXT_SEQ_NO_INDICATOR . " = Save automatically with next number in sequence.";
+				}
 
 				// Create the URL to edit the field attributes in table dba_table_fields
 				if ($table == 'dba_table_fields')

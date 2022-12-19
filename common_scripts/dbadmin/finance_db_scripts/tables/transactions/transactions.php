@@ -285,14 +285,6 @@ class tables_transactions
 			$this->afterDelete($record);
 			return;
 		}
-		else
-		{
-			// Re-update record
-			$seq_no = update_seq_number('transactions',$account,$seq_no);
-			$primary_keys['account'] = $account;
-			$primary_keys['seq_no'] = $seq_no;
-			update_session_var('saved_record_id',encode_record_id($primary_keys));
-		}
 		$old_account = $record->OldPKVal('account');
 		$old_seq_no = $record->OldPKVal('seq_no');
 

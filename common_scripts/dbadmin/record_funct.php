@@ -997,6 +997,20 @@ function save_record($record,$old_record_id,$new_record_id)
 		$record->SetField($field_name,$new_primary_keys[$field_name]);
 	}
 
+	// Update auto sequence number if applicable
+	if (($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'"))) &&
+			(!empty($row['seq_no_field'])) && ($seq_no = $record->FieldVal($row['seq_no_field'])) && ($seq_no == NEXT_SEQ_NO_INDICATOR) &&
+			($row2 = mysqli_fetch_assoc(mysqli_query($db,"SHOW COLUMNS FROM $base_table WHERE Field='{$row['seq_no_field']}'"))) &&
+			($row2['Default'] == NEXT_SEQ_NO_INDICATOR))
+	{
+		$sort_1_value = $record->FieldVal($row['sort_1_field']);
+		$seq_no = update_seq_number($base_table,$sort_1_value,$seq_no);
+		$record->SetField($row['seq_no_field'],$seq_no);
+		$primary_keys = fully_decode_record_id($new_record_id);
+		$primary_keys[$row['seq_no_field']] = $seq_no;
+		$new_record_id = encode_record_id($primary_keys);
+	}
+
 	// Run the after save function for any file widgets
 	$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
 	while ($row = mysqli_fetch_assoc($query_result))

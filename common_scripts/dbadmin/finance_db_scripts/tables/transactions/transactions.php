@@ -538,8 +538,6 @@ class tables_transactions
 				mysqli_query($db,"UPDATE transactions SET record_sched=0 WHERE account='$account' AND seq_no=$seq_no");
 			}
 		}
-
-		load_return_url();
 	}
 }
 ?>

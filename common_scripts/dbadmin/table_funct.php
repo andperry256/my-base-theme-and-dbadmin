@@ -470,49 +470,30 @@ function display_table($params)
 	{
 		update_session_var('filtered_table','');
 	}
-	if ((isset($_GET['-showall'])) || ($table != get_session_var('filtered_table')))
-	{
-		// Clear all filters
-		if (!isset($_GET['-where']))
-		{
-			update_session_var('search_clause','');
-		}
-		update_session_var('sort_clause','');
-		update_session_var('show_relationships',false);
 
-		// Do not allow an outstanding action to proceed, in case another window has
-		// altered the filters for the current session.
-		if (isset($_POST['submitted']))
-		{
-			unset($_POST['submitted']);
-		}
+	// Initialise the search filter if not set
+	if (!session_var_is_set('search_clause'))
+	{
+		update_session_var('search_clause','');
+	}
+
+	if ((isset($_GET['-sortfield'])) && (isset($_GET['-sortorder'])))
+	{
+		// Apply a sort filter
+		$sort_field = $_GET['-sortfield'];
+		$sort_order = $_GET['-sortorder'];
+		update_session_var('sort_clause',"ORDER BY $sort_field ".strtoupper($sort_order));
+	}
+	elseif (!session_var_is_set('sort_clause'))
+	{
+		update_session_var('sort_clause','');
 	}
 	else
 	{
-		// Initialise the search filter if not set
-		if (!session_var_is_set('search_clause'))
-		{
-			update_session_var('search_clause','');
-		}
-
-		if ((isset($_GET['-sortfield'])) && (isset($_GET['-sortorder'])))
-		{
-			// Apply a sort filter
-			$sort_field = $_GET['-sortfield'];
-			$sort_order = $_GET['-sortorder'];
-			update_session_var('sort_clause',"ORDER BY $sort_field ".strtoupper($sort_order));
-		}
-		elseif (!session_var_is_set('sort_clause'))
-		{
-			update_session_var('sort_clause','');
-		}
-		else
-		{
-			// Leave the existing sort filter in place.
-			$tempstr = str_replace('ORDER BY ','',get_session_var('sort_clause'));
-			$sort_field = strtok($tempstr,' ');
-			$sort_order = strtolower(strtok(' '));
-		}
+		// Leave the existing sort filter in place.
+		$tempstr = str_replace('ORDER BY ','',get_session_var('sort_clause'));
+		$sort_field = strtok($tempstr,' ');
+		$sort_order = strtolower(strtok(' '));
 	}
 	update_session_var('filtered_table',$table);
 

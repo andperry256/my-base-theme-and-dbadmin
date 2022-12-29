@@ -123,6 +123,24 @@ function check_new_action($action,$table)
 		// No table is being displayed - force filters to be cleared on next table display.
 		update_session_var('filtered_table','');
 	}
+
+	if ((isset($_GET['-showall'])) || ($table != get_session_var('filtered_table')))
+	{
+		// Clear all filters
+		if (!isset($_GET['-where']))
+		{
+			update_session_var('search_clause','');
+		}
+		update_session_var('sort_clause','');
+		update_session_var('show_relationships',false);
+
+		// Do not allow an outstanding action to proceed, in case another window has
+		// altered the filters for the current session.
+		if (isset($_POST['submitted']))
+		{
+			unset($_POST['submitted']);
+		}
+	}
 }
 
 //==============================================================================

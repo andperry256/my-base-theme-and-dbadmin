@@ -1515,6 +1515,21 @@ function delete_record($record,$record_id)
 
 //==============================================================================
 /*
+Function delete_record_on_save
+
+This function is intended solely for use in calling from the afterSave method
+of a given table. The 'saved_record_id' session variable will always have been
+set in this context.
+*/
+//==============================================================================
+
+function delete_record_on_save($record)
+{
+	delete_record($record,get_session_var('saved_record_id'));
+}
+
+//==============================================================================
+/*
 Function load_return_url
 */
 //==============================================================================

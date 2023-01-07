@@ -224,14 +224,11 @@ class tables_dba_change_log
 
 	function afterSave($record)
 	{
-    $db = admin_db_connect();
-    $date_and_time = $record->FieldVal('date_and_time');
 		$delete_record = $record->FieldVal('delete_record');
     if ($delete_record)
     {
 			// Delete flag is set
-			$query_result = mysqli_query($db,"DELETE FROM dba_change_log WHERE date_and_time='$date_and_time'");
-			return;
+      delete_record_on_save($record);
     }
 	}
 }
@@ -245,7 +242,9 @@ class tables_admin_passwords
 		$new_passwd = $record->FieldVal('new_passwd');
 		$conf_new_passwd = $record->FieldVal('conf_new_passwd');
 		if ($conf_new_passwd != $new_passwd)
-			return report_error("Passwords do not match");
+    {
+      return report_error("Passwords do not match");
+    }
 	}
 
 	function afterSave($record)

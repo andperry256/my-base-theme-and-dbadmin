@@ -281,8 +281,7 @@ class tables_transactions
 		if ($delete_record)
 		{
 			// Delete record
-			$query_result = mysqli_query($db,"DELETE FROM transactions WHERE account='$account' AND seq_no=$seq_no");
-			$this->afterDelete($record);
+			delete_record_on_save($record);
 			return;
 		}
 		$old_account = $record->OldPKVal('account');

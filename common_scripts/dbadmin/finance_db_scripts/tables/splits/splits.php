@@ -93,7 +93,7 @@ class tables_splits
 
 		if ($delete_record)
 		{
-			mysqli_query($db,"DELETE FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$old_split_no");
+			delete_record_on_save($record);
 			return;
 		}
 

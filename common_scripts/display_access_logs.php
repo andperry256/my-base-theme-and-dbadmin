@@ -35,10 +35,6 @@
 //==============================================================================
 
 require("allowed_hosts.php");
-if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
-{
-	exit("Authentication failure");
-}
 if (isset($_GET['site']))
 {
 	$local_site_dir = $_GET['site'];
@@ -50,6 +46,10 @@ if (is_file("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php"))
 else
 {
 	exit("Path definitions script not found");
+}
+if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER['REMOTE_ADDR'])))
+{
+	exit("Authentication failure");
 }
 if (!isset($local_site_dir))
 {

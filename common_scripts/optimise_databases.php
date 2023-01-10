@@ -1,9 +1,5 @@
 <?php
   require("allowed_hosts.php");
-  if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (substr($_SERVER['REMOTE_ADDR'],0,8) != '192.168.'))
-  {
-  	exit("Authentication Failure");
-  }
   if (is_file("/Config/linux_pathdefs.php"))
   {
     if (!isset($_GET['site']))
@@ -16,6 +12,10 @@
     }
   }
   require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+  if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER['REMOTE_ADDR'])))
+  {
+    exit("Authentication Failure");
+  }
   require("$PrivateScriptsDir/mysql_connect.php");
   $add_tags = ((isset($_SERVER['HTTP_USER_AGENT'])) && (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'wget') === false));
   foreach ($dbinfo as $dbid => $info)

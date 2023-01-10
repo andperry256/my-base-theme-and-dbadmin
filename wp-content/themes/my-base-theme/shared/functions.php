@@ -781,7 +781,7 @@ function output_to_access_log($user='',$add_info='')
 		$ofp = fopen("$AccessLogsDir/$date.log",'a');
 		$time = date('H:i:s');
 		$addr_str = $_SERVER['REMOTE_ADDR'];
-		if (substr($addr_str,0,8) == '192.168.')
+		if (is_local_ip($_SERVER['REMOTE_ADDR']))
 		{
 			$addr_str = '[Local]';
 		}

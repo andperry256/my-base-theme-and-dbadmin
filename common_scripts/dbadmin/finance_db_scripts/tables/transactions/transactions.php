@@ -422,7 +422,7 @@ class tables_transactions
 		}
 		if (($save_defaults) && (substr($category,0,1) != '-'))
 		{
-			mysqli_query($db,"UPDATE payees SET default_category='$category' WHERE name='$payee'");
+			mysqli_query($db,"UPDATE payees SET default_cat='$category' WHERE name='$payee'");
 		}
 
 		if ((empty($acct_month)) || ($change_acct_month == 0))

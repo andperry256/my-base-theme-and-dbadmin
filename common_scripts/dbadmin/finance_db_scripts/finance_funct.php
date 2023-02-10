@@ -407,13 +407,15 @@ function record_scheduled_transaction($account,$seq_no)
 
 		// Update scheduled transaction to next date
 		$type = substr($sched_freq,0,1);
-		$multiplier = (int)(ltrim($sched_freq,'MW'));
+		$multiplier = (int)(ltrim($sched_freq,'MWD'));
 		$year = (int)substr($date,0,4);
 		$month = (int)substr($date,5,2);
 		$day = (int)substr($date,8,2);
 		if ($type == 'M')
 		{
-			// Frequency in months (N.B. 12 months is the largest interval used).
+			// Frequency in months (12 months is the largest interval used, so never
+			// spans more than a year).
+
 			$acct_month_year = (int)substr($acct_month,0,4);
 			$acct_month_month = (int)substr($acct_month,5,2);
 			$month += $multiplier;
@@ -432,13 +434,39 @@ function record_scheduled_transaction($account,$seq_no)
 		}
 		elseif ($type == 'W')
 		{
-			// Frequency in weeks (N.B. 4 weeks is the largest interval used).
+			// Frequency in weeks (4 weeks is the largest interval used, so never
+			// spans more than a month).
+
 			$days_in_month = DaysInMonth($month,$year);
 			$day += ($multiplier * 7);
 			if ($day > $days_in_month)
 			{
 				$day -= $days_in_month;
 				$month++;
+				if ($month > 12)
+				{
+					$month = 1;
+					$year++;
+				}
+			}
+		}
+		elseif ($type == 'D')
+		{
+			// Frequency in days (30 days is the largest interval used, so normally
+			// spans no more than a month, but see condition below).
+			$days_in_month = DaysInMonth($month,$year);
+			$day += $multiplier;
+			if ($day > $days_in_month)
+			{
+				$day -= $days_in_month;
+				$month++;
+				$days_in_month = DaysInMonth($month,$year);
+				if ($day > $days_in_month)
+				{
+					// Cover a 30 day jump from January to March.
+					$day -= $days_in_month;
+					$month++;
+				}
 				if ($month > 12)
 				{
 					$month = 1;

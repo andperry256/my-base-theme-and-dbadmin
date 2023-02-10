@@ -885,6 +885,8 @@ function coded_text_to_html($url)
 		'#*BL#' => array ('</ul>','</ul>','#\*BL#'),
 		'#NL#' => array ('<ol>','<ol>','#NL#'),
 		'#*NL#' => array ('</ol>','/<ol>','#\*NL#'),
+		'#TB#' => array ('<table>','<table>','#TB#'),
+		'#*TB#' => array ('</table>','</table>','#\*TB#'),
 	);
 	$tag_status = array (
 		'####' => 0,
@@ -899,10 +901,14 @@ function coded_text_to_html($url)
 		'#*BL#' => 0,
 		'#NL#' => 0,
 		'#*NL#' => 0,
+		'#TB#' => 0,
+		'#*TB#' => 0,
 	);
 	$in_paragraph = false;
 	$list_level = 0;
 	$new_list = false;
+	$in_table = false;
+	$new_table = false;
 
 	$content = file($url);
 	$result = '';
@@ -922,7 +928,7 @@ function coded_text_to_html($url)
 			{
 				if ($key == '@@')
 				{
-					// Hyperlink
+					// ====== Hyperlink ======
 					$pos1 = strpos($line,'@@');
 					if (($pos2 = strpos($line,'@@',$pos1+2)) && ($pos3 = strpos($line,'@@',$pos2+2)))
 					{
@@ -945,7 +951,7 @@ function coded_text_to_html($url)
 				}
 				elseif (($key == '#BL#') || ($key == '#NL#'))
 				{
-					// Start of list
+					// ====== Start of List ======
 					$list_level++;
 					$new_list = true;
 					if ($in_paragraph)
@@ -955,14 +961,61 @@ function coded_text_to_html($url)
 						$in_paragraph = false;
 					}
 				}
+				elseif ($key == '#TB#')
+				{
+					// ====== Start of Table ======
+					$in_table = true;
+					$new_table = true;
+					$col_count_tok = '';
+					$style_tok = '';
+					$tok = strtok(substr($line,strpos($line,$key)+4),'#');
+					$col_count = 2; // Set default
+					while ($tok !== false)
+					{
+						if ((substr($tok,0,2) == 'C=') && (is_numeric(substr($tok,2))))
+						{
+							// Extract required column count
+							$col_count_tok = $tok;
+							$col_count = substr($tok,2);
+						}
+						elseif (substr($tok,0,2) == 'S=')
+						{
+							// Extract style definition
+							$style_tok = $tok;
+							$style = substr($tok,2);
+						}
+						$tok = strtok('#');
+					}
+					if (!empty($col_count_tok))
+					{
+						$line = str_replace("$col_count_tok#",'',$line);
+					}
+					if (!empty($style_tok))
+					{
+						$line = str_replace("#TB#$style_tok#","<table style=\"$style\">",$line);
+					}
+					else
+					{
+						$line = str_replace("#TB#","<table>",$line);
+					}
+					$col_no = 0;
+				}
 				else
 				{
 					if (($list_level > 0) && (($key == '#*BL#') || ($key == '#*NL#')))
 					{
-						// End of list. Close the last list item.
+						// ====== End of List ======
 						$result .= "</li>\n";
 						$list_level--;
 					}
+					if (($in_table) && ($key == '#*TB#'))
+					{
+						// ====== End of Table ======
+						$result .= "</td></tr>\n";
+						$in_table = false;
+					}
+
+					// Substitute the tag with the required HTML.
 					$line = preg_replace("/{$values[2]}/",$values[$tag_status[$key]],$line,1);
 					$tag_status[$key] = ($tag_status[$key] + 1 & 1);
 				}
@@ -971,7 +1024,7 @@ function coded_text_to_html($url)
 
 		if (($list_level > 0) && (substr($line,0,1) == '*'))
 		{
-			// Start of list item
+			// ====== Start of List Item ======
 			if (!$new_list)
 			{
 				// Close the last list item
@@ -979,6 +1032,27 @@ function coded_text_to_html($url)
 			}
 			$new_list = false;
 			$line = preg_replace("/\*/",'<li>',$line,1);
+		}
+		elseif (($in_table) && (substr($line,0,2) == '[]'))
+		{
+			// ====== Start of Table Cell ======
+			if ($new_table)
+			{
+				// Start of new table
+				$line = preg_replace('/\[\]/',"<tr><td>",$line,1);
+			}
+			elseif ($col_no == 0)
+			{
+				// Start of new row
+				$line = preg_replace('/\[\]/',"</td></tr>\n<tr><td>",$line,1);
+			}
+			else
+			{
+				// Next cell on same row
+				$line = preg_replace('/\[\]/',"</td><td>",$line,1);
+			}
+			$new_table = false;
+			$col_no = ($col_no + 1) % $col_count;
 		}
 		elseif ((empty($line)) && ($in_paragraph))
 		{

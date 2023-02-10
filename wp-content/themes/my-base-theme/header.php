@@ -34,7 +34,7 @@
 	output_meta_data();
 ?>
 </head>
-
+<!-- *** SITE CHECK *** DO NOT DELETE THIS LINE *** -->
 <body <?php body_class(); ?> >
 
 <div id="super-container">

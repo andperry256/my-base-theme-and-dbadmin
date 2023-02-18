@@ -308,7 +308,7 @@ if (!function_exists('PreviousDate'))
 {
 	function PreviousDate($date)
 	{
-		return date('Y-m-d', strtotime("$date. - 1 day"));
+		return date('Y-m-d', strtotime("$date - 1 day"));
 	}
 }
 
@@ -318,7 +318,7 @@ if (!function_exists('NextDate'))
 {
 	function NextDate($date)
 	{
-		return date('Y-m-d', strtotime("$date. + 1 day"));
+		return date('Y-m-d', strtotime("$date + 1 day"));
 	}
 }
 

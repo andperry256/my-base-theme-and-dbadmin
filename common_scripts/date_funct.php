@@ -195,14 +195,9 @@ if (!function_exists('GregorianDoW'))
 		}
 		$result = floor((($year % 100) * 5) / 4);
 		$result += $day;
-		if (IsLeapYear($year))
-		{
-			$result += $LeapYearMonthAdjust[$month];
-		}
-		else
-		{
-			$result += $NonLeapYearMonthAdjust[$month];
-		}
+		$result += (IsLeapYear($year))
+			 ? $LeapYearMonthAdjust[$month]
+			 : $NonLeapYearMonthAdjust[$month];
 		$result += $GregorianCenturyAdjust[floor(($year % 400) / 100)];
 		$result %= 7;
 		return $result;
@@ -298,15 +293,9 @@ if (!function_exists('EndWeekOfMonth'))
 {
 	function EndWeekOfMonth($month,$year)
 	{
-		if (IsLeapYear($year))
-		{
-			$LastDay = LeapYearDays($month);
-		}
-		else
-		{
-			$LastDay = NonLeapYearDays($month);
-		}
-
+		$LastDay = (IsLeapYear($year))
+			? LeapYearDays($month)
+			: NonLeapYearDays($month);
 		$EndDoW = DMYToDoW($LastDay,$month,$year);
 		$SoWDay = $LastDay - $EndDoW;
 		return sprintf("%04d-%02d-%02d",$year,$month,$SoWDay);
@@ -319,21 +308,7 @@ if (!function_exists('PreviousDate'))
 {
 	function PreviousDate($date)
 	{
-		$day = (int)substr($date,8,2);
-		$month = (int)substr($date,5,2);
-		$year = (int)substr($date,0,4);
-		$day--;
-		if ($day < 1)
-		{
-			$month--;
-			if ($month < 1)
-			{
-				$year--;
-				$month = 12;
-			}
-			$day = DaysInMonth($month,$year);
-		}
-		return sprintf("%04d-%02d-%02d",$year,$month,$day);
+		return date('Y-m-d', strtotime("$date. - 1 day"));
 	}
 }
 
@@ -343,21 +318,69 @@ if (!function_exists('NextDate'))
 {
 	function NextDate($date)
 	{
-		$day = (int)substr($date,8,2);
-		$month = (int)substr($date,5,2);
+		return date('Y-m-d', strtotime("$date. + 1 day"));
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('AddDays'))
+{
+	function AddDays($date,$days)
+	{
+		$abs_int = abs($days);
+	 	return ($days >= 0)
+			? date('Y-m-d', strtotime("$date + $abs_int days"))
+			: date('Y-m-d', strtotime("$date - $abs_int days"));
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('AddWeeks'))
+{
+	function AddWeeks($date,$weeks)
+	{
+		$abs_int = abs($weeks);
+	 	return ($weeks >= 0)
+			? date('Y-m-d', strtotime("$date + $abs_int weeks"))
+			: date('Y-m-d', strtotime("$date - $abs_int weeks"));
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('AddMonths'))
+{
+	function AddMonths($date,$months,$last_day=false)
+	{
 		$year = (int)substr($date,0,4);
-		$day++;
-		if ($day > DaysInMonth($month,$year))
+		$month = (int)substr($date,5,2);
+		$day = (int)substr($date,8,2);
+		$projected_month = $month + $months;
+		$year_interval = floor(($projected_month - 1) / 12);
+		$new_year = $year + $year_interval;
+		$new_month = $projected_month - ($year_interval * 12);
+		$days_in_month = DaysInMonth($new_month,$new_year);
+		if (($day > $days_in_month) || ($last_day))
 		{
-			$day = 1;
-			$month++;
-			if ($month > 12)
-			{
-				$month = 1;
-				$year++;
-			}
+			$day = $days_in_month;
 		}
-		return sprintf("%04d-%02d-%02d",$year,$month,$day);
+		return sprintf("%04d-%02d-%02d",$new_year,$new_month,$day);
+	}
+}
+
+//==============================================================================
+
+if (!function_exists('DateDifference'))
+{
+	function DateDifference ($start_date, $end_date)
+	{
+
+		$start_date_obj = date_create($start_date);
+		$end_date_obj = date_create($end_date);
+		$interval = date_diff($start_date_obj, $end_date_obj);
+		return (int)$interval->format('%R%a');
 	}
 }
 
@@ -567,64 +590,6 @@ if (!function_exists('EndOfNextTerm'))
 		{
 			return ("$ThisYear-08-31");
 		}
-	}
-}
-
-//==============================================================================
-
-if (!function_exists('AddDays'))
-{
-	function AddDays($date,$days)
-	{
-		// Add a given number of days to (or substract from) a given date
-		$year = (int)substr($date,0,4);
-		$month = (int)substr($date,5,2);
-		$day = (int)substr($date,8,2);
-		$day += $days;
-
-		while ($day > DaysInMonth($month,$year))
-		{
-			$day -= DaysInMonth($month,$year);
-			$month ++;
-			if ($month > 12)
-			{
-				$year ++;
-				$month = 1;
-			}
-		}
-		while ($day < 1)
-		{
-			$month --;
-			if ($month < 1)
-			{
-				$year --;
-				$month = 12;
-			}
-			$day += DaysInMonth($month,$year);
-		}
-
-		return sprintf("%04d-%02d-%02d",$year,$month,$day);
-	}
-}
-
-//==============================================================================
-
-if (!function_exists('DateDifference'))
-{
-	function DateDifference ($start_date, $end_date)
-	{
-		$start_year = (int)substr($start_date,0,4);
-		$start_month = (int)substr($start_date,5,2);
-		$start_day = (int)substr($start_date,8,2);
-		$start_date_offset = mktime(1,0,0,$start_month,$start_day,$start_year);
-		$end_year = (int)substr($end_date,0,4);
-		$end_month = (int)substr($end_date,5,2);
-		$end_day = (int)substr($end_date,8,2);
-		$end_date_offset = mktime(1,0,0,$end_month,$end_day,$end_year);
-
-		// Round the difference to avoid problems with DST change.
-		$difference = ($end_date_offset - $start_date_offset) / 86400;
-		return (int)round($difference,0);
 	}
 }
 

@@ -349,6 +349,19 @@ if (!function_exists('AddWeeks'))
 }
 
 //==============================================================================
+/*
+Function AddMonths
+
+This function adds a given number of months (positive or negative) to a date.
+The new date will have the same day of the month as the original date unless:-
+1. The given day does not exist in the new month, in which case it is set to the
+   last day of the month. So for example 31 March plus one month will give
+	 30 April.
+2. The $last_day flag is set, in which case it is set to the last day of the
+   month. So for example 30 April plus one month will give 31 May if the flag is
+	 set and 30 May if it is not set.
+*/
+//==============================================================================
 
 if (!function_exists('AddMonths'))
 {

@@ -104,12 +104,10 @@ while ($row = mysqli_fetch_assoc($query_result))
 	}
 	else
 	{
-		$text = '';
+		$text .= "* Zero *";
+		$amount = 0;
 	}
-	if (!empty($text))
-	{
-		print("<option value=\"{$row['seq_no']}[$amount]\">$text</option>\n");
-	}
+	print("<option value=\"{$row['seq_no']}[$amount]\">$text</option>\n");
 }
 print("</select>\n");
 print("</td></tr>\n");

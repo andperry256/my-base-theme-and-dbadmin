@@ -972,6 +972,12 @@ function save_record($record,$old_record_id,$new_record_id)
 			$query .= " $field={$old_mysql_fields[$field]}";
 		}
 		$main_query_result = mysqli_query($db,$query);
+		if (isset($_POST['replicate_changes']))
+		{
+			// Replicate change to online site
+			$db2 = online_db_connect();
+			mysqli_query($db2,$query);
+		}
 	}
 	elseif (($action == 'new') || ($action == 'copy'))
 	{
@@ -1412,8 +1418,24 @@ function handle_record($action,$params)
 		{
 			if ($_GET['-action'] == 'edit')
 			{
+				// Generate 'save as new record' selector
 				print("<input type=\"checkbox\" name =\"save_as_new\">&nbsp;Save as new record\n");
 				print("<div class=\"halfspace\">&nbsp;</div>");
+
+				// Generate 'replicate changes' selector if required conditions are met
+				if (($Location == 'local') &&
+				    (function_exists('online_db_connect')) &&
+				    ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'"))) &&
+				    ($row['replicate_enabled']))
+				{
+					// Check that corresponding online record exists
+					$db2 = online_db_connect();
+					if (($db2) && (mysqli_num_rows(mysqli_query($db2,$select_this_record)) > 0))
+					{
+						print("<input type=\"checkbox\" name =\"replicate_changes\">&nbsp;Replicate changes\n");
+						print("<div class=\"halfspace\">&nbsp;</div>");
+					}
+				}
 			}
 			print("<input type=\"Submit\" value =\"Save\">\n");
 			print("<input type=\"hidden\" name=\"submitted\"/>\n");

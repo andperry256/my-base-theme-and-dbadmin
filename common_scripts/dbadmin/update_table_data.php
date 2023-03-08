@@ -161,7 +161,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   mysqli_query($db,"UPDATE dba_table_info SET collation='-auto-' WHERE collation='' OR collation IS NULL");
   mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr' AFTER `collation`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `grid_columns` `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr'");
-  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `grid_columns`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `replicate_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `grid_columns`");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `replicate_enabled` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `replicate_enabled`");
   mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if ($new_installation)
   {

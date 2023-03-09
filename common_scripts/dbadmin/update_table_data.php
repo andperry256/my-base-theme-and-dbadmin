@@ -478,8 +478,11 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
     try { mysqli_query($db,"SHOW COLUMNS FROM $table"); }
     catch (Exception $e)
     {
-      // This should not occur but condition needs to be checked because of
-      // previous problems.
+      /*
+      This should not normally occur but may do so if there is an old view
+      present in the database that no longer relates to valid data.
+      */
+      mysqli_query($db,"DROP VIEW IF EXISTS $table");
       exit("ERROR - ".$e->getMessage().$eol);
     }
     if ($row['Table_type'] != 'VIEW')

@@ -289,7 +289,7 @@ class tables_transactions
 
 		// Re-link any splits if the transaction primary keys have changed.
 		// Can leave the split sequence numbers intact as they are specific to the individual transaction.
-		if (($account != $old_account) || ($seq_no != $old_seq_no))
+		if ((!empty($old_account)) && (($account != $old_account) || ($seq_no != $old_seq_no)))
 		{
 			mysqli_query($db,"UPDATE splits SET account='$account',transact_seq_no=$seq_no WHERE account='$old_account' AND transact_seq_no=$old_seq_no");
 		}

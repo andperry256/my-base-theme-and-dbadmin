@@ -1,14 +1,15 @@
 <?php
 //==============================================================================
 /*
-  This script is called to run the 'update_table_data' function for a given
-  database in command line mode. It is normally included in a site specific
-  script in which the following variables must be defined:-
+  N.B. This cannot be run as a standalone script.
+
+  It is called to run the 'update_table_data' function for a given database in
+  command line mode and must be included in a site specific script in which the
+  following variables are set up beforehand:-
 
   1. $local_site_dir
   2. $OnlineRootDir
-  3. $RelativePath  - This is generally taken from a command line parameter.
-     Setting it to '+' will cause all databases to be processed.
+  3. $RelativePath - This is normally taken from a command line parameter.
 */
 //==============================================================================
 
@@ -51,21 +52,8 @@ require("$BaseDir/common_scripts/dbadmin/widget_types.php");
 require("$BaseDir/common_scripts/dbadmin/table_funct.php");
 require("$BaseDir/common_scripts/dbadmin/record_funct.php");
 require("$BaseDir/common_scripts/dbadmin/update_table_data.php");
-if ($RelativePath == '+')
+if (is_file("$CustomPagesPath/$RelativePath/db_funct.php"))
 {
-  // Process all databases
-  foreach ($dbinfo as $dbid => $info)
-  {
-    $RelativePath = $info[3];
-    if (!empty($RelativePath))
-    {
-      update_table_data_with_dbid($dbid,$update_charsets,$optimise);
-    }
-  }
-}
-elseif (is_file("$CustomPagesPath/$RelativePath/db_funct.php"))
-{
-  // Process single database
   require("$CustomPagesPath/$RelativePath/db_funct.php");
   update_table_data($update_charsets,$optimise);
 }

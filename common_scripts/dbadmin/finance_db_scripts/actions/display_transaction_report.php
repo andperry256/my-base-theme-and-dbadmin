@@ -1,11 +1,11 @@
 <?php
 //==============================================================================
 
-global $BaseDir;
+global $FinanceReportDir;
 global $Location;
 $db = admin_db_connect();
 $csv_file = 'report_'.date('Ymd').'_'.date('His').'.csv';
-$ofp2 = fopen("$BaseDir/admin_data/finances/$csv_file", "w");
+$ofp2 = fopen("$FinanceReportDir/$csv_file", "w");
 fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
 print("<h1>Transaction Report</h1>\n");
 $account_exclusions = select_excluded_accounts('account');

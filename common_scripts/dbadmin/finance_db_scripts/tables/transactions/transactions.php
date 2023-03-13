@@ -459,7 +459,7 @@ class tables_transactions
 			mysqli_query($db,"UPDATE transactions SET seq_no=$seq_no,currency='$account_currency',credit_amount=$credit_amount,debit_amount=$debit_amount,auto_total=0,fund='$fund',category='$category',acct_month='$acct_month',save_defaults=0 WHERE account='$account' AND seq_no=$seq_no");
 			if ($sched_freq != '#')
 			{
-				mysqli_query($db,"UPDATE transactions SET cleared_balance=0.00,full_balance=0.00 WHERE account='$account' AND seq_no=$seq_no");
+				mysqli_query($db,"UPDATE transactions SET reconciled_balance=0.00,full_balance=0.00 WHERE account='$account' AND seq_no=$seq_no");
 			}
 		}
 

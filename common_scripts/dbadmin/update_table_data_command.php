@@ -45,17 +45,22 @@ foreach($argv as $key => $value)
   {
     $optimise = true;
   }
+  elseif ($value == '-pur')
+  {
+    $purge = true;
+  }
 }
 
 require("$PrivateScriptsDir/mysql_connect.php");
 require("$BaseDir/common_scripts/dbadmin/widget_types.php");
 require("$BaseDir/common_scripts/dbadmin/table_funct.php");
 require("$BaseDir/common_scripts/dbadmin/record_funct.php");
+require("$BaseDir/common_scripts/dbadmin/view_funct.php");
 require("$BaseDir/common_scripts/dbadmin/update_table_data.php");
 if (is_file("$CustomPagesPath/$RelativePath/db_funct.php"))
 {
   require("$CustomPagesPath/$RelativePath/db_funct.php");
-  update_table_data($update_charsets,$optimise);
+  update_table_data($update_charsets,$optimise,$purge);
 }
 else
 {

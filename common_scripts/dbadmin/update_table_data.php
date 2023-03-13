@@ -22,17 +22,17 @@ Function update_table_data
 */
 //==============================================================================
 
-function update_table_data($update_charsets=false,$optimise=false)
+function update_table_data($update_charsets=false,$optimise=false,$purge=false)
 {
-  update_table_data_main('',$update_charsets,$optimise);
+  update_table_data_main('',$update_charsets,$optimise,$purge);
 }
 
-function update_table_data_with_dbid($dbid,$update_charsets=false,$optimise=false)
+function update_table_data_with_dbid($dbid,$update_charsets=false,$optimise=false,$purge=false)
 {
-  update_table_data_main($dbid,$update_charsets,$optimise);
+  update_table_data_main($dbid,$update_charsets,$optimise,$purge);
 }
 
-function update_table_data_main($dbid,$update_charsets,$optimise)
+function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 {
   global $CustomPagesPath, $RelativePath, $AltIncludePath;
   global $WidgetTypes;
@@ -68,6 +68,10 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   if ($optimise)
   {
     print("[Optimising of tables included]$eol");
+  }
+  if ($purge)
+  {
+    print("[Purging of dynamic views included]$eol");
   }
   $default_engine = DEFAULT_ENGINE;
   $default_charset = DEFAULT_CHARSET;
@@ -464,278 +468,295 @@ function update_table_data_main($dbid,$update_charsets,$optimise)
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $table = $row[$table_field];
-    print("Processing");
-    if ($row['Table_type'] == 'VIEW')
+    if (($purge) && (substr($table,0,6) == '_view_'))
     {
-      print(" view");
+      print ("Purging view $ltag$table$rtag ...$eol");
+      if (($query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) &&
+          ($row2 = mysqli_fetch_assoc($query_result2)) &&
+          (!empty($row2['parent_table'])))
+      {
+        delete_view_structure($table,$row2['parent_table']);
+      }
+      else
+      {
+        mysqli_query($db,"DROP VIEW $table");
+      }
     }
     else
     {
-      print(" table");
-    }
-    print(" $ltag$table$rtag ...$eol");
-
-    try { mysqli_query($db,"SHOW COLUMNS FROM $table"); }
-    catch (Exception $e)
-    {
-      /*
-      This should not normally occur but may do so if there is an old view
-      present in the database that no longer relates to valid data.
-      */
-      mysqli_query($db,"DROP VIEW IF EXISTS $table");
-      exit("ERROR - ".$e->getMessage().$eol);
-    }
-    if ($row['Table_type'] != 'VIEW')
-    {
-      // Set the table to the required character set and collation if required
-      if ($update_charsets)
+      print("Processing");
+      if ($row['Table_type'] == 'VIEW')
       {
-        $charset = $default_charset;
-        $collation = $default_collation;
-        $engine = $default_engine;
-        $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
-        if ($row2 = mysqli_fetch_assoc($query_result2))
+        print(" view");
+      }
+      else
+      {
+        print(" table");
+      }
+      print(" $ltag$table$rtag ...$eol");
+
+      try { mysqli_query($db,"SHOW COLUMNS FROM $table"); }
+      catch (Exception $e)
+      {
+        /*
+        This should not normally occur but may do so if there is an old view
+        present in the database that no longer relates to valid data.
+        */
+        mysqli_query($db,"DROP VIEW IF EXISTS $table");
+        exit("ERROR - ".$e->getMessage().$eol);
+      }
+      if ($row['Table_type'] != 'VIEW')
+      {
+        // Set the table to the required character set and collation if required
+        if ($update_charsets)
         {
-          if (!empty($row2['engine']))
+          $charset = $default_charset;
+          $collation = $default_collation;
+          $engine = $default_engine;
+          $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+          if ($row2 = mysqli_fetch_assoc($query_result2))
           {
-            $engine = $row2['engine'];
+            if (!empty($row2['engine']))
+            {
+              $engine = $row2['engine'];
+            }
+            if ((!empty($row2['character_set'])) && ($row2['character_set'] != '-auto-'))
+            {
+              $charset = $row2['character_set'];
+            }
+            if ((!empty($row2['collation'])) && ($row2['collation'] != '-auto-'))
+            {
+              $collation = $row2['collation'];
+            }
           }
-          if ((!empty($row2['character_set'])) && ($row2['character_set'] != '-auto-'))
+          if (mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
           {
-            $charset = $row2['character_set'];
+            print("--Unable to update charset/collation for table $table$eol");
           }
-          if ((!empty($row2['collation'])) && ($row2['collation'] != '-auto-'))
+          if (mysqli_query($db,"ALTER TABLE $table ENGINE=$engine") == false)
           {
-            $collation = $row2['collation'];
+            print("--Unable to update storage engine for table $table$eol");
           }
         }
-        if (mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
+
+        // Optimise the table if required
+        if ($optimise)
         {
-          print("--Unable to update charset/collation for table $table$eol");
-        }
-        if (mysqli_query($db,"ALTER TABLE $table ENGINE=$engine") == false)
-        {
-          print("--Unable to update storage engine for table $table$eol");
+          if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
+          {
+            print("--Unable to optimise table $table$eol");
+          }
         }
       }
 
-      // Optimise the table if required
-      if ($optimise)
+      $table = $row[$table_field];
+      mysqli_query($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
+      mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
+      if ($table == get_base_table($table,$db))
       {
-        if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
+        if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) ||
+        (is_dir("$AltIncludePath/tables/$table")) ||
+        (substr($table,0,4) == 'dba_'))
         {
-          print("--Unable to optimise table $table$eol");
-        }
-      }
-    }
-
-    $table = $row[$table_field];
-    mysqli_query($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
-    mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
-    if ($table == get_base_table($table,$db))
-    {
-      if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) ||
-      (is_dir("$AltIncludePath/tables/$table")) ||
-      (substr($table,0,4) == 'dba_'))
-      {
-        if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) == 0)
-        {
-          mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Not showing properly on Atom syntax highlighting
-        }
-        $last_display_order = 0;
-
-        // Loop through the table fields
-        $field_list = array();
-        if ($query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table"))
-        {
-          while ($row2 = mysqli_fetch_assoc($query_result2))
+          if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) == 0)
           {
-            $field_name = $row2['Field'];
-            $field_list[$field_name] = true;
-            $field_type = strtok($row2['Type'],'(');
-            $field_size = strtok(')');
-            if ($row2['Key'] == 'PRI')
+            mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Not showing properly on Atom syntax highlighting
+          }
+          $last_display_order = 0;
+
+          // Loop through the table fields
+          $field_list = array();
+          if ($query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table"))
+          {
+            while ($row2 = mysqli_fetch_assoc($query_result2))
             {
-              $is_primary = 1;
-              $required = 2;  // Value required
-            }
-            else
-            {
-              $is_primary = 0;
-              if ($row2['Null'] == 'NO')
+              $field_name = $row2['Field'];
+              $field_list[$field_name] = true;
+              $field_type = strtok($row2['Type'],'(');
+              $field_size = strtok(')');
+              if ($row2['Key'] == 'PRI')
               {
-                // Require value by default. Can later call the
-                // enable_non_null_empty function to override this.
-                $required = 2;
-              }
-              else
-              {
-                $required = 0;  //Can be null
-              }
-            }
-            switch ($field_type)
-            {
-              case 'date':
-              $default_widget_type = 'date';
-              break;
-
-              case 'time':
-              $default_widget_type = 'time';
-              break;
-
-              case 'varchar';
-              case 'char';
-              if ($field_size >= 200)
-              {
-                $default_widget_type = 'textarea';
-              }
-              else
-              {
-                $default_widget_type = 'input-text';
-              }
-              break;
-
-              case 'int':
-              case 'decimal':
-              if ($row2['Extra'] == 'auto_increment')
-              {
-                $default_widget_type = 'auto-increment';
-              }
-              else
-              {
-                $default_widget_type = 'input-num';
-              }
-              if ($required == 1)
-              {
-                $required = 2;
-              }
-              break;
-
-              case 'tinyint':
-              $default_widget_type = 'checkbox';
-              if ($required == 1)
-              {
-                $required = 2;
-              }
-              break;
-
-              case 'enum':
-              $enum_select_list = $field_size;
-              $field_size ='';
-              $default_widget_type = 'enum';
-              if ($required == 1)
-              {
-                $required = 2;
-              }
-              break;
-
-              default:
-              $default_widget_type = 'input-text';
-              break;
-            }
-
-            // Run query to select data for the given table & field
-            $query_result3 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
-            if ($row3 = mysqli_fetch_assoc($query_result3))
-            {
-              /*
-              Record already found.  Enforce the following constraints:-
-              1. Ensure that the 'is primary' and 'required' fields reflect
-              the current table definition and that they are set as static
-              widgets.
-              2. Set the widget type for a nnumeric primary key to 'input-num'.
-              3. Set the widget type to 'date' for any date field.
-              4. Set the widget type to 'enum' for any enum field.
-              5. Set the widget type to 'auto-increment' for any auto-increment field.
-              */
-              if ($row3['is_primary'])
-              {
-                /*
-                If the field is already set to primary then do not reset this
-                as it may have been set manually (normally in the case of a view
-                where primary key status does not occur naturally).
-                */
                 $is_primary = 1;
-                $required = 2;
+                $required = 2;  // Value required
               }
-              mysqli_query($db,"UPDATE dba_table_fields SET is_primary=$is_primary,required=$required WHERE table_name='$table' AND field_name='$field_name'");
-              if ($is_primary)
+              else
               {
+                $is_primary = 0;
+                if ($row2['Null'] == 'NO')
+                {
+                  // Require value by default. Can later call the
+                  // enable_non_null_empty function to override this.
+                  $required = 2;
+                }
+                else
+                {
+                  $required = 0;  //Can be null
+                }
+              }
+              switch ($field_type)
+              {
+                case 'date':
+                $default_widget_type = 'date';
+                break;
+
+                case 'time':
+                $default_widget_type = 'time';
+                break;
+
+                case 'varchar';
+                case 'char';
+                if ($field_size >= 200)
+                {
+                  $default_widget_type = 'textarea';
+                }
+                else
+                {
+                  $default_widget_type = 'input-text';
+                }
+                break;
+
+                case 'int':
+                case 'decimal':
                 if ($row2['Extra'] == 'auto_increment')
                 {
-                  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='auto-increment' WHERE table_name='$table' AND field_name='$field_name'");
+                  $default_widget_type = 'auto-increment';
                 }
-                elseif ($field_type == 'int')
+                else
                 {
-                  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='input-num' WHERE table_name='$table' AND field_name='$field_name'");
+                  $default_widget_type = 'input-num';
                 }
+                if ($required == 1)
+                {
+                  $required = 2;
+                }
+                break;
+
+                case 'tinyint':
+                $default_widget_type = 'checkbox';
+                if ($required == 1)
+                {
+                  $required = 2;
+                }
+                break;
+
+                case 'enum':
+                $enum_select_list = $field_size;
+                $field_size ='';
+                $default_widget_type = 'enum';
+                if ($required == 1)
+                {
+                  $required = 2;
+                }
+                break;
+
+                default:
+                $default_widget_type = 'input-text';
+                break;
               }
-              if ($default_widget_type == 'date')
+
+              // Run query to select data for the given table & field
+              $query_result3 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+              if ($row3 = mysqli_fetch_assoc($query_result3))
               {
-                mysqli_query($db,"UPDATE dba_table_fields SET widget_type='date' WHERE table_name='$table' AND field_name='$field_name'");
-              }
-              if ($default_widget_type == 'enum')
-              {
-                mysqli_query($db,"UPDATE dba_table_fields SET widget_type='enum' WHERE table_name='$table' AND field_name='$field_name'");
-              }
-              $last_display_order = $row3['display_order'];
-            }
-            else
-            {
-              /*
-              Add new record into the table fields table.
-              A simplified method is currently used to determine the required value
-              for the display order. A value of 10 is added to that of the previous
-              record unless this clashes with an existing record in which case a
-              value of 5 is added.
-              */
-              $next_display_order = $last_display_order + 10;
-              $query_result4 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND display_order=$next_display_order");
-              if (mysqli_num_rows($query_result4) == 0)
-              {
-                $display_order = $last_display_order + 10;
+                /*
+                Record already found.  Enforce the following constraints:-
+                1. Ensure that the 'is primary' and 'required' fields reflect
+                the current table definition and that they are set as static
+                widgets.
+                2. Set the widget type for a nnumeric primary key to 'input-num'.
+                3. Set the widget type to 'date' for any date field.
+                4. Set the widget type to 'enum' for any enum field.
+                5. Set the widget type to 'auto-increment' for any auto-increment field.
+                */
+                if ($row3['is_primary'])
+                {
+                  /*
+                  If the field is already set to primary then do not reset this
+                  as it may have been set manually (normally in the case of a view
+                  where primary key status does not occur naturally).
+                  */
+                  $is_primary = 1;
+                  $required = 2;
+                }
+                mysqli_query($db,"UPDATE dba_table_fields SET is_primary=$is_primary,required=$required WHERE table_name='$table' AND field_name='$field_name'");
+                if ($is_primary)
+                {
+                  if ($row2['Extra'] == 'auto_increment')
+                  {
+                    mysqli_query($db,"UPDATE dba_table_fields SET widget_type='auto-increment' WHERE table_name='$table' AND field_name='$field_name'");
+                  }
+                  elseif ($field_type == 'int')
+                  {
+                    mysqli_query($db,"UPDATE dba_table_fields SET widget_type='input-num' WHERE table_name='$table' AND field_name='$field_name'");
+                  }
+                }
+                if ($default_widget_type == 'date')
+                {
+                  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='date' WHERE table_name='$table' AND field_name='$field_name'");
+                }
+                if ($default_widget_type == 'enum')
+                {
+                  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='enum' WHERE table_name='$table' AND field_name='$field_name'");
+                }
+                $last_display_order = $row3['display_order'];
               }
               else
               {
-                $display_order = $last_display_order + 5;
-              }
-              $last_display_order = $display_order;
+                /*
+                Add new record into the table fields table.
+                A simplified method is currently used to determine the required value
+                for the display order. A value of 10 is added to that of the previous
+                record unless this clashes with an existing record in which case a
+                value of 5 is added.
+                */
+                $next_display_order = $last_display_order + 10;
+                $query_result4 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND display_order=$next_display_order");
+                if (mysqli_num_rows($query_result4) == 0)
+                {
+                  $display_order = $last_display_order + 10;
+                }
+                else
+                {
+                  $display_order = $last_display_order + 5;
+                }
+                $last_display_order = $display_order;
 
-              // Insert record.
-              // N.B. Set the 'list desktop' and 'list mobile' fields by default on
-              // primary key fields only.
-              if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'")) == 0)
-              {
-                $query = "INSERT INTO dba_table_fields";
-                $query .= " (table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order)";
-                $query .= " VALUES ('$table','$field_name',$is_primary,$required,'$default_widget_type',$is_primary,$is_primary,$display_order)";
-                mysqli_query($db,$query);
-                print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
+                // Insert record.
+                // N.B. Set the 'list desktop' and 'list mobile' fields by default on
+                // primary key fields only.
+                if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'")) == 0)
+                {
+                  $query = "INSERT INTO dba_table_fields";
+                  $query .= " (table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order)";
+                  $query .= " VALUES ('$table','$field_name',$is_primary,$required,'$default_widget_type',$is_primary,$is_primary,$display_order)";
+                  mysqli_query($db,$query);
+                  print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
+                }
               }
             }
           }
-        }
 
-        // Delete redundant table field records
-        $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
-          $field_name = $row2['field_name'];
-          if (!isset($field_list[$field_name]))
+          // Delete redundant table field records
+          $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
+          while ($row2 = mysqli_fetch_assoc($query_result2))
           {
-            mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
-            print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
+            $field_name = $row2['field_name'];
+            if (!isset($field_list[$field_name]))
+            {
+              mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+              print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
+            }
           }
-        }
 
-        /*
-        Force certain widgets to static within the dba_table_fields table iteslf.
-        Although the 'table_name' field should not be editable, allow this to be
-        a 'select' widget in order to allow it to be selected in a copy operation.
-        */
-        mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_table_fields' AND field_name='table_name'");
-        mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_table_fields' AND (field_name='field_name' OR field_name='is_primary' OR field_name='required')");
-        mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_change_log' AND field_name<>'delete_record'");
+          /*
+          Force certain widgets to static within the dba_table_fields table iteslf.
+          Although the 'table_name' field should not be editable, allow this to be
+          a 'select' widget in order to allow it to be selected in a copy operation.
+          */
+          mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_table_fields' AND field_name='table_name'");
+          mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_table_fields' AND (field_name='field_name' OR field_name='is_primary' OR field_name='required')");
+          mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_change_log' AND field_name<>'delete_record'");
+        }
       }
     }
   }  // End of loop through tables

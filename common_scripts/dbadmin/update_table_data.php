@@ -108,7 +108,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
   if ($update_charsets)
   {
-    if (mysqli_query($db,"ALTER DATABASE `$dbname` CHARACTER SET $default_charset COLLATE $default_collation") === false)
+    if (mysqli_query_normal($db,"ALTER DATABASE `$dbname` CHARACTER SET $default_charset COLLATE $default_collation") === false)
     {
       print("Unable to update default collation for database$eol");
     }
@@ -123,13 +123,13 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
   $widget_types = rtrim($widget_types,',');
   $default_widget_type = 'input-text';
 
-  if (mysqli_num_rows(mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_table_info'")) == 0)
+  if (mysqli_num_rows(mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_table_info'")) == 0)
   {
     // Create tables and mark as a new installation
     $new_installation = true;
-    mysqli_query($db,"CREATE TABLE `dba_table_info` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
-    mysqli_query($db,"CREATE TABLE `dba_table_fields` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
-    mysqli_query($db,"CREATE TABLE `dba_sidebar_config` ( `display_order` INT(11) COLLATE $default_collation NOT NULL, PRIMARY KEY (`display_order`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+    mysqli_query_normal($db,"CREATE TABLE `dba_table_info` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+    mysqli_query_normal($db,"CREATE TABLE `dba_table_fields` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+    mysqli_query_normal($db,"CREATE TABLE `dba_sidebar_config` ( `display_order` INT(11) COLLATE $default_collation NOT NULL, PRIMARY KEY (`display_order`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
   }
   else
   {
@@ -138,104 +138,104 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
   // These tables are checked regardless of whether it is a new installation
   // as they were added after the original version of DBAdmin.
-  if (mysqli_num_rows(mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_change_log'")) == 0)
+  if (mysqli_num_rows(mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_change_log'")) == 0)
   {
-    mysqli_query($db,"CREATE TABLE `dba_change_log` ( `seq_no` INT(11) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`seq_no`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+    mysqli_query_normal($db,"CREATE TABLE `dba_change_log` ( `seq_no` INT(11) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`seq_no`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
   }
-  if (mysqli_num_rows(mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_relationships'")) == 0)
+  if (mysqli_num_rows(mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_relationships'")) == 0)
   {
-    mysqli_query($db,"CREATE TABLE `dba_relationships` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
+    mysqli_query_normal($db,"CREATE TABLE `dba_relationships` ( `table_name` varchar(63) COLLATE $default_collation NOT NULL, PRIMARY KEY (`table_name`) ) ENGINE=$default_engine DEFAULT CHARSET=$default_charset COLLATE=$default_collation");
   }
 
   // Run the following queries to create/update the structure for the table info table
   $fieldlist = array();
-  $query_result = mysqli_query($db,"SHOW COLUMNS FROM dba_table_info");
+  $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_table_info");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $fieldlist[$row['Field']] = true;
   }
   if (isset($fieldlist['auto_dump']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` DROP `auto_dump`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` DROP `auto_dump`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
   if (!isset($fieldlist['parent_table']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `parent_table` VARCHAR( 63 ) NULL AFTER `table_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `parent_table` VARCHAR( 63 ) NULL AFTER `table_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `parent_table` `parent_table` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `parent_table` `parent_table` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['real_access']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `local_access` ENUM( $access_types ) NOT NULL DEFAULT '$default_access_type' AFTER `parent_table`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `local_access` ENUM( $access_types ) NOT NULL DEFAULT '$default_access_type' AFTER `parent_table`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `local_access` `local_access` ENUM( $access_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_access_type'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `local_access` `local_access` ENUM( $access_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_access_type'");
   if (!isset($fieldlist['real_access']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `real_access` ENUM( $access_types ) NOT NULL DEFAULT '$default_access_type' AFTER `local_access`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `real_access` ENUM( $access_types ) NOT NULL DEFAULT '$default_access_type' AFTER `local_access`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `real_access` `real_access` ENUM( $access_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_access_type'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `real_access` `real_access` ENUM( $access_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_access_type'");
   if (!isset($fieldlist['list_size']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `list_size` INT NOT NULL DEFAULT '100' AFTER `real_access`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `list_size` INT NOT NULL DEFAULT '100' AFTER `real_access`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `list_size` `list_size` INT( 11 ) NOT NULL DEFAULT '100'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `list_size` `list_size` INT( 11 ) NOT NULL DEFAULT '100'");
   if (!isset($fieldlist['sort_1_field']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `sort_1_field` VARCHAR( 63 ) NULL AFTER `list_size`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `sort_1_field` VARCHAR( 63 ) NULL AFTER `list_size`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `sort_1_field` `sort_1_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `sort_1_field` `sort_1_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['seq_no_field']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `seq_no_field` VARCHAR( 63 ) NULL AFTER `sort_1_field`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `seq_no_field` VARCHAR( 63 ) NULL AFTER `sort_1_field`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `seq_no_field` `seq_no_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `seq_no_field` `seq_no_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['seq_method']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `seq_method` ENUM( 'continuous', 'repeat' ) NOT NULL DEFAULT 'continuous' AFTER `seq_no_field`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `seq_method` ENUM( 'continuous', 'repeat' ) NOT NULL DEFAULT 'continuous' AFTER `seq_no_field`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `seq_method` `seq_method` ENUM( 'continuous', 'repeat' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT 'continuous'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `seq_method` `seq_method` ENUM( 'continuous', 'repeat' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT 'continuous'");
   if (!isset($fieldlist['renumber_enabled']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `renumber_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `seq_method`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `renumber_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `seq_method`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `renumber_enabled` `renumber_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `renumber_enabled` `renumber_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['alt_field_order']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `alt_field_order` VARCHAR( 127 ) NULL AFTER `renumber_enabled`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `alt_field_order` VARCHAR( 127 ) NULL AFTER `renumber_enabled`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `alt_field_order` `alt_field_order` VARCHAR( 127 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `alt_field_order` `alt_field_order` VARCHAR( 127 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['engine']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `engine` ENUM( 'InnoDB', 'MyISAM' ) NOT NULL DEFAULT '$default_engine' AFTER `alt_field_order`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `engine` ENUM( 'InnoDB', 'MyISAM' ) NOT NULL DEFAULT '$default_engine' AFTER `alt_field_order`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `engine` `engine` ENUM( 'InnoDB', 'MyISAM' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_engine'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `engine` `engine` ENUM( 'InnoDB', 'MyISAM' ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_engine'");
   if (!isset($fieldlist['character_set']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `character_set` VARCHAR( 15 ) NULL AFTER `engine`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `character_set` VARCHAR( 15 ) NULL AFTER `engine`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `character_set` `character_set` VARCHAR( 15 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '-auto-'");
-  mysqli_query($db,"UPDATE dba_table_info SET character_set='-auto-' WHERE character_set='' OR character_set IS NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `character_set` `character_set` VARCHAR( 15 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '-auto-'");
+  mysqli_query_normal($db,"UPDATE dba_table_info SET character_set='-auto-' WHERE character_set='' OR character_set IS NULL");
   if (!isset($fieldlist['collation']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `collation` VARCHAR( 31 ) NULL AFTER `character_set`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `collation` VARCHAR( 31 ) NULL AFTER `character_set`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `collation` `collation` VARCHAR( 31 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '-auto-'");
-  mysqli_query($db,"UPDATE dba_table_info SET collation='-auto-' WHERE collation='' OR collation IS NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `collation` `collation` VARCHAR( 31 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '-auto-'");
+  mysqli_query_normal($db,"UPDATE dba_table_info SET collation='-auto-' WHERE collation='' OR collation IS NULL");
   if (!isset($fieldlist['grid_columns']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr' AFTER `collation`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr' AFTER `collation`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `grid_columns` `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `grid_columns` `grid_columns` VARCHAR( 31 ) NOT NULL DEFAULT '1.5em 1fr'");
   if (!isset($fieldlist['replicate_enabled']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `replicate_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `grid_columns`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `replicate_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `grid_columns`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `replicate_enabled` `replicate_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `replicate_enabled` `replicate_enabled` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['orphan']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `replicate_enabled`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `replicate_enabled`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_info` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if ($new_installation)
   {
     print("This is a first time installation - please return to the main page (to do any auto view creation) and then repeat this operation.$eol");
@@ -244,195 +244,195 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
   // Run the following queries to create/update the structure for the table fields table.
   $fieldlist = array();
-  $query_result = mysqli_query($db,"SHOW COLUMNS FROM dba_table_fields");
+  $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_table_fields");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $fieldlist[$row['Field']] = true;
   }
   if (isset($fieldlist['parent_table']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` DROP `parent_table`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` DROP `parent_table`");
   }
   if (isset($fieldlist['default_widget_type']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` DROP `default_widget_type`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` DROP `default_widget_type`");
   }
   if (isset($fieldlist['custom_widget_type']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` DROP `custom_widget_type`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` DROP `custom_widget_type`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
   if (!isset($fieldlist['field_name']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `field_name` VARCHAR( 63 ) NOT NULL AFTER `table_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `field_name` VARCHAR( 63 ) NOT NULL AFTER `table_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `field_name` `field_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `field_name`)");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `field_name` `field_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `field_name`)");
   if (!isset($fieldlist['is_primary']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `is_primary` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `field_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `is_primary` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `field_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `is_primary` `is_primary` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `is_primary` `is_primary` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['required']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `required` INT( 11 ) NOT NULL DEFAULT '0' AFTER `is_primary`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `required` INT( 11 ) NOT NULL DEFAULT '0' AFTER `is_primary`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `required` `required` Int( 11 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `required` `required` Int( 11 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['alt_label']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `alt_label` VARCHAR( 63 ) NULL AFTER `required`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `alt_label` VARCHAR( 63 ) NULL AFTER `required`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `alt_label` `alt_label` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `alt_label` `alt_label` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['widget_type']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `widget_type` ENUM( $widget_types ) NOT NULL DEFAULT '$default_widget_type' AFTER `alt_label`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `widget_type` ENUM( $widget_types ) NOT NULL DEFAULT '$default_widget_type' AFTER `alt_label`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `widget_type` `widget_type` ENUM( $widget_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_widget_type'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `widget_type` `widget_type` ENUM( $widget_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_widget_type'");
   if (!isset($fieldlist['description']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `description` VARCHAR( 511 ) NULL AFTER `widget_type`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `description` VARCHAR( 511 ) NULL AFTER `widget_type`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `description` `description` VARCHAR( 511 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `description` `description` VARCHAR( 511 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['vocab_table']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `vocab_table` VARCHAR( 63 ) NULL AFTER `description`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `vocab_table` VARCHAR( 63 ) NULL AFTER `description`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `vocab_table` `vocab_table` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `vocab_table` `vocab_table` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['vocab_field']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `vocab_field` VARCHAR( 63 ) NULL AFTER `vocab_table`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `vocab_field` VARCHAR( 63 ) NULL AFTER `vocab_table`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `vocab_field` `vocab_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `vocab_field` `vocab_field` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['list_desktop']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `list_desktop` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `vocab_field`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `list_desktop` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `vocab_field`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `list_desktop` `list_desktop` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `list_desktop` `list_desktop` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['list_mobile']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `list_mobile` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `list_desktop`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `list_mobile` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `list_desktop`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `list_mobile` `list_mobile` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `list_mobile` `list_mobile` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['display_group']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `display_group` VARCHAR( 31 ) NOT NULL DEFAULT '-default-' AFTER `list_mobile`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `display_group` VARCHAR( 31 ) NOT NULL DEFAULT '-default-' AFTER `list_mobile`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `display_group` `display_group` VARCHAR( 31 ) NOT NULL DEFAULT '-default-'");
-  mysqli_query($db,"UPDATE `dba_table_fields` SET `display_group`='-default-' WHERE display_group='0' OR display_group='' OR display_group IS NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `display_group` `display_group` VARCHAR( 31 ) NOT NULL DEFAULT '-default-'");
+  mysqli_query_normal($db,"UPDATE `dba_table_fields` SET `display_group`='-default-' WHERE display_group='0' OR display_group='' OR display_group IS NULL");
   if (!isset($fieldlist['display_order']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `display_order` INT( 11 ) NOT NULL DEFAULT '0' AFTER `display_group`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `display_order` INT( 11 ) NOT NULL DEFAULT '0' AFTER `display_group`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `display_order` `display_order` INT( 11 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `display_order` `display_order` INT( 11 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['grid_coords']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `grid_coords` VARCHAR( 15 ) NOT NULL DEFAULT 'auto' AFTER `display_order`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `grid_coords` VARCHAR( 15 ) NOT NULL DEFAULT 'auto' AFTER `display_order`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `grid_coords` `grid_coords` VARCHAR( 15 ) NOT NULL DEFAULT 'auto'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `grid_coords` `grid_coords` VARCHAR( 15 ) NOT NULL DEFAULT 'auto'");
   if (!isset($fieldlist['relative_path']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `relative_path` VARCHAR( 63 ) NULL AFTER `grid_position`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `relative_path` VARCHAR( 63 ) NULL AFTER `grid_position`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `relative_path` `relative_path` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `relative_path` `relative_path` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['allowed_filetypes']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `allowed_filetypes` VARCHAR( 63 ) NULL AFTER `relative_path`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `allowed_filetypes` VARCHAR( 63 ) NULL AFTER `relative_path`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `allowed_filetypes` `allowed_filetypes` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `allowed_filetypes` `allowed_filetypes` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['exclude_from_search']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `exclude_from_search` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `allowed_filetypes`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `exclude_from_search` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `allowed_filetypes`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `exclude_from_search` `exclude_from_search` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `exclude_from_search` `exclude_from_search` TINYINT( 1 ) NOT NULL DEFAULT '0'");
   if (!isset($fieldlist['orphan']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_table_fields` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `exclude_from_search`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `exclude_from_search`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_table_fields` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
 
   // Run the following queries to create/update the structure for the sidebar configuration table.
   $fieldlist = array();
-  $query_result = mysqli_query($db,"SHOW COLUMNS FROM dba_sidebar_config");
+  $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_sidebar_config");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $fieldlist[$row['Field']] = true;
   }
-  mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `display_order` `display_order` INT( 11 ) NOT NULL DEFAULT '9999'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `display_order` `display_order` INT( 11 ) NOT NULL DEFAULT '9999'");
   if (!isset($fieldlist['label']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `label` VARCHAR( 31 ) NOT NULL AFTER `display_order`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `label` VARCHAR( 31 ) NOT NULL AFTER `display_order`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `label` `label` VARCHAR( 31 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `label` `label` VARCHAR( 31 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
   if (!isset($fieldlist['action_name']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `action_name` VARCHAR( 63 ) NULL AFTER `label`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `action_name` VARCHAR( 63 ) NULL AFTER `label`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `action_name` `action_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `action_name` `action_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['table_name']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `table_name` VARCHAR( 63 ) NULL AFTER `action_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `table_name` VARCHAR( 63 ) NULL AFTER `action_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['link']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `link` VARCHAR( 63 ) NULL AFTER `table_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `link` VARCHAR( 63 ) NULL AFTER `table_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `link` `link` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `link` `link` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
   if (!isset($fieldlist['new_window']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_sidebar_config` ADD `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `link`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `link`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_sidebar_config` CHANGE `new_window` `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0'");
+  mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `new_window` `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0'");
 
   // Run the following queries to create/update the structure for the relationships table.
   $fieldlist = array();
-  $query_result = mysqli_query($db,"SHOW COLUMNS FROM dba_relationships");
+  $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_relationships");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $fieldlist[$row['Field']] = true;
   }
   if (!isset($fieldlist['relationship_name']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `relationship_name` VARCHAR( 63 ) NOT NULL AFTER `table_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_relationships` ADD `relationship_name` VARCHAR( 63 ) NOT NULL AFTER `table_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `relationship_name` `relationship_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
-  mysqli_query($db,"ALTER TABLE `dba_relationships` DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `relationship_name`)");
+  mysqli_query_normal($db,"ALTER TABLE `dba_relationships` CHANGE `relationship_name` `relationship_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_relationships` DROP PRIMARY KEY, ADD PRIMARY KEY( `table_name`, `relationship_name`)");
   if (!isset($fieldlist['query']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_relationships` ADD `query` VARCHAR( 255 ) NOT NULL AFTER `relationship_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_relationships` ADD `query` VARCHAR( 255 ) NOT NULL AFTER `relationship_name`");
   }
-  mysqli_query($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 255 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+  mysqli_query_normal($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 255 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
 
   // Run the following queries to create/update the structure for the change log table.
   $fieldlist = array();
-  $query_result = mysqli_query($db,"SHOW COLUMNS FROM dba_change_log");
+  $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_change_log");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $fieldlist[$row['Field']] = true;
   }
   if (!isset($fieldlist['date_and_time']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `date_and_time` CHAR( 19 ) NOT NULL AFTER `seq_no`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_change_log` ADD `date_and_time` CHAR( 19 ) NOT NULL AFTER `seq_no`");
   }
   if (!isset($fieldlist['table_name']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `table_name` VARCHAR( 63 ) NOT NULL AFTER `date_and_time`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_change_log` ADD `table_name` VARCHAR( 63 ) NOT NULL AFTER `date_and_time`");
   }
   if (!isset($fieldlist['action']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `action` ENUM( 'New','Edit','Delete' ) NOT NULL AFTER `table_name`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_change_log` ADD `action` ENUM( 'New','Edit','Delete' ) NOT NULL AFTER `table_name`");
   }
   if (!isset($fieldlist['record_id']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `record_id` VARCHAR( 511 ) NOT NULL AFTER `action`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_change_log` ADD `record_id` VARCHAR( 511 ) NOT NULL AFTER `action`");
   }
   if (!isset($fieldlist['details']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `details` MEDIUMTEXT NULL AFTER `record_id`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_change_log` ADD `details` MEDIUMTEXT NULL AFTER `record_id`");
   }
   if (!isset($fieldlist['delete_record']))
   {
-    mysqli_query($db,"ALTER TABLE `dba_change_log` ADD `delete_record` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `details`");
+    mysqli_query_normal($db,"ALTER TABLE `dba_change_log` ADD `delete_record` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `details`");
   }
 
   /*
@@ -441,37 +441,37 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
   Set all orphan flags to 1 by default. The main loop below will then reset the
   flags to 0 for those tables/views which exist in the database.
   */
-  mysqli_query($db,"CREATE OR REPLACE VIEW _view_orphan_table_info_records AS SELECT * FROM dba_table_info WHERE orphan=1");
-  mysqli_query($db,"CREATE OR REPLACE VIEW _view_orphan_table_field_records AS SELECT * FROM dba_table_fields WHERE orphan=1");
-  if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='_view_orphan_table_info_records'")) == 0)
+  mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_orphan_table_info_records AS SELECT * FROM dba_table_info WHERE orphan=1");
+  mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_orphan_table_field_records AS SELECT * FROM dba_table_fields WHERE orphan=1");
+  if (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='_view_orphan_table_info_records'")) == 0)
   {
-    mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('_view_orphan_table_info_records','dba_table_info')");
+    mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('_view_orphan_table_info_records','dba_table_info')");
   }
-  if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='_view_orphan_table_field_records'")) == 0)
+  if (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='_view_orphan_table_field_records'")) == 0)
   {
-    mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('_view_orphan_table_field_records','dba_table_fields')");
+    mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('_view_orphan_table_field_records','dba_table_fields')");
   }
-  mysqli_query($db,"UPDATE dba_table_info SET orphan=1");
-  mysqli_query($db,"UPDATE dba_table_fields SET orphan=1");
+  mysqli_query_normal($db,"UPDATE dba_table_info SET orphan=1");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=1");
 
 
   $table_field = "Tables_in_$dbname";
-  $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` LIKE 'dataface__%'");
+  $query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` LIKE 'dataface__%'");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $table = $row[$table_field];
-    mysqli_query($db,"DROP TABLE $table");
+    mysqli_query_normal($db,"DROP TABLE $table");
   }
 
   // Main loop to process all tables in the database
-  $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` NOT LIKE 'dataface__%'");
+  $query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE `$table_field` NOT LIKE 'dataface__%'");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     $table = $row[$table_field];
     if (($purge) && (substr($table,0,6) == '_view_'))
     {
       print ("Purging view $ltag$table$rtag ...$eol");
-      if (($query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) &&
+      if (($query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) &&
           ($row2 = mysqli_fetch_assoc($query_result2)) &&
           (!empty($row2['parent_table'])))
       {
@@ -479,7 +479,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
       }
       else
       {
-        mysqli_query($db,"DROP VIEW $table");
+        mysqli_query_normal($db,"DROP VIEW $table");
       }
     }
     else
@@ -495,14 +495,14 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
       }
       print(" $ltag$table$rtag ...$eol");
 
-      try { mysqli_query($db,"SHOW COLUMNS FROM $table"); }
+      try { mysqli_query_normal($db,"SHOW COLUMNS FROM $table"); }
       catch (Exception $e)
       {
         /*
         This should not normally occur but may do so if there is an old view
         present in the database that no longer relates to valid data.
         */
-        mysqli_query($db,"DROP VIEW IF EXISTS $table");
+        mysqli_query_normal($db,"DROP VIEW IF EXISTS $table");
         exit("ERROR - ".$e->getMessage().$eol);
       }
       if ($row['Table_type'] != 'VIEW')
@@ -513,7 +513,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
           $charset = $default_charset;
           $collation = $default_collation;
           $engine = $default_engine;
-          $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+          $query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
           if ($row2 = mysqli_fetch_assoc($query_result2))
           {
             if (!empty($row2['engine']))
@@ -529,11 +529,11 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
               $collation = $row2['collation'];
             }
           }
-          if (mysqli_query($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
+          if (mysqli_query_normal($db,"ALTER TABLE $table CONVERT TO CHARACTER SET $charset COLLATE $collation") === false)
           {
             print("--Unable to update charset/collation for table $table$eol");
           }
-          if (mysqli_query($db,"ALTER TABLE $table ENGINE=$engine") == false)
+          if (mysqli_query_normal($db,"ALTER TABLE $table ENGINE=$engine") == false)
           {
             print("--Unable to update storage engine for table $table$eol");
           }
@@ -542,7 +542,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         // Optimise the table if required
         if ($optimise)
         {
-          if (mysqli_query($db,"OPTIMIZE TABLE $table") === false)
+          if (mysqli_query_normal($db,"OPTIMIZE TABLE $table") === false)
           {
             print("--Unable to optimise table $table$eol");
           }
@@ -550,23 +550,23 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
       }
 
       $table = $row[$table_field];
-      mysqli_query($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
-      mysqli_query($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
+      mysqli_query_normal($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
+      mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
       if ($table == get_base_table($table,$db))
       {
         if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) ||
         (is_dir("$AltIncludePath/tables/$table")) ||
         (substr($table,0,4) == 'dba_'))
         {
-          if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) == 0)
+          if (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) == 0)
           {
-            mysqli_query($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Not showing properly on Atom syntax highlighting
+            mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Not showing properly on Atom syntax highlighting
           }
           $last_display_order = 0;
 
           // Loop through the table fields
           $field_list = array();
-          if ($query_result2 = mysqli_query($db,"SHOW COLUMNS FROM $table"))
+          if ($query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
           {
             while ($row2 = mysqli_fetch_assoc($query_result2))
             {
@@ -655,7 +655,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
               }
 
               // Run query to select data for the given table & field
-              $query_result3 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+              $query_result3 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
               if ($row3 = mysqli_fetch_assoc($query_result3))
               {
                 /*
@@ -678,25 +678,25 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                   $is_primary = 1;
                   $required = 2;
                 }
-                mysqli_query($db,"UPDATE dba_table_fields SET is_primary=$is_primary,required=$required WHERE table_name='$table' AND field_name='$field_name'");
+                mysqli_query_normal($db,"UPDATE dba_table_fields SET is_primary=$is_primary,required=$required WHERE table_name='$table' AND field_name='$field_name'");
                 if ($is_primary)
                 {
                   if ($row2['Extra'] == 'auto_increment')
                   {
-                    mysqli_query($db,"UPDATE dba_table_fields SET widget_type='auto-increment' WHERE table_name='$table' AND field_name='$field_name'");
+                    mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='auto-increment' WHERE table_name='$table' AND field_name='$field_name'");
                   }
                   elseif ($field_type == 'int')
                   {
-                    mysqli_query($db,"UPDATE dba_table_fields SET widget_type='input-num' WHERE table_name='$table' AND field_name='$field_name'");
+                    mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='input-num' WHERE table_name='$table' AND field_name='$field_name'");
                   }
                 }
                 if ($default_widget_type == 'date')
                 {
-                  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='date' WHERE table_name='$table' AND field_name='$field_name'");
+                  mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='date' WHERE table_name='$table' AND field_name='$field_name'");
                 }
                 if ($default_widget_type == 'enum')
                 {
-                  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='enum' WHERE table_name='$table' AND field_name='$field_name'");
+                  mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='enum' WHERE table_name='$table' AND field_name='$field_name'");
                 }
                 $last_display_order = $row3['display_order'];
               }
@@ -710,7 +710,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 value of 5 is added.
                 */
                 $next_display_order = $last_display_order + 10;
-                $query_result4 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND display_order=$next_display_order");
+                $query_result4 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND display_order=$next_display_order");
                 if (mysqli_num_rows($query_result4) == 0)
                 {
                   $display_order = $last_display_order + 10;
@@ -724,12 +724,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 // Insert record.
                 // N.B. Set the 'list desktop' and 'list mobile' fields by default on
                 // primary key fields only.
-                if (mysqli_num_rows(mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'")) == 0)
+                if (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'")) == 0)
                 {
                   $query = "INSERT INTO dba_table_fields";
                   $query .= " (table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order)";
                   $query .= " VALUES ('$table','$field_name',$is_primary,$required,'$default_widget_type',$is_primary,$is_primary,$display_order)";
-                  mysqli_query($db,$query);
+                  mysqli_query_normal($db,$query);
                   print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
                 }
               }
@@ -737,13 +737,13 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
           }
 
           // Delete redundant table field records
-          $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
+          $query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
           while ($row2 = mysqli_fetch_assoc($query_result2))
           {
             $field_name = $row2['field_name'];
             if (!isset($field_list[$field_name]))
             {
-              mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+              mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
               print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
             }
           }
@@ -753,9 +753,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
           Although the 'table_name' field should not be editable, allow this to be
           a 'select' widget in order to allow it to be selected in a copy operation.
           */
-          mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_table_fields' AND field_name='table_name'");
-          mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_table_fields' AND (field_name='field_name' OR field_name='is_primary' OR field_name='required')");
-          mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_change_log' AND field_name<>'delete_record'");
+          mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_table_fields' AND field_name='table_name'");
+          mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_table_fields' AND (field_name='field_name' OR field_name='is_primary' OR field_name='required')");
+          mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name='dba_change_log' AND field_name<>'delete_record'");
         }
       }
     }
@@ -763,75 +763,75 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
   // Make a number of standard settings to enable certain non primary key fields
   // to be displayed by default in a table listing.
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_sidebar_config' AND field_name='label'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='parent_table'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='grid_columns'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_group'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=0 WHERE table_name='dba_relationships' AND field_name='query'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='date_and_time'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='table_name'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='action'");
-  mysqli_query($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='record_id'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_sidebar_config' AND field_name='label'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='parent_table'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='grid_columns'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_group'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_order'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=0 WHERE table_name='dba_relationships' AND field_name='query'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='date_and_time'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='table_name'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='action'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_change_log' AND field_name='record_id'");
 
   // Set sequencing info for built-in tables
-  mysqli_query($db,"UPDATE dba_table_info SET sort_1_field='table_name',seq_no_field='display_order',seq_method='repeat',renumber_enabled=1 WHERE table_name='dba_table_fields'");
-  mysqli_query($db,"UPDATE dba_table_info SET sort_1_field='',seq_no_field='display_order',seq_method='continuous',renumber_enabled=1 WHERE table_name='dba_sidebar_config'");
+  mysqli_query_normal($db,"UPDATE dba_table_info SET sort_1_field='table_name',seq_no_field='display_order',seq_method='repeat',renumber_enabled=1 WHERE table_name='dba_table_fields'");
+  mysqli_query_normal($db,"UPDATE dba_table_info SET sort_1_field='',seq_no_field='display_order',seq_method='continuous',renumber_enabled=1 WHERE table_name='dba_sidebar_config'");
 
   // Set miscellaneous field descriptions for built-in tables
-  mysqli_query($db,"UPDATE dba_table_fields SET description='Alternate field order for sorting records when creating <em>Previous</em> and <em>Next</em> links. Comma separated list of field names.' WHERE table_name='dba_table_info' AND field_name='alt_field_order'");
-  mysqli_query($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
-  mysqli_query($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
-  mysqli_query($db,"UPDATE dba_table_fields SET description='CSS grid column widths for mobile mode. Do NOT use the <em>repeat</em> construct.' WHERE table_name='dba_table_info' AND field_name='grid_columns'");
-  mysqli_query($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
-  mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Grid Co-ordinates' WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
-  mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Date & Time' WHERE table_name='dba_change_log' AND field_name='date_and_time'");
-  mysqli_query($db,"UPDATE dba_table_fields SET alt_label='Record ID' WHERE table_name='dba_change_log' AND field_name='record_id'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET description='Alternate field order for sorting records when creating <em>Previous</em> and <em>Next</em> links. Comma separated list of field names.' WHERE table_name='dba_table_info' AND field_name='alt_field_order'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET description='Character set to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='character_set'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET description='CSS grid column widths for mobile mode. Do NOT use the <em>repeat</em> construct.' WHERE table_name='dba_table_info' AND field_name='grid_columns'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET alt_label='Grid Co-ordinates' WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET alt_label='Date & Time' WHERE table_name='dba_change_log' AND field_name='date_and_time'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET alt_label='Record ID' WHERE table_name='dba_change_log' AND field_name='record_id'");
   $query = "UPDATE dba_table_fields SET description='";
   $query .= "In format <em>row/column/span</em><br />";
   $query .= "Column is optional and defaults to 2; span is optional and defaults to 1.<br />";
   $query .= "Set all field records for a given table to <em>auto</em> to format as one field per row.";
   $query .= "' WHERE table_name='dba_table_fields' AND field_name='grid_coords'";
-  mysqli_query($db,$query);
-  mysqli_query($db,"UPDATE dba_table_fields SET description='Set flag to delete record on save.' WHERE table_name='dba_change_log' AND field_name='delete_record'");
+  mysqli_query_normal($db,$query);
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET description='Set flag to delete record on save.' WHERE table_name='dba_change_log' AND field_name='delete_record'");
 
   // Set other misceallaneous fields for built-in-tables
-  mysqli_query($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_relationships' AND field_name='table_name'");
+  mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='select',vocab_table='dba_table_info',vocab_field='table_name' WHERE table_name='dba_relationships' AND field_name='table_name'");
 
   // Add/re-create relationships for built-in tables
   // The queries are built the way they are due to problems with syntax highlighting in Atom
-  mysqli_query($db,"DELETE FROM dba_relationships WHERE table_name LIKE 'dba_%'");
+  mysqli_query_normal($db,"DELETE FROM dba_relationships WHERE table_name LIKE 'dba_%'");
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_table_info WHERE parent_table=\'$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables - Delete',\"{query}\")";
   $query = str_replace('{query}','# Do not include (too complex)',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables - Update',\"{query}\")";
   $query = str_replace('{query}','UPDATE dba_table_info SET parent_table=\'$table_name WHERE parent_table=\'$$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_table_fields WHERE table_name=\'$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields - Delete',\"{query}\")";
   $query = str_replace('{query}','DELETE FROM dba_table_fields WHERE table_name=\'$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields - Update',\"{query}\")";
   $query = str_replace('{query}','UPDATE dba_table_fields SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Relationships',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_relationships WHERE table_name=\'$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Relationships - Delete',\"{query}\")";
   $query = str_replace('{query}','DELETE FROM dba_relationships WHERE table_name=\'$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Relationships - Update',\"{query}\")";
   $query = str_replace('{query}','UPDATE dba_relationships SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'',$query);
-  mysqli_query($db,$query);
+  mysqli_query_normal($db,$query);
 
   // Uncomment the following line to activate it
-  // mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name LIKE '_view_%'");
+  // mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name LIKE '_view_%'");
 
   print("Operation completed.$eol");
   if ($mode == 'web')

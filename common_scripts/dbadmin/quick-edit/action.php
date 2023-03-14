@@ -22,10 +22,10 @@
 
   $post_name = $_POST['post_name'];
   $content_par = addslashes($_POST['content']);
-  $query_result = mysqli_query($db,"SELECT * FROM wp_posts WHERE post_name='$post_name'");
+  $query_result = mysqli_query_normal($db,"SELECT * FROM wp_posts WHERE post_name='$post_name'");
   if ($row = mysqli_fetch_assoc($query_result))
   {
-    mysqli_query($db,"UPDATE wp_posts SET post_content='$content_par' WHERE  post_name='$post_name'");
+    mysqli_query_normal($db,"UPDATE wp_posts SET post_content='$content_par' WHERE  post_name='$post_name'");
   }
   header("Location: {$_POST['returnurl']}");
   exit;

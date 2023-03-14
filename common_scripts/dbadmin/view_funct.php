@@ -43,12 +43,12 @@ function create_view_structure($view,$table,$conditions)
 
 	// Create the view and drop any old tables/views that may conflict with the
 	// current setup.
-	mysqli_query($db,"CREATE OR REPLACE VIEW $view AS SELECT * FROM $table WHERE $conditions");
+	mysqli_query_normal($db,"CREATE OR REPLACE VIEW $view AS SELECT * FROM $table WHERE $conditions");
 	if (substr($view,0,6) == '_view_')
 	{
-		mysqli_query($db,"DROP TABLE IF EXISTS $view");
+		mysqli_query_normal($db,"DROP TABLE IF EXISTS $view");
 		$old_view = substr($view,6);
-		mysqli_query($db,"DROP VIEW IF EXISTS $old_view");
+		mysqli_query_normal($db,"DROP VIEW IF EXISTS $old_view");
 	}
 
 	// Add new class definition and symbolic link to directory if the directory
@@ -81,12 +81,12 @@ function create_view_structure($view,$table,$conditions)
   }
 
 	// Set the parent table in the table info record for the view
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$view'");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$view'");
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
-  	mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$view','$table')");
-		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+  	mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$view','$table')");
+		$query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			/*
@@ -94,14 +94,14 @@ function create_view_structure($view,$table,$conditions)
 			new table info record, thus allowing a view to be subsequently altered from
 			the parent table should that ever be required.
 			*/
-			mysqli_query($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$view'");
-			mysqli_query($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$view'");
+			mysqli_query_normal($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$view'");
+			mysqli_query_normal($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$view'");
 		}
 	}
 	else
 	{
 		// Update existing table info record
-		mysqli_query($db,"UPDATE dba_table_info SET parent_table='$table' WHERE table_name='$view'");
+		mysqli_query_normal($db,"UPDATE dba_table_info SET parent_table='$table' WHERE table_name='$view'");
 	}
 }
 
@@ -116,7 +116,7 @@ function delete_view_structure($view,$table)
 	global $CustomPagesPath, $RelativePath;
 	$db = admin_db_connect();
 
-	mysqli_query($db,"DROP VIEW IF EXISTS $view");
+	mysqli_query_normal($db,"DROP VIEW IF EXISTS $view");
 	$file = "$CustomPagesPath/$RelativePath/tables/$table/$view.php";
 	if (is_file($file))
   {
@@ -127,7 +127,7 @@ function delete_view_structure($view,$table)
   {
 		unlink($link);
   }
-  mysqli_query($db,"DELETE FROM dba_table_info WHERE table_name='$view' AND parent_table='$table'");
+  mysqli_query_normal($db,"DELETE FROM dba_table_info WHERE table_name='$view' AND parent_table='$table'");
 }
 
 //==============================================================================
@@ -141,7 +141,7 @@ function create_child_table_structure($child,$parent)
   global $CustomPagesPath, $RelativePath;
 	$db = admin_db_connect();
 
-	mysqli_query($db,"CREATE TABLE IF NOT EXISTS $child LIKE $parent");
+	mysqli_query_normal($db,"CREATE TABLE IF NOT EXISTS $child LIKE $parent");
 	$file = "$CustomPagesPath/$RelativePath/tables/$parent/$child.php";
 	if (!is_file($file))
 	{
@@ -159,12 +159,12 @@ function create_child_table_structure($child,$parent)
   }
 
 	// Set the parent table in the table info record for the child table
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$child'");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$child'");
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
-  	mysqli_query($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$parent')");
-		$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$parent'");
+  	mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$parent')");
+		$query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$parent'");
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			/*
@@ -172,14 +172,14 @@ function create_child_table_structure($child,$parent)
 			this for a new table info record, thus allowing a child table to be
 			subsequently altered from	the parent table should that ever be required.
 			*/
-			mysqli_query($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$child'");
-			mysqli_query($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$child'");
+			mysqli_query_normal($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$child'");
+			mysqli_query_normal($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$child'");
 		}
 	}
 	else
 	{
 		// Update existing table info record
-		mysqli_query($db,"UPDATE dba_table_info SET parent_table='$parent' WHERE table_name='$child'");
+		mysqli_query_normal($db,"UPDATE dba_table_info SET parent_table='$parent' WHERE table_name='$child'");
 	}
 }
 
@@ -194,7 +194,7 @@ function delete_child_table_structure($child,$parent)
 	global $CustomPagesPath, $RelativePath;
 	$db = admin_db_connect();
 
-	mysqli_query($db,"DROP TABLE $child");
+	mysqli_query_normal($db,"DROP TABLE $child");
 	$file = "$CustomPagesPath/$RelativePath/tables/$parent/$child.php";
 	if (is_file($file))
   {
@@ -205,7 +205,7 @@ function delete_child_table_structure($child,$parent)
   {
 		unlink($link);
   }
-  mysqli_query($db,"DELETE FROM dba_table_info WHERE table_name='$child' AND parent_table='$parent'");
+  mysqli_query_normal($db,"DELETE FROM dba_table_info WHERE table_name='$child' AND parent_table='$parent'");
 }
 
 //==============================================================================
@@ -217,7 +217,7 @@ Function set_primary_key_on_view
 function set_primary_key_on_view($table,$field)
 {
 	$db = admin_db_connect();
-	mysqli_query($db,"UPDATE dba_table_fields SET is_primary=1,required=2 WHERE table_name='$table' AND field_name='$field'");
+	mysqli_query_normal($db,"UPDATE dba_table_fields SET is_primary=1,required=2 WHERE table_name='$table' AND field_name='$field'");
 }
 
 //==============================================================================
@@ -229,7 +229,7 @@ Function clear_primary_key_on_view
 function clear_primary_key_on_view($table,$field)
 {
 	$db = admin_db_connect();
-	mysqli_query($db,"UPDATE dba_table_fields SET is_primary=0,required=0 WHERE table_name='$table' AND field_name='$field'");
+	mysqli_query_normal($db,"UPDATE dba_table_fields SET is_primary=0,required=0 WHERE table_name='$table' AND field_name='$field'");
 }
 
 //==============================================================================

@@ -9,7 +9,7 @@ global $CustomPagesURL;
 $db = admin_db_connect();
 
 $account = $_GET['-account'];
-$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'");
+$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label='$account'");
 if ($row = mysqli_fetch_assoc($query_result))
 {
 	$account_type = $row['type'];
@@ -28,7 +28,7 @@ if ((isset($_GET['message'])) && (!empty($_GET['message'])))
 	print($_GET['message']);
 }
 
-$query_result = mysqli_query($db,"SELECT * FROM bank_import");
+$query_result = mysqli_query_normal($db,"SELECT * FROM bank_import");
 if (mysqli_num_rows($query_result) == 0)
 {
 }
@@ -41,7 +41,7 @@ print("<tr><td>Bank Transaction:</td><td>\n");
 print("<select name=\"bank_transaction\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
-$query_result = mysqli_query($db,"SELECT * FROM bank_import WHERE reconciled=0 ORDER BY rec_id DESC");
+$query_result = mysqli_query_normal($db,"SELECT * FROM bank_import WHERE reconciled=0 ORDER BY rec_id DESC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$text = $row['date'].' | '.$row['description'].' | ';
@@ -78,7 +78,7 @@ print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
 print("<option value=\"NONE\">Discard Bank Transaction</option>\n");
 print("<option value=\"NEW\">Create New Transaction</option>\n");
-$query_result = mysqli_query($db,"SELECT * FROM _view_account_$account WHERE reconciled=0 ORDER BY payee ASC,date ASC,seq_no ASC");
+$query_result = mysqli_query_normal($db,"SELECT * FROM _view_account_$account WHERE reconciled=0 ORDER BY payee ASC,date ASC,seq_no ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$date = $row['date'];

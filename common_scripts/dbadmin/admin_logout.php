@@ -15,12 +15,12 @@ require_once("$PrivateScriptsDir/mysql_connect.php");
 $db = db_connect($dbid);
 $user_key = SV_USER;
 $_SESSION[$user_key] = '';
-mysqli_query($db,"DELETE FROM wp_session_updates WHERE name='$user_key'");
+mysqli_query_normal($db,"DELETE FROM wp_session_updates WHERE name='$user_key'");
 if (defined('SV_ACCESS_LEVEL'))
 {
 	$access_level_key = SV_ACCESS_LEVEL;
 	$_SESSION[$access_level_key] = 0;
-	mysqli_query($db,"DELETE FROM wp_session_updates WHERE name='$access_level_key'");
+	mysqli_query_normal($db,"DELETE FROM wp_session_updates WHERE name='$access_level_key'");
 }
 if (isset($_COOKIE[$LoginCookieID]))
 {

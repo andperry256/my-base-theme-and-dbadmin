@@ -17,11 +17,11 @@ Long -  This performs the operation long hand to avoid having to set up any
 
 function import_table_from_csv($file_path,$db,$table,$method='long')
 {
-	mysqli_query($db,"DELETE FROM $table");
+	mysqli_query_normal($db,"DELETE FROM $table");
 	if ($method == 'short')
 	{
 		$query = "LOAD DATA INFILE '$file_path' INTO TABLE $table FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n'";
-		mysqli_query($db,$query);
+		mysqli_query_normal($db,$query);
 	}
 	elseif ($method == 'long')
 	{
@@ -35,7 +35,7 @@ function import_table_from_csv($file_path,$db,$table,$method='long')
 			// Convert escape sequence for double quotes (CSV to MySQL)
 			$line = str_replace('""',"\\\"",$line);
 			// Add record to table
-			mysqli_query($db,"INSERT INTO $table ($field_list) VALUES ($line)");
+			mysqli_query_normal($db,"INSERT INTO $table ($field_list) VALUES ($line)");
 		}
 	}
 }
@@ -58,7 +58,7 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 	if ($method == 'short')
 	{
     $query = "SELECT * INTO OUTFILE '$file_path' FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n' FROM $table";
-    mysqli_query($db,$query);
+    mysqli_query_normal($db,$query);
 	}
 	elseif ($method == 'long')
 	{
@@ -70,7 +70,7 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 			$field_selection = '*';
 			$header_line = '';
 			$field_count = 0;
-			$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
+			$query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ($field_count > 0)
@@ -105,7 +105,7 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 			$limit_clause = "LIMIT $limit_clause";
 
 		// Query and main loop to process the table records.
-		$query_result = mysqli_query($db,"SELECT $field_selection FROM $table $where_clause $order_clause $limit_clause");
+		$query_result = mysqli_query_normal($db,"SELECT $field_selection FROM $table $where_clause $order_clause $limit_clause");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			$field_count = 0;

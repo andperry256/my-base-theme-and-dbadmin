@@ -12,7 +12,7 @@
   $password = $_POST['password'];
   $UserAuthenticated = false;
   if ((preg_match("/^[A-Z0-9.]*$/i", $username)) &&
-      ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM $AuthDB_Table WHERE $AuthDB_UsernameField='$username'"))))
+      ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM $AuthDB_Table WHERE $AuthDB_UsernameField='$username'"))))
   {
     if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))
     {

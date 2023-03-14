@@ -44,12 +44,12 @@ else
 				// Run the merge
 				$source = addslashes($_POST['source']);
 				$target = addslashes($_POST['target']);
-				mysqli_query($db,"UPDATE transactions SET $entity='$target' WHERE  $entity='$source'");
+				mysqli_query_normal($db,"UPDATE transactions SET $entity='$target' WHERE  $entity='$source'");
 				if ($type != 'payees')
 				{
-					mysqli_query($db,"UPDATE splits SET $entity='$target' WHERE  $entity='$source'");
+					mysqli_query_normal($db,"UPDATE splits SET $entity='$target' WHERE  $entity='$source'");
 				}
-				mysqli_query($db,"DELETE from $type WHERE name='$source'");
+				mysqli_query_normal($db,"DELETE from $type WHERE name='$source'");
 				print("<p>$Entity <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
 				print("<p><a href=\"index.php?-action=merge_entities&type={$_POST['type']}\"><button>Go Back</button></a></p>\n");
 				$show_form = false;
@@ -69,7 +69,7 @@ else
 		print("<td width=\"100px\">Source:</td>");
 		print("<td><select name=\"source\">\n");
 		print("<option value=\"\">Please select ...</option>");
-		$query_result = mysqli_query($db,$query);
+		$query_result = mysqli_query_normal($db,$query);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			print("<option value=\"{$row['name']}\"");
@@ -86,7 +86,7 @@ else
 		print("<td>Target:</td>");
 		print("<td><select name=\"target\">\n");
 		print("<option value=\"\">Please select ...</option>");
-		$query_result = mysqli_query($db,$query);
+		$query_result = mysqli_query_normal($db,$query);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			print("<option value=\"{$row['name']}\"");

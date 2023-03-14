@@ -141,7 +141,7 @@ function display_sidebar_content()
   else
   {
     print("<table class=\"sidebar-table\">");
-    $query_result = mysqli_query($db,"SELECT * FROM dba_sidebar_config ORDER BY display_order ASC");
+    $query_result = mysqli_query_normal($db,"SELECT * FROM dba_sidebar_config ORDER BY display_order ASC");
     while ($row = mysqli_fetch_assoc($query_result))
     {
       $label = $row['label'];
@@ -387,7 +387,7 @@ function display_main_content($mode)
 
       case 'renumber_records2':
         print("<h1>Renumber Records</h1>\n");
-        $query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE renumber_enabled=1 ORDER BY table_name ASC");
+        $query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE renumber_enabled=1 ORDER BY table_name ASC");
         while ($row = mysqli_fetch_assoc($query_result))
         {
           renumber_records($row['table_name']);
@@ -426,7 +426,7 @@ function display_main_content($mode)
 $db = admin_db_connect();
 
 // Temporary code
-mysqli_query($db,"DROP TABLE dba_master_location");
+mysqli_query_normal($db,"DROP TABLE dba_master_location");
 
 if (!isset($db_master_location))
 {
@@ -443,7 +443,7 @@ if (($db_master_location[$db_sub_path] != $Location) &&
   print("<p class=\"small\"><span class=\"highlight-warning\">WARNING</span> - You are not using the master copy of the database. Any changes are liable to be lost on the next database synchronisation.<p>\n");
 }
 create_view_structure('_view_dba_table_fields','dba_table_fields','table_name IS NOT NULL');
-mysqli_query($db,"CREATE OR REPLACE VIEW _view_dba_table_fields AS SELECT * FROM dba_table_fields ORDER BY table_name ASC, display_order ASC");
+mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_dba_table_fields AS SELECT * FROM dba_table_fields ORDER BY table_name ASC, display_order ASC");
 
 // Load the table class if applicable
 if ((isset($_GET['-table'])) && (is_file("$CustomPagesPath/$RelativePath/tables/{$_GET['-table']}/{$_GET['-table']}.php")))

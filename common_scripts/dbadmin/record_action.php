@@ -119,11 +119,11 @@ $dbase = admin_db_name();
 // Handle the saving of the record.
 $record = new db_record;
 $new_primary_keys = array();
-$query_result = mysqli_query($db,"SHOW COLUMNS FROM $table");
+$query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 while ($row = mysqli_fetch_assoc($query_result))
 {
   $field_name = $row['Field'];
-  $query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+  $query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
   if ($row2 = mysqli_fetch_assoc($query_result2))
   {
     if ($row2['widget_type'] == 'checkbox')
@@ -164,7 +164,7 @@ while ($row = mysqli_fetch_assoc($query_result))
       if (($action == 'new') && ($row2['widget_type'] == 'auto-increment'))
       {
         // Predict the next auto-increment value for the field
-        $query_result3 = mysqli_query($db,"SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA='$dbase' AND TABLE_NAME='$base_table'");
+        $query_result3 = mysqli_query_normal($db,"SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA='$dbase' AND TABLE_NAME='$base_table'");
         if ($row3 = mysqli_fetch_assoc($query_result3))
         {
           $new_primary_keys[$field_name] = $row3['AUTO_INCREMENT'];

@@ -97,7 +97,7 @@ class tables_splits
 			return;
 		}
 
-		$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$transact_seq_no");
+		$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$transact_seq_no");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$date = $row['date'];
@@ -111,7 +111,7 @@ class tables_splits
 		if ($auto_amount)
 		{
 			$split_amount = $parent_amount;
-			$query_result = mysqli_query($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no<>$split_no");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no<>$split_no");
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				// Subtract value of other aplit from total
@@ -156,7 +156,7 @@ class tables_splits
 		// Select default category for fund or vice versa where appropriate.
 		if (($fund != '-default-') && ($category == '-default-'))
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM funds WHERE name='$fund'");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM funds WHERE name='$fund'");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ((!empty($row['default_income_cat'])) && ($credit_amount > 0))
@@ -171,7 +171,7 @@ class tables_splits
 		}
 		elseif (($category != '-default-') && ($fund == '-default-'))
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM categories WHERE name='$category'");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM categories WHERE name='$category'");
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
@@ -217,7 +217,7 @@ class tables_splits
 		rationalise_transaction($account,$transact_seq_no);
 
 		// Re-update record
-		mysqli_query($db,"UPDATE splits SET split_no=$split_no,credit_amount=$credit_amount,debit_amount=$debit_amount,auto_amount=0,fund='$fund',category='$category',acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$old_split_no");
+		mysqli_query_normal($db,"UPDATE splits SET split_no=$split_no,credit_amount=$credit_amount,debit_amount=$debit_amount,auto_amount=0,fund='$fund',category='$category',acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$old_split_no");
 
 		if (!headers_sent())
 		{

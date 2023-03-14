@@ -93,7 +93,7 @@ class tables_transactions
 		if (!empty($value))
 		{
 			$db = admin_db_connect();
-			$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label='$value[0]'");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label='$value[0]'");
 			if (($row = mysqli_fetch_assoc($query_result)) && ($row['currency'] != $record->FieldVal('currency')))
 			{
 				return report_error("Attempt create transfer with account of different currency.");
@@ -158,7 +158,7 @@ class tables_transactions
 		$target_account = $record->FieldVal('target_account');
 		$copy_to_date = $record->FieldVal('copy_to_date');
 
-		$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+		$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$old_target_account = $row['target_account'];
@@ -190,7 +190,7 @@ class tables_transactions
 		// Check for various error conditions
 		if ((!empty($target_account)) && (!empty($target_seq_no)))
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$target_account' AND seq_no=$target_seq_no");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$target_account' AND seq_no=$target_seq_no");
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    ($row['reconciled'] ) &&
 			    (($row['credit_amount']!= $debit_amount) || ($row['debit_amount']!= $credit_amount)))
@@ -200,7 +200,7 @@ class tables_transactions
 		}
 		if (!empty($source_account))
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$source_account' AND seq_no=$source_seq_no");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$source_account' AND seq_no=$source_seq_no");
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    ($row['reconciled'] ) &&
 			    (($row['credit_amount']!= $debit_amount) || ($row['debit_amount']!= $credit_amount)))
@@ -267,7 +267,7 @@ class tables_transactions
 		$copy_to_date = $record->FieldVal('copy_to_date');
 		$delete_record = $record->FieldVal('delete_record');
 
-		$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+		$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$date = $row['date'];
@@ -291,11 +291,11 @@ class tables_transactions
 		// Can leave the split sequence numbers intact as they are specific to the individual transaction.
 		if ((!empty($old_account)) && (($account != $old_account) || ($seq_no != $old_seq_no)))
 		{
-			mysqli_query($db,"UPDATE splits SET account='$account',transact_seq_no=$seq_no WHERE account='$old_account' AND transact_seq_no=$old_seq_no");
+			mysqli_query_normal($db,"UPDATE splits SET account='$account',transact_seq_no=$seq_no WHERE account='$old_account' AND transact_seq_no=$old_seq_no");
 		}
 
 		// Get account currency
-		$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'");
+		$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label='$account'");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$account_currency = $row['currency'];
@@ -306,17 +306,17 @@ class tables_transactions
 		}
 
 		// Add payee to payees table
-		$query_result = mysqli_query($db,"SELECT * FROM payees WHERE name='$payee'");
+		$query_result = mysqli_query_normal($db,"SELECT * FROM payees WHERE name='$payee'");
 		if (mysqli_num_rows($query_result) == 0)
 		{
-			mysqli_query($db,"INSERT INTO payees (name) VALUES ('$payee')");
+			mysqli_query_normal($db,"INSERT INTO payees (name) VALUES ('$payee')");
 		}
 
 		// Adjust credit/debit amounts as necessary.
 		if ($auto_total)
 		{
 			$total = 0;
-			$query_result = mysqli_query($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				// Add value of split to total
@@ -361,7 +361,7 @@ class tables_transactions
 		// Select default category for fund or vice versa where appropriate.
 		if (($fund != '-default-') && ($category == '-default-'))
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM funds WHERE name='$fund'");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM funds WHERE name='$fund'");
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ((!empty($row['default_income_cat'])) && ($credit_amount > 0))
@@ -376,7 +376,7 @@ class tables_transactions
 		}
 		elseif (($category != '-default-') && ($fund == '-default-'))
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM categories WHERE name='$category'");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM categories WHERE name='$category'");
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
@@ -388,11 +388,11 @@ class tables_transactions
 		// otherwise use the global default value.
 		if ($fund == '-default-')
 		{
-			if (($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM payees WHERE name='$payee'"))) && (!empty($row['default_fund'])))
+			if (($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM payees WHERE name='$payee'"))) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
 			}
-			elseif (($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'"))) && (!empty($row['default_fund'])))
+			elseif (($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'"))) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
 			}
@@ -403,7 +403,7 @@ class tables_transactions
 		}
 		if ($category == '-default-')
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM payees WHERE name='$payee'");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM payees WHERE name='$payee'");
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_cat'])))
 			{
 				$category = $row['default_cat'];
@@ -418,11 +418,11 @@ class tables_transactions
 		// has been selected.
 		if (($save_defaults) && (substr($fund,0,1) != '-'))
 		{
-			mysqli_query($db,"UPDATE payees SET default_fund='$fund' WHERE name='$payee'");
+			mysqli_query_normal($db,"UPDATE payees SET default_fund='$fund' WHERE name='$payee'");
 		}
 		if (($save_defaults) && (substr($category,0,1) != '-'))
 		{
-			mysqli_query($db,"UPDATE payees SET default_cat='$category' WHERE name='$payee'");
+			mysqli_query_normal($db,"UPDATE payees SET default_cat='$category' WHERE name='$payee'");
 		}
 
 		if ((empty($acct_month)) || ($change_acct_month == 0))
@@ -451,29 +451,29 @@ class tables_transactions
 				$query = str_replace('date,','date,chq_no,',$query);
 				$query = str_replace("'$date',","'$date','$chq_no',",$query);
 			}
-			mysqli_query($db,$query);
+			mysqli_query_normal($db,$query);
 		}
 		else
 		{
 			// Re-update record
-			mysqli_query($db,"UPDATE transactions SET seq_no=$seq_no,currency='$account_currency',credit_amount=$credit_amount,debit_amount=$debit_amount,auto_total=0,fund='$fund',category='$category',acct_month='$acct_month',save_defaults=0 WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET seq_no=$seq_no,currency='$account_currency',credit_amount=$credit_amount,debit_amount=$debit_amount,auto_total=0,fund='$fund',category='$category',acct_month='$acct_month',save_defaults=0 WHERE account='$account' AND seq_no=$seq_no");
 			if ($sched_freq != '#')
 			{
-				mysqli_query($db,"UPDATE transactions SET reconciled_balance=0.00,full_balance=0.00 WHERE account='$account' AND seq_no=$seq_no");
+				mysqli_query_normal($db,"UPDATE transactions SET reconciled_balance=0.00,full_balance=0.00 WHERE account='$account' AND seq_no=$seq_no");
 			}
 		}
 
 		// Handle auto-reconciliation if record has been created via the reconcile screen
 		if ($bank_import_id != 0 )
 		{
-			$query_result = mysqli_query($db,"SELECT * FROM bank_import WHERE rec_id=$bank_import_id");
+			$query_result = mysqli_query_normal($db,"SELECT * FROM bank_import WHERE rec_id=$bank_import_id");
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    (($row['amount'] = $credit_amount) || ($row['amount'] = -$debit_amount)))
 			{
-				mysqli_query($db,"UPDATE transactions SET reconciled=1 WHERE account='$account' AND seq_no=$seq_no");
-				mysqli_query($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_import_id");
+				mysqli_query_normal($db,"UPDATE transactions SET reconciled=1 WHERE account='$account' AND seq_no=$seq_no");
+				mysqli_query_normal($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_import_id");
 			}
-			mysqli_query($db,"UPDATE transactions SET bank_import_id=0 WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET bank_import_id=0 WHERE account='$account' AND seq_no=$seq_no");
 		}
 
 		// Update account balances
@@ -482,12 +482,12 @@ class tables_transactions
 		// Update appropriate fields on other side of transfer
 		if ((!empty($target_account)) && (!empty($target_seq_no)))
 		{
-			mysqli_query($db,"UPDATE transactions SET date='$date',credit_amount=$debit_amount,debit_amount=$credit_amount,fund='$fund',acct_month='$acct_month' WHERE account='$target_account' AND seq_no=$target_seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET date='$date',credit_amount=$debit_amount,debit_amount=$credit_amount,fund='$fund',acct_month='$acct_month' WHERE account='$target_account' AND seq_no=$target_seq_no");
 			update_account_balances($target_account,$date);
 		}
 		if ((!empty($source_account)) && (!empty($source_seq_no)))
 		{
-			mysqli_query($db,"UPDATE transactions SET date='$date',credit_amount=$debit_amount,debit_amount=$credit_amount,fund='$fund',acct_month='$acct_month' WHERE account='$source_account' AND seq_no=$source_seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET date='$date',credit_amount=$debit_amount,debit_amount=$credit_amount,fund='$fund',acct_month='$acct_month' WHERE account='$source_account' AND seq_no=$source_seq_no");
 			update_account_balances($source_account,$date);
 		}
 
@@ -506,19 +506,19 @@ class tables_transactions
 				// Create transfer
 				$target_seq_no = next_seq_no($target_account);
 				update_account_balances($target_account,$date);
-				mysqli_query($db,"INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no) VALUES ('$target_account',$target_seq_no,'$date','$account_currency','$payee',$debit_amount,$credit_amount,'$fund','-transfer-','$memo','$acct_month','$account',$seq_no)");
+				mysqli_query_normal($db,"INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no) VALUES ('$target_account',$target_seq_no,'$date','$account_currency','$payee',$debit_amount,$credit_amount,'$fund','-transfer-','$memo','$acct_month','$account',$seq_no)");
 				update_account_balances($target_account,$date);
-				mysqli_query($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$seq_no");
+				mysqli_query_normal($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$seq_no");
 			}
 			elseif ((!empty($target_account)) && (!empty($target_seq_no)))
 			{
 				// Update links on target account in case this transactiop has changed account
-				mysqli_query($db,"UPDATE transactions SET source_account='$account',source_seq_no=$seq_no WHERE account='$target_account' AND seq_no=$target_seq_no");
+				mysqli_query_normal($db,"UPDATE transactions SET source_account='$account',source_seq_no=$seq_no WHERE account='$target_account' AND seq_no=$target_seq_no");
 			}
 			elseif ((!empty($source_account)) && (!empty($source_seq_no)))
 			{
 				// Update links on source account in case this transaction has changed account
-				mysqli_query($db,"UPDATE transactions SET target_account='$account',target_seq_no=$seq_no WHERE account='$source_account' AND seq_no=$source_seq_no");
+				mysqli_query_normal($db,"UPDATE transactions SET target_account='$account',target_seq_no=$seq_no WHERE account='$source_account' AND seq_no=$source_seq_no");
 			}
 			if ((!headers_sent()) && ($action != 'update') && ($action != 'copy'))
 			{
@@ -530,11 +530,11 @@ class tables_transactions
 		else
 		{
 			// Scheduled transaction
-			mysqli_query($db,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$seq_no");
 			if ($record_sched)
 			{
 				record_scheduled_transaction($account,$seq_no);
-				mysqli_query($db,"UPDATE transactions SET record_sched=0 WHERE account='$account' AND seq_no=$seq_no");
+				mysqli_query_normal($db,"UPDATE transactions SET record_sched=0 WHERE account='$account' AND seq_no=$seq_no");
 			}
 		}
 	}

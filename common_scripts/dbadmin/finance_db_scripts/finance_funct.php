@@ -25,7 +25,7 @@ function update_account_balances($account,$start_date)
 {
 	$db = admin_db_connect();
 	$view = "_view_account_$account";
-	$query_result = mysqli_query($db,"SELECT * FROM accounts WHERE label='$account'");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label='$account'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$use_quoted_balance = $row['use_quoted_balance'];
@@ -35,7 +35,7 @@ function update_account_balances($account,$start_date)
 		// This should not occur
 		$use_quoted_balance = false;
 	}
-	$query_result = mysqli_query($db,"SELECT * FROM $view WHERE date<'$start_date' ORDER BY date DESC,seq_no DESC LIMIT 1");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM $view WHERE date<'$start_date' ORDER BY date DESC,seq_no DESC LIMIT 1");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$full_balance = $row['full_balance'];
@@ -76,9 +76,9 @@ function update_account_balances($account,$start_date)
 			}
 		}
 	}
-	mysqli_query($db,"UPDATE $view SET no_quote=0 WHERE reconciled=1 AND (credit_amount=0.00 OR date<='$date')");
+	mysqli_query_normal($db,"UPDATE $view SET no_quote=0 WHERE reconciled=1 AND (credit_amount=0.00 OR date<='$date')");
 
-	$query_result = mysqli_query($db,"SELECT * FROM $view WHERE date>='$start_date' ORDER BY date ASC,seq_no ASC");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM $view WHERE date>='$start_date' ORDER BY date ASC,seq_no ASC");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$full_balance = add_money($full_balance,subtract_money($row['credit_amount'],$row['debit_amount']));
@@ -97,7 +97,7 @@ function update_account_balances($account,$start_date)
 				$quoted_balance = 0;
 			}
 		}
-		mysqli_query($db,"UPDATE $view SET full_balance=$full_balance,reconciled_balance=$reconciled_balance,quoted_balance=$quoted_balance WHERE seq_no={$row['seq_no']}");
+		mysqli_query_normal($db,"UPDATE $view SET full_balance=$full_balance,reconciled_balance=$reconciled_balance,quoted_balance=$quoted_balance WHERE seq_no={$row['seq_no']}");
 	}
 }
 
@@ -106,7 +106,7 @@ function update_account_balances($account,$start_date)
 function next_seq_no($account)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' ORDER BY seq_no DESC LIMIT 1");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' ORDER BY seq_no DESC LIMIT 1");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$seq_no = $row['seq_no'] + 10;
@@ -123,7 +123,7 @@ function next_seq_no($account)
 function next_split_no($account,$transact_seq_no)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no ORDER BY split_no DESC LIMIT 1");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no ORDER BY split_no DESC LIMIT 1");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$split_no = $row['split_no'] + 10;
@@ -141,17 +141,17 @@ function unlink_transaction($account,$seq_no)
 {
 	// N.B. This function will only operate on a transfer target.
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 	if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['source_account'])))
 	{
 		// Delete transaction if not reconciled. Otherwise update it to break the link with the transfer source.
 		if (!$row['reconciled'])
 		{
-			mysqli_query($db,"DELETE FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"DELETE FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 		}
 		else
 		{
-			mysqli_query($db,"UPDATE transactions SET source_account='',source_seq_no='',category='-none-' WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET source_account='',source_seq_no='',category='-none-' WHERE account='$account' AND seq_no=$seq_no");
 		}
 	}
 }
@@ -161,7 +161,7 @@ function unlink_transaction($account,$seq_no)
 function rationalise_transaction($account,$seq_no)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$fund = $row['fund'];
@@ -169,11 +169,11 @@ function rationalise_transaction($account,$seq_no)
 		$target_seq_no = $row['target_seq_no'];
 		$source_account = $row['source_account'];
 		$source_seq_no = $row['source_seq_no'];
-		$query_result2 = mysqli_query($db,"SELECT * FROM splits WHERE  account='$account' AND transact_seq_no=$seq_no");
+		$query_result2 = mysqli_query_normal($db,"SELECT * FROM splits WHERE  account='$account' AND transact_seq_no=$seq_no");
 		$split_count = mysqli_num_rows($query_result2);
 		if (!empty($source_account))
 		{
-			$query_result2 = mysqli_query($db,"SELECT * FROM splits WHERE  account='$source_account' AND transact_seq_no=$source_seq_no");
+			$query_result2 = mysqli_query_normal($db,"SELECT * FROM splits WHERE  account='$source_account' AND transact_seq_no=$source_seq_no");
 			$source_split_count = mysqli_num_rows($query_result2);
 		}
 		else
@@ -189,34 +189,34 @@ function rationalise_transaction($account,$seq_no)
 		*/
 		if (($split_count == 0) && ($fund == '-split-') && (empty($source_account)))
 		{
-      mysqli_query($db,"UPDATE transactions SET fund='-nosplit-' WHERE account='$account' AND seq_no=$seq_no");
-      mysqli_query($db,"UPDATE transactions SET fund='-nosplit-' WHERE fund='-split-' AND source_account='$account' AND source_seq_no=$seq_no");
+      mysqli_query_normal($db,"UPDATE transactions SET fund='-nosplit-' WHERE account='$account' AND seq_no=$seq_no");
+      mysqli_query_normal($db,"UPDATE transactions SET fund='-nosplit-' WHERE fund='-split-' AND source_account='$account' AND source_seq_no=$seq_no");
 		}
 
 		// Check status of fund and category in relation to splits.
 		if (($split_count > 0) || ($source_split_count > 0))
 		{
 			// Ensure that the fund and category are set to 'split' in the transaction and at the other end of any transfer.
-			mysqli_query($db,"UPDATE transactions SET fund='-split-',category='-split-' WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET fund='-split-',category='-split-' WHERE account='$account' AND seq_no=$seq_no");
 			if (!empty($target_account))
 			{
-				mysqli_query($db,"UPDATE transactions SET fund='-split-',category='-split-' WHERE account='$target_account' AND seq_no=$target_seq_no");
+				mysqli_query_normal($db,"UPDATE transactions SET fund='-split-',category='-split-' WHERE account='$target_account' AND seq_no=$target_seq_no");
 			}
 		}
 		else
 		{
 			// Ensure that the fund is not set to 'split' in the transaction and at the other end of any transfer.
-			mysqli_query($db,"UPDATE transactions SET fund='-none-' WHERE account='$account' AND seq_no=$seq_no AND fund='-split-'");
+			mysqli_query_normal($db,"UPDATE transactions SET fund='-none-' WHERE account='$account' AND seq_no=$seq_no AND fund='-split-'");
 			if (!empty($target_account))
 			{
-				mysqli_query($db,"UPDATE transactions SET fund='-none-' WHERE account='$target_account' AND seq_no=$target_seq_no AND fund='-split-'");
+				mysqli_query_normal($db,"UPDATE transactions SET fund='-none-' WHERE account='$target_account' AND seq_no=$target_seq_no AND fund='-split-'");
 			}
 
 			// Ensure that the category is not set to 'split' in the transaction and at the other end of any transfer.
-			mysqli_query($db,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND categort='-split-'");
+			mysqli_query_normal($db,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND categort='-split-'");
 			if (!empty($target_account))
 			{
-				mysqli_query($db,"UPDATE transactions SET category='-none-' WHERE account='$target_account' AND seq_no=$target_seq_no AND category='-split-'");
+				mysqli_query_normal($db,"UPDATE transactions SET category='-none-' WHERE account='$target_account' AND seq_no=$target_seq_no AND category='-split-'");
 			}
 		}
 
@@ -224,11 +224,11 @@ function rationalise_transaction($account,$seq_no)
 		if (((!empty($row['target_account'])) || (!empty($row['source_account']))) &&
 		     ($row['category'] != '-split-'))
 		{
-			mysqli_query($db,"UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no");
 		}
 		elseif ($row['category'] == '-transfer-')
 		{
-			mysqli_query($db,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no");
 		}
 
 		// Process associated splits
@@ -241,21 +241,21 @@ function rationalise_transaction($account,$seq_no)
 			// Ensure that fund and category are not set to indicate a split.
 			if ($row2['fund'] == '-split-')
 			{
-				mysqli_query($db,"UPDATE splits SET fund='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+				mysqli_query_normal($db,"UPDATE splits SET fund='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
 			}
 			if ($row2['category'] == '-split-')
 			{
-				mysqli_query($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+				mysqli_query_normal($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
 			}
 
 			// Check status of category in relation to transfers.
 			if ((!empty($row['target_account'])) || (!empty($row['source_account'])))
 			{
-				mysqli_query($db,"UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+				mysqli_query_normal($db,"UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
 			}
 			elseif ($row['category'] == '-transfer-')
 			{
-				mysqli_query($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
+				mysqli_query_normal($db,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$seq_no AND split_no=$split_no");
 			}
 		}
 		if ($split_count == 0)
@@ -266,7 +266,7 @@ function rationalise_transaction($account,$seq_no)
 		{
 			$splits_discrepancy = subtract_money(add_money($splits_total,$row['debit_amount']),$row['credit_amount']);
 		}
-		mysqli_query($db,"UPDATE transactions SET splits_discrepancy=$splits_discrepancy WHERE account='$account' AND seq_no=$seq_no");
+		mysqli_query_normal($db,"UPDATE transactions SET splits_discrepancy=$splits_discrepancy WHERE account='$account' AND seq_no=$seq_no");
 	}
 }
 
@@ -331,7 +331,7 @@ function year_end($date)
 function copy_transaction($account,$seq_no,$new_date)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		if (!empty($row['source_account']))
@@ -341,19 +341,19 @@ function copy_transaction($account,$seq_no,$new_date)
 		}
 
 		// Create copy of transaction using new sequence number
-		mysqli_query($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
-		mysqli_query($db,"DELETE TABLE IF EXISTS temp_transactions");
-		mysqli_query($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
-		mysqli_query($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
-		mysqli_query($db,"DELETE TABLE IF EXISTS temp_splits");
-		mysqli_query($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
-		mysqli_query($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+		mysqli_query_normal($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
+		mysqli_query_normal($db,"DELETE TABLE IF EXISTS temp_transactions");
+		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
+		mysqli_query_normal($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+		mysqli_query_normal($db,"DELETE TABLE IF EXISTS temp_splits");
+		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
+		mysqli_query_normal($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 		$new_seq_no = next_seq_no($account);
 		$new_acct_month = accounting_month($new_date);
-		mysqli_query($db,"UPDATE temp_transactions SET seq_no=$new_seq_no,date='$new_date',acct_month='$new_acct_month',reconciled=0");
-		mysqli_query($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
-		mysqli_query($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no,acct_month='$new_acct_month'");
-		mysqli_query($db,"INSERT INTO splits SELECT * FROM temp_splits");
+		mysqli_query_normal($db,"UPDATE temp_transactions SET seq_no=$new_seq_no,date='$new_date',acct_month='$new_acct_month',reconciled=0");
+		mysqli_query_normal($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
+		mysqli_query_normal($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no,acct_month='$new_acct_month'");
+		mysqli_query_normal($db,"INSERT INTO splits SELECT * FROM temp_splits");
 		update_account_balances($account,$new_date);
 
 		// Create transfer if required
@@ -365,9 +365,9 @@ function copy_transaction($account,$seq_no,$new_date)
 			$memo = addslashes($row['memo']);
 			$query = "INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no)";
 			$query .= " VALUES ('$target_account',$target_seq_no,'$new_date','$payee',{$row['debit_amount']},{$row['credit_amount']},'{$row['fund']}','-transfer-','$memo','$acct_month','$account',$new_seq_no)";
-			mysqli_query($db,$query);
+			mysqli_query_normal($db,$query);
 			update_account_balances($target_account,$new_date);
-			mysqli_query($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$new_seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$new_seq_no");
 		}
 		return $new_seq_no;
 	}
@@ -383,7 +383,7 @@ function record_scheduled_transaction($account,$seq_no)
 {
 	global $DBAdminURL, $local_site_dir, $FinanceDBId;
 	$db = admin_db_connect();
-	$query_result = mysqli_query($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no AND sched_freq<>'#' and sched_count<>0");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no AND sched_freq<>'#' and sched_count<>0");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$date = $row['date'];
@@ -395,14 +395,14 @@ function record_scheduled_transaction($account,$seq_no)
 		// Copy scheduled transaction to new transaction and remove schedule from
 		// the latter
 		$new_seq_no = copy_transaction($account,$seq_no,$date);
-		mysqli_query($db,"UPDATE transactions SET sched_freq='#',sched_count=-1 WHERE account='$account' AND seq_no=$new_seq_no");
+		mysqli_query_normal($db,"UPDATE transactions SET sched_freq='#',sched_count=-1 WHERE account='$account' AND seq_no=$new_seq_no");
 		update_account_balances($account,$date);
 
 		// Update schedule count if appliable
 		if ($sched_count > 0)
 		{
 			$sched_count--;
-			mysqli_query($db,"UPDATE transactions SET sched_count=$sched_count WHERE account='$account' AND seq_no=$seq_no");
+			mysqli_query_normal($db,"UPDATE transactions SET sched_count=$sched_count WHERE account='$account' AND seq_no=$seq_no");
 		}
 
 		// Update scheduled transaction to next date
@@ -421,8 +421,8 @@ function record_scheduled_transaction($account,$seq_no)
 			$date = AddDays($date,$multiplier);
 		}
 		$acct_month = accounting_month($date);
-		mysqli_query($db,"UPDATE transactions SET date='$date',acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no");
-		mysqli_query($db,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$seq_no");
+		mysqli_query_normal($db,"UPDATE transactions SET date='$date',acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no");
+		mysqli_query_normal($db,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$seq_no");
 
 
 		// Send e-mail alert if required
@@ -459,10 +459,10 @@ function select_excluded_accounts($field_name)
 	$db2 = admin_db_connect();
 	$user = get_session_var(SV_USER);
 	$result = '';
-	$query_result = mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
+	$query_result = mysqli_query_normal($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$query_result2 = mysqli_query($db2,"SELECT * FROM accounts");
+		$query_result2 = mysqli_query_normal($db2,"SELECT * FROM accounts");
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -491,10 +491,10 @@ function select_excluded_funds($field_name)
 	$db2 = admin_db_connect();
 	$user = get_session_var(SV_USER);
 	$result = '';
-	$query_result = mysqli_query($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
+	$query_result = mysqli_query_normal($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$query_result2 = mysqli_query($db2,"SELECT * FROM funds");
+		$query_result2 = mysqli_query_normal($db2,"SELECT * FROM funds");
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -514,7 +514,7 @@ function initialise_archive_table_data($db)
 	global $RelativePath;
 	$dbname = admin_db_name();
 	$directory_created = false;
-	$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname`");
+	$query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname`");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$table = $row["Tables_in_$dbname"];
@@ -535,13 +535,13 @@ function initialise_archive_table_data($db)
 				create_view_structure("_view_$table",$table,"account IS NOT NULL ORDER BY account ASC, date DESC, seq_no DESC");
 				set_primary_key_on_view("$table",'account');
 				set_primary_key_on_view("$table",'seq_no');
-				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='transactions'");
+				$query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='transactions'");
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
-					mysqli_query($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
+					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
 				}
 				$splits_table = str_replace('transactions','splits',$table);
-				mysqli_query($db,"INSERT INTO dba_relationships VALUES ('$table','Splits','SELECT * FROM $splits_table WHERE transact_seq_no=$"."seq_no')");
+				mysqli_query_normal($db,"INSERT INTO dba_relationships VALUES ('$table','Splits','SELECT * FROM $splits_table WHERE transact_seq_no=$"."seq_no')");
 			}
 			elseif (substr($table,9,5) == 'split')
 			{
@@ -550,16 +550,16 @@ function initialise_archive_table_data($db)
 				set_primary_key_on_view("$table",'account');
 				set_primary_key_on_view("$table",'transact_seq_no');
 				set_primary_key_on_view("$table",'split_no');
-				$query_result2 = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='splits'");
+				$query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='splits'");
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
-					mysqli_query($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
+					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
 				}
 			}
 		}
 	}
 	// Make all archive tables read-only.
-	mysqli_query($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name LIKE 'archived_%'");
+	mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='static' WHERE table_name LIKE 'archived_%'");
 
 	// Output warning if new tables have been added.
 	if ($directory_created)
@@ -574,7 +574,7 @@ function output_archive_table_links($db)
 {
 	$dbname = admin_db_name();
 	$archive_tables = array();
-	$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname`");
+	$query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname`");
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		if (substr($row["Tables_in_$dbname"],0,9) == 'archived_')

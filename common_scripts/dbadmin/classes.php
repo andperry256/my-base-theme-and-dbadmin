@@ -94,7 +94,7 @@ class tables_dba_table_info
 	{
     $db = admin_db_connect();
     $table = $record->FieldVal('table_name');
-    mysqli_query($db,"DELETE FROM dba_table_fields WHERE table_name='$table'");
+    mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name='$table'");
 	}
 }
 
@@ -109,7 +109,7 @@ class tables_dba_table_fields
     $table = $record->FieldVal('table_name');
     $field = $record->FieldVal('field_name');
     $db = admin_db_connect();
-    $query_result = mysqli_query($db,"SHOW COLUMNS FROM $table WHERE Field='$field'");
+    $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table WHERE Field='$field'");
     if ($row = mysqli_fetch_assoc($query_result))
     {
       $field_type = strtok($row['Type'],'(');
@@ -156,7 +156,7 @@ class tables_dba_table_fields
         $valid_select = false;
         if ((!empty($vocab_table)) && (!empty($vocab_field)))
         {
-          if (mysqli_query($db,"SELECT $vocab_field FROM $vocab_table"))
+          if (mysqli_query_normal($db,"SELECT $vocab_field FROM $vocab_table"))
           {
             $valid_select = true;
           }
@@ -203,7 +203,7 @@ class tables_dba_sidebar_config
     $default_seq_no = DEFAULT_SEQ_NO;
     if ($display_order == $default_seq_no)
     {
-      $query_result = mysqli_query($db,"SELECT * FROM dba_sidebar_config WHERE display_order<>$default_seq_no ORDER BY display_order DESC LIMIT 1");
+      $query_result = mysqli_query_normal($db,"SELECT * FROM dba_sidebar_config WHERE display_order<>$default_seq_no ORDER BY display_order DESC LIMIT 1");
       if ($row = mysqli_fetch_assoc($query_result))
       {
         $new_display_order = $row['display_order'] + 10;
@@ -213,7 +213,7 @@ class tables_dba_sidebar_config
         $new_display_order = 10;
       }
     }
-    mysqli_query($db,"UPDATE dba_sidebar_config SET display_order=$new_display_order WHERE display_order=$default_seq_no");
+    mysqli_query_normal($db,"UPDATE dba_sidebar_config SET display_order=$new_display_order WHERE display_order=$default_seq_no");
 	}
 }
 
@@ -255,7 +255,7 @@ class tables_admin_passwords
 		if (!empty($new_passwd))
 		{
 			$enc_passwd = addslashes(password_hash($new_passwd,PASSWORD_DEFAULT));
-			mysqli_query($db,"UPDATE admin_passwords SET new_passwd='',conf_new_passwd='',enc_passwd='$enc_passwd' WHERE username='$username'");
+			mysqli_query_normal($db,"UPDATE admin_passwords SET new_passwd='',conf_new_passwd='',enc_passwd='$enc_passwd' WHERE username='$username'");
 		}
 	}
 }

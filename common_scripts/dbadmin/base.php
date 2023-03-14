@@ -141,7 +141,7 @@ function display_sidebar_content()
   else
   {
     print("<table class=\"sidebar-table\">");
-    $query_result = mysqli_query_normal($db,"SELECT * FROM dba_sidebar_config ORDER BY display_order ASC");
+    $query_result = mysqli_query_strict($db,"SELECT * FROM dba_sidebar_config ORDER BY display_order ASC");
     while ($row = mysqli_fetch_assoc($query_result))
     {
       $label = $row['label'];
@@ -387,7 +387,7 @@ function display_main_content($mode)
 
       case 'renumber_records2':
         print("<h1>Renumber Records</h1>\n");
-        $query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE renumber_enabled=1 ORDER BY table_name ASC");
+        $query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE renumber_enabled=1 ORDER BY table_name ASC");
         while ($row = mysqli_fetch_assoc($query_result))
         {
           renumber_records($row['table_name']);

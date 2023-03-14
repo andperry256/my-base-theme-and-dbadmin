@@ -21,7 +21,7 @@ function get_table_access_level($table)
 		return('read-only');  // This should not occur
 	}
 
-	$query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
 	if ((session_var_is_set('read_only')) && (get_session_var('read_only')))
 	{
 		$access_level = 'read-only';

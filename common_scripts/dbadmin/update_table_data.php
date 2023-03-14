@@ -471,7 +471,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     if (($purge) && (substr($table,0,6) == '_view_'))
     {
       print ("Purging view $ltag$table$rtag ...$eol");
-      if (($query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) &&
+      if (($query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'")) &&
           ($row2 = mysqli_fetch_assoc($query_result2)) &&
           (!empty($row2['parent_table'])))
       {
@@ -513,7 +513,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
           $charset = $default_charset;
           $collation = $default_collation;
           $engine = $default_engine;
-          $query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+          $query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
           if ($row2 = mysqli_fetch_assoc($query_result2))
           {
             if (!empty($row2['engine']))
@@ -655,7 +655,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
               }
 
               // Run query to select data for the given table & field
-              $query_result3 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+              $query_result3 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
               if ($row3 = mysqli_fetch_assoc($query_result3))
               {
                 /*
@@ -710,7 +710,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 value of 5 is added.
                 */
                 $next_display_order = $last_display_order + 10;
-                $query_result4 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND display_order=$next_display_order");
+                $query_result4 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND display_order=$next_display_order");
                 if (mysqli_num_rows($query_result4) == 0)
                 {
                   $display_order = $last_display_order + 10;
@@ -737,7 +737,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
           }
 
           // Delete redundant table field records
-          $query_result2 = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
+          $query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$table'");
           while ($row2 = mysqli_fetch_assoc($query_result2))
           {
             $field_name = $row2['field_name'];

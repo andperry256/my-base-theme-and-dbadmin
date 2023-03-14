@@ -10,7 +10,7 @@ if (isset($_POST['archive_end_date']))
   $archive_end_month = accounting_month($archive_end_date);
   $archive_year = substr($archive_end_month,0,4);
   print("<p>Deleting 'Balance B/F' transactions<br />\n");
-    $query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE payee='Balance B/F' AND acct_month='$archive_end_month'");
+    $query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE payee='Balance B/F' AND acct_month='$archive_end_month'");
   while ($row = mysqli_fetch_assoc($query_result))
   {
     mysqli_query_normal($db,"DELETE FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");

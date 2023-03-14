@@ -20,7 +20,7 @@ if (get_table_access_level('transactions') != 'read-only')
   $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
 }
 
-$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label='$account'");
+$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
 if ($row = mysqli_fetch_assoc($query_result))
 {
   print("<h1>{$row['name']}</h1>\n");

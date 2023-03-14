@@ -10,7 +10,7 @@ if (isset($_POST['new_start_date']))
   $archive_end_date = AddDays($new_start_date,-1);
   $balances = array();
   $error = false;
-  $query_result = mysqli_query_normal($db,"SELECT * from accounts");
+  $query_result = mysqli_query_strict($db,"SELECT * from accounts");
   print("<p>");
   while (($row = mysqli_fetch_assoc($query_result)) && ($error === false))
   {
@@ -20,13 +20,13 @@ if (isset($_POST['new_start_date']))
     {
       $balances[$account] = array();
     }
-    $query_result2 = mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND date<'$new_start_date'");
+    $query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND date<'$new_start_date'");
     while ($row2 = mysqli_fetch_assoc($query_result2))
     {
       if (($row2['fund'] == '-split-') && (empty($row2['source_account'])))
       {
         // Process splits
-        $query_result3 = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no={$row2['seq_no']}");
+        $query_result3 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no={$row2['seq_no']}");
         $splits_total = 0;
         while ($row3 = mysqli_fetch_assoc($query_result3))
         {
@@ -47,7 +47,7 @@ if (isset($_POST['new_start_date']))
       elseif ($row2['fund'] == '-split-')
       {
         // Process splits on other side of transfer
-        $query_result3 = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='{$row2['source_account']}' AND transact_seq_no={$row2['source_seq_no']}");
+        $query_result3 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='{$row2['source_account']}' AND transact_seq_no={$row2['source_seq_no']}");
         $splits_total = 0;
         while ($row3 = mysqli_fetch_assoc($query_result3))
         {
@@ -86,7 +86,7 @@ if (isset($_POST['new_start_date']))
   // Calculate the sequence number for the new 'Balance B/F' transaction
   // for each account.
   $bbf_seq_no = array();
-  $query_result = mysqli_query_normal($db,"SELECT * from accounts");
+  $query_result = mysqli_query_strict($db,"SELECT * from accounts");
   while (($row = mysqli_fetch_assoc($query_result)) && ($error === false))
   {
     $account = $row['label'];
@@ -135,7 +135,7 @@ if (isset($_POST['new_start_date']))
     mysqli_query_normal($db,"DROP TABLE IF EXISTS archived_splits_$year");
     mysqli_query_normal($db,"CREATE TABLE archived_transactions_$year AS SELECT * FROM transactions WHERE date<='$archive_end_date'");
     mysqli_query_normal($db,"CREATE TABLE archived_splits_$year LIKE splits");
-    $query_result = mysqli_query_normal($db,"SELECT * FROM archived_transactions_$year");
+    $query_result = mysqli_query_strict($db,"SELECT * FROM archived_transactions_$year");
     while ($row = mysqli_fetch_assoc($query_result))
     {
       mysqli_query_normal($db,"INSERT INTO archived_splits_$year SELECT * FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");
@@ -143,7 +143,7 @@ if (isset($_POST['new_start_date']))
 
     // Delete archived transactions from main tables
     print("Deleting old transactions<br />\n");
-    $query_result = mysqli_query_normal($db,"SELECT * FROM transactions WHERE date<'$new_start_date'");
+    $query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE date<'$new_start_date'");
     while ($row = mysqli_fetch_assoc($query_result))
     {
       mysqli_query_normal($db,"DELETE FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");
@@ -151,7 +151,7 @@ if (isset($_POST['new_start_date']))
     mysqli_query_normal($db,"DELETE FROM transactions WHERE date<'$new_start_date'");
 
     // Add new 'Balance B/F' transactions
-    $query_result = mysqli_query_normal($db,"SELECT * from accounts");
+    $query_result = mysqli_query_strict($db,"SELECT * from accounts");
     while ($row = mysqli_fetch_assoc($query_result))
     {
       print("Creating 'Balance B/F' transaction for account {$row['name']}<br />\n");

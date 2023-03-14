@@ -61,7 +61,7 @@
     }
 
     $base_table = get_base_table($table);
-    $query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table'");
+    $query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table'");
     if (mysqli_num_rows($query_result) > 0)
     {
       $list_desktop = array();

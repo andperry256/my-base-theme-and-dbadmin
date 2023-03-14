@@ -105,7 +105,7 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 			$limit_clause = "LIMIT $limit_clause";
 
 		// Query and main loop to process the table records.
-		$query_result = mysqli_query_normal($db,"SELECT $field_selection FROM $table $where_clause $order_clause $limit_clause");
+		$query_result = mysqli_query_strict($db,"SELECT $field_selection FROM $table $where_clause $order_clause $limit_clause");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			$field_count = 0;

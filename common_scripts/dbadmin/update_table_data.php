@@ -495,7 +495,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
       }
       print(" $ltag$table$rtag ...$eol");
 
-      try { mysqli_query_normal($db,"SHOW COLUMNS FROM $table"); }
+      try { mysqli_query($db,"SHOW COLUMNS FROM $table"); }
       catch (Exception $e)
       {
         /*

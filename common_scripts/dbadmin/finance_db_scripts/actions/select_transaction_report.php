@@ -16,7 +16,7 @@ print("<table cellpadding=\"10\">\n");
 print("<tr><td>Account:</td><td>\n");
 print("<select name=\"account\">\n");
 print("<option value=\"\">--all--</option>\n");
-$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions ORDER BY name ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions ORDER BY name ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	print("<option value=\"{$row['label']}\">{$row['name']}</option>\n");
@@ -29,7 +29,7 @@ $previous_superfund = '';
 print("<tr><td>Fund:</td><td>\n");
 print("<select name=\"fund\">\n");
 print("<option value=\"\">--all--</option>\n");
-$query_result = mysqli_query_normal($db,"SELECT * FROM funds WHERE name IS NOT NULL $fund_exclusions ORDER BY name ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM funds WHERE name IS NOT NULL $fund_exclusions ORDER BY name ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$fund = $row['name'];
@@ -51,7 +51,7 @@ $previous_supercategory = '';
 print("<tr><td>Category:</td><td>\n");
 print("<select name=\"category\">\n");
 print("<option value=\"\">--all--</option>\n");
-$query_result = mysqli_query_normal($db,"SELECT * FROM categories ORDER BY name ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM categories ORDER BY name ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$category = $row['name'];
@@ -72,7 +72,7 @@ print("</td></tr>\n");
 print("<tr><td>Payee:</td><td>\n");
 print("<select name=\"payee\">\n");
 print("<option value=\"\">-all--</option>\n");
-$query_result = mysqli_query_normal($db,"SELECT * FROM payees ORDER BY name ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM payees ORDER BY name ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$payee_par = urlencode($row['name']);
@@ -84,7 +84,7 @@ print("</td></tr>\n");
 // Build select list for currency
 print("<tr><td>Currency:</td>\n");
 print("<td colspan=2><select name=\"currency\">\n");
-$query_result = mysqli_query_normal($db,"SELECT * FROM currencies ORDER BY id ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM currencies ORDER BY id ASC");
 while($row = mysqli_fetch_assoc($query_result))
 {
 	$id = $row['id'];

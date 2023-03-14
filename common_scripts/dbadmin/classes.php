@@ -203,7 +203,7 @@ class tables_dba_sidebar_config
     $default_seq_no = DEFAULT_SEQ_NO;
     if ($display_order == $default_seq_no)
     {
-      $query_result = mysqli_query_normal($db,"SELECT * FROM dba_sidebar_config WHERE display_order<>$default_seq_no ORDER BY display_order DESC LIMIT 1");
+      $query_result = mysqli_query_strict($db,"SELECT * FROM dba_sidebar_config WHERE display_order<>$default_seq_no ORDER BY display_order DESC LIMIT 1");
       if ($row = mysqli_fetch_assoc($query_result))
       {
         $new_display_order = $row['display_order'] + 10;

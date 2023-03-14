@@ -92,7 +92,7 @@
   }
   elseif ($account_transaction == 'NEW')
   {
-    $query_result = mysqli_query_normal($db,"SELECT * FROM bank_import WHERE rec_id=$bank_rec_id");
+    $query_result = mysqli_query_strict($db,"SELECT * FROM bank_import WHERE rec_id=$bank_rec_id");
     if ($row = mysqli_fetch_assoc($query_result))
     {
       // Create new transaction. Update payee if regex match is found.
@@ -100,7 +100,7 @@
       // using the original payee name with variable numbers of underscores added to the end.
       $date = $row['date'];
       $payee = addslashes($row['description']);
-      $query_result2 = mysqli_query_normal($db,"SELECT * FROM payees WHERE regex_match<>'^$'");
+      $query_result2 = mysqli_query_strict($db,"SELECT * FROM payees WHERE regex_match<>'^$'");
       while ($row2 = mysqli_fetch_assoc($query_result2))
       {
         $pattern = "/{$row2['regex_match']}/i";
@@ -148,7 +148,7 @@
           if (isset($_POST['update_schedule']))
           {
             // Update associated scheduled transaction
-            $query_result2 = mysqli_query_normal($db,"SELECT * FROM _view_account_$account WHERE seq_no=$account_seq_no");
+            $query_result2 = mysqli_query_strict($db,"SELECT * FROM _view_account_$account WHERE seq_no=$account_seq_no");
             if ($row2 = mysqli_fetch_assoc($query_result2))
             {
               $payee = addslashes($row2['payee']);
@@ -156,12 +156,12 @@
             }
           }
         }
-        $query_result2 = mysqli_query_normal($db,"SELECT * FROM _view_account_$account WHERE seq_no=$account_seq_no");
+        $query_result2 = mysqli_query_strict($db,"SELECT * FROM _view_account_$account WHERE seq_no=$account_seq_no");
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
           update_account_balances($account,$row2['date']);
         }
-        $query_result2 = mysqli_query_normal($db,"SELECT * FROM _view_account_$account ORDER BY date DESC, seq_no DESC LIMIT 1");
+        $query_result2 = mysqli_query_strict($db,"SELECT * FROM _view_account_$account ORDER BY date DESC, seq_no DESC LIMIT 1");
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
           $user_message = "<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['reconciled_balance']}</p>\n";

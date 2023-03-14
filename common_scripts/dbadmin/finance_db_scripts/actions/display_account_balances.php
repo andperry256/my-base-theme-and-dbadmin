@@ -14,11 +14,11 @@ $account_exclusions = select_excluded_accounts('label');
 
 // Initialise the balances array
 $balances = array();
-$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions");
+$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
-	$query_result2 = mysqli_query_normal($db,"SELECT * FROM funds WHERE type='localised'");
+	$query_result2 = mysqli_query_strict($db,"SELECT * FROM funds WHERE type='localised'");
 	while ($row2 = mysqli_fetch_assoc($query_result2))
 	{
 		$fund = $row2['name'];
@@ -28,7 +28,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 }
 
 // Calculate the balances
-$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions ORDER BY sort_order ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label IS NOT NULL $account_exclusions ORDER BY sort_order ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
@@ -51,7 +51,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 		}
 		elseif (empty($row2['source_account']))
 		{
-			$query_result3 = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no={$row2['seq_no']}");
+			$query_result3 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no={$row2['seq_no']}");
 			while ($row3 = mysqli_fetch_assoc($query_result3))
 			{
 				// Add split amount to fund balance
@@ -63,7 +63,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 		}
 		else
 		{
-			$query_result3 = mysqli_query_normal($db,"SELECT * FROM splits WHERE account='{$row2['source_account']}' AND transact_seq_no={$row2['source_seq_no']}");
+			$query_result3 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='{$row2['source_account']}' AND transact_seq_no={$row2['source_seq_no']}");
 			while ($row3 = mysqli_fetch_assoc($query_result3))
 			{
 					// Subtract split amount from source account if applicable
@@ -79,7 +79,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 // Output the information
 print("<h1>Account Balances</h1>\n");
 print("<table style=\"$table_style\">\n");
-$query_result = mysqli_query_normal($db,"SELECT * FROM accounts WHERE label IS NOT NULl $account_exclusions ORDER BY sort_order ASC");
+$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label IS NOT NULl $account_exclusions ORDER BY sort_order ASC");
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
@@ -94,7 +94,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 			if (round($value,2) != 0)
 			{
 				// Output fund name and balance
-				$query_result2 = mysqli_query_normal($db,"SELECT * FROM funds WHERE name='$fund'");
+				$query_result2 = mysqli_query_strict($db,"SELECT * FROM funds WHERE name='$fund'");
 				if ($row2 = mysqli_fetch_assoc($query_result2))
 					print("<td style=\"$table_cell_style\" width=\"120px\">{$row2['name']}</td>");
 				elseif ($fund == 'other')

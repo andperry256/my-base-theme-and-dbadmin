@@ -18,7 +18,7 @@ On an online server, errors are output to a log file rather than the screen.
 
 function run_mysqli_query($db,$query,$strict=false)
 {
-	global $argc, $BaseDir;
+	global $argc, $RootDir;
 	$eol = (isset($argc)) ? "\n" : "<br />\n";
 	$error_id = substr(md5(date('YmdHis')),0,8);
 	$date_and_time = date('Y-m-d H:i:s');
@@ -39,7 +39,7 @@ function run_mysqli_query($db,$query,$strict=false)
 		else
 		{
 			// Online server
-			$ofp = fopen("$BaseDir/error_log",'a');
+			$ofp = fopen("$RootDir/logs/php_error.log",'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
 			fprintf($ofp,'  '.$e->getMessage()."\n");
 			fclose($ofp);
@@ -57,7 +57,7 @@ function run_mysqli_query($db,$query,$strict=false)
 		else
 		{
 			// Online server
-			$ofp = fopen("$BaseDir/error_log",'a');
+			$ofp = fopen("$RootDir/logs/php_error.log",'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
 			fclose($ofp);
 			print($fatal_error_message);

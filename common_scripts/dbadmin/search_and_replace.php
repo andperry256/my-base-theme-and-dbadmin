@@ -13,10 +13,10 @@ function search_and_replace($local_db_name)
 	if ($Location == 'local')
 	{
 		$db_sites = sites_db_connect();
-		$query_result = mysqli_query($db_sites,"SELECT * FROM dbases WHERE dbname='$local_db_name' AND domname='$Server_Station_ID'");
+		$query_result = mysqli_query_normal($db_sites,"SELECT * FROM dbases WHERE dbname='$local_db_name' AND domname='$Server_Station_ID'");
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
-			if ($row2 = mysqli_fetch_assoc(mysqli_query($db_sites,"SELECT * FROM db_sets WHERE site_path='{$row['site_path']}' AND sub_path='{$row['sub_path']}'")))
+			if ($row2 = mysqli_fetch_assoc(mysqli_query_strict($db_sites,"SELECT * FROM db_sets WHERE site_path='{$row['site_path']}' AND sub_path='{$row['sub_path']}'")))
 			{
 				$user = $row2['username'];
 			}
@@ -102,7 +102,7 @@ function search_and_replace($local_db_name)
 				print("<option value=\"\">Please select...</option>\n");
 				print("<option value=\"#all#\">[All]</option>\n");
 				$dbname = admin_db_name();
-				$query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
+				$query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
 				while ($row = mysqli_fetch_assoc($query_result))
 				{
 					print("<option value=\"{$row["Tables_in_$dbname"]}\">{$row["Tables_in_$dbname"]}</option>\n");

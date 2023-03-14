@@ -13,7 +13,7 @@ class tables_notes
 		$action = $record->action;
 		$table = $record->table;
 		$today_date = date('Y-m-d');
-		mysqli_query($db,"UPDATE notes SET date='$today_date' WHERE date NOT LIKE '20%'");
+		mysqli_query_normal($db,"UPDATE notes SET date='$today_date' WHERE date NOT LIKE '20%'");
 	}
 }
 ?>

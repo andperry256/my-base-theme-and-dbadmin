@@ -61,7 +61,7 @@
     }
 
     $base_table = get_base_table($table);
-    $query_result = mysqli_query($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table'");
+    $query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table'");
     if (mysqli_num_rows($query_result) > 0)
     {
       $list_desktop = array();
@@ -87,14 +87,14 @@
           $label = addslashes(trim(substr($line,12)," =\"\n\r\t"));
           $query = "UPDATE dba_table_fields SET alt_label='$label' WHERE table_name='$table' AND field_name='$field_name'";
           print("$query<br />\n");
-          mysqli_query($db,$query);
+          mysqli_query_normal($db,$query);
         }
         elseif (substr($line,0,18) == 'widget:description')
         {
           $description = addslashes(trim(substr($line,18)," =\"\n\r\t"));
           $query = "UPDATE dba_table_fields SET description='$description' WHERE table_name='$table' AND field_name='$field_name'";
           print("$query<br />\n");
-          mysqli_query($db,$query);
+          mysqli_query_normal($db,$query);
         }
         elseif (substr($line,0,10) == 'vocabulary')
         {
@@ -106,7 +106,7 @@
       {
         $query = "UPDATE dba_table_fields SET list_desktop=$status WHERE table_name='$table' AND field_name='$field'";
         print("$query<br />\n");
-        mysqli_query($db,$query);
+        mysqli_query_normal($db,$query);
       }
     }
   }

@@ -6,7 +6,7 @@ $db = admin_db_connect();
 print("<h1>Payee Report</h1>\n");
 print("<p>Please select the required payee:-</p>\n");
 
-$query_result = mysqli_query($db,"SELECT * FROM payees");
+$query_result = mysqli_query_normal($db,"SELECT * FROM payees");
 print("<ul>\n");
 while ($row = mysqli_fetch_assoc($query_result))
 {

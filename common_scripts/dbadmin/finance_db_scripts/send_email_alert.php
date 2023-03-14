@@ -6,7 +6,7 @@
   require("$BaseDir/common_scripts/mail_funct.php");
   require("$PrivateScriptsDir/mysql_connect.php");
   $db = finance_db_connect();
-  $query_result = mysqli_query($db,"SELECT * FROM email_alerts WHERE rec_id='{$_GET['recid']}'");
+  $query_result = mysqli_query_normal($db,"SELECT * FROM email_alerts WHERE rec_id='{$_GET['recid']}'");
   if ($row = mysqli_fetch_assoc($query_result))
   {
     $message_info = array();

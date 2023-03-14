@@ -21,7 +21,7 @@ function get_table_access_level($table)
 		return('read-only');  // This should not occur
 	}
 
-	$query_result = mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	$query_result = mysqli_query_normal($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
 	if ((session_var_is_set('read_only')) && (get_session_var('read_only')))
 	{
 		$access_level = 'read-only';
@@ -96,7 +96,7 @@ function next_seq_number($table,$sort_1_value,$interval=10)
 	}
 	$db = admin_db_connect();
 	$table = get_table_for_info_field($table,'seq_no_field');
-	$row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
+	$row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
 	if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
 	{
 		// Calculate next sequence number, given:-
@@ -113,7 +113,7 @@ function next_seq_number($table,$sort_1_value,$interval=10)
 			$query .= " AND  $sort_1_name='$sort_1_value'";
 		}
 		$query .= " ORDER BY $seq_no_name DESC";
-		$query_result = mysqli_query($db,$query);
+		$query_result = mysqli_query_normal($db,$query);
 		return ($row = mysqli_fetch_assoc($query_result))
 			? $row[$seq_no_name] + $interval
 			: $interval;
@@ -132,7 +132,7 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
 		exit("Constant NEXT_SEQ_NO_INDICATOR not defined");
 	}
 	$db = admin_db_connect();
-	$row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
+	$row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
 	if (($seq_no == NEXT_SEQ_NO_INDICATOR) && (isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
 	{
 		// Update record with new sequence number
@@ -147,7 +147,7 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
 			$sort_1_value = addslashes($sort_1_value);
 			$query .= " AND $sort_1_name='$sort_1_value'";
 		}
-		mysqli_query($db,$query);
+		mysqli_query_normal($db,$query);
 		if (function_exists('update_session_var'))
 		{
 			$primary_keys[$seq_no_name] = $new_seq_no;
@@ -172,7 +172,7 @@ Function enable_non_null_empty
 function enable_non_null_empty($table,$field)
 {
 	$db = admin_db_connect();
-	mysqli_query($db,"UPDATE dba_table_fields SET required=1 WHERE table_name='$table' AND field_name='$field'");
+	mysqli_query_normal($db,"UPDATE dba_table_fields SET required=1 WHERE table_name='$table' AND field_name='$field'");
 }
 
 //==============================================================================

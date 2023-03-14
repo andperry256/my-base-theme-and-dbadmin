@@ -20,8 +20,10 @@ function run_mysqli_query($db,$query,$strict=false)
 {
 	global $argc, $BaseDir;
 	$eol = (isset($argc)) ? "\n" : "<br />\n";
+	$error_id = substr(md5(date('YmdHis')),0,8);
+	$date_and_time = date('Y-m-d H:i:s');
 	$fatal_error_message = "There has been a fatal error, details of which have been logged.$eol";
-	$fatal_error_message .= "Please report this incident including the date and time to the webmaster.$eol";
+	$fatal_error_message .= "Please report this to the webmaster quoting code <strong>$error_id</strong>.$eol";
 	try
 	{
 		$result = mysqli_query($db,$query);
@@ -38,7 +40,7 @@ function run_mysqli_query($db,$query,$strict=false)
 		{
 			// Online server
 			$ofp = fopen("$BaseDir/error_log",'a');
-			fprintf($ofp,date('[Y-m-d H:i:s] ')."Error caught on running MySQL query:\n  $query\n");
+			fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
 			fprintf($ofp,'  '.$e->getMessage()."\n");
 			fclose($ofp);
 			print($fatal_error_message);
@@ -56,7 +58,7 @@ function run_mysqli_query($db,$query,$strict=false)
 		{
 			// Online server
 			$ofp = fopen("$BaseDir/error_log",'a');
-			fprintf($ofp,date('[Y-m-d H:i:s] ')."Error caught on running MySQL query:\n  $query\n");
+			fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
 			fclose($ofp);
 			print($fatal_error_message);
 		}

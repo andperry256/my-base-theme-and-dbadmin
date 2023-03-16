@@ -212,8 +212,8 @@ class tables_dba_sidebar_config
       {
         $new_display_order = 10;
       }
+      mysqli_query_normal($db,"UPDATE dba_sidebar_config SET display_order=$new_display_order WHERE display_order=$default_seq_no");
     }
-    mysqli_query_normal($db,"UPDATE dba_sidebar_config SET display_order=$new_display_order WHERE display_order=$default_seq_no");
 	}
 }
 

@@ -3,6 +3,30 @@
 if (!function_exists('mysqli_query_normal'))
 {
 //==============================================================================
+
+function print_stack_trace_for_mysqli_error($ofp=false)
+{
+	global $argc;
+	$eol = (isset($argc)) ? "\n" : "<br />\n";
+	ob_start();
+	debug_print_backtrace();
+	$trace = ob_get_contents();
+	ob_end_clean();
+	if ($ofp === false)
+	{
+		print(str_replace("\n",$eol,$trace));
+	}
+	else
+	{
+		$content = explode("\n",$trace);
+		foreach ($content as $line)
+		{
+			fprintf($ofp,"  $line$eol");
+		}
+	}
+}
+
+//==============================================================================
 /*
 Function run_mysqli_query
 
@@ -35,6 +59,7 @@ function run_mysqli_query($db,$query,$strict=false)
 			// Local server
 			print("Error caught on running MySQL query:$eol$query$eol");
 			print($e->getMessage().$eol);
+			print_stack_trace_for_mysqli_error();
 		}
 		else
 		{
@@ -43,6 +68,7 @@ function run_mysqli_query($db,$query,$strict=false)
 			fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
 			fprintf($ofp,'  '.$e->getMessage()."\n");
 			fclose($ofp);
+			print_stack_trace_for_mysqli_error($ofp);
 			print($fatal_error_message);
 		}
 		exit;
@@ -53,6 +79,7 @@ function run_mysqli_query($db,$query,$strict=false)
 		{
 			// Local server
 			print("Error result returned from MySQL query:$eol$query$eol");
+			print_stack_trace_for_mysqli_error();
 		}
 		else
 		{
@@ -60,6 +87,7 @@ function run_mysqli_query($db,$query,$strict=false)
 			$ofp = fopen("$RootDir/logs/php_error.log",'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
 			fclose($ofp);
+			print_stack_trace_for_mysqli_error($ofp);
 			print($fatal_error_message);
 		}
 		exit;

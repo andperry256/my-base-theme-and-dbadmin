@@ -375,6 +375,7 @@ function handle_file_widget_before_save(&$record,$field)
 			$tok = strtok($allowed_filetypes,',');
 			while ($tok !== false)
 			{
+				$tok = trim($tok,'.');
 				if ($tok == $fileext)
 				{
 					$found = true;

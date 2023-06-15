@@ -293,6 +293,16 @@ function display_main_content($mode)
     switch ($action)
     {
       case 'list':
+        if ((is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php")) &&
+            (!class_exists ("tables_$table",false)))
+        {
+          require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
+        }
+        elseif ((is_file("$AltIncludePath/tables/$table/$table.php")) &&
+                (!class_exists ("tables_$table",false)))
+        {
+          require("$AltIncludePath/tables/$table/$table.php");
+        }
         if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_list.php"))
         {
           require("$CustomPagesPath/$RelativePath/tables/$table/custom_list.php");

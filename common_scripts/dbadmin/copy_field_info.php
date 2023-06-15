@@ -34,9 +34,10 @@
   $tables = array();
   if ($table == '*')
   {
-    if ($handle = opendir($tables_dir))
+    if (is_dir($tables_dir))
     {
-      while (false !== ($file = readdir($handle)))
+      $dirlist = scandir($tables_dir);
+      foreach ($dirlist as $file)
       {
         if ((is_dir("$tables_dir/$file")) && (!is_link("$tables_dir/$file")) && ($file != '.') && ($file != '..'))
         {

@@ -342,10 +342,10 @@ function copy_transaction($account,$seq_no,$new_date)
 
 		// Create copy of transaction using new sequence number
 		mysqli_query_normal($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
-		mysqli_query_normal($db,"DELETE TABLE IF EXISTS temp_transactions");
+		mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_transactions");
 		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
 		mysqli_query_normal($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
-		mysqli_query_normal($db,"DELETE TABLE IF EXISTS temp_splits");
+		mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_splits");
 		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
 		mysqli_query_normal($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 		$new_seq_no = next_seq_no($account);

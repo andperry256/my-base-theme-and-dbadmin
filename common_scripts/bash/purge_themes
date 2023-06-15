@@ -5,7 +5,7 @@ else
   themes_dir="$root_dir/public_html/wp-content/themes"
 fi
 default_theme="twentytwelve"
-redundant_themes="twentynineteen twentytwenty twentytwentyone twentytwentytwo"
+redundant_themes="twentynineteen twentytwenty twentytwentyone twentytwentytwo twentytwentythree"
 
 if [ -d "$themes_dir/$default_theme" ]; then
   for theme in $redundant_themes; do

@@ -1469,10 +1469,26 @@ afterDelete method for the associated table class.
 
 function delete_record($record,$record_id)
 {
+	global $CustomPagesPath, $RelativePath, $AltIncludePath, $DBAdminDir;
 	$db = admin_db_connect();
 	$table = $record->table;
 	$base_table = get_base_table($table);
 	$classname = "tables_$base_table";
+
+	// May need to include table class here because it is not automatically
+	// loaded in all contexts.
+	if (!class_exists ($classname,false))
+	{
+		if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
+		{
+			require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
+		}
+		elseif (is_file("$AltIncludePath/tables/$base_table/$table.php"))
+		{
+			require("$AltIncludePath/tables/$base_table/$table.php");
+		}
+	}
+
 	if  (class_exists ($classname,false))
 	{
 		$table_obj = new $classname;

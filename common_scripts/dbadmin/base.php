@@ -6,101 +6,8 @@
   require("$RootDir/maintenance/db_master_location.php");
   $return_url = cur_url_par();
   $dummy = '{';  // To remove false positive from syntax checker
+  print("<script type=\"text/javascript\" src=\"$DBAdminURL/form_funct.js\"></script>\n");
 ?>
-<script type="text/javascript" language="javascript">
-//==============================================================================
-
-// Function to check/un-check all check boxes in a form in response to
-// an action on the designated 'check all' check box.
-function checkAll(source)
-{
-  var checkboxes = new Array();
-  checkboxes = document.getElementsByTagName('input');
-  for (var i=0; i<checkboxes.length; i++)  {
-    if (checkboxes[i].type == 'checkbox')   {
-      checkboxes[i].checked = source.checked;
-    }
-  }
-}
-
-// Function to submit the form with no specific option
-function submitForm(form)
-{
-  element = document.getElementById("submitted");
-  element.value = '#';
-  form.submit();
-}
-
-// Functions to select desktop/mobile mode
-function selectDesktopMode()
-{
-  window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
-}
-function selectMobileMode()
-{
-  window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
-}
-
-// Function to apply a search to the table
-function applySearch(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'apply_search';
-  form.submit();
-}
-
-// Function to confirm submission for a delete action
-function confirmDelete(form)
-{
-  if (confirm("Delete the selected records?")) {
-    element = document.getElementById("submitted");
-    element.value = 'delete';
-    form.submit();
-  }
-}
-
-// Functions to perform submission for an update action
-function selectUpdate(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'select_update';
-  form.submit();
-}
-function selectUpdateAll(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'select_update_all';
-  form.submit();
-}
-function runUpdate(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'run_update';
-  form.submit();
-}
-function runUpdateAll(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'run_update_all';
-  form.submit();
-}
-
-// Functions to perform submission for a copy action
-function selectCopy(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'select_copy';
-  form.submit();
-}
-function runCopy(form)
-{
-  element = document.getElementById("submitted");
-  element.value = 'run_copy';
-  form.submit();
-}
-
-//==============================================================================
-</script>
 <?php if (get_session_var('theme_mode') == 'dark'): ?>
   <style>
     /* These styles are intentionally included inline */
@@ -538,16 +445,7 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
   }
   print("</p>\n");
 }
+print("<script type=\"text/javascript\" src=\"$DBAdminURL/no_resubmit.js\"></script>\n");
 
 //==============================================================================
 ?>
-<script type="text/javascript" language="javascript">
-//==============================================================================
-
-// The following code prevents a form from re-submitting on a page refresh.
-if ( window.history.replaceState ) {
-  window.history.replaceState( null, null, window.location.href );
-}
-
-//==============================================================================
-</script>

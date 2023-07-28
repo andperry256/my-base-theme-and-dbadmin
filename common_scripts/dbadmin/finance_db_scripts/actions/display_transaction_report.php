@@ -10,6 +10,21 @@ fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
 print("<h1>Transaction Report</h1>\n");
 $account_exclusions = select_excluded_accounts('account');
 $fund_exclusions = select_excluded_funds('fund');
+if (isset($_GET['autodates']))
+{
+	if (isset($_GET['start_date']))
+	{
+		$_POST['start_year'] = substr($_GET['start_date'],0,4);
+		$_POST['start_month'] = substr($_GET['start_date'],5,2);
+		if (isset($_GET['end_date']))
+		{
+			$_POST['end_year'] = substr($_GET['end_date'],0,4);
+			$_POST['end_month'] = substr($_GET['end_date'],5,2);
+			$_POST['submitted'] = true;
+			$_POST['date_range'] = 'select';
+		}
+	}
+}
 
 // Account filter
 if (!isset($_GET['account']))

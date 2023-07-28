@@ -251,7 +251,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Account has been specified. All funds and categories are included.
 		// Process all associated splits.
-		$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE name IS NOT NULL $fund_exclusions");
+		$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account IS NOT NULL $fund_exclusions");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
@@ -511,6 +511,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				$row_no++;
 			}
 		}
+		print("</table>\n");
 	}
 }
 

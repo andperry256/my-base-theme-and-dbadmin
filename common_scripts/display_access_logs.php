@@ -1,11 +1,4 @@
 <html><head>
-<script>
-	function selectFile(dropdown,site,mode)
-	{
-		var option_value = dropdown.options[dropdown.selectedIndex].value;
-		location.href = './display_access_logs.php?site=' + site + '&file=' + encodeURIComponent(option_value) + '&mode=' + mode;
-	}
-</script>
 <style>
 	html {
 		font-size: 16px;
@@ -34,6 +27,7 @@
 <?php
 //==============================================================================
 
+print("<script type=\"text/javascript\" src=\"$BaseURL/common_scripts/js_for_display_access_logs.js\"></script>\n");
 require("allowed_hosts.php");
 if (isset($_GET['site']))
 {

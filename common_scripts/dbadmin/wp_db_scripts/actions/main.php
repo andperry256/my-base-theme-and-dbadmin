@@ -8,8 +8,8 @@
 	<ul>
 		<li><a href="<?php echo $BaseURL; ?>/wp-admin" target="_blank">Wordpress Dashboard</a></li>
 	</ul>
+<div class="horizontal-divide">&nbsp;</div>
 <h2>Tables/Views</h2>
-<p>The following tables/views are available for editing:-</p>
 <ul>
 	<li><a href="?-table=wp_posts">Posts Table (Full)</a></li>
 	<li><a href="?-table=_view_pages">Posts Table (Pages)</a></li>
@@ -22,9 +22,10 @@
 	<li><a href="?-table=wp_users">Users</a></li>
 	<li><a href="?-table=wp_usermeta">User Meta</a></li>
 </ul>
-
+<div class="horizontal-divide">&nbsp;</div>
 <h2>Special Views/Actions</h2>
 <div class="halfspace"></div>
 <ul>
 	<li><a href="./?-action=delete_revisions_1">Delete Post Revisions</a></li>
 </ul>
+<div class="horizontal-divide">&nbsp;</div>

@@ -829,258 +829,65 @@ function readable_markup($str)
 
 //================================================================================
 /*
- * Function coded_text_to_html
+ * Function simpify_html_tag
  *
- * This function coverts a coded text file into readable HTML. The following
- * syntax is used in the source:-
+ * This function is called by the simplify_html function or a site specific
+ * function that calls the latter.
  *
- *   #*#<Text>#*#                        H1 Header
- *   ##<Text>##                          H2 Header
- *   ###<Text>###                        H3 Header
- *   ####<Text>####                      H4 Header
- *   **<Text>**                          Bold
- *   ///<Text>///                        Italic
- *   __<Text>__                          Underline
- *   @@<Link Address>@@<Link Text>@@     Hyperlink (same tab/window)
- *   @@<Link Address>@@@<Link Text>@@    Hyperlink (new tab/window)
- *   #BL#                                Start of bulleted list
- *   #*BL#                               End of bulleted list
- *   #NL#                                Start of numbered list
- *   #*NL#                               End of numbered list
- *   *                                   Create new list item (when at start of
- *                                       line inside a list)
- *   <Blank Line>                        Create paragraph break (unless in
- *                                       a list)
- *   \                                   Escape character to override other
- *                                       syntax
+ * It reduces all tags of a given type to a simple tag with no options.
  */
 //================================================================================
 
-function coded_text_to_html($url)
+function simpify_html_tag($content,$tag)
 {
-	/*
-	Define standard tag substitions.
-
-	The array $tag_substitutions defines string substitutions that are made to
-	generate HTML tags.
-
-	Each generated tag alternates between offsets 0 & 1 of the sub-array as
-	controlled by the corresponding value in the array $tag_status (0 or 1).
-
-	Offset 2 of the sub-array defines the pattern to be used in preg_replace.
-
-	The header tags must appear in descending order so that substitutions are
-	made in the correct order.
-	*/
-	$tag_substitutions = array (
-		'####' => array ('<h4>','</h4>','####'),
-		'###' => array ('<h3>','</h3>','###'),
-		'##' => array ('<h2>','</h2>','##'),
-		'#*#' => array ('<h1>','</h1>','#\*#'),
-		'**' => array ('<strong>','</strong>','\*\*'),
-		'///' => array ('<em>','</em>','\/\/\/'),
-		'__' => array ('<u>','</u>','__'),
-		'@@' => array ('<a>','<a>','@@'),
-		'#BL#' => array ('<ul>','<ul>','#BL#'),
-		'#*BL#' => array ('</ul>','</ul>','#\*BL#'),
-		'#NL#' => array ('<ol>','<ol>','#NL#'),
-		'#*NL#' => array ('</ol>','/<ol>','#\*NL#'),
-		'#TB#' => array ('<table>','<table>','#TB#'),
-		'#*TB#' => array ('</table>','</table>','#\*TB#'),
-	);
-	$tag_status = array (
-		'####' => 0,
-		'###' => 0,
-		'##' => 0,
-		'#*#' => 0,
-		'**' => 0,
-		'///' => 0,
-		'__' => 0,
-		'@@' => 0,
-		'#BL#' => 0,
-		'#*BL#' => 0,
-		'#NL#' => 0,
-		'#*NL#' => 0,
-		'#TB#' => 0,
-		'#*TB#' => 0,
-	);
-	$in_paragraph = false;
-	$list_level = 0;
-	$new_list = false;
-	$in_table = false;
-	$new_table = false;
-
-	$content = file($url);
-	$result = '';
-	if (empty($content))
+	$pos1 = strpos($content,"<$tag");
+	while ($pos1 !== false)
 	{
-		return("###### INPUT TEXT NOT FOUND ######");
+		$pos2 = strpos($content,'>',$pos1);
+		$content = substr($content,0,$pos1+strlen($tag)+1).substr($content,$pos2);
+		$pos1 = strpos($content,"<$tag",$pos1+1);
 	}
-	foreach ($content as $line)
+	return $content;
+}
+
+//================================================================================
+/*
+ * Function simplify_html
+ *
+ * This function is called to simplify a word processor document that has been
+ * exported as HTML. Its main purpose is to remove any built-in style
+ * information that is otherwise defined in CSS.
+ *
+ * The local copy of the $allowed_tags array can be overridden by an externally
+ * declared version.
+ *
+ * If further edits are required, then it is suggested that this function is
+ * called from a site specific function with the necessary additional
+ * functionality.
+ */
+//================================================================================
+
+function simplify_html($content)
+{
+	global $allowed_tags;
+	if (!isset($allowed_tags))
 	{
-		$line = trim($line);
-		$original_line = $line;
-
-		// Perform standard tag substitutions
-		foreach ($tag_substitutions as $key => $values)
-		{
-			while (strpos($line,$key) !== false)
-			{
-				if ($key == '@@')
-				{
-					// ====== Hyperlink ======
-					$pos1 = strpos($line,'@@');
-					if (($pos2 = strpos($line,'@@',$pos1+2)) && ($pos3 = strpos($line,'@@',$pos2+2)))
-					{
-						$link_address = substr($line,$pos1+2,$pos2-$pos1-2);
-						if (substr($line,$pos2+2,1) == '@')
-						{
-							// An extra '@' symbol inthe middle indicates open link in new tab/window
-							$options = ' target="_blank"';
-							$link_text = substr($line,$pos2+3,$pos3-$pos2-3);
-							$old_string = "@@$link_address@@@$link_text@@";
-						}
-						else
-						{
-							$options = '';
-							$link_text = substr($line,$pos2+2,$pos3-$pos2-2);
-							$old_string = "@@$link_address@@$link_text@@";
-						}
-					}
-					$line = str_replace($old_string,"<a href=\"$link_address\"$options>$link_text</a>",$line);
-				}
-				elseif (($key == '#BL#') || ($key == '#NL#'))
-				{
-					// ====== Start of List ======
-					$list_level++;
-					$new_list = true;
-					if ($in_paragraph)
-					{
-						// Close the previous paragraph
-						$result .= "</p>\n";
-						$in_paragraph = false;
-					}
-				}
-				elseif ($key == '#TB#')
-				{
-					// ====== Start of Table ======
-					$in_table = true;
-					$new_table = true;
-					$col_count_tok = '';
-					$style_tok = '';
-					$tok = strtok(substr($line,strpos($line,$key)+4),'#');
-					$col_count = 2; // Set default
-					while ($tok !== false)
-					{
-						if ((substr($tok,0,2) == 'C=') && (is_numeric(substr($tok,2))))
-						{
-							// Extract required column count
-							$col_count_tok = $tok;
-							$col_count = substr($tok,2);
-						}
-						elseif (substr($tok,0,2) == 'S=')
-						{
-							// Extract style definition
-							$style_tok = $tok;
-							$style = substr($tok,2);
-						}
-						$tok = strtok('#');
-					}
-					if (!empty($col_count_tok))
-					{
-						$line = str_replace("$col_count_tok#",'',$line);
-					}
-					if (!empty($style_tok))
-					{
-						$line = str_replace("#TB#$style_tok#","<table style=\"$style\">",$line);
-					}
-					else
-					{
-						$line = str_replace("#TB#","<table>",$line);
-					}
-					$col_no = 0;
-				}
-				else
-				{
-					if (($list_level > 0) && (($key == '#*BL#') || ($key == '#*NL#')))
-					{
-						// ====== End of List ======
-						$result .= "</li>\n";
-						$list_level--;
-					}
-					if (($in_table) && ($key == '#*TB#'))
-					{
-						// ====== End of Table ======
-						$result .= "</td></tr>\n";
-						$in_table = false;
-					}
-
-					// Substitute the tag with the required HTML.
-					$line = preg_replace("/{$values[2]}/",$values[$tag_status[$key]],$line,1);
-					$tag_status[$key] = ($tag_status[$key] + 1 & 1);
-				}
-			}
-		}
-
-		if (($list_level > 0) && (substr($line,0,1) == '*'))
-		{
-			// ====== Start of List Item ======
-			if (!$new_list)
-			{
-				// Close the last list item
-				$result .= "</li>\n";
-			}
-			$new_list = false;
-			$line = preg_replace("/\*/",'<li>',$line,1);
-		}
-		elseif (($in_table) && (substr($line,0,2) == '[]'))
-		{
-			// ====== Start of Table Cell ======
-			if ($new_table)
-			{
-				// Start of new table
-				$line = preg_replace('/\[\]/',"<tr><td>",$line,1);
-			}
-			elseif ($col_no == 0)
-			{
-				// Start of new row
-				$line = preg_replace('/\[\]/',"</td></tr>\n<tr><td>",$line,1);
-			}
-			else
-			{
-				// Next cell on same row
-				$line = preg_replace('/\[\]/',"</td><td>",$line,1);
-			}
-			$new_table = false;
-			$col_no = ($col_no + 1) % $col_count;
-		}
-		elseif ((empty($line)) && ($in_paragraph))
-		{
-			// Handle blank line as a paragraph break
-			$line = "</p>";
-			$in_paragraph = false;
-		}
-		elseif (substr($original_line,0,1) != '#')
-		{
-			// Line contains ordinary text
-			if ($in_paragraph)
-			{
-				$result .= "<br />\n";
-			}
-			elseif ($list_level == 0)
-			{
-				$result .= "<p>";
-				$in_paragraph = true;
-			}
-		}
-
-		$result .= "$line\n";
+		$allowed_tags = array('<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<i>','<u>');
 	}
-	if ($in_paragraph)
+
+	// Strip out any <style> tags. This is done long-hand as there have been
+	// issues when just relying on the call to strip_tags.
+	$pos1 = strpos($content,'<style');
+	while ($pos1 !== false)
 	{
-		$result .= "</p>\n";
+		$pos2 = strpos($content,'</style>',$pos1);
+		$content = substr($content,0,$pos1).substr($content,$pos2+8);
+		$pos1 = strpos($content,'<style',$pos1+1);
 	}
-	return stripslashes($result);
+
+	$content = strip_tags($content,$allowed_tags);
+	$content = simpify_html_tag($content,'p');
+	return $content;
 }
 
 //================================================================================

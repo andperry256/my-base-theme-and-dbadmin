@@ -1164,6 +1164,7 @@ Function run_update
 
 function run_update($table,$option)
 {
+	global $Location;
 	$_POST = array_map( 'stripslashes_deep', $_POST );
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
@@ -1326,7 +1327,7 @@ function run_update($table,$option)
 		}
 	}
 	$alert_message = "$success_count record(s) updated, $failure_count record(s) not updated.";
-	if (isset($_POST['show_progress']))
+	if ((isset($Location)) && ($Location == 'local') && (isset($_POST['show_progress'])))
 	{
 		print("<script>alert(\"$alert_message\")</script>\n");
 	}
@@ -1461,6 +1462,7 @@ Function run_copy
 
 function run_copy($table)
 {
+	global $Location;
 	$_POST = array_map( 'stripslashes_deep', $_POST );
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
@@ -1591,7 +1593,7 @@ function run_copy($table)
 		}
 	}
 	$alert_message = "$success_count record(s) copied, $failure_count record(s) not copied.";
-	if (isset($_POST['show_progress']))
+	if ((isset($Location)) && ($Location == 'local') && (isset($_POST['show_progress'])))
 	{
 		print("<script>alert(\"$alert_message\")</script>\n");
 	}

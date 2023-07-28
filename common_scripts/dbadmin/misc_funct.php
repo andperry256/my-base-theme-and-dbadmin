@@ -210,15 +210,18 @@ Function sites_db_connect
 */
 //==============================================================================
 
-function sites_db_connect()
+if (!function_exists('sites_db_connect'))
 {
-	if (function_exists('sites_db_connect'))
+	function sites_db_connect()
 	{
-		return connect_to_sites_db();
-	}
-	else
-	{
-		exit("ERROR - Sites database not available on this server.");
+		if (function_exists('connect_to_sites_db'))
+		{
+			return connect_to_sites_db();
+		}
+		else
+		{
+			exit("ERROR - Sites database not available on this server.");
+		}
 	}
 }
 

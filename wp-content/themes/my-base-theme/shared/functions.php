@@ -58,7 +58,7 @@ function run_session()
 	elseif (function_exists('wp_db_connect'))
 	{
 		// Running outside the WP environment
-		wp_db_connect();
+		$wpdb = wp_db_connect();
 		$env = 'non-wp';
 	}
 	if (!isset($wpdb))
@@ -279,7 +279,7 @@ function run_session()
  	{
  		if (function_exists('wp_db_connect'))
  		{
- 			wp_db_connect();
+ 			$wpdb = wp_db_connect();
  		}
  		else
  		{
@@ -367,7 +367,7 @@ function run_session()
  	{
  		if (function_exists('wp_db_connect'))
  		{
- 			wp_db_connect();
+ 			$wpdb = wp_db_connect();
  		}
  		else
  		{

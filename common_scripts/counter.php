@@ -23,14 +23,7 @@
 	{
 		require("$PrivateScriptsDir/mysql_connect.php");
 	}
-	if (function_exists('db_connect_with_params'))
-	{
-		$db = db_connect_with_params($dbid,$DBMode,$Location);
-	}
-	else
-	{
-		$db = db_connect($dbid);
-	}
+	$db = db_connect($dbid);
 
 	// Determine if the remote user is likely to be a search engine / robot.
 	$bot_identifiers = array(

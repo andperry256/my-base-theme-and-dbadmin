@@ -1,19 +1,24 @@
 <?php
 //==============================================================================
 /*
+This script is designed by be included by the mysql_connect.php script for the
+given site.
+*/
+//==============================================================================
+/*
 Function db_connect
 
-This is the main function to connect to a given MySQL database given the database
-ID as defined in the $dbinfo array for the given site.  Each element of this
-array has the database ID as the key and is itself an array with the following
-elements:-
+This is the main function to connect to the MySQL database associated with a
+given database ID as defined in the $dbinfo array for the site. Each element of
+this array has the database ID as the key and is itself an array with the
+following elements:-
 0 - Local database name.
 1 - Online database name.
 2 - Default character set (optional).
 
-This function performs a MySQLi connection in either object orientated or
+This function performs a MySQLi connection using either object orientated or
 procedural style, as specified by the $mode parameter (defaults to procedural
-mode).
+style).
 
 The database user name normally defaults to that defined by the constant
 REAL_DB_USER, but there is the option to override this with an optional
@@ -90,7 +95,7 @@ function db_connect($dbid,$mode='p',$alt_user='')
 /*
 Function wp_db_connect
 
-This function connects to the WordPress database for the given site. It always
+This function connects to the WordPress database for the site. It always
 returns an object.
 */
 //==============================================================================
@@ -105,7 +110,7 @@ function wp_db_connect()
 Function db_name
 
 This function returns the database name associated with a given database ID as
-defined in the $dbinfo array for the given site.
+defined in the $dbinfo array for the site.
 */
 //==============================================================================
 

@@ -12,7 +12,7 @@ global $meta_refresh_url_pars;
 global $desktop_header_image_path, $desktop_header_image_url;
 global $intermediate_header_image_path, $intermediate_header_image_url;
 global $mobile_header_image_path, $mobile_header_image_url;
-global $PrivateScriptsDir, $DBMode, $Location;
+global $PrivateScriptsDir;
 global $custom_footer_script;
 global $wpdb;
 global $favicon_loaded;

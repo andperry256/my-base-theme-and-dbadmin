@@ -270,11 +270,8 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
 	$all_values = array_merge($set_values,$where_values);
 	foreach ($all_values as $value)
 	{
-		print("$value<br>");
 		$type_list .= substr(gettype($value),0,1);
 	}
-	print("$type_list<br>");
-	print("$query<br>");
 	$stmt = mysqli_prepare($db,$query);
 	mysqli_stmt_bind_param($stmt, $type_list, ...$all_values);
 	return run_prepared_statement($stmt,$strict);

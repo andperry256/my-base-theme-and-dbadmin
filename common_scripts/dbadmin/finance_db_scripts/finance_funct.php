@@ -491,12 +491,12 @@ function select_excluded_accounts($field_name)
 	$result = '';
 	$where_clause = ' username=?';
   $where_values = array('s',$user);
-  $query_result = mysqli_select_query($db,'admin_passwords','*',$where_clause,$where_values,'');
+  $query_result = mysqli_select_query($db1,'admin_passwords','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$where_clause = '';
 	  $where_values = array();
-	  $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
+	  $query_result2 = mysqli_select_query($db2,'accounts','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -527,12 +527,12 @@ function select_excluded_funds($field_name)
 	$result = '';
 	$where_clause = 'username=?';
   $where_values = array('s',$user);
-  $query_result = mysqli_select_query($db,'admin_passwords','*',$where_clause,$where_values,'');
+  $query_result = mysqli_select_query($db1,'admin_passwords','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$where_clause = '';
 	  $where_values = array();
-	  $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
+	  $query_result2 = mysqli_select_query($db2,'funds','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])

@@ -93,7 +93,9 @@ class tables_transactions
 		if (!empty($value))
 		{
 			$db = admin_db_connect();
-			$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$value[0]'");
+		  $where_clause = 'label=?';
+		  $where_values = array('s',$value[0]);
+		  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) && ($row['currency'] != $record->FieldVal('currency')))
 			{
 				return report_error("Attempt create transfer with account of different currency.");
@@ -158,7 +160,9 @@ class tables_transactions
 		$target_account = $record->FieldVal('target_account');
 		$copy_to_date = $record->FieldVal('copy_to_date');
 
-		$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+	  $where_clause = 'account=? AND seq_no=?';
+	  $where_values = array('s',$account,'i',$seq_no);
+	  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$old_target_account = $row['target_account'];
@@ -190,7 +194,9 @@ class tables_transactions
 		// Check for various error conditions
 		if ((!empty($target_account)) && (!empty($target_seq_no)))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$target_account' AND seq_no=$target_seq_no");
+		  $where_clause = 'account=? AND seq_no=?';
+		  $where_values = array('s',$target_account,'i',$target_seq_no);
+		  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    ($row['reconciled'] ) &&
 			    (($row['credit_amount']!= $debit_amount) || ($row['debit_amount']!= $credit_amount)))
@@ -200,7 +206,9 @@ class tables_transactions
 		}
 		if (!empty($source_account))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$source_account' AND seq_no=$source_seq_no");
+		  $where_clause = 'account=? AND seq_no=?';
+		  $where_values = array('s',$source_account,'i',$source_seq_no);
+		  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    ($row['reconciled'] ) &&
 			    (($row['credit_amount']!= $debit_amount) || ($row['debit_amount']!= $credit_amount)))
@@ -267,11 +275,13 @@ class tables_transactions
 		$copy_to_date = $record->FieldVal('copy_to_date');
 		$delete_record = $record->FieldVal('delete_record');
 
-		$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+	  $where_clause = 'account=? AND seq_no=?';
+	  $where_values = array('s',$account,'i',$seq_no);
+	  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$date = $row['date'];
-			$payee = addslashes($row['payee']);
+			$payee = $row['payee'];
 		}
 
 		$primary_keys = array();
@@ -295,7 +305,9 @@ class tables_transactions
 		}
 
 		// Get account currency
-		$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
+	  $where_clause = 'label=?';
+	  $where_values = array('s',$account);
+	  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$account_currency = $row['currency'];
@@ -306,7 +318,9 @@ class tables_transactions
 		}
 
 		// Add payee to payees table
-		$query_result = mysqli_query_strict($db,"SELECT * FROM payees WHERE name='$payee'");
+	  $where_clause = 'name=?';
+	  $where_values = array('s',$payee);
+	  $query_result = mysqli_select_query($db,'payees','*',$where_clause,$where_values,'');
 		if (mysqli_num_rows($query_result) == 0)
 		{
 			mysqli_query_normal($db,"INSERT INTO payees (name) VALUES ('$payee')");
@@ -316,7 +330,9 @@ class tables_transactions
 		if ($auto_total)
 		{
 			$total = 0;
-			$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+		  $where_clause = 'account=? AND transact_seq_no=?';
+		  $where_values = array('s',$account,'i',$seq_no);
+		  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				// Add value of split to total
@@ -361,7 +377,9 @@ class tables_transactions
 		// Select default category for fund or vice versa where appropriate.
 		if (($fund != '-default-') && ($category == '-default-'))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM funds WHERE name='$fund'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$fund);
+		  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ((!empty($row['default_income_cat'])) && ($credit_amount > 0))
@@ -376,7 +394,9 @@ class tables_transactions
 		}
 		elseif (($category != '-default-') && ($fund == '-default-'))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM categories WHERE name='$category'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$category);
+		  $query_result = mysqli_select_query($db,'categories','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
@@ -388,11 +408,15 @@ class tables_transactions
 		// otherwise use the global default value.
 		if ($fund == '-default-')
 		{
-			if (($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM payees WHERE name='$payee'"))) && (!empty($row['default_fund'])))
+		  $where_clause1 = 'name=?';
+		  $where_values1 = array('s',$payee);
+			$where_clause2 = 'label=?';
+			$where_values2 = array('s',$account);
+			if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'payees','*',$where_clause1,$where_values1,''))) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
 			}
-			elseif (($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'"))) && (!empty($row['default_fund'])))
+			elseif (($row = mysqli_fetch_assoc(mysqli_select_query($db,'accounts','*',$where_clause2,$where_values2,''))) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
 			}
@@ -403,7 +427,9 @@ class tables_transactions
 		}
 		if ($category == '-default-')
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM payees WHERE name='$payee'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$payee);
+		  $query_result = mysqli_select_query($db,'payees','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_cat'])))
 			{
 				$category = $row['default_cat'];
@@ -466,7 +492,9 @@ class tables_transactions
 		// Handle auto-reconciliation if record has been created via the reconcile screen
 		if ($bank_import_id != 0 )
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM bank_import WHERE rec_id=$bank_import_id");
+		  $where_clause = 'rec_id=?';
+		  $where_values = array('i',$bank_import_id);
+		  $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) &&
 			    (($row['amount'] = $credit_amount) || ($row['amount'] = -$debit_amount)))
 			{

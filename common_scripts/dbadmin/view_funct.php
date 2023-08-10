@@ -81,12 +81,16 @@ function create_view_structure($view,$table,$conditions)
   }
 
 	// Set the parent table in the table info record for the view
-	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$view'");
+  $where_clause = 'table_name=?';
+  $where_values = array('s',$view);
+  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
   	mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$view','$table')");
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$table);
+	  $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			/*
@@ -159,12 +163,16 @@ function create_child_table_structure($child,$parent)
   }
 
 	// Set the parent table in the table info record for the child table
-	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$child'");
+  $where_clause = 'table_name=?';
+  $where_values = array('s',$child);
+  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
   	mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$parent')");
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$parent'");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$parent);
+	  $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			/*

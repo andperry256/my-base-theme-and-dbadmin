@@ -8,7 +8,9 @@
     // Cause the account field to be preset on creating a new record
     $account = substr($table,14);
     $presets['account'] = $account;
-    $query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
+    $where_clause = 'label=?';
+    $where_values = array('s',$account);
+    $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
     if ($row = mysqli_fetch_assoc($query_result))
     {
       $presets['currency'] = $row['currency'];

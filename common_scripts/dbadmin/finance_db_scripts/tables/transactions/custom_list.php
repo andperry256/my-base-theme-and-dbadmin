@@ -6,7 +6,9 @@ $params = array();
 $mode = get_viewing_mode();
 if ($mode == 'mobile')
 {
-  $row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT grid_columns FROM dba_table_info WHERE table_name='transactions'"));
+  $where_clause = "table_name='transactions'";
+  $where_values = array();
+  $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','grid_columns',$where_clause,$where_values,''));
   mysqli_query_normal($db,"UPDATE dba_table_info SET grid_columns='{$row['grid_columns']}' WHERE parent_table='transactions' OR parent_table LIKE '_view_transactions%'");
 }
 $account = $table;
@@ -20,7 +22,9 @@ if (get_table_access_level('transactions') != 'read-only')
   $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
 }
 
-$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
+$where_clause = 'label=?';
+$where_values = array('s',$account);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
   print("<h1>{$row['name']}</h1>\n");

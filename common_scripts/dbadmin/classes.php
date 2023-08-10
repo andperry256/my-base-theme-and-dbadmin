@@ -13,18 +13,30 @@ class db_record
   private $old_primary_keys = array();
   private $custom_vars = array();
 
-  function SetField($field_name,$value)
+  function SetField($field_name,$value,$type='s')
   {
     // Perform a trim because this is the format in which the field
     // will be submitted to any MySQL query.
-    $this->fields[$field_name] = trim($value);
+    $this->fields[$field_name] = array(trim($value),$type);
   }
 
   function FieldVal($field_name)
   {
     if (isset($this->fields[$field_name]))
     {
-      return $this->fields[$field_name];
+      return $this->fields[$field_name][0];
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  function FieldType($field_name)
+  {
+    if (isset($this->fields[$field_name]))
+    {
+      return $this->fields[$field_name][1];
     }
     else
     {
@@ -156,7 +168,10 @@ class tables_dba_table_fields
         $valid_select = false;
         if ((!empty($vocab_table)) && (!empty($vocab_field)))
         {
-          if (mysqli_query_normal($db,"SELECT $vocab_field FROM $vocab_table"))
+
+          $where_clause = '';
+          $where_values = array();
+          if (mysqli_select_query($db,$vocab_table,$vocab_field,$where_clause,$where_values,'',false))
           {
             $valid_select = true;
           }
@@ -203,7 +218,10 @@ class tables_dba_sidebar_config
     $default_seq_no = DEFAULT_SEQ_NO;
     if ($display_order == $default_seq_no)
     {
-      $query_result = mysqli_query_strict($db,"SELECT * FROM dba_sidebar_config WHERE display_order<>$default_seq_no ORDER BY display_order DESC LIMIT 1");
+      $where_clause = "display_order<>$default_seq_no";
+      $where_values = array();
+      $add_clause = 'ORDER BY display_order DESC LIMIT 1';
+      $query_result = mysqli_select_query($db,'dba_sidebar_config','*',$where_clause,$where_values,$add_clause);
       if ($row = mysqli_fetch_assoc($query_result))
       {
         $new_display_order = $row['display_order'] + 10;

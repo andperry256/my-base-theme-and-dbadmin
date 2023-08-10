@@ -57,8 +57,9 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 {
 	if ($method == 'short')
 	{
-    $query = "SELECT * INTO OUTFILE '$file_path' FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n' FROM $table";
-    mysqli_query_normal($db,$query);
+		$where_values = array('s',$file_path,'s',$table);
+    $query = "SELECT * INTO OUTFILE ? FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n' FROM ?";
+    mysqli_free_format_query($db,$query,$where_values);
 	}
 	elseif ($method == 'long')
 	{
@@ -74,7 +75,9 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ($field_count > 0)
+				{
 					$header_line .= ',';
+				}
 				$header_line .= $row['Field'];
 				$field_count++;
 			}
@@ -89,23 +92,27 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 			foreach ($fields as $field_name => $field_desc)
 			{
 				if ($field_count > 0)
+				{
 					$field_selection .= ',';
+				}
 				$field_selection .= $field_name;
 				$field_count++;
 			}
 			fprintf($ofp,"$field_selection\n");
 		}
-
-		// Add any extra clauses to the query
-		if (!empty($where_clause))
-			$where_clause = "WHERE $where_clause";
 		if (!empty($order_clause))
+		{
 			$order_clause = "ORDER BY $order_clause";
+		}
 		if (!empty($limit_clause))
+		{
 			$limit_clause = "LIMIT $limit_clause";
+		}
 
 		// Query and main loop to process the table records.
-		$query_result = mysqli_query_strict($db,"SELECT $field_selection FROM $table $where_clause $order_clause $limit_clause");
+	  $where_values = array();
+	  $add_clause = '';
+	  $query_result = mysqli_select_query($db,$table,$field_selection,$where_clause,$where_values,"$order_clause $limit_clause");
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			$field_count = 0;

@@ -58,7 +58,9 @@ $count_set_acct_month = 0;
 $dummy_count = 0;
 
 // BEGIN - Main loop for processing transactions
-$query_result = mysqli_query_strict($db,"SELECT * FROM transactions");
+$where_clause = '';
+$where_values = array();
+$query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['account'];
@@ -73,11 +75,15 @@ while ($row = mysqli_fetch_assoc($query_result))
 	$source_seq_no = $row['source_seq_no'];
 	if ((!empty($source_account)) && (!empty($source_seq_no)))
 	{
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$source_account' AND transact_seq_no=$source_seq_no");
+	  $where_clause = 'account=? AND transact_seq_no=?';
+	  $where_values = array('s',$source_account,'i',$source_seq_no);
+	  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 	}
 	else
 	{
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+	  $where_clause = 'account=? AND transact_seq_no?';
+	  $where_values = array('s',$account,'i',$seq_no);
+	  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 	}
 	$split_count = mysqli_num_rows($query_result2);
 
@@ -131,7 +137,9 @@ while ($row = mysqli_fetch_assoc($query_result))
 	// Check for a dead target link
 	if ((!empty($target_account)) && (!empty($target_seq_no)))
 	{
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$target_account' AND seq_no=$target_seq_no");
+	  $where_clause = 'account=? AND seq_no=?';
+	  $where_values = array('s',$target_account,'i',$target_seq_no);
+	  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['source_account'] == $account) && ($row2['source_seq_no'] == $seq_no))
 		{
 			// No action
@@ -146,7 +154,9 @@ while ($row = mysqli_fetch_assoc($query_result))
 	// Check for a dead source link
 	if ((!empty($source_account)) && (!empty($source_seq_no)))
 	{
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$source_account' AND seq_no=$source_seq_no");
+	  $where_clause = 'account=? AND seq_no=?';
+	  $where_values = array('s',$source_account,'i',$source_seq_no);
+	  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['target_account'] == $account) && ($row2['target_seq_no'] == $seq_no))
 		{
 			// No action
@@ -166,8 +176,10 @@ while ($row = mysqli_fetch_assoc($query_result))
 	}
 
 	// Check for -split- fund with no splits present
+	$where_clause = 'account=? AND transact_seq_no=?';
+  $where_values = array('s',$row['account'],'i',$row['seq_no']);
   if (($fund == '-split-') && (empty($source_account)) &&
-	    (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}")) == 0))
+	    (mysqli_num_rows(mysqli_select_query($db,'splits','*',$where_clause,$where_values,'')) == 0))
   {
     // Update the fund to '-nosplit-' and if applicable on the other side of the transfer
     run_or_preview_query($ofp,"UPDATE transactions SET fund='-nosplit-' WHERE account='{$row['account']}' AND seq_no={$row['seq_no']},$count_no_splits");
@@ -175,7 +187,9 @@ while ($row = mysqli_fetch_assoc($query_result))
   }
 
 	// Check for unmatching split total
-	$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+  $where_clause = 'account=? AND transact_seq_no=?';
+  $where_values = array('s',$account,'i',$seq_no);
+  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 	if (mysqli_num_rows($query_result2) > 0)
 	{
 		if (empty($source_account))
@@ -215,7 +229,9 @@ while ($row = mysqli_fetch_assoc($query_result))
 // END -  Main loop for processing transactions
 
 // BEGIN - Main loop for processing splits
-$query_result = mysqli_query_strict($db,"SELECT * FROM splits");
+$where_clause = '';
+$where_values = array();
+$query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['account'];
@@ -224,7 +240,9 @@ while ($row = mysqli_fetch_assoc($query_result))
 	$fund = $row['fund'];
 	$category = $row['category'];
 	$acct_month = $row['acct_month'];
-	$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$transact_seq_no");
+  $where_clause = 'account=? AND seq_no=?';
+  $where_values = array('s',$account,'i',$transact_seq_no);
+  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	if ($row2 = mysqli_fetch_assoc($query_result2))
 	{
 		$parent_fund = $row2['fund'];

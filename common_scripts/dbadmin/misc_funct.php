@@ -21,7 +21,9 @@ function get_table_access_level($table)
 		return('read-only');  // This should not occur
 	}
 
-	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+  $where_clause = 'table_name=?';
+  $where_values = array('s',$table);
+  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 	if ((session_var_is_set('read_only')) && (get_session_var('read_only')))
 	{
 		$access_level = 'read-only';
@@ -96,7 +98,9 @@ function next_seq_number($table,$sort_1_value,$interval=10)
 	}
 	$db = admin_db_connect();
 	$table = get_table_for_info_field($table,'seq_no_field');
-	$row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
+  $where_clause = 'table_name=?';
+  $where_values = array('s',$table);
+	$row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''));
 	if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
 	{
 		// Calculate next sequence number, given:-
@@ -106,14 +110,16 @@ function next_seq_number($table,$sort_1_value,$interval=10)
 		$seq_no_name =  $row['seq_no_field'];
 		$seq_type = $row['seq_method'];
 		$next_seq_no_indicator = NEXT_SEQ_NO_INDICATOR;
-		$query = "SELECT * FROM $table WHERE $seq_no_name<>$next_seq_no_indicator";
+		$where_clause = "$seq_no_name<>$next_seq_no_indicator";
+	  $where_values = array();
 		if ((!empty($sort_1_name)) && ($seq_type == 'repeat'))
 		{
-			$sort_1_value = addslashes($sort_1_value);
-			$query .= " AND  $sort_1_name='$sort_1_value'";
+			$where_clause .= " AND $sort_1_name=?";
+			$where_values[0] = query_field_type($db,$table,$sort_1_name);
+			$where_values[1] = $sort_1_value;
 		}
-		$query .= " ORDER BY $seq_no_name DESC";
-		$query_result = mysqli_query_normal($db,$query);
+		$add_clause = "ORDER BY $seq_no_name DESC";
+		$query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 		return ($row = mysqli_fetch_assoc($query_result))
 			? $row[$seq_no_name] + $interval
 			: $interval;
@@ -132,7 +138,9 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
 		exit("Constant NEXT_SEQ_NO_INDICATOR not defined");
 	}
 	$db = admin_db_connect();
-	$row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
+  $where_clause = 'table_name=?';
+  $where_values = array('s',$table);
+	$row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''));
 	if (($seq_no == NEXT_SEQ_NO_INDICATOR) && (isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
 	{
 		// Update record with new sequence number

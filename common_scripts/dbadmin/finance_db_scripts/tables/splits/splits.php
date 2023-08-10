@@ -97,7 +97,9 @@ class tables_splits
 			return;
 		}
 
-		$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$transact_seq_no");
+	  $where_clause = 'account=? AND seq_no=?';
+	  $where_values = array('s',$account,'i',$transact_seq_no);
+	  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$date = $row['date'];
@@ -111,7 +113,9 @@ class tables_splits
 		if ($auto_amount)
 		{
 			$split_amount = $parent_amount;
-			$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no<>$split_no");
+		  $where_clause = 'account=? AND transact_seq_no=? AND split_no<>?';
+		  $where_values = array('s',$account,'i',$transact_seq_no,'i',$split_no);
+		  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				// Subtract value of other aplit from total
@@ -156,7 +160,9 @@ class tables_splits
 		// Select default category for fund or vice versa where appropriate.
 		if (($fund != '-default-') && ($category == '-default-'))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM funds WHERE name='$fund'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$fund);
+		  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ((!empty($row['default_income_cat'])) && ($credit_amount > 0))
@@ -171,7 +177,9 @@ class tables_splits
 		}
 		elseif (($category != '-default-') && ($fund == '-default-'))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM categories WHERE name='$category'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$category);
+		  $query_result = mysqli_select_query($db,'categories','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];

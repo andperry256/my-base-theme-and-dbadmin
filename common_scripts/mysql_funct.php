@@ -596,7 +596,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true)
 	}
 	else
 	{
-		foreach ($where_values as $value)
+		for ($i=0; $i<$where_values_count; $i+=2)
 		{
 			$pos = 0;
 			for ($i=0; $i<$where_values_count; $i+=2)

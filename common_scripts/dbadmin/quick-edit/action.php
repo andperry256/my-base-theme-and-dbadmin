@@ -22,7 +22,9 @@
 
   $post_name = $_POST['post_name'];
   $content_par = addslashes($_POST['content']);
-  $query_result = mysqli_query_strict($db,"SELECT * FROM wp_posts WHERE post_name='$post_name'");
+  $where_clause = 'post_name=?';
+  $where_values = array('s',$post_name);
+  $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result))
   {
     mysqli_query_normal($db,"UPDATE wp_posts SET post_content='$content_par' WHERE  post_name='$post_name'");

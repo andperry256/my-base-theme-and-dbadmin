@@ -955,24 +955,25 @@ function save_record($record,$old_record_id,$new_record_id)
 	if (($action == 'edit') || ($action == 'update'))
 	{
 		// Save the record
-		$query = "UPDATE $table SET ";
+		$set_fields = '';
+	  $set_values = array();
 		foreach ($new_mysql_fields AS $field => $value)
 		{
-			$query .= "$field=$value,";
+			$set_fields .= "$field,";
+			$set_values[count($set_values)] = $record->FieldType($field);
+			$set_values[count($set_values)] = $value;
 		}
-		$query = rtrim($query,',');
-		$query .= " WHERE";
-		$field_processed = false;
+	  $where_clause = '';
+	  $where_values = array();
 		foreach ($old_primary_keys as $field => $value)
 		{
-			if ($field_processed)
-			{
-				$query .= " AND";
-			}
-			$field_processed = true;
-			$query .= " $field={$old_mysql_fields[$field]}";
+			$where_clause .= " $field=? AND ";
+			$where_values[count($where_values)] = $record->FieldType($field);
+			$where_values[count($where_values)] = $value;
 		}
-		$main_query_result = mysqli_query_normal($db,$query);
+		$where_clause = rtrim($where_clause,' AND');
+	  $main_query_result = mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
+
 		if (isset($_POST['replicate_changes']))
 		{
 			// Replicate change to online site

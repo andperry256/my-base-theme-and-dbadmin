@@ -9,7 +9,9 @@ global $CustomPagesURL;
 $db = admin_db_connect();
 
 $account = $_GET['-account'];
-$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
+$where_clause = 'label=?';
+$where_values = array('s',$account);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
 	$account_type = $row['type'];
@@ -28,7 +30,9 @@ if ((isset($_GET['message'])) && (!empty($_GET['message'])))
 	print($_GET['message']);
 }
 
-$query_result = mysqli_query_strict($db,"SELECT * FROM bank_import");
+$where_clause = '';
+$where_values = array();
+$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'');
 if (mysqli_num_rows($query_result) == 0)
 {
 }
@@ -41,7 +45,10 @@ print("<tr><td>Bank Transaction:</td><td>\n");
 print("<select name=\"bank_transaction\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
-$query_result = mysqli_query_strict($db,"SELECT * FROM bank_import WHERE reconciled=0 ORDER BY rec_id DESC");
+$where_clause = 'reconciled=0';
+$where_values = array();
+$add_clause = 'ORDER BY rec_id DESC';
+$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$text = $row['date'].' | '.$row['description'].' | ';
@@ -78,7 +85,10 @@ print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
 print("<option value=\"NONE\">Discard Bank Transaction</option>\n");
 print("<option value=\"NEW\">Create New Transaction</option>\n");
-$query_result = mysqli_query_strict($db,"SELECT * FROM _view_account_$account WHERE reconciled=0 ORDER BY payee ASC,date ASC,seq_no ASC");
+$where_clause = 'reconciled=0';
+$where_values = array();
+$add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
+$query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$date = $row['date'];

@@ -181,7 +181,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	mysqli_query_normal($db,"CREATE TEMPORARY TABLE report LIKE transaction_report");
 
 	$payee_name = addslashes($payee_name);
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND fund LIKE '$fund_name' AND category LIKE '$category_name' AND payee LIKE '$payee_name' AND sched_freq='#'");
+	$where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND fund LIKE ? AND category LIKE ? AND payee LIKE ? AND sched_freq='#'";
+  $where_values = array('s',$currency,'s',$account_name,'s',$fund_name,'s',$category_name,'s',$payee_name);
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		// Add transaction with matching parameters into the table
@@ -205,11 +207,15 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Fund and/or category has been specified. Process any splits relating
 		// to the given fund/category.
-		$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE fund LIKE '$fund_name' $fund_exclusions AND category LIKE '$category_name'");
+	  $where_clause = "fund LIKE ? $fund_exclusions AND category LIKE ?";
+	  $where_values = array('s',$fund_name,'s',$category_name);
+	  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
+		  $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
+		  $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+		  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
@@ -228,7 +234,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			}
 
 			// Check for transaction at opposite end of transfer
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND source_account='{$row['account']}' AND source_seq_no={$row['transact_seq_no']}");
+		  $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND source_account=? AND source_seq_no=?";
+		  $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+		  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
@@ -251,11 +259,15 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Account has been specified. All funds and categories are included.
 		// Process all associated splits.
-		$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account IS NOT NULL $fund_exclusions");
+	  $where_clause = "account IS NOT NULL $fund_exclusions";
+	  $where_values = array();
+	  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
+		  $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
+		  $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+		  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
@@ -290,7 +302,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	$table_header_style = $table_cell_style." font-weight:bold;";
 	$table_header_style_ra = $table_header_style." text-align:right;";
 
-	$query_result = mysqli_query_strict($db,"SELECT * FROM report WHERE acct_month<='$end_month'");
+  $where_clause = 'acct_month<=?';
+  $where_values = array('s',$end_month);
+  $query_result = mysqli_select_query($db,'report','*',$where_clause,$where_values,'');
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// Empty result
@@ -298,7 +312,10 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	}
 	else
 	{
-		$query_result = mysqli_query_strict($db,"SELECT * FROM report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
+	  $where_clause = '';
+	  $where_values = array();
+	  $add_clause = 'ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC';
+	  $query_result = mysqli_select_query($db,'report','*',$where_clause,$where_values,$add_clause);
 		$row_count = mysqli_num_rows($query_result);
 		$row_no = 0;
 		while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))
@@ -410,7 +427,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 					print('[*]');
 				}
 				print("</td>");
-				$query_result2 = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='{$row['account']}'");
+			  $where_clause = 'label=?';
+			  $where_values = array('s',$row['account']);
+			  $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 
 				// Account
 				if ($row2 = mysqli_fetch_assoc($query_result2))

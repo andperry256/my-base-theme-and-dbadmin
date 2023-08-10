@@ -25,7 +25,9 @@ function update_account_balances($account,$start_date)
 {
 	$db = admin_db_connect();
 	$view = "_view_account_$account";
-	$query_result = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
+  $where_clause = 'label=?';
+  $where_values = array('s',$account);
+  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$use_quoted_balance = $row['use_quoted_balance'];
@@ -35,7 +37,11 @@ function update_account_balances($account,$start_date)
 		// This should not occur
 		$use_quoted_balance = false;
 	}
-	$query_result = mysqli_query_strict($db,"SELECT * FROM $view WHERE date<'$start_date' ORDER BY date DESC,seq_no DESC LIMIT 1");
+	$fields = '';
+  $where_clause = 'date<?';
+  $where_values = array('s',$start_date);
+  $add_clause = 'ORDER BY date DESC,seq_no DESC LIMIT 1';
+  $query_result = mysqli_select_query($db,$view,'*',$where_clause,$where_values,$add_clause);
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$full_balance = $row['full_balance'];
@@ -78,7 +84,11 @@ function update_account_balances($account,$start_date)
 	}
 	mysqli_query_normal($db,"UPDATE $view SET no_quote=0 WHERE reconciled=1 AND (credit_amount=0.00 OR date<='$date')");
 
-	$query_result = mysqli_query_strict($db,"SELECT * FROM $view WHERE date>='$start_date' ORDER BY date ASC,seq_no ASC");
+	$fields = '';
+  $where_clause = 'date>=?';
+  $where_values = array('s',$start_date);
+  $add_clause = ' ORDER BY date ASC,seq_no ASC';
+  $query_result = mysqli_select_query($db,$view,'*',$where_clause,$where_values,$add_clause);
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$full_balance = add_money($full_balance,subtract_money($row['credit_amount'],$row['debit_amount']));
@@ -106,7 +116,11 @@ function update_account_balances($account,$start_date)
 function next_seq_no($account)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' ORDER BY seq_no DESC LIMIT 1");
+	$fields = '';
+  $where_clause = 'account=?';
+  $where_values = array('s',$account);
+  $add_clause = 'ORDER BY seq_no DESC LIMIT 1';
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,$add_clause);
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$seq_no = $row['seq_no'] + 10;
@@ -123,7 +137,11 @@ function next_seq_no($account)
 function next_split_no($account,$transact_seq_no)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no ORDER BY split_no DESC LIMIT 1");
+	$fields = '';
+  $where_clause = 'account=? AND transact_seq_no=?';
+  $where_values = array('s',$account,'i',$transact_seq_no);
+  $add_clause = 'ORDER BY split_no DESC LIMIT 1';
+  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$split_no = $row['split_no'] + 10;
@@ -141,7 +159,9 @@ function unlink_transaction($account,$seq_no)
 {
 	// N.B. This function will only operate on a transfer target.
 	$db = admin_db_connect();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+  $where_clause = 'account=? AND seq_no=?';
+  $where_values = array('s',$account,'i',$seq_no);
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['source_account'])))
 	{
 		// Delete transaction if not reconciled. Otherwise update it to break the link with the transfer source.
@@ -161,7 +181,9 @@ function unlink_transaction($account,$seq_no)
 function rationalise_transaction($account,$seq_no)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+  $where_clause = 'account=? AND seq_no=?';
+  $where_values = array('s',$account,'i',$seq_no);
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$fund = $row['fund'];
@@ -169,11 +191,15 @@ function rationalise_transaction($account,$seq_no)
 		$target_seq_no = $row['target_seq_no'];
 		$source_account = $row['source_account'];
 		$source_seq_no = $row['source_seq_no'];
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE  account='$account' AND transact_seq_no=$seq_no");
+	  $where_clause = 'account=? AND transact_seq_no=?';
+	  $where_values = array('s',$account,'i',$seq_no);
+	  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		$split_count = mysqli_num_rows($query_result2);
 		if (!empty($source_account))
 		{
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE  account='$source_account' AND transact_seq_no=$source_seq_no");
+		  $where_clause = 'account=? AND transact_seq_no=?';
+		  $where_values = array('s',$source_account,'i',$source_seq_no);
+		  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 			$source_split_count = mysqli_num_rows($query_result2);
 		}
 		else
@@ -331,7 +357,9 @@ function year_end($date)
 function copy_transaction($account,$seq_no,$new_date)
 {
 	$db = admin_db_connect();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+  $where_clause = 'account=? AND seq_no=?';
+  $where_values = array('s',$account,'i',$seq_no);
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		if (!empty($row['source_account']))
@@ -383,7 +411,9 @@ function record_scheduled_transaction($account,$seq_no)
 {
 	global $DBAdminURL, $local_site_dir, $FinanceDBId;
 	$db = admin_db_connect();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no AND sched_freq<>'#' and sched_count<>0");
+  $where_clause = "account=? AND seq_no=? AND sched_freq<>'#' and sched_count<>0";
+  $where_values = array('s',$account,'i',$seq_no);
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		$date = $row['date'];
@@ -459,10 +489,14 @@ function select_excluded_accounts($field_name)
 	$db2 = admin_db_connect();
 	$user = get_session_var(SV_USER);
 	$result = '';
-	$query_result = mysqli_query_normal($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
+	$where_clause = ' username=?';
+  $where_values = array('s',$user);
+  $query_result = mysqli_select_query($db,'admin_passwords','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$query_result2 = mysqli_query_normal($db2,"SELECT * FROM accounts");
+		$where_clause = '';
+	  $where_values = array();
+	  $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -491,10 +525,14 @@ function select_excluded_funds($field_name)
 	$db2 = admin_db_connect();
 	$user = get_session_var(SV_USER);
 	$result = '';
-	$query_result = mysqli_query_normal($db1,"SELECT * FROM admin_passwords WHERE username='$user'");
+	$where_clause = 'username=?';
+  $where_values = array('s',$user);
+  $query_result = mysqli_select_query($db,'admin_passwords','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$query_result2 = mysqli_query_normal($db2,"SELECT * FROM funds");
+		$where_clause = '';
+	  $where_values = array();
+	  $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -535,7 +573,9 @@ function initialise_archive_table_data($db)
 				create_view_structure("_view_$table",$table,"account IS NOT NULL ORDER BY account ASC, date DESC, seq_no DESC");
 				set_primary_key_on_view("$table",'account');
 				set_primary_key_on_view("$table",'seq_no');
-				$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='transactions'");
+			  $where_clause = "table_name='transactions'";
+			  $where_values = array();
+			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
@@ -550,7 +590,9 @@ function initialise_archive_table_data($db)
 				set_primary_key_on_view("$table",'account');
 				set_primary_key_on_view("$table",'transact_seq_no');
 				set_primary_key_on_view("$table",'split_no');
-				$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='splits'");
+			  $where_clause = "table_name='splits'";
+			  $where_values = array();
+			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");

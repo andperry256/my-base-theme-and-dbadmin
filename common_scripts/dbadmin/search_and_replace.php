@@ -13,10 +13,14 @@ function search_and_replace($local_db_name)
 	if ($Location == 'local')
 	{
 		$db_sites = sites_db_connect();
-		$query_result = mysqli_query_strict($db_sites,"SELECT * FROM dbases WHERE dbname='$local_db_name' AND domname='$Server_Station_ID'");
+	  $where_clause = 'dbname=? AND domname=?';
+	  $where_values = array('s',$local_db_name,'s',$Server_Station_ID);
+	  $query_result = mysqli_select_query($db,'dbases','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
-			if ($row2 = mysqli_fetch_assoc(mysqli_query_strict($db_sites,"SELECT * FROM db_sets WHERE site_path='{$row['site_path']}' AND sub_path='{$row['sub_path']}'")))
+		  $where_clause = 'site_path=? AND sub_path=?';
+		  $where_values = array('s',$row['site_path'],'s',$row['sub_path']);
+			if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'db_sets','*',$where_clause,$where_values,'')))
 			{
 				$user = $row2['username'];
 			}

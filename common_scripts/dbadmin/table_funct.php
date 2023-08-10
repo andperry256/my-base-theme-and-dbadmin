@@ -35,7 +35,9 @@ function get_base_table($table,$db=false)
 	}
 	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
-		$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$table);
+	  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			if (empty($row['parent_table']))
@@ -72,10 +74,14 @@ function get_table_for_field($table,$field,$db=false)
 	}
 	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
-	  $query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$table);
+	  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 	  if ($row = mysqli_fetch_assoc($query_result))
 	  {
-	    $query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND field_name='$field'");
+		  $where_clause = 'table_name=? AND field_name=?';
+		  $where_values = array('s',$table,'s',$field);
+		  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 	    if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table'])))
 	    {
 	      return $table;
@@ -106,7 +112,9 @@ function get_table_for_info_field($table,$info_field,$db=false)
 	}
 	for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
 	{
-	  $query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$table);
+	  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 	  if ($row = mysqli_fetch_assoc($query_result))
 	  {
 	    if ((empty($row['parent_table'])) || (!empty($row[$info_field])))
@@ -174,7 +182,9 @@ function generate_grid_styles($table)
 	$cells_used = array();
 
 	$base_table = get_table_for_info_field($table,'grid_columns');
-	if ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'")))
+  $where_clause = 'table_name=?';
+  $where_values = array('s',$base_table);
+	if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')))
 	{
 		$grid_columns = $row['grid_columns'];
 	}
@@ -187,7 +197,9 @@ function generate_grid_styles($table)
 		$base_table = get_table_for_field($table,$field_name);
 
 		// Extract and save the grid co-ordinates for the given field.
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name' AND list_mobile=1");
+	  $where_clause = 'table_name=? AND field_name? AND list_mobile=1';
+	  $where_values = array('s',$base_table,'s',$field_name);
+	  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			$grid_coords[$field_name] = $row2['grid_coords'];
@@ -265,7 +277,10 @@ function generate_grid_styles($table)
 			$result .= "}\n";
 		}
 		$row_no = 1;
-		$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' ORDER BY display_order ASC");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$base_table);
+	  $add_clause = 'ORDER BY display_order ASC';
+	  $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			if (isset($grid_coords[$row['field_name']]))
@@ -305,7 +320,10 @@ function generate_grid_styles($table)
 		}
 		$row_count = 1;
 		$col_count = 1;
-		$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' ORDER BY display_order ASC");
+	  $where_clause = 'table_name=?';
+	  $where_values = array('s',$base_table);
+	  $add_clause = 'ORDER BY display_order ASC';
+	  $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			if (isset($grid_coords[$row['field_name']]))
@@ -389,7 +407,9 @@ function display_table($params)
 	}
 	$table = $_GET['-table'];
 	$base_table = get_base_table($table);
-	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$base_table'");
+  $where_clause = "table_name=?";
+  $where_values = array('s',$base_table);
+  $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
 		if (isset($_GET['-listsize']))
@@ -525,7 +545,9 @@ function display_table($params)
 					while ($row = mysqli_fetch_assoc($query_result))
 					{
 						$field_name = $row['Field'];
-						$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+					  $where_clause = 'table_name=? AND field_name=?';
+					  $where_values = array('s',$base_table,'s',$field_name);
+					  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 						if ($row2 = mysqli_fetch_assoc($query_result2))
 						{
 							if (($WidgetTypes[$row2['widget_type']]) && (!$row2['exclude_from_search']))
@@ -604,7 +626,7 @@ function display_table($params)
 	if ($mode == 'mobile')
 	{
 		$result = generate_grid_styles($table);
-		if ($result == false)
+		if ($result === false)
 		{
 			print("<p class=\"highlight-error\">ERROR - Cannot resolve the grid co-ordinates. Please check the table field definitions for possible errors.</p>\n");
 			$display_table = false;
@@ -620,7 +642,10 @@ function display_table($params)
 	}
 
 	// Calculate pagination parameters
-	$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause'));
+  $where_clause = '';
+  $where_values = array();
+  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause');
+  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 	$table_size = mysqli_num_rows($query_result);
 	$page_count = ceil($table_size / $list_size);
 	$current_page = floor($start_offset / $list_size +1);
@@ -658,7 +683,9 @@ function display_table($params)
 	print("&nbsp;&nbsp;&nbsp;Showing&nbsp;<input class=\"small\" name=\"listsize2\" value=$list_size size=4>&nbsp;results&nbsp;per&nbsp;page");
 	print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Apply\" onClick=\"submitForm(this.form)\"/></p>");
 	print("<p>$page_links");
-	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'SELECT%'");
+  $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
+  $where_values = array('s',$base_table);
+  $query_result = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
 	if (mysqli_num_rows($query_result) > 0)
 	{
 		// One or more select relationships are defined for the given table
@@ -695,7 +722,9 @@ function display_table($params)
 
 		// Determine whether the field is to be displayed in the table listing.
 		$tab = get_table_for_field($table,$field_name);
-		$query_result3 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$tab' AND field_name='$field_name'");
+	  $where_clause = 'table_name=? AND field_name=?';
+	  $where_values = array('s',$tab,'s',$field_name);
+	  $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 		if ($row3 = mysqli_fetch_assoc($query_result3))
 		{
 			// Table field found
@@ -708,7 +737,10 @@ function display_table($params)
 
 	// Construct array for primary key data
 	$primary_key = array();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER BY display_order ASC");
+  $where_clause = 'table_name=? AND is_primary=1';
+  $where_values = array('s',$base_table);
+  $add_clause = 'ORDER BY display_order ASC';
+  $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$primary_key[$row['field_name']] = '';
@@ -772,7 +804,10 @@ function display_table($params)
 
 	// Process table records
 	$record_offset = $start_offset;
-	$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $start_offset,$list_size");
+  $where_clause = '';
+  $where_values = array();
+  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $start_offset,$list_size";
+  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 	$row_no = 0;
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
@@ -867,7 +902,9 @@ function display_table($params)
 			{
 				print("<div class=\"table-listing-cell relationships $style\" style=\"font-size:0.8em\">");
 			}
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_relationships WHERE table_name='$base_table' AND UPPER(query) LIKE 'SELECT%'");
+		  $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
+		  $where_values = array('s',$base_table);
+		  $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
 			while ($row2 = mysqli_fetch_assoc($query_result2))
 			{
 				/*
@@ -963,10 +1000,16 @@ function delete_record_set($table)
 			// Build up array of deletions indexed by record ID.
 			if (is_numeric($record_offset))
 			{
-				$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
+			  $where_clause = '';
+			  $where_values = array();
+			  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
+			  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
-					$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
+				  $where_clause = 'table_name=? AND is_primary=1';
+				  $where_values = array('s',$base_table);
+				  $add_clause = 'ORDER by display_order ASC';
+				  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 					while ($row2 = mysqli_fetch_assoc($query_result2))
 					{
 						$field_name = $row2['field_name'];
@@ -985,36 +1028,35 @@ function delete_record_set($table)
 		$record->action = 'delete';
 		$record->table = $table;
 
-		// Build the query to select the record
+		$where_clause = '';
+	  $where_values = array();
 		$primary_keys = fully_decode_record_id($record_id);
-		$query = "SELECT * FROM $table WHERE";
-		$field_processed = false;
 		foreach ($primary_keys as $field => $value)
 		{
-			if ($field_processed)
-			{
-				$query .= " AND";
-			}
-			$field_processed = true;
-			$query .= " $field='".addslashes($value)."'";
+			$where_clause .= " $field=? AND";
+			$where_values[count($where_values)] = query_field_type($db,$table,$field);
+			$where_values[count($where_values)] = $value;
 		}
-
-		$query_result = mysqli_query_normal($db,$query);
+		$where_clause = rtrim($where_clause,'AND ');
+	  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Populate the record fields
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' ORDER by display_order ASC");
+		  $where_clause = 'table_name=?';
+		  $where_values = array('s',$base_table);
+		  $add_clause = 'ORDER by display_order ASC';
+		  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 			while ($row2 = mysqli_fetch_assoc($query_result2))
 			{
 				$field_name = $row2['field_name'];
-				$record->SetField($field_name,$row[$field_name]);
+				$record->SetField($field_name,$row[$field_name],query_field_type($db,$table,$field_name));
 			}
 		}
 
 		// Call the delete function on the record
 		$result = delete_record($record,$record_id);
 		unset($record);
-		if ($result == false)
+		if ($result === false)
 		{
 			return;
 		}
@@ -1072,7 +1114,9 @@ function select_update($table,$option)
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+	  $where_clause = 'table_name=? AND field_name=?';
+	  $where_values = array('s',$base_table,'s',$field_name);
+	  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 		if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['widget_type'] != 'file'))
 		{
 			$display_group = $row2['display_group'];
@@ -1181,10 +1225,16 @@ function run_update($table,$option)
 				$record_offset = substr($key,7);
 				if (is_numeric($record_offset))
 				{
-					$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause'). "LIMIT $record_offset,1");
+				  $where_clause = '';
+				  $where_values = array();
+				  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause'). "LIMIT $record_offset,1";
+				  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 					if ($row = mysqli_fetch_assoc($query_result))
 					{
-						$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
+					  $where_clause = 'table_name=? AND is_primary=1';
+					  $where_values = array('s',$base_table);
+					  $add_clause = 'ORDER by display_order ASC';
+					  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 						while ($row2 = mysqli_fetch_assoc($query_result2))
 						{
 							$field_name = $row2['field_name'];
@@ -1198,14 +1248,23 @@ function run_update($table,$option)
 	}
 	elseif ($option == 'all')
 	{
-		$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause'));
+	  $where_clause = '';
+	  $where_values = array();
+	  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause');
+	  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 		$record_count = mysqli_num_rows($query_result);
 		for ($record_offset=0; $record_offset<$record_count; $record_offset++)
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
+		  $where_clause = '';
+		  $where_values = array();
+		  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
+		  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
-				$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
+			  $where_clause = 'table_name=? AND is_primary=1';
+			  $where_values = array('s',$base_table);
+			  $add_clause = 'ORDER by display_order ASC';
+			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					$field_name = $row2['field_name'];
@@ -1222,7 +1281,9 @@ function run_update($table,$option)
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name' AND is_primary=0");
+	  $where_clause = ' table_name=? AND field_name=? AND is_primary=0';
+	  $where_values = array('s',$base_table,'s',$field_name);
+	  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if (isset($_POST["select_$field_name"]))
@@ -1241,28 +1302,24 @@ function run_update($table,$option)
 		$record->action = 'update';
 		$record->table = $table;
 
-		// Build the query to select the record
-		$primary_keys = fully_decode_record_id($record_id);
 		$pk_values = '^';
-		$query = "SELECT * FROM $table WHERE";
-		$field_processed = false;
+		$where_clause = '';
+		$where_values = array();
+		$primary_keys = fully_decode_record_id($record_id);
 		foreach ($primary_keys as $field => $value)
 		{
-			if ($field_processed)
-			{
-				$query .= " AND";
-			}
-			$field_processed = true;
-			$query .= " $field='".addslashes($value)."'";
 			$pk_values .= "$value^";
+		  $where_clause .= " $field=? AND";
+			$where_values[count($where_values)] = query_field_type($db,$table,$field);
+		  $where_values[count($where_values)] = $value;
 		}
+		$where_clause = rtrim($where_clause,'AND ');
 		if (isset($_POST['show_progress']))
 		{
 			set_time_limit(30);
 			print("Processing record $pk_values<br />\n");
 		}
-
-		$query_result = mysqli_query_normal($db,$query);
+		$query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Populate the record fields
@@ -1270,7 +1327,9 @@ function run_update($table,$option)
 			while ($row2 = mysqli_fetch_assoc($query_result2))
 			{
 				$field_name = $row2['Field'];
-				$query_result3 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+			  $where_clause = 'table_name=? AND field_name=?';
+			  $where_values = array('s',$base_table,'s',$field_name);
+			  $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 				if ($row3 = mysqli_fetch_assoc($query_result3))
 				{
 					if (isset($_POST["select_$field_name"]))
@@ -1309,7 +1368,7 @@ function run_update($table,$option)
 						// Field is not being updated
 						$field_value = $row[$field_name];
 					}
-					$record->SetField($field_name,$field_value);
+					$record->SetField($field_name,$field_value,query_field_type($db,$table,$field_name));
 				}
 			}
 		}
@@ -1317,7 +1376,7 @@ function run_update($table,$option)
 		// Call the save function on the record
 		$result = save_record($record,$record_id,$record_id);
 		unset($record);
-		if ($result == false)
+		if ($result === false)
 		{
 			$failure_count++;
 		}
@@ -1373,7 +1432,9 @@ function select_copy($table)
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+	  $where_clause = 'table_name=? AND field_name=?';
+	  $where_values = array('s',$base_table,'s',$field_name);
+	  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 		if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['widget_type'] != 'file'))
 		{
 			$display_group = $row2['display_group'];
@@ -1477,10 +1538,16 @@ function run_copy($table)
 			$record_offset = substr($key,7);
 			if (is_numeric($record_offset))
 			{
-				$query_result = mysqli_query_strict($db,"SELECT * FROM $table ".get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1");
+			  $where_clause = '';
+			  $where_values = array();
+			  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
+			  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
-					$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
+				  $where_clause = 'table_name=? AND is_primary=1';
+				  $where_values = array('s',$base_table);
+				  $add_clause = 'ORDER by display_order ASC';
+				  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 					while ($row2 = mysqli_fetch_assoc($query_result2))
 					{
 						$field_name = $row2['field_name'];
@@ -1498,7 +1565,9 @@ function run_copy($table)
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$field_name = $row['Field'];
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name' AND is_primary=1");
+	  $where_clause = 'table_name=? AND field_name=? AND is_primary=1';
+	  $where_values = array('s',$base_table,'s',$field_name);
+	  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 		if (($row2 = mysqli_fetch_assoc($query_result2)) &&
 		    ((isset($_POST["select_$field_name"])) || ($row2['widget_type'] == 'auto-increment')))
 		{
@@ -1520,27 +1589,24 @@ function run_copy($table)
 		$record->action = 'copy';
 		$record->table = $table;
 
-		// Build the query to select the record
+		$pk_values = '^';
+		$where_clause = '';
+		$where_values = array();
 		$primary_keys = fully_decode_record_id($record_id);
-		$query = "SELECT * FROM $table WHERE";
-		$field_processed = false;
 		foreach ($primary_keys as $field => $value)
 		{
-			if ($field_processed)
-			{
-				$query .= " AND";
-			}
-			$field_processed = true;
-			$query .= " $field='".addslashes($value)."'";
 			$pk_values .= "$value^";
+		  $where_clause .= " $field=? AND ";
+			$where_values[count($where_values)] = query_field_type($db,$table,$field);
+		  $where_values[count($where_values)] = $value;
 		}
+		$where_clause = rtrim($where_clause,' AND');
 		if (isset($_POST['show_progress']))
 		{
 			set_time_limit(30);
 			print("Processing record $pk_values<br />\n");
 		}
-
-		$query_result = mysqli_query_normal($db,$query);
+		$query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Populate the record fields
@@ -1548,7 +1614,9 @@ function run_copy($table)
 			while ($row2 = mysqli_fetch_assoc($query_result2))
 			{
 				$field_name = $row2['Field'];
-				$query_result3 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+			  $where_clause = 'table_name=? AND field_name=?';
+			  $where_values = array('s',$base_table,'s',$field_name);
+			  $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
 				if ($row3 = mysqli_fetch_assoc($query_result3))
 				{
 					if (isset($_POST["select_$field_name"]))
@@ -1575,7 +1643,7 @@ function run_copy($table)
 						// Field is not being updated
 						$field_value = $row[$field_name];
 					}
-					$record->SetField($field_name,$field_value);
+					$record->SetField($field_name,$field_value,query_field_type($db,$table,$field_name));
 				}
 			}
 		}
@@ -1583,7 +1651,7 @@ function run_copy($table)
 		// Call the save function on the record
 		$result = save_record($record,$record_id,$record_id);
 		unset($record);
-		if ($result == false)
+		if ($result === false)
 		{
 			$failure_count++;
 		}
@@ -1617,28 +1685,34 @@ function renumber_records($table)
 	$db = admin_db_connect();
 	set_time_limit(30);
 	$table = get_table_for_info_field($table,'seq_no_field');
-	$row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE table_name='$table'"));
+	$where_clause = 'table_name=?';
+	$where_values = array('s',$table);
+	$row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''));
 	if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])) && ($row['renumber_enabled']))
 	{
 		// Set up basic query string according to sort method
 		if (!empty($row['sort_1_field']))
 		{
-			$select_query = "SELECT * FROM $table ORDER BY {$row['sort_1_field']},{$row['seq_no_field']}";
-			mysqli_query_normal($db,"ALTER TABLE $table ORDER BY {$row['sort_1_field']},{$row['seq_no_field']}");
+			$saved_add_clause = "ORDER BY {$row['sort_1_field']},{$row['seq_no_field']}";
 			$level_1_sort = true;
 		}
 		else
 		{
-			$select_query = "SELECT * FROM $table ORDER BY {$row['seq_no_field']}";
-			mysqli_query_normal($db,"ALTER TABLE $table ORDER BY {$row['seq_no_field']}");
+			$saved_add_clause = "ORDER BY {$row['seq_no_field']}";
 			$row['seq_method'] = 'continuous';   // Force continuous method if no first-level sort
 			$level_1_sort = false;
 		}
+		mysqli_free_format_query($db,"ALTER TABLE $table $saved_add_clause",array());
 
 		// Renumber records to temporary range (outside existing range)
-		$query_result = mysqli_query_strict($db,"SELECT * FROM $table");
+	  $where_clause = '';
+	  $where_values = array();
+	  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
 		$record_count = mysqli_num_rows($query_result);
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM $table ORDER BY {$row['seq_no_field']} DESC LIMIT 1");
+	  $where_clause = '';
+	  $where_values = array();
+	  $add_clause = "ORDER BY {$row['seq_no_field']} DESC LIMIT 1";
+	  $query_result2 = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			$max_rec_id = $row2[$row['seq_no_field']];
@@ -1648,7 +1722,9 @@ function renumber_records($table)
 			$max_rec_id = 0;
 		}
 		$temp_rec_id = $max_rec_id + 10;
-		$query_result2 = mysqli_query_normal($db,$select_query);
+		$where_clause = '';
+	  $where_values = array();
+		$query_result = mysqli_select_query($db,'','*',$where_clause,$where_values,$saved_add_clause);
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($level_1_sort)

@@ -19,16 +19,6 @@ function submitForm(form)
   form.submit();
 }
 
-// Functions to select desktop/mobile mode
-function selectDesktopMode()
-{
-  window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
-}
-function selectMobileMode()
-{
-  window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
-}
-
 // Function to apply a search to the table
 function applySearch(form)
 {

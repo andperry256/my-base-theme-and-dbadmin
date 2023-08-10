@@ -63,13 +63,15 @@ else
 		print("The source $entity will then be removed from the system.</p>");
 		print("<form method=\"post\">\n");
 		print("<table cellpadding=\"8\"><tr>\n");
-		$query = "SELECT * FROM $type WHERE name NOT LIKE '-%' ORDER BY name ASC";
 
 		// Selector for source
 		print("<td width=\"100px\">Source:</td>");
 		print("<td><select name=\"source\">\n");
 		print("<option value=\"\">Please select ...</option>");
-		$query_result = mysqli_query_normal($db,$query);
+		$where_clause = "name NOT LIKE '-%'";
+	  $where_values = array();
+		$add_clause = 'ORDER BY name ASC';
+	  $query_result = mysqli_select_query($db,$type,'*',$where_clause,$where_values,$add_clause);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			print("<option value=\"{$row['name']}\"");

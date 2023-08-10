@@ -10,9 +10,13 @@ function print_localised_superfund_balance_line($col1_style,$col2_style,$col3_st
 	print("<td style=\"$col3_style\">");
 	$link = "index.php?-action=display_transaction_report&fund=$fund&start_month=".NO_START_MONTH."&end_month=$end_month&currency=$currency";
 	if ($balance >= 0)
+	{
 		printf("<a class=\"balance-positive\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
+	}
 	else
+	{
 		printf("<a class=\"balance-negative\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
+	}
 	print("</td></tr>\n");
 }
 
@@ -33,9 +37,13 @@ function print_global_fund_balance_line($col1_style,$col2_style,$fund,$is_superf
 	print("<td style=\"$col2_style\" width=\"100px\">");
 	$link = "index.php?-action=display_transaction_report&fund=$fund&start_month=".NO_START_MONTH."&end_month=$end_month&currency=$currency";
 	if ($balance >= 0)
+	{
 		printf("<a class=\"balance-positive\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
+	}
 	else
+	{
 		printf("<a class=\"balance-negative\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
+	}
 	print("</td></tr>\n");
 }
 
@@ -110,7 +118,10 @@ if ((isset($_POST['submitted'])) && (!$error))
 	// Process localised funds
 	print("<h2>Localised Funds</h2>\n");
 	$balances = array();
-	$query_result = mysqli_query_strict($db,"SELECT * FROM accounts ORDER by sort_order ASC");
+  $where_clause = '';
+  $where_values = array();
+  $add_clause = 'ORDER by sort_order ASC';
+  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,$add_clause);
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$balances[$row['label']] = 0;
@@ -118,7 +129,9 @@ if ((isset($_POST['submitted'])) && (!$error))
 	print("<table style=\"$table_style\">\n");
 	$superfund = '';
 	$superfund_balance = 0;
-	$query_result = mysqli_query_strict($db,"SELECT * FROM funds WHERE type='localised' $fund_exclusions");
+  $where_clause = "type='localised' $fund_exclusions";
+  $where_values = array();
+  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		foreach ($balances as $label => $value)
@@ -128,9 +141,13 @@ if ((isset($_POST['submitted'])) && (!$error))
 		$fund = $row['name'];
 		$last_superfund = $superfund;
 		if (strpos($fund,':') !== false)
+		{
 			$superfund = strtok($fund,':');
+		}
 		else
+		{
 			$superfund = '';
+		}
 		if ($last_superfund != $superfund)
 		{
 			if ($last_superfund != '')
@@ -144,24 +161,32 @@ if ((isset($_POST['submitted'])) && (!$error))
 
 		print("<tr><td style=\"$table_cell_style\" width=\"100px\"><a href=\"index.php?-action=display_transaction_report&fund=$fund&currency=$currency\" target=\"blank\">$fund</a></td>\n");
 		$total = 0;
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND fund='$fund' AND acct_month<='$end_month' AND sched_freq='#'");
+	  $where_clause = "currency=? AND fund=? AND acct_month<=? AND sched_freq='#'";
+	  $where_values = array('s',$currency,'s',$fund,'s',$end_month);
+	  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			// Add transaction amount to account balance
 			$balances[$row2['account']] = add_money($balances[$row2['account']],subtract_money($row2['credit_amount'],$row2['debit_amount']));
 			$superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 		}
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE fund='$fund' AND acct_month<='$end_month'");
+	  $where_clause = 'fund=? AND acct_month<=?';
+	  $where_values = array('s',$fund,'s',$end_month);
+	  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
-			$query_result3 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account='{$row2['account']}' AND seq_no={$row2['transact_seq_no']} AND acct_month<='$end_month'");
+		  $where_clause = 'currency=? AND account=? AND seq_no=? AND acct_month<=?';
+		  $where_values = array('s',$currency,$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
+		  $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
 			{
 				// Add split amount to only/source account balance
 				$balances[$row3['account']] = add_money($balances[$row3['account']],subtract_money($row2['credit_amount'],$row2['debit_amount']));
 				$superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 			}
-			$query_result3 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND source_account='{$row2['account']}' AND source_seq_no={$row2['transact_seq_no']} AND acct_month<='$end_month'");
+		  $where_clause = 'currency=? AND source_account=? AND source_seq_no=? AND acct_month<=?';
+		  $where_values = array('s',$currency,$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
+		  $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
 			{
 				// Subtract split amount from target account balance
@@ -174,15 +199,23 @@ if ((isset($_POST['submitted'])) && (!$error))
 			if (round($value,2) != 0)
 			{
 				// Output account name and balance
-				$query_result2 = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$label'");
+			  $where_clause = 'label=?';
+			  $where_values = array('s',$label);
+			  $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 				if ($row2 = mysqli_fetch_assoc($query_result2))
+				{
 					print("<td style=\"$table_cell_style\" width=\"120px\">{$row2['name']}</td>");
+				}
 				print("<td style=\"$table_cell_style_ra\" width=\"50px\">");
 				$link = "index.php?-action=display_transaction_report&account=$label&fund=$fund&start_month=".NO_START_MONTH."&end_month=$end_month&currency=$currency";
 				if ($value >= 0)
+				{
 					printf("<a class=\"balance-positive\" target=\"_blank\" href=\"$link\">%01.2f</a>", $value);
+				}
 				else
+				{
 					printf("<a class=\"balance-negative\" target=\"_blank\" href=\"$link\">%01.2f</a>", $value);
+				}
 				print("</td></tr>\n");
 				print("<tr><td style=\"$table_cell_style\">&nbsp;</td>\n");
 				$total = add_money($total,$value);
@@ -191,9 +224,13 @@ if ((isset($_POST['submitted'])) && (!$error))
 		// Output fund total
 		print("<td style=\"$table_cell_style\">Total</td><td style=\"$table_cell_style_total\">\n");
 		if ($total >= 0)
+		{
 			printf("<span class=\"balance-positive\">%01.2f</span>", $total);
+		}
 		else
+		{
 			printf("<span class=\"balance-negative\">%01.2f</span>", $total);
+		}
 		print("</td></tr><tr><td style=\"$table_filler_line\">&nbsp;</td></tr>\n");
 	}
 	if ($last_superfund != '')
@@ -209,15 +246,21 @@ if ((isset($_POST['submitted'])) && (!$error))
 	print("<table style=\"$table_style\">\n");
 	$superfund = '';
 	$superfund_balance = 0;
-	$query_result = mysqli_query_strict($db,"SELECT * FROM funds WHERE type='global' $fund_exclusions");
+  $where_clause = "type='global' $fund_exclusions";
+  $where_values = array();
+  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$fund = $row['name'];
 		$last_superfund = $superfund;
 		if (strpos($fund,':') !== false)
+		{
 			$superfund = strtok($fund,':');
+		}
 		else
+		{
 			$superfund = '';
+		}
 		if ($last_superfund != $superfund)
 		{
 			if ($last_superfund != '')
@@ -228,17 +271,23 @@ if ((isset($_POST['submitted'])) && (!$error))
 			$superfund_balance = 0;
 		}
 		$balance = 0;
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND fund='$fund' AND acct_month<='$end_month' AND sched_freq='#'");
+	  $where_clause = "currency=? AND fund=? AND acct_month<=? AND sched_freq='#'";
+	  $where_values = array('s',$currency,'s',$fund,'s',$end_month);
+	  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			// Add transaction amount to fund balance
 			$balance = add_money($balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 			$superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 		}
-		$query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE fund='$fund' AND category<>'-transfer-' AND acct_month<='$end_month'");
+	  $where_clause = 'fund=? AND category<>'-transfer-' AND acct_month<=?';
+	  $where_values = array('s',$fund,'s',$end_month);
+	  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
-			$query_result3 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account='{$row2['account']}' AND seq_no={$row2['transact_seq_no']} AND acct_month<='$end_month'");
+		  $where_clause = 'currency=? AND account=? AND seq_no=? AND acct_month<=?';
+		  $where_values = array('s',$currency,$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
+		  $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
 			{
 				// Add split amount to fund balance
@@ -292,7 +341,10 @@ if (!isset($OffScreen))
 	print("</select></td></tr>\n");
 	print("<tr><td>Currency:</td>\n");
 	print("<td colspan=2><select name=\"currency\">\n");
-	$query_result = mysqli_query_strict($db,"SELECT * FROM currencies ORDER BY id ASC");
+  $where_clause = '';
+  $where_values = array();
+  $add_clause = 'ORDER BY id ASC';
+  $query_result = mysqli_select_query($db,'currencies','*',$where_clause,$where_values,$add_clause);
 	while($row = mysqli_fetch_assoc($query_result))
 	{
 		$id = $row['id'];

@@ -322,7 +322,9 @@ function output_mail($mail_info,$host,$attachments=array())
 	// Connect to database and request routing information
 	if ($db = mail_db_connect())
 	{
-		$query_result = mysqli_query($db,"SELECT * FROM mail_routes WHERE orig_domain='$host'");
+		$where_clause = 'orig_domain=?';
+	  $where_values = array('s',$host);
+	  $query_result = mysqli_select_query($db,'','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Create PHPMailer object

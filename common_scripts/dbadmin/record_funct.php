@@ -1504,37 +1504,18 @@ function delete_record($record,$record_id)
 			}
 		}
 
-		// Create deletion query
-		$query = "DELETE FROM $table WHERE";
-		$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND is_primary=1 ORDER by display_order ASC");
-		while ($row = mysqli_fetch_assoc($query_result))
-		{
-			$field_name = $row['field_name'];
-			if (($row['widget_type'] == 'input-num') || ($row['widget_type'] == 'checkbox'))
-			{
-				// Field is a number
-				$mysql_fields[$field_name] = $record->FieldVal($field_name);
-			}
-			else
-			{
-				// Field is a string
-				$mysql_fields[$field_name] = "'".addslashes($record->FieldVal($field_name))."'";
-			}
-		}
+		// Delete the record
+		$where_clause = '';
+	  $where_values = array();
 		$primary_keys = fully_decode_record_id($record_id);
-		$field_processed = false;
 		foreach ($primary_keys as $field => $value)
 		{
-			if ($field_processed)
-			{
-				$query .= " AND";
-			}
-			$field_processed = true;
-			$query .= " $field={$mysql_fields[$field]}";
+			$where_clause .= "$field=? AND ";
+			$where_values[count($where_values)] = $record->FieldType($field);
+			$where_values[count($where_values)] = $record->FieldVal($field);
 		}
-
-		// Delete the record
-		mysqli_query_normal($db,$query);
+		$where_clause = rtrim($where_clause,' AND');
+	  mysqli_delete_query($db,$table,$where_clause,$where_values);
 
 		if  (class_exists ($classname,false))
 		{

@@ -983,16 +983,16 @@ function save_record($record,$old_record_id,$new_record_id)
 	elseif (($action == 'new') || ($action == 'copy'))
 	{
 		// Insert the record
-		$field_list = '';
-		$value_list = '';
+		$fields = '';
+	  $values = array();
 		foreach ($new_mysql_fields as $field => $value)
 		{
-			$field_list .= "$field,";
-			$value_list .= "$value,";
+			$fields .= "$field,";
+			$values[count($values)] = $record->FieldType($field);
+			$values[count($values)] = "$value";
 		}
-		$field_list = rtrim($field_list,',');
-		$value_list = rtrim($value_list,',');
-		$main_query_result = mysqli_query_normal($db,"INSERT INTO $table ($field_list) VALUES ($value_list)");
+		$fields = rtrim($fields,',');
+	  $main_query_result = mysqli_insert_query($db,$table,$fields,$values);
 	}
 
 	// Update any auto-increment fields in the record object to reflect the

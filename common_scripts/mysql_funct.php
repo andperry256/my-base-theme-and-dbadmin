@@ -189,6 +189,78 @@ function run_prepared_statement($stmt,$strict)
 
 //==============================================================================
 /*
+Function query_field_type
+
+This function returns the variable type for a given field given the table and
+field name. The following results may be returned:-
+
+i - Integer (including Boolean).
+d - Double (any non-integer number type).
+s - String.
+*/
+//==============================================================================
+
+function query_field_type($db,$table,$field_name)
+{
+	if (function_exists('base_table'))
+	{
+		$table = base_table($table);
+	}
+	if ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SHOW COLUMNS FROM $table WHERE Field='$field_name'")))
+	{
+		if (preg_match('/int/',($row['Type'])))
+		{
+			return 'i';
+		}
+		elseif (preg_match('/dec/',($row['Type'])))
+		{
+			return 'd';
+		}
+		else
+		{
+			return 's' ;
+		}
+	}
+	else
+	{
+		return 's';
+	}
+}
+
+//==============================================================================
+/*
+Function raise_query_validation_error
+
+This function is called to raise an exception when a query fails validations
+in one of the below functions. It is currently only used to trap situations
+where the number of question marks in the query does not relate correctly to
+the number of supplied parameters.
+*/
+//==============================================================================
+
+function raise_query_validation_error($query)
+{
+	$eol = (isset($argc)) ? "\n" : "<br />\n";
+	if (is_file("/Config/linux_pathdefs.php"))
+	{
+		// Local server
+		print("Failed to validate MySQL query:$eol$query$eol");
+		print_stack_trace_for_mysqli_error();
+	}
+	else
+	{
+		// Online server
+		$ofp = fopen("$RootDir/logs/php_error.log",'a');
+		fprintf($ofp,"[$date_and_time] [$error_id] Failed to validate MySQL query:\n  $query\n");
+		fclose($ofp);
+		print_stack_trace_for_mysqli_error($ofp);
+		print($fatal_error_message);
+	}
+	exit;
+}
+
+//==============================================================================
+/*
 Function mysqli_select_query
 
 This function is called to run a SELECT query using a prepared statement.

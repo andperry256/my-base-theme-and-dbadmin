@@ -20,7 +20,7 @@ $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_valu
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
-  $where_clause = "type='localised";
+  $where_clause = "type='localised'";
   $where_values = array();
   $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 	while ($row2 = mysqli_fetch_assoc($query_result2))

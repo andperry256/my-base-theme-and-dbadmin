@@ -176,7 +176,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 		  $where_clause = 'currency=? AND account=? AND seq_no=? AND acct_month<=?';
-		  $where_values = array('s',$currency,$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
+		  $where_values = array('s',$currency,'s',$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
 		  $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
 			{
@@ -185,7 +185,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 				$superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 			}
 		  $where_clause = 'currency=? AND source_account=? AND source_seq_no=? AND acct_month<=?';
-		  $where_values = array('s',$currency,$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
+		  $where_values = array('s',$currency,'s',$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
 		  $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
 			{
@@ -280,13 +280,13 @@ if ((isset($_POST['submitted'])) && (!$error))
 			$balance = add_money($balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 			$superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
 		}
-	  $where_clause = 'fund=? AND category<>'-transfer-' AND acct_month<=?';
+	  $where_clause = "fund=? AND category<>'-transfer-' AND acct_month<=?";
 	  $where_values = array('s',$fund,'s',$end_month);
 	  $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 		  $where_clause = 'currency=? AND account=? AND seq_no=? AND acct_month<=?';
-		  $where_values = array('s',$currency,$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
+		  $where_values = array('s',$currency,'s',$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month);
 		  $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
 			{

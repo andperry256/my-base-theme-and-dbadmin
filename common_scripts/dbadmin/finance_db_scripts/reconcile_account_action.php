@@ -105,8 +105,7 @@
       $date = $row['date'];
       $payee = addslashes($row['description']);
       $where_clause = "regex_match<>'^$'";
-      $where_values = array();
-      $query_result2 = mysqli_select_query($db,'payees','*',$where_clause,$where_values,'');
+      $query_result2 = mysqli_select_query($db,'payees','*',$where_clause,array(),'');
       while ($row2 = mysqli_fetch_assoc($query_result2))
       {
         $pattern = "/{$row2['regex_match']}/i";
@@ -175,10 +174,8 @@
         {
           update_account_balances($account,$row2['date']);
         }
-        $where_clause = '';
-        $where_values = array();
         $add_clause = 'ORDER BY date DESC, seq_no DESC LIMIT 1';
-        $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,$add_clause);
+        $query_result2 = mysqli_select_query($db,"_view_account_$account",'*','',array(),$add_clause);
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
           $user_message = "<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['reconciled_balance']}</p>\n";

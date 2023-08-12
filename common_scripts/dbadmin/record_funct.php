@@ -173,10 +173,8 @@ function generate_widget($table,$field_name,$field_value)
 					print("<datalist id=\"list_$field_name\">\n");
 					$vocab_table = $row['vocab_table'];
 					$vocab_field = $row['vocab_field'];
-				  $where_clause = '';
-				  $where_values = array();
 				  $add_clause = "ORDER BY $vocab_field ASC";
-				  $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,$where_clause,$where_values,$add_clause);
+				  $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
 					while ($row2 = mysqli_fetch_assoc($query_result2))
 					{
 						print("<option value=\"{$row2[$vocab_field]}\"></option>\n");
@@ -238,10 +236,8 @@ function generate_widget($table,$field_name,$field_value)
 				print("<option value=\"\">Please select ...</option>\n");
 				$vocab_table = $row['vocab_table'];
 				$vocab_field = $row['vocab_field'];
-			  $where_clause = '';
-			  $where_values = array();
 			  $add_clause = "ORDER BY $vocab_field ASC";
-			  $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,$where_clause,$where_values,$add_clause);
+			  $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					print("<option value=\"{$row2[$vocab_field]}\"");
@@ -268,10 +264,8 @@ function generate_widget($table,$field_name,$field_value)
 					}
 					$tok = strtok('^');
 				}
-			  $where_clause = '';
-			  $where_values = array();
 			  $add_clause = "ORDER BY $vocab_field ASC";
-			  $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,$where_clause,$where_values,$add_clause);
+			  $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					$item = $row2[$vocab_field];

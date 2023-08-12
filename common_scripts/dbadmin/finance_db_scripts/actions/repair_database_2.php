@@ -58,9 +58,7 @@ $count_set_acct_month = 0;
 $dummy_count = 0;
 
 // BEGIN - Main loop for processing transactions
-$where_clause = '';
-$where_values = array();
-$query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+$query_result = mysqli_select_query($db,'transactions','*','',array(),'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['account'];
@@ -229,9 +227,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 // END -  Main loop for processing transactions
 
 // BEGIN - Main loop for processing splits
-$where_clause = '';
-$where_values = array();
-$query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
+$query_result = mysqli_select_query($db,'splits','*','',array(),'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['account'];

@@ -7,8 +7,7 @@ $mode = get_viewing_mode();
 if ($mode == 'mobile')
 {
   $where_clause = "table_name='transactions'";
-  $where_values = array();
-  $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','grid_columns',$where_clause,$where_values,''));
+  $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','grid_columns',$where_clause,array(),''));
   mysqli_query_normal($db,"UPDATE dba_table_info SET grid_columns='{$row['grid_columns']}' WHERE parent_table='transactions' OR parent_table LIKE '_view_transactions%'");
 }
 $account = $table;

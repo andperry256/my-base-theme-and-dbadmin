@@ -118,10 +118,8 @@ if ((isset($_POST['submitted'])) && (!$error))
 	// Process localised funds
 	print("<h2>Localised Funds</h2>\n");
 	$balances = array();
-  $where_clause = '';
-  $where_values = array();
   $add_clause = 'ORDER by sort_order ASC';
-  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,$add_clause);
+  $query_result = mysqli_select_query($db,'accounts','*','',array(),$add_clause);
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$balances[$row['label']] = 0;
@@ -130,8 +128,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 	$superfund = '';
 	$superfund_balance = 0;
   $where_clause = "type='localised' $fund_exclusions";
-  $where_values = array();
-  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
+  $query_result = mysqli_select_query($db,'funds','*',$where_clause,array(),'');
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		foreach ($balances as $label => $value)
@@ -247,8 +244,7 @@ if ((isset($_POST['submitted'])) && (!$error))
 	$superfund = '';
 	$superfund_balance = 0;
   $where_clause = "type='global' $fund_exclusions";
-  $where_values = array();
-  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
+  $query_result = mysqli_select_query($db,'funds','*',$where_clause,array(),'');
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		$fund = $row['name'];
@@ -341,10 +337,8 @@ if (!isset($OffScreen))
 	print("</select></td></tr>\n");
 	print("<tr><td>Currency:</td>\n");
 	print("<td colspan=2><select name=\"currency\">\n");
-  $where_clause = '';
-  $where_values = array();
   $add_clause = 'ORDER BY id ASC';
-  $query_result = mysqli_select_query($db,'currencies','*',$where_clause,$where_values,$add_clause);
+  $query_result = mysqli_select_query($db,'currencies','*','',array(),$add_clause);
 	while($row = mysqli_fetch_assoc($query_result))
 	{
 		$id = $row['id'];

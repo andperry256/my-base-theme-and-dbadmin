@@ -69,9 +69,8 @@ else
 		print("<td><select name=\"source\">\n");
 		print("<option value=\"\">Please select ...</option>");
 		$where_clause = "name NOT LIKE '-%'";
-	  $where_values = array();
 		$add_clause = 'ORDER BY name ASC';
-	  $query_result = mysqli_select_query($db,$type,'*',$where_clause,$where_values,$add_clause);
+	  $query_result = mysqli_select_query($db,$type,'*',$where_clause,array(),$add_clause);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			print("<option value=\"{$row['name']}\"");

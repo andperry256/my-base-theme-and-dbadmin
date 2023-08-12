@@ -263,8 +263,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 		// Account has been specified. All funds and categories are included.
 		// Process all associated splits.
 	  $where_clause = "account IS NOT NULL $fund_exclusions";
-	  $where_values = array();
-	  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
+	  $query_result = mysqli_select_query($db,'splits','*',$where_clause,array(),'');
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
@@ -316,10 +315,8 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	}
 	else
 	{
-	  $where_clause = '';
-	  $where_values = array();
 	  $add_clause = 'ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC';
-	  $query_result = mysqli_select_query($db,'report','*',$where_clause,$where_values,$add_clause);
+	  $query_result = mysqli_select_query($db,'report','*','',array(),$add_clause);
 		$row_count = mysqli_num_rows($query_result);
 		$row_no = 0;
 		while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))

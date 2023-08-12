@@ -492,9 +492,7 @@ function select_excluded_accounts($field_name)
   $query_result = mysqli_select_query($db1,'admin_passwords','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$where_clause = '';
-	  $where_values = array();
-	  $query_result2 = mysqli_select_query($db2,'accounts','*',$where_clause,$where_values,'');
+	  $query_result2 = mysqli_select_query($db2,'accounts','*','',array(),'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -528,9 +526,7 @@ function select_excluded_funds($field_name)
   $query_result = mysqli_select_query($db1,'admin_passwords','*',$where_clause,$where_values,'');
 	if ($row = mysqli_fetch_assoc($query_result))
 	{
-		$where_clause = '';
-	  $where_values = array();
-	  $query_result2 = mysqli_select_query($db2,'funds','*',$where_clause,$where_values,'');
+	  $query_result2 = mysqli_select_query($db2,'funds','*','',array(),'');
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($row2['access_level'] > $row['access_level'])
@@ -572,8 +568,7 @@ function initialise_archive_table_data($db)
 				set_primary_key_on_view("$table",'account');
 				set_primary_key_on_view("$table",'seq_no');
 			  $where_clause = "table_name='transactions'";
-			  $where_values = array();
-			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
+			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,array(),'');
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
@@ -589,8 +584,7 @@ function initialise_archive_table_data($db)
 				set_primary_key_on_view("$table",'transact_seq_no');
 				set_primary_key_on_view("$table",'split_no');
 			  $where_clause = "table_name='splits'";
-			  $where_values = array();
-			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
+			  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,array(),'');
 				while ($row2 = mysqli_fetch_assoc($query_result2))
 				{
 					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");

@@ -10,8 +10,7 @@ $db = admin_db_connect();
 $table = $_GET['table'];
 
 $where_clause = "table_name='transactions'";
-$where_values = array();
-$query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
+$query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
   $list_size = $row['list_size'];

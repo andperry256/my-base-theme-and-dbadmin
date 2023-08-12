@@ -158,7 +158,9 @@ if (isset($_POST['new_start_date']))
     $query_result = mysqli_select_query($db,"archived_transactions_$year",'*',$where_clause,$where_values,'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
-      mysqli_query_normal($db,"INSERT INTO archived_splits_$year SELECT * FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");
+      $query = "INSERT INTO archived_splits_$year SELECT * FROM splits WHERE account=? AND transact_seq_no=?";
+      $where_values = array('s',$row['account'],'i',$row['seq_no']);
+      mysqli_free_format_query($db,$query,$where_values);
     }
 
     // Delete archived transactions from main tables
@@ -194,27 +196,27 @@ if (isset($_POST['new_start_date']))
           // This loop should only be executed once.
           $credit = ($balance > 0) ? $balance : 0;
           $debit = ($balance < 0) ? -$balance : 0;
-          $query = "INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled)";
-          $query .= " VALUES ('$account',$transaction_seq_no,'$new_start_date','{$row['currency']}','Balance B/F',$credit,$debit,'$acct_month','$fund','-none-',1)";
-          mysqli_query_normal($db,$query);
+          $fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled';
+          $values = array('s',$account,'i',$transaction_seq_no,'s',$new_start_date,'s',$row['currency'],'s','Balance B/F','d',$credit,'d',$debit,'s',$acct_month,'s',$fund,'s','-none-','i',1);
+          mysqli_insert_query($db,'transactions',$fields,$values);
         }
         update_account_balances($account,$new_start_date);
       }
       else
       {
         // Add transaction with splits
-        $query = "INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled)";
-        $query .= " VALUES ('$account',$transaction_seq_no,'$new_start_date','{$row['currency']}','Balance B/F',0,0,'$acct_month','-split-','-split-',1)";
-        mysqli_query_normal($db,$query);
+        $fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled';
+        $values = array('s',$account,'i',$transaction_seq_no,'s',$new_start_date,'s',$row['currency'],'s','Balance B/F','i',0,'i',0,'s',$acct_month,'s','-split-','s','-split-','i',1);
+        mysqli_insert_query($db,'transactions',$fields,$values);
         $splits_total = 0;
         $split_no = 10;
         foreach ($balances[$account] as $fund => $balance)
         {
           $credit = ($balance > 0) ? $balance : 0;
           $debit = ($balance < 0) ? -$balance : 0;
-          $query = "INSERT INTO splits (account,transact_seq_no,split_no,credit_amount,debit_amount,fund,category,acct_month)";
-          $query .= " VALUES ('$account',$transaction_seq_no,$split_no,$credit,$debit,'$fund','-none-','$acct_month')";
-          mysqli_query_normal($db,$query);
+          $fields = 'account,transact_seq_no,split_no,credit_amount,debit_amount,fund,category,acct_month';
+          $values = array('s',$account,'i',$transaction_seq_no,'i',$split_no,'d',$credit,'d',$debit,'s',$fund,'s','-none-','s',$acct_month);
+          mysqli_insert_query($db,'splits',$fields,$values);
           $split_no += 10;
           $splits_total = add_money($splits_total,subtract_money($credit,$debit));
         }

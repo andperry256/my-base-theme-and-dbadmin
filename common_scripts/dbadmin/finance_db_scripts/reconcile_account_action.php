@@ -76,7 +76,9 @@
   			}
   			$description = addslashes($description);
   			$description = substr($description,0,31);
-  			mysqli_query_normal($db,"INSERT INTO bank_import (date,description,amount,balance) VALUES ('$mysql_date','$description',$amount,$balance)");
+        $fields = 'date,description,amount,balance';
+        $values = array('s',$mysql_date,'s',$description,'d',$amount,'d',$balance);
+        mysqli_insert_query($db,'bank_import',$fields,$values);
   		}
   	}
   }
@@ -115,7 +117,9 @@
         }
       }
       $seq_no = next_seq_no($account);
-      mysqli_query_normal($db,"INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,bank_import_id) VALUES ('$account',$seq_no,'$date','$payee',$credit_amount,$debit_amount,$bank_rec_id)");
+      $fields = 'account,seq_no,date,payee,credit_amount,debit_amount,bank_import_id';
+      $values = array('s',$account,'i',$seq_no,'s',$date,'s',$payee,'d',$credit_amount,'d',$debit_amount,'i',$bank_rec_id);
+      mysqli_insert_query($db,'transactions',$fields,$values);
 
       // Go to the record edit screen.
       $primary_keys = array();

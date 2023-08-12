@@ -372,16 +372,16 @@ function copy_transaction($account,$seq_no,$new_date)
 		mysqli_query_normal($db,"UPDATE transactions SET copy_to_date=NULL WHERE account='$account' AND seq_no=$seq_no");
 		mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_transactions");
 		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
-		mysqli_query_normal($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+		mysqli_free_format_query($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no",array());
 		mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_splits");
 		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
-		mysqli_query_normal($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
+		mysqli_free_format_query($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no",array());
 		$new_seq_no = next_seq_no($account);
 		$new_acct_month = accounting_month($new_date);
 		mysqli_query_normal($db,"UPDATE temp_transactions SET seq_no=$new_seq_no,date='$new_date',acct_month='$new_acct_month',reconciled=0");
-		mysqli_query_normal($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
-		mysqli_query_normal($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no,acct_month='$new_acct_month'");
-		mysqli_query_normal($db,"INSERT INTO splits SELECT * FROM temp_splits");
+		mysqli_free_format_query($db,"INSERT INTO transactions SELECT * FROM temp_transactions",array());
+		mysqli_query_normal($db,"UPDATE temp_splits SET transact_seq_no=$new_seq_no,acct_month='$new_acct_month'",array());
+		mysqli_free_format_query($db,"INSERT INTO splits SELECT * FROM temp_splits",array());
 		update_account_balances($account,$new_date);
 
 		// Create transfer if required
@@ -389,11 +389,9 @@ function copy_transaction($account,$seq_no,$new_date)
 		{
 			$target_account = $row['target_account'];
 			$target_seq_no = next_seq_no($target_account);
-			$payee = addslashes($row['payee']);
-			$memo = addslashes($row['memo']);
-			$query = "INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no)";
-			$query .= " VALUES ('$target_account',$target_seq_no,'$new_date','$payee',{$row['debit_amount']},{$row['credit_amount']},'{$row['fund']}','-transfer-','$memo','$acct_month','$account',$new_seq_no)";
-			mysqli_query_normal($db,$query);
+			$fields = 'account,seq_no,date,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no';
+		  $values = array('s',$target_account,'i',$target_seq_no,'s',$new_date,'s',$row['payee'],'d',$row['debit_amount'],'d',$row['credit_amount'],'s',$row['fund'],'s','-transfer-','s',$row['memo'],'s',$acct_month,'s',$account,'i',$new_seq_no);
+		  mysqli_insert_query($db,'transactions',$fields,$values);
 			update_account_balances($target_account,$new_date);
 			mysqli_query_normal($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$new_seq_no");
 		}
@@ -581,7 +579,7 @@ function initialise_archive_table_data($db)
 					mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop={$row2['list_desktop']},list_mobile={$row2['list_mobile']} WHERE table_name='$table' AND field_name='{$row2['field_name']}'");
 				}
 				$splits_table = str_replace('transactions','splits',$table);
-				mysqli_query_normal($db,"INSERT INTO dba_relationships VALUES ('$table','Splits','SELECT * FROM $splits_table WHERE transact_seq_no=$"."seq_no')");
+				mysqli_free_format_query($db,"INSERT INTO dba_relationships VALUES ('$table','Splits','SELECT * FROM $splits_table WHERE transact_seq_no=$seq_no')",array());
 			}
 			elseif (substr($table,9,5) == 'split')
 			{

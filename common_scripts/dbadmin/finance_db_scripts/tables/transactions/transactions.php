@@ -253,13 +253,13 @@ class tables_transactions
 		$account = $record->FieldVal('account');
 		$date = $record->FieldVal('date');
 		$chq_no = $record->FieldVal('chq_no');
-		$payee = addslashes($record->FieldVal('payee'));
+		$payee = $record->FieldVal('payee');
 		$credit_amount = $record->FieldVal('credit_amount');
 		$debit_amount = $record->FieldVal('debit_amount');
 		$auto_total = $record->FieldVal('auto_total');
 		$fund = $record->FieldVal('fund');
 		$category = $record->FieldVal('category');
-		$memo = addslashes($record->FieldVal('memo'));
+		$memo = $record->FieldVal('memo');
 		$acct_month = $record->FieldVal('acct_month');
 		$change_acct_month = $record->FieldVal('change_acct_month');
 		$target_account = $record->FieldVal('target_account');
@@ -323,7 +323,9 @@ class tables_transactions
 	  $query_result = mysqli_select_query($db,'payees','*',$where_clause,$where_values,'');
 		if (mysqli_num_rows($query_result) == 0)
 		{
-			mysqli_query_normal($db,"INSERT INTO payees (name) VALUES ('$payee')");
+			$fields = 'name';
+		  $values = array('s','$payee');
+		  mysqli_insert_query($db,'payees',$fields,$values);
 		}
 
 		// Adjust credit/debit amounts as necessary.
@@ -471,13 +473,15 @@ class tables_transactions
 			{
 				$sched_count = 0;
 			}
-			$query = "INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,target_account,sched_freq,sched_count,save_defaults) VALUES ('$account',$seq_no,'$date','$account_currency','$payee',$credit_amount,$debit_amount,'$fund','$category','$memo','$acct_month','$target_account','$sched_freq',$sched_count,$save_defaults)";
+			$fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,target_account,sched_freq,sched_count,save_defaults';
+		  $values = array('s',$account,'i',$seq_no,'s',$date,'s',$account_currency,'s',$payee,'d',$credit_amount,'d',$debit_amount,'s',$fund,'s',$category,'s',$memo,'s',$acct_month,'s',$target_account,'s',$sched_freq,'i',$sched_count,'i',$save_defaults);
 			if (!empty($chq_no))
 			{
-				$query = str_replace('date,','date,chq_no,',$query);
-				$query = str_replace("'$date',","'$date','$chq_no',",$query);
+				$fields .= ',chq_no,';
+				$values[count($values)] = 'i';
+				$values[count($values)] = $chq_no;
 			}
-			mysqli_query_normal($db,$query);
+			mysqli_insert_query($db,'transactions',$fields,$values);
 		}
 		else
 		{
@@ -534,7 +538,9 @@ class tables_transactions
 				// Create transfer
 				$target_seq_no = next_seq_no($target_account);
 				update_account_balances($target_account,$date);
-				mysqli_query_normal($db,"INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no) VALUES ('$target_account',$target_seq_no,'$date','$account_currency','$payee',$debit_amount,$credit_amount,'$fund','-transfer-','$memo','$acct_month','$account',$seq_no)");
+				$fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no';
+			  $values = array('s',$target_account,'i',$target_seq_no,'s',$date,'s',$account_currency,'s',$payee,'d',$debit_amount,'d',$credit_amount,'s',$fund,'s','-transfer-','s',$memo,'s',$acct_month,'s',$account,'i',$seq_no);
+			  mysqli_insert_query($db,'transactions',$fields,$values);
 				update_account_balances($target_account,$date);
 				mysqli_query_normal($db,"UPDATE transactions SET category='-transfer-',target_seq_no=$target_seq_no WHERE account='$account' AND seq_no=$seq_no");
 			}

@@ -87,7 +87,9 @@ function create_view_structure($view,$table,$conditions)
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
-  	mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$view','$table')");
+		$fields = 'table_name,parent_table';
+	  $values = array('s',$view,'s',$table);
+	  mysqli_insert_query($db,'dba_table_info',$fields,$values);
 	  $where_clause = 'table_name=?';
 	  $where_values = array('s',$table);
 	  $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
@@ -169,7 +171,9 @@ function create_child_table_structure($child,$parent)
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// New table info record
-  	mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('$child','$parent')");
+		$fields = 'table_name,parent_table';
+	  $values = array('s',$child,'s',$parent);
+	  mysqli_insert_query($db,'dba_table_info',$fields,$values);
 	  $where_clause = 'table_name=?';
 	  $where_values = array('s',$parent);
 	  $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');

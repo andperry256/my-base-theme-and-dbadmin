@@ -447,13 +447,17 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
   $where_values = array();
   if (mysqli_num_rows( mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0)
   {
-    mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('_view_orphan_table_info_records','dba_table_info')");
+    $fields = 'table_name,parent_table';
+    $values = array('s','_view_orphan_table_info_records','s','dba_table_info');
+    mysqli_insert_query($db,'dba_table_info',$fields,$values);
   }
   $where_clause = "table_name='_view_orphan_table_field_records'";
   $where_values = array();
   if (mysqli_num_rows( mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0)
   {
-    mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name,parent_table) VALUES ('_view_orphan_table_field_records','dba_table_fields')");
+    $fields = 'table_name,parent_table';
+    $values = array('s','_view_orphan_table_field_records','s','dba_table_fields');
+    mysqli_insert_query($db,'dba_table_info','s',$fields,$values);
   }
   mysqli_query_normal($db,"UPDATE dba_table_info SET orphan=1");
   mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=1");
@@ -570,7 +574,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
           $where_values = array('s',$table);
           if (mysqli_num_rows(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0)
           {
-            mysqli_query_normal($db,"INSERT INTO dba_table_info (table_name) VALUES ('$table')");  // Not showing properly on Atom syntax highlighting
+            $fields = 'table_name';
+            $values = array('s',$table);
+            mysqli_insert_query($db,'dba_table_info',$fields,$values);
           }
           $last_display_order = 0;
 
@@ -742,10 +748,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 $where_values = array('s',$table);
                 if (mysqli_num_rows(mysqli_select_query($db,'','*',$where_clause,$where_values,'')) == 0)
                 {
-                  $query = "INSERT INTO dba_table_fields";
-                  $query .= " (table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order)";
-                  $query .= " VALUES ('$table','$field_name',$is_primary,$required,'$default_widget_type',$is_primary,$is_primary,$display_order)";
-                  mysqli_query_normal($db,$query);
+                  $fields = 'table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order';
+                  $values = array('s',$table,'s',$field_name,'i',$is_primary,'i',$required,'s',$default_widget_type,'i',$is_primary,'i',$is_primary,'i',$display_order);
+                  mysqli_insert_query($db,'dba_table_fields',$fields,$values);
                   print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
                 }
               }
@@ -822,31 +827,31 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
   mysqli_query_normal($db,"DELETE FROM dba_relationships WHERE table_name LIKE 'dba_%'");
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_table_info WHERE parent_table=\'$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables - Delete',\"{query}\")";
   $query = str_replace('{query}','# Do not include (too complex)',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables - Update',\"{query}\")";
   $query = str_replace('{query}','UPDATE dba_table_info SET parent_table=\'$table_name WHERE parent_table=\'$$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_table_fields WHERE table_name=\'$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields - Delete',\"{query}\")";
   $query = str_replace('{query}','DELETE FROM dba_table_fields WHERE table_name=\'$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields - Update',\"{query}\")";
   $query = str_replace('{query}','UPDATE dba_table_fields SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Relationships',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_relationships WHERE table_name=\'$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Relationships - Delete',\"{query}\")";
   $query = str_replace('{query}','DELETE FROM dba_relationships WHERE table_name=\'$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Relationships - Update',\"{query}\")";
   $query = str_replace('{query}','UPDATE dba_relationships SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'',$query);
-  mysqli_query_normal($db,$query);
+  mysqli_free_format_queryl($db,$query,array());
 
   // Uncomment the following line to activate it
   // mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name LIKE '_view_%'");

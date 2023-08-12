@@ -35,7 +35,7 @@ function import_table_from_csv($file_path,$db,$table,$method='long')
 			// Convert escape sequence for double quotes (CSV to MySQL)
 			$line = str_replace('""',"\\\"",$line);
 			// Add record to table
-			mysqli_query_normal($db,"INSERT INTO $table ($field_list) VALUES ($line)");
+			mysqli_free_format_query($db,"INSERT INTO $table ($field_list) VALUES ($line)",array());
 		}
 	}
 }

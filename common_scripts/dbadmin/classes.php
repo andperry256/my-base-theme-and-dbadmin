@@ -169,9 +169,7 @@ class tables_dba_table_fields
         if ((!empty($vocab_table)) && (!empty($vocab_field)))
         {
 
-          $where_clause = '';
-          $where_values = array();
-          if (mysqli_select_query($db,$vocab_table,$vocab_field,$where_clause,$where_values,'',false))
+          if (mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),'',false))
           {
             $valid_select = true;
           }
@@ -218,10 +216,8 @@ class tables_dba_sidebar_config
     $default_seq_no = DEFAULT_SEQ_NO;
     if ($display_order == $default_seq_no)
     {
-      $where_clause = "display_order<>$default_seq_no";
-      $where_values = array();
       $add_clause = 'ORDER BY display_order DESC LIMIT 1';
-      $query_result = mysqli_select_query($db,'dba_sidebar_config','*',$where_clause,$where_values,$add_clause);
+      $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',array(),$add_clause);
       if ($row = mysqli_fetch_assoc($query_result))
       {
         $new_display_order = $row['display_order'] + 10;

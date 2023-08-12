@@ -642,14 +642,12 @@ function display_table($params)
 	}
 
 	// Calculate pagination parameters
-  $where_clause = '';
-  $where_values = array();
 	$add_clause = get_session_var('sort_clause');
 	if (!empty(get_session_var('search_clause')))
 	{
 		$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
 	}
-  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 	$table_size = mysqli_num_rows($query_result);
 	$page_count = ceil($table_size / $list_size);
 	$current_page = floor($start_offset / $list_size +1);
@@ -808,14 +806,12 @@ function display_table($params)
 
 	// Process table records
 	$record_offset = $start_offset;
-  $where_clause = '';
-  $where_values = array();
   $add_clause = get_session_var('sort_clause')." LIMIT $start_offset,$list_size";
 	if (!empty(get_session_var('search_clause')))
 	{
 		$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
 	}
-  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 	$row_no = 0;
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
@@ -1008,14 +1004,12 @@ function delete_record_set($table)
 			// Build up array of deletions indexed by record ID.
 			if (is_numeric($record_offset))
 			{
-			  $where_clause = '';
-			  $where_values = array();
 			  $add_clause = get_session_var('sort_clause')." LIMIT $record_offset,1";
 				if (!empty(get_session_var('search_clause')))
 				{
 					$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
 				}
-			  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+			  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
 				  $where_clause = 'table_name=? AND is_primary=1';
@@ -1237,14 +1231,12 @@ function run_update($table,$option)
 				$record_offset = substr($key,7);
 				if (is_numeric($record_offset))
 				{
-				  $where_clause = '';
-				  $where_values = array();
 				  $add_clause = get_session_var('sort_clause'). "LIMIT $record_offset,1";
 					if (!empty(get_session_var('search_clause')))
 					{
 						$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
 					}
-				  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+				  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 					if ($row = mysqli_fetch_assoc($query_result))
 					{
 					  $where_clause = 'table_name=? AND is_primary=1';
@@ -1264,21 +1256,17 @@ function run_update($table,$option)
 	}
 	elseif ($option == 'all')
 	{
-	  $where_clause = '';
-	  $where_values = array();
 	  $add_clause = get_session_var('sort_clause');
 		if (!empty(get_session_var('search_clause')))
 		{
 			$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
 		}
-	  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+	  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 		$record_count = mysqli_num_rows($query_result);
 		for ($record_offset=0; $record_offset<$record_count; $record_offset++)
 		{
-		  $where_clause = '';
-		  $where_values = array();
 		  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
-		  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+		  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 			  $where_clause = 'table_name=? AND is_primary=1';
@@ -1558,14 +1546,12 @@ function run_copy($table)
 			$record_offset = substr($key,7);
 			if (is_numeric($record_offset))
 			{
-			  $where_clause = '';
-			  $where_values = array();
 			  $add_clause = get_session_var('sort_clause')." LIMIT $record_offset,1";
 				if (!empty(get_session_var('search_clause')))
 				{
 					$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
 				}
-			  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+			  $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
 				  $where_clause = 'table_name=? AND is_primary=1';
@@ -1729,14 +1715,10 @@ function renumber_records($table)
 		mysqli_free_format_query($db,"ALTER TABLE $table $saved_add_clause",array());
 
 		// Renumber records to temporary range (outside existing range)
-	  $where_clause = '';
-	  $where_values = array();
-	  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
+	  $query_result = mysqli_select_query($db,$table,'*','',array(),'');
 		$record_count = mysqli_num_rows($query_result);
-	  $where_clause = '';
-	  $where_values = array();
 	  $add_clause = "ORDER BY {$row['seq_no_field']} DESC LIMIT 1";
-	  $query_result2 = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
+	  $query_result2 = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 		if ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			$max_rec_id = $row2[$row['seq_no_field']];
@@ -1746,9 +1728,7 @@ function renumber_records($table)
 			$max_rec_id = 0;
 		}
 		$temp_rec_id = $max_rec_id + 10;
-		$where_clause = '';
-	  $where_values = array();
-		$query_result = mysqli_select_query($db,'','*',$where_clause,$where_values,$saved_add_clause);
+		$query_result = mysqli_select_query($db,'','*','',array(),$saved_add_clause);
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($level_1_sort)

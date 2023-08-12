@@ -15,14 +15,12 @@ $account_exclusions = select_excluded_accounts('label');
 // Initialise the balances array
 $balances = array();
 $where_clause = "label IS NOT NULL $account_exclusions";
-$where_values = array();
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
   $where_clause = "type='localised'";
-  $where_values = array();
-  $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
+  $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,array(),'');
 	while ($row2 = mysqli_fetch_assoc($query_result2))
 	{
 		$fund = $row2['name'];
@@ -33,9 +31,8 @@ while ($row = mysqli_fetch_assoc($query_result))
 
 // Calculate the balances
 $where_clause = "label IS NOT NULL $account_exclusions";
-$where_values = array();
 $add_clause = 'ORDER BY sort_order ASC';
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,$add_clause);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];
@@ -107,9 +104,8 @@ while ($row = mysqli_fetch_assoc($query_result))
 print("<h1>Account Balances</h1>\n");
 print("<table style=\"$table_style\">\n");
 $where_clause = "label IS NOT NULl $account_exclusions";
-$where_values = array();
 $add_clause = 'ORDER BY sort_order ASC';
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,$add_clause);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$account = $row['label'];

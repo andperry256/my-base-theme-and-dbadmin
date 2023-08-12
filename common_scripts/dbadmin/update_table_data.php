@@ -444,16 +444,14 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
   mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_orphan_table_info_records AS SELECT * FROM dba_table_info WHERE orphan=1");
   mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_orphan_table_field_records AS SELECT * FROM dba_table_fields WHERE orphan=1");
   $where_clause = "table_name='_view_orphan_table_info_records'";
-  $where_values = array();
-  if (mysqli_num_rows( mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0)
+  if (mysqli_num_rows( mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'')) == 0)
   {
     $fields = 'table_name,parent_table';
     $values = array('s','_view_orphan_table_info_records','s','dba_table_info');
     mysqli_insert_query($db,'dba_table_info',$fields,$values);
   }
   $where_clause = "table_name='_view_orphan_table_field_records'";
-  $where_values = array();
-  if (mysqli_num_rows( mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0)
+  if (mysqli_num_rows( mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'')) == 0)
   {
     $fields = 'table_name,parent_table';
     $values = array('s','_view_orphan_table_field_records','s','dba_table_fields');

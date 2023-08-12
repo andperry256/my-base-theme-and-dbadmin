@@ -30,9 +30,7 @@ if ((isset($_GET['message'])) && (!empty($_GET['message'])))
 	print($_GET['message']);
 }
 
-$where_clause = '';
-$where_values = array();
-$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'');
+$query_result = mysqli_select_query($db,'bank_import','*','',array(),'');
 if (mysqli_num_rows($query_result) == 0)
 {
 }
@@ -46,9 +44,8 @@ print("<select name=\"bank_transaction\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
 $where_clause = 'reconciled=0';
-$where_values = array();
 $add_clause = 'ORDER BY rec_id DESC';
-$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,$add_clause);
+$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$text = $row['date'].' | '.$row['description'].' | ';
@@ -86,9 +83,8 @@ print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
 print("<option value=\"NONE\">Discard Bank Transaction</option>\n");
 print("<option value=\"NEW\">Create New Transaction</option>\n");
 $where_clause = 'reconciled=0';
-$where_values = array();
 $add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
-$query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,$add_clause);
+$query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
 	$date = $row['date'];

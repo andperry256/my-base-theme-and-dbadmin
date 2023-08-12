@@ -10,9 +10,7 @@ if (isset($_POST['new_start_date']))
   $archive_end_date = AddDays($new_start_date,-1);
   $balances = array();
   $error = false;
-  $where_clause = '';
-  $where_values = array();
-  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
+  $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
   print("<p>");
   while (($row = mysqli_fetch_assoc($query_result)) && ($error === false))
   {
@@ -94,9 +92,7 @@ if (isset($_POST['new_start_date']))
   // Calculate the sequence number for the new 'Balance B/F' transaction
   // for each account.
   $bbf_seq_no = array();
-  $where_clause = '';
-  $where_values = array();
-  $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
+  $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
   while (($row = mysqli_fetch_assoc($query_result)) && ($error === false))
   {
     $account = $row['label'];
@@ -153,9 +149,7 @@ if (isset($_POST['new_start_date']))
     mysqli_query_normal($db,"DROP TABLE IF EXISTS archived_splits_$year");
     mysqli_query_normal($db,"CREATE TABLE archived_transactions_$year AS SELECT * FROM transactions WHERE date<='$archive_end_date'");
     mysqli_query_normal($db,"CREATE TABLE archived_splits_$year LIKE splits");
-    $where_clause = '';
-    $where_values = array();
-    $query_result = mysqli_select_query($db,"archived_transactions_$year",'*',$where_clause,$where_values,'');
+    $query_result = mysqli_select_query($db,"archived_transactions_$year",'*','',array(),'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
       $query = "INSERT INTO archived_splits_$year SELECT * FROM splits WHERE account=? AND transact_seq_no=?";
@@ -175,9 +169,7 @@ if (isset($_POST['new_start_date']))
     mysqli_query_normal($db,"DELETE FROM transactions WHERE date<'$new_start_date'");
 
     // Add new 'Balance B/F' transactions
-    $where_clause = '';
-    $where_values = array();
-    $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
+    $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
       print("Creating 'Balance B/F' transaction for account {$row['name']}<br />\n");

@@ -60,10 +60,8 @@ function display_sidebar_content()
   else
   {
     print("<table class=\"sidebar-table\">");
-    $where_clause = '';
-    $where_values = array();
     $add_clause = 'ORDER BY display_order ASC';
-    $query_result = mysqli_select_query($db,'dba_sidebar_config','*',$where_clause,$where_values,$add_clause);
+    $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',array(),$add_clause);
     while ($row = mysqli_fetch_assoc($query_result))
     {
       $label = $row['label'];
@@ -321,9 +319,7 @@ function display_main_content($mode)
         print("<h1>Renumber Records</h1>\n");
         $fields = '';
         $where_clause = 'renumber_enabled=1';
-        $where_values = array();
-        $add_clause = '';
-        $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,$add_clause);
+        $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
         while ($row = mysqli_fetch_assoc($query_result))
         {
           renumber_records($row['table_name']);

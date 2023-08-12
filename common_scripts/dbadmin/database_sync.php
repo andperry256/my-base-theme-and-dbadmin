@@ -65,8 +65,7 @@ function sync_databases($local_db_name)
 						fprintf($ofp,"## LOCKED ##\n");
 						$count = 0;
 					  $where_clause = "table_name NOT LIKE '%dba_%'";
-					  $where_values = array();
-					  $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
+					  $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,array(),'');
 						while ($row2 = mysqli_fetch_assoc($query_result2))
 						{
 							$relationship_name_par = addslashes($row2['relationship_name']);

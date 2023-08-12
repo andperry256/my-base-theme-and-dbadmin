@@ -1743,14 +1743,13 @@ function post_change_snapshot($record)
 
 		// Add record to change log
 		$date_and_time = date('Y-m-d H:i:s');
-		$details = addslashes($details);
 		if ($action == 'Delete')
 		{
 			$record_id = $pre_change_snapshot_fields['-recordid'];
 		}
-		$query = "INSERT INTO dba_change_log (date_and_time,table_name,action,record_id,details)";
-		$query .= " VALUES ('$date_and_time','$table','$action','$record_id','$details')";
-		mysqli_query_normal($db,$query);
+		$fields = 'date_and_time,table_name,action,record_id,details';
+	  $values = array('s',$date_and_time,'s',$table,'s',$action,'s',$record_id,'s',$details);
+	  mysqli_insert_query($db,'dba_change_log',$fields,$values);
 	}
 }
 

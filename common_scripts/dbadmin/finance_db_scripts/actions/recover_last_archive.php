@@ -19,8 +19,10 @@ if (isset($_POST['archive_end_date']))
   }
   mysqli_query_normal($db,"DELETE FROM transactions WHERE payee='Balance B/F' AND acct_month='$archive_end_month'");
   print("Copying transactions from archive<br />\n");
-  mysqli_query_normal($db,"INSERT INTO transactions SELECT * FROM archived_transactions_$archive_year");
-  mysqli_query_normal($db,"INSERT INTO splits SELECT * FROM archived_splits_$archive_year");
+  $query = "INSERT INTO transactions SELECT * FROM archived_transactions_$archive_year";
+  mysqli_free_format_query($db,$query,array());
+  $query = "INSERT INTO splits SELECT * FROM archived_splits_$archive_year";
+  mysqli_free_format_query($db,$query,array());
   print("Operation completed.</p>\n");
 }
 else

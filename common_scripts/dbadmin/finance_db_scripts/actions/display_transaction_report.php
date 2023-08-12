@@ -198,8 +198,8 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			$chq_no = 'NULL';
 		}
 		$fields = "account,seq_no,split_no,date,chq_no,payee,credit_amount,debit_amount,fund,category,memo,acct_month,reconciled,target_account,source_account";
-		$values = "'{$row['account']}', {$row['seq_no']}, 0, '{$row['date']}', $chq_no, '$payee', {$row['credit_amount']}, {$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}', {$row['reconciled']}, '{$row['target_account']}', '{$row['source_account']}'";
-		mysqli_query_normal($db,"INSERT INTO report ($fields) VALUES ($values)");
+		$values = array('s',$row['account'],'i',$row['seq_no'],'i',0,'s',$row['date'],'i',$chq_no,'s','$payee','d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$memo,'s',$row['acct_month'],'i',$row['reconciled'],'s',$row['target_account'],'s',$row['source_account']);
+		mysqli_insert_query($db,'',$fields,$values);
 	}
 
 	// Process associated splits as required
@@ -220,7 +220,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			{
 				// Add split with matching parameters into the table
 				$memo = addslashes($row['memo']);
-				mysqli_query_normal($db,"INSERT INTO report (account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES ('{$row['account']}', {$row['transact_seq_no']}, {$row['split_no']}, {$row['credit_amount']}, {$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}')");
+				$fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
+			  $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$memo,'s',$row['acct_month']);
+			  mysqli_insert_query($db,'report',$fields,$values);
 				// Add record fields from parent transaction
 				if (!empty($row2['chq_no']))
 				{
@@ -240,8 +242,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
-				$memo = addslashes($row['memo']);
-				mysqli_query_normal($db,"INSERT INTO report (account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES ('{$row['account']}', {$row['transact_seq_no']}, {$row['split_no']}, -{$row['credit_amount']}, -{$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}')");
+				$fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
+			  $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',-$row['credit_amount'],'d',-$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+			  mysqli_insert_query($db,'report',$fields,$values);
 				// Add record fields from parent transaction
 				if (!empty($row2['chq_no']))
 				{
@@ -271,8 +274,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
-				$memo = addslashes($row['memo']);
-				mysqli_query_normal($db,"INSERT INTO report (account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES ('{$row['account']}', {$row['transact_seq_no']}, {$row['split_no']}, {$row['credit_amount']}, {$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}')");
+				$fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
+			  $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+			  mysqli_insert_query($db,'report',$fields,$values);
 				// Add record fields from parent transaction
 				if (!empty($row2['chq_no']))
 				{

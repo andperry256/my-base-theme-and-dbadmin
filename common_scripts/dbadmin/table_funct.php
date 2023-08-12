@@ -484,7 +484,7 @@ function display_table($params)
 	if (isset($_GET['-where']))
 	{
 		$where_clause = stripslashes($_GET['-where']);
-		update_session_var('search_clause',"WHERE $where_clause");
+		update_session_var('search_clause',$where_clause);
 	}
 	if (!session_var_is_set('filtered_table'))
 	{
@@ -539,7 +539,7 @@ function display_table($params)
 				if (!empty($_POST['search_string']))
 				{
 					$lc_search_string = strtolower($_POST['search_string']);
-					$search_clause = "WHERE";
+					$search_clause = '';
 					$field_processed = false;
 					$query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 					while ($row = mysqli_fetch_assoc($query_result))
@@ -644,7 +644,11 @@ function display_table($params)
 	// Calculate pagination parameters
   $where_clause = '';
   $where_values = array();
-  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause');
+	$add_clause = get_session_var('sort_clause');
+	if (!empty(get_session_var('search_clause')))
+	{
+		$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+	}
   $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 	$table_size = mysqli_num_rows($query_result);
 	$page_count = ceil($table_size / $list_size);
@@ -806,7 +810,11 @@ function display_table($params)
 	$record_offset = $start_offset;
   $where_clause = '';
   $where_values = array();
-  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $start_offset,$list_size";
+  $add_clause = get_session_var('sort_clause')." LIMIT $start_offset,$list_size";
+	if (!empty(get_session_var('search_clause')))
+	{
+		$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+	}
   $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 	$row_no = 0;
 	while ($row = mysqli_fetch_assoc($query_result))
@@ -1002,7 +1010,11 @@ function delete_record_set($table)
 			{
 			  $where_clause = '';
 			  $where_values = array();
-			  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
+			  $add_clause = get_session_var('sort_clause')." LIMIT $record_offset,1";
+				if (!empty(get_session_var('search_clause')))
+				{
+					$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+				}
 			  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 				if ($row = mysqli_fetch_assoc($query_result))
 				{
@@ -1227,7 +1239,11 @@ function run_update($table,$option)
 				{
 				  $where_clause = '';
 				  $where_values = array();
-				  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause'). "LIMIT $record_offset,1";
+				  $add_clause = get_session_var('sort_clause'). "LIMIT $record_offset,1";
+					if (!empty(get_session_var('search_clause')))
+					{
+						$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+					}
 				  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 					if ($row = mysqli_fetch_assoc($query_result))
 					{
@@ -1250,7 +1266,11 @@ function run_update($table,$option)
 	{
 	  $where_clause = '';
 	  $where_values = array();
-	  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause');
+	  $add_clause = get_session_var('sort_clause');
+		if (!empty(get_session_var('search_clause')))
+		{
+			$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+		}
 	  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 		$record_count = mysqli_num_rows($query_result);
 		for ($record_offset=0; $record_offset<$record_count; $record_offset++)
@@ -1540,7 +1560,11 @@ function run_copy($table)
 			{
 			  $where_clause = '';
 			  $where_values = array();
-			  $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
+			  $add_clause = get_session_var('sort_clause')." LIMIT $record_offset,1";
+				if (!empty(get_session_var('search_clause')))
+				{
+					$add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+				}
 			  $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,$add_clause);
 				if ($row = mysqli_fetch_assoc($query_result))
 				{

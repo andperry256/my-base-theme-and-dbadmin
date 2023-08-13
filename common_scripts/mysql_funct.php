@@ -339,7 +339,7 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
 			}
 			$pos = strpos($query,'?',$pos);
 			$query = substr($query,0,$pos).$param.substr($query,$pos+1);
-			$pos++;
+			$pos += strlen($param) + 1;
 		}
 		return run_mysqli_query($db,$query,$strict);
 	}
@@ -417,7 +417,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
 			}
 			$pos = strpos($query,'?',$pos);
 			$query = substr($query,0,$pos).$param.substr($query,$pos+1);
-			$pos++;
+			$pos += strlen($param) + 1;
 		}
 		return run_mysqli_query($db,$query,$strict);
 	}
@@ -547,7 +547,7 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
 			}
 			$pos = strpos($query,'?',$pos);
 			$query = substr($query,0,$pos).$param.substr($query,$pos+1);
-			$pos++;
+			$pos += strlen($param) + 1;
 		}
 		return run_mysqli_query($db,$query,$strict);
 	}
@@ -615,7 +615,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true)
 				}
 				$pos = strpos($query,'?',$pos);
 				$query = substr($query,0,$pos).$param.substr($query,$pos+1);
-				$pos++;
+				$pos += strlen($param) + 1;
 			}
 		}
 		return run_mysqli_query($db,$query,$strict);

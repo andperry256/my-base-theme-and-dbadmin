@@ -167,7 +167,9 @@ function unlink_transaction($account,$seq_no)
 		// Delete transaction if not reconciled. Otherwise update it to break the link with the transfer source.
 		if (!$row['reconciled'])
 		{
-			mysqli_query_normal($db,"DELETE FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+			$where_clause = 'account=? AND seq_no=?';
+		  $where_values = array('s',$account,'i',$seq_no);
+		  mysqli_delete_query($db,'transactions',$where_clause,$where_values);
 		}
 		else
 		{

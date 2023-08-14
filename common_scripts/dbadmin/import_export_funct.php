@@ -17,7 +17,7 @@ Long -  This performs the operation long hand to avoid having to set up any
 
 function import_table_from_csv($file_path,$db,$table,$method='long')
 {
-	mysqli_query_normal($db,"DELETE FROM $table");
+	mysqli_delete_query($db,$table,'1',array());
 	if ($method == 'short')
 	{
 		$query = "LOAD DATA INFILE '$file_path' INTO TABLE $table FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n'";

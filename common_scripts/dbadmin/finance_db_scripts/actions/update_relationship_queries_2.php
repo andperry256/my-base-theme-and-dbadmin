@@ -5,7 +5,7 @@ global $DBAdminDir,$CustomPagesPath,$RelativePath;
 $db = admin_db_connect();
 print("<h1>Update Relationship Queries</h1>\n");
 $sql_scripts = file("$DBAdminDir/finance_db_scripts/relationships.sql");
-mysqli_query_normal($db,"DELETE FROM dba_relationships");
+mysqli_delete_query($db,'dba_relationships','1',array());
 $count = 0;
 foreach ($sql_scripts as $line)
 {

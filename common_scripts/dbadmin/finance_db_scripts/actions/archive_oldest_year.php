@@ -164,9 +164,13 @@ if (isset($_POST['new_start_date']))
     $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
-      mysqli_query_normal($db,"DELETE FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");
+      $where_clause = 'account=? AND transact_seq_no=?';
+      $where_values = array('s',$row['account'],'i',$row['seq_no']);
+      mysqli_delete_query($db,'splits',$where_clause,$where_values);
     }
-    mysqli_query_normal($db,"DELETE FROM transactions WHERE date<'$new_start_date'");
+    $where_clause = 'date<?';
+    $where_values = array('s',$new_start_date);
+    mysqli_delete_query($db,'transactions',$where_clause,$where_values);
 
     // Add new 'Balance B/F' transactions
     $query_result = mysqli_select_query($db,'accounts','*','',array(),'');

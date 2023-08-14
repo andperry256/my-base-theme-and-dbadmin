@@ -10,7 +10,9 @@ while ($row = mysqli_fetch_assoc($query_result))
 {
 	print("<p>Payee <em>{$row['name']}</em> deleted.</p>\n");
 }
-$query_result = mysqli_query_normal($db,"DELETE FROM payees WHERE instances=0");
+$where_clause = 'instances=0';
+$where_values = array();
+mysqli_delete_query($db,'payees',$where_clause,$where_values);
 print("<p>Operation completed.</p>\n");
 
 //==============================================================================

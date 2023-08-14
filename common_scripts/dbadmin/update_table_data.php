@@ -764,7 +764,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
             $field_name = $row2['field_name'];
             if (!isset($field_list[$field_name]))
             {
-              mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name='$table' AND field_name='$field_name'");
+              $where_clause = 'table_name=? AND field_name=?';
+              $where_values = array('s',$table,'s',$field_name);
+              mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
               print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
             }
           }
@@ -822,7 +824,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
   // Add/re-create relationships for built-in tables
   // The queries are built the way they are due to problems with syntax highlighting in Atom
-  mysqli_query_normal($db,"DELETE FROM dba_relationships WHERE table_name LIKE 'dba_%'");
+  $where_clause = "table_name LIKE 'dba_%'";
+  $where_values = array();
+  mysqli_delete_query($db,'dba_relationships',$where_clause,$where_values);
   $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables',\"{query}\")";
   $query = str_replace('{query}','SELECT * FROM dba_table_info WHERE parent_table=\'$table_name\'',$query);
   mysqli_free_format_queryl($db,$query,array());

@@ -33,7 +33,7 @@
   if (($bank_transaction == 'IMPORT') && ($account_transaction == 'IMPORT'))
   {
     // Populate bank import table from CSV file
-    mysqli_query_normal($db,"DELETE FROM bank_import");
+    mysqli_delete_query($db,'bank_import','1',array());
   	$import_data = array();
   	$import_data = file("$BankImportDir/Account_$account.csv");
   	$first_line_skipped = false;

@@ -49,7 +49,9 @@ else
 				{
 					mysqli_query_normal($db,"UPDATE splits SET $entity='$target' WHERE  $entity='$source'");
 				}
-				mysqli_query_normal($db,"DELETE from $type WHERE name='$source'");
+				$where_clause = 'name=?';
+			  $where_values = array('s',$source);
+			  mysqli_delete_query($db,$type,$where_clause,$where_values);
 				print("<p>$Entity <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
 				print("<p><a href=\"index.php?-action=merge_entities&type={$_POST['type']}\"><button>Go Back</button></a></p>\n");
 				$show_form = false;

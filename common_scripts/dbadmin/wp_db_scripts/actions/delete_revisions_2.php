@@ -3,13 +3,17 @@
 	$db = admin_db_connect();
 
 	// Remove post records
-	mysqli_query_normal($db,"DELETE FROM wp_posts WHERE post_type='revision' OR post_status='auto-draft'");
+	$where_clause = "post_type='revision' OR post_status='auto-draft'";
+  $where_values = array();
+  mysqli_delete_query($db,'wp_posts',$where_clause,$where_values);
 
 	// Remove orphan post meta records
 	$query_result = mysqli_free_format_query($db,"SELECT post_id,post_name FROM wp_postmeta LEFT JOIN wp_posts ON wp_posts.ID=wp_postmeta.post_ID WHERE ID IS NULL",array());
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
-		mysqli_query_normal($db,"DELETE FROM wp_postmeta WHERE post_id={$row['post_id']}");
+		$where_clause = 'post_id=?';
+	  $where_values = array('i',$row['post_id']);
+	  mysqli_delete_query($db,'wp_postmeta',$where_clause,$where_values);
 	}
 ?>
 <p>Action Completed</p>

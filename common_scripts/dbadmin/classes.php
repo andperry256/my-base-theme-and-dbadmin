@@ -106,7 +106,9 @@ class tables_dba_table_info
 	{
     $db = admin_db_connect();
     $table = $record->FieldVal('table_name');
-    mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name='$table'");
+    $where_clause = 'table_name=?';
+    $where_values = array('s',$table);
+    mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
 	}
 }
 

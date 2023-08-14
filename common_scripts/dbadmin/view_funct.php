@@ -133,7 +133,9 @@ function delete_view_structure($view,$table)
   {
 		unlink($link);
   }
-  mysqli_query_normal($db,"DELETE FROM dba_table_info WHERE table_name='$view' AND parent_table='$table'");
+	$where_clause = 'table_name=? AND parent_table=?';
+  $where_values = array('s',$view,'s',$table);
+  mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
 }
 
 //==============================================================================
@@ -217,7 +219,9 @@ function delete_child_table_structure($child,$parent)
   {
 		unlink($link);
   }
-  mysqli_query_normal($db,"DELETE FROM dba_table_info WHERE table_name='$child' AND parent_table='$parent'");
+	$where_clause = 'table_name=? AND parent_table=?';
+  $where_values = array('s',$child,'s',$parent);
+  mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
 }
 
 //==============================================================================

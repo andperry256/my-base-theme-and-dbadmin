@@ -507,12 +507,15 @@ The query result is returned.
 
 function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=false)
 {
-	// N.B. Query must have a WHERE clause.
-	$query = "DELETE FROM $table WHERE $where_clause";
+	$query = "DELETE FROM $table";
 	$where_values_count = count($where_values);
-	if ($where_values_count != (substr_count($where_clause,'?')*2) || ($where_values_count == 0))
+	if ($where_values_count != (substr_count($where_clause,'?')*2))
 	{
 		raise_query_validation_error($query);
+	}
+	if (!empty($where_clause))
+	{
+		$query .= " WHERE $where_clause";
 	}
 	if (USE_PREPARED_STATEMENTS)
 	{

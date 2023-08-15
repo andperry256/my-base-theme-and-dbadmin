@@ -1728,7 +1728,7 @@ function renumber_records($table)
 			$max_rec_id = 0;
 		}
 		$temp_rec_id = $max_rec_id + 10;
-		$query_result = mysqli_select_query($db,'','*','',array(),$saved_add_clause);
+		$query_result = mysqli_select_query($db,$table,'*','',array(),$saved_add_clause);
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($level_1_sort)

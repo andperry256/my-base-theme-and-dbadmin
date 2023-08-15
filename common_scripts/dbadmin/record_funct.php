@@ -1650,7 +1650,7 @@ function pre_change_snapshot($record)
 			$where_values2[count($where_values2)] = $field_value;
 		}
 		$where_clause2 = rtrim($where_clause2,' AND');
-		if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'','*',$where_clause2,$where_values2,'')))
+		if ($row = mysqli_fetch_assoc(mysqli_select_query($db,$table,'*',$where_clause2,$where_values2,'')))
 		{
 			// Add record field details to the snapshot array and build the
 			// record ID string.

@@ -744,7 +744,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 // primary key fields only.
                 $where_clause = 'table_name=?';
                 $where_values = array('s',$table);
-                if (mysqli_num_rows(mysqli_select_query($db,'','*',$where_clause,$where_values,'')) == 0)
+                if (mysqli_num_rows(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'')) == 0)
                 {
                   $fields = 'table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order';
                   $values = array('s',$table,'s',$field_name,'i',$is_primary,'i',$required,'s',$default_widget_type,'i',$is_primary,'i',$is_primary,'i',$display_order);

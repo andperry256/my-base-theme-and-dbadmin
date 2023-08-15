@@ -324,7 +324,7 @@ function output_mail($mail_info,$host,$attachments=array())
 	{
 		$where_clause = 'orig_domain=?';
 	  $where_values = array('s',$host);
-	  $query_result = mysqli_select_query($db,'','*',$where_clause,$where_values,'');
+	  $query_result = mysqli_select_query($db,'mail_routes','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Create PHPMailer object

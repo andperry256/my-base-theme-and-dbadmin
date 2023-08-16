@@ -218,7 +218,11 @@ if (isset($_POST['new_start_date']))
         }
         $credit = ($splits_total > 0) ? $splits_total : 0;
         $debit = ($splits_total < 0) ? -$splits_total : 0;
-        mysqli_query_normal($db,"UPDATE transactions SET credit_amount=$credit,debit_amount=$debit WHERE account='$account' AND seq_no=$transaction_seq_no");
+        $set_fields = 'credit_amount,debit_amount';
+        $set_values = array('d',$credit,'d',$debit);
+        $where_clause = 'account=? AND seq_no=?';
+        $where_values = array('s',$account,'d',$transaction_seq_no);
+        mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         update_account_balances($account,$new_start_date);
       }
     }

@@ -100,14 +100,26 @@ function create_view_structure($view,$table,$conditions)
 			new table info record, thus allowing a view to be subsequently altered from
 			the parent table should that ever be required.
 			*/
-			mysqli_query_normal($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$view'");
-			mysqli_query_normal($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$view'");
+			$set_fields = 'local_access';
+		  $set_values = array('s',$row2['local_access']);
+		  $where_clause = 'table_name=?';
+		  $where_values = array('s',$view);
+		  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
+			$set_fields = 'real_access';
+		  $set_values = array('s',$row2['real_access']);
+			$where_clause = 'table_name=?';
+		  $where_values = array('s',$view);
+		  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
 		}
 	}
 	else
 	{
 		// Update existing table info record
-		mysqli_query_normal($db,"UPDATE dba_table_info SET parent_table='$table' WHERE table_name='$view'");
+		$set_fields = 'parent_table';
+	  $set_values = array('s',$table);
+		$where_clause = 'table_name=?';
+		$where_values = array('s',$view);
+	  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
 	}
 }
 
@@ -186,14 +198,26 @@ function create_child_table_structure($child,$parent)
 			this for a new table info record, thus allowing a child table to be
 			subsequently altered from	the parent table should that ever be required.
 			*/
-			mysqli_query_normal($db,"UPDATE dba_table_info SET local_access='{$row2['local_access']}' WHERE table_name='$child'");
-			mysqli_query_normal($db,"UPDATE dba_table_info SET real_access='{$row2['real_access']}' WHERE table_name='$child'");
+			$set_fields = 'local_access';
+		  $set_values = array('s',$row2['local_access']);
+		  $where_clause = 'table_name=?';
+		  $where_values = array('s',$child);
+		  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
+			$set_fields = 'real_access';
+		  $set_values = array('s',$row2['real_access']);
+			$where_clause = 'table_name=?';
+		  $where_values = array('s',$child);
+		  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
 		}
 	}
 	else
 	{
 		// Update existing table info record
-		mysqli_query_normal($db,"UPDATE dba_table_info SET parent_table='$parent' WHERE table_name='$child'");
+		$set_fields = 'parent_table';
+	  $set_values = array('s',$parent);
+		$where_clause = 'table_name=?';
+		$where_values = array('s',$child);
+	  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
 	}
 }
 
@@ -233,7 +257,11 @@ Function set_primary_key_on_view
 function set_primary_key_on_view($table,$field)
 {
 	$db = admin_db_connect();
-	mysqli_query_normal($db,"UPDATE dba_table_fields SET is_primary=1,required=2 WHERE table_name='$table' AND field_name='$field'");
+	$set_fields = 'is_primary,required';
+  $set_values = array('i',1,'i',2);
+  $where_clause = 'table_name=? AND field_name=?';
+  $where_values = array('s',$table,'s',$field);
+  mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 }
 
 //==============================================================================
@@ -245,7 +273,11 @@ Function clear_primary_key_on_view
 function clear_primary_key_on_view($table,$field)
 {
 	$db = admin_db_connect();
-	mysqli_query_normal($db,"UPDATE dba_table_fields SET is_primary=0,required=0 WHERE table_name='$table' AND field_name='$field'");
+	$set_fields = 'is_primary,required';
+  $set_values = array('i',0,'i',0);
+	$where_clause = 'table_name=? AND field_name=?';
+  $where_values = array('s',$table,'s',$field);
+  mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 }
 
 //==============================================================================

@@ -8,7 +8,11 @@ if ($mode == 'mobile')
 {
   $where_clause = "table_name='transactions'";
   $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','grid_columns',$where_clause,array(),''));
-  mysqli_query_normal($db,"UPDATE dba_table_info SET grid_columns='{$row['grid_columns']}' WHERE parent_table='transactions' OR parent_table LIKE '_view_transactions%'");
+  $set_fields = 'grid_columns';
+  $set_values = array('s',$row['grid_columns']);
+  $where_clause = "parent_table='transactions' OR parent_table LIKE '_view_transactions%'";
+  $where_values = array();
+  mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
 }
 $account = $table;
 if (substr($account,0,14) == '_view_account_')

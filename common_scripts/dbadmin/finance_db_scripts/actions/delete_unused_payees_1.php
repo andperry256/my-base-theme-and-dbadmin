@@ -14,7 +14,11 @@ while ($row = mysqli_fetch_assoc($query_result))
 	  $where_values = array('s',$payee);
 	  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		$count = mysqli_num_rows($query_result2);
-		mysqli_query_normal($db,"UPDATE payees SET instances=$count WHERE name='$payee'");
+		$set_fields = 'instances';
+	  $set_values = array('i',$count);
+	  $where_clause = 'name=?';
+	  $where_values = array('s',$payee);
+	  mysqli_update_query($db,'payees',$set_fields,$set_values,$where_clause,$where_values);
 		if (($count == 0) && ($row['locked'] == 0))
 		{
 			print("<li>{$row['name']}</li>\n");

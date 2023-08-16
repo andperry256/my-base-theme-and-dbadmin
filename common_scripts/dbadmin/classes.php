@@ -228,7 +228,11 @@ class tables_dba_sidebar_config
       {
         $new_display_order = 10;
       }
-      mysqli_query_normal($db,"UPDATE dba_sidebar_config SET display_order=$new_display_order WHERE display_order=$default_seq_no");
+      $set_fields = 'display_order';
+      $set_values = array('i',$new_display_order);
+      $where_clause = 'display_order=?';
+      $where_values = array('i',$default_seq_no);
+      mysqli_update_query($db,'dba_sidebar_config',$set_fields,$set_values,$where_clause,$where_values);
     }
 	}
 }
@@ -270,8 +274,12 @@ class tables_admin_passwords
 		$new_passwd = $record->FieldVal('new_passwd');
 		if (!empty($new_passwd))
 		{
-			$enc_passwd = addslashes(password_hash($new_passwd,PASSWORD_DEFAULT));
-			mysqli_query_normal($db,"UPDATE admin_passwords SET new_passwd='',conf_new_passwd='',enc_passwd='$enc_passwd' WHERE username='$username'");
+			$enc_passwd = password_hash($new_passwd,PASSWORD_DEFAULT);
+      $set_fields = 'new_passwd,conf_new_passwd,enc_passwd';
+      $set_values = array('s','','s','','s',$enc_passwd);
+      $where_clause = 'username=?';
+      $where_values = array('s',$username);
+      mysqli_update_query($db,'admin_passwords',$set_fields,$set_values,$where_clause,$where_values);
 		}
 	}
 }

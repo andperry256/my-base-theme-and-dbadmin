@@ -2,7 +2,11 @@
 	$db = admin_db_connect();
 	create_view_structure('_view_pages','wp_posts',"post_type='page' AND (post_status='draft' OR post_status='publish') ORDER BY post_name ASC");
 	create_view_structure('_view_posts','wp_posts',"post_type='post' AND (post_status='draft' OR post_status='publish') ORDER BY post_name ASC");
-	mysqli_query_normal($db,"UPDATE wp_posts SET post_content='[No WordPress content - see custom scripts]' WHERE post_type='page' AND (post_content IS NULL OR post_content='')");
+	$set_fields = 'post_content';
+  $set_values = array('s','[No WordPress content - see custom scripts]');
+  $where_clause = "post_type='page' AND (post_content IS NULL OR post_content=''";
+  $where_values = array();
+  mysqli_update_query($db,'wp_posts',$set_fields,$set_values,$where_clause,$where_values);
 ?>
 <p><strong>WARNING</strong> - You are editing the main WordPress database. Please do so with caution!!<p>
 	<ul>

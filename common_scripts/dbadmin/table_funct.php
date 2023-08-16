@@ -1733,11 +1733,19 @@ function renumber_records($table)
 		{
 			if ($level_1_sort)
 			{
-				mysqli_query_normal($db,"UPDATE $table SET {$row['seq_no_field']}=$temp_rec_id WHERE {$row['sort_1_field']}='{$row2[$row['sort_1_field']]}' AND {$row['seq_no_field']}={$row2[$row['seq_no_field']]}");
+				$set_fields = "{$row['seq_no_field']}";
+			  $set_values = array('i',$temp_rec_id);
+			  $where_clause = "{$row['sort_1_field']}=? AND {$row['seq_no_field']}=?";
+			  $where_values = array('i',$row2[$row['sort_1_field']],'i',$row2[$row['seq_no_field']]);
+			  mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
 			}
 			else
 			{
-				mysqli_query_normal($db,"UPDATE $table SET {$row['seq_no_field']}=$temp_rec_id WHERE {$row['seq_no_field']}={$row2[$row['seq_no_field']]}");
+				$set_fields = "{$row['seq_no_field']}";
+			  $set_values = array('i',$temp_rec_id);
+			  $where_clause = "{$row['seq_no_field']}=?";
+			  $where_values = array('i',$row2[$row['seq_no_field']]);
+			  mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
 			}
 			$temp_rec_id += 10;
 		}
@@ -1756,7 +1764,11 @@ function renumber_records($table)
 			{
 				$new_id += 10;
 			}
-			mysqli_query_normal($db,"UPDATE $table SET {$row['seq_no_field']}=$new_id WHERE {$row['seq_no_field']}={$row2[$row['seq_no_field']]}");
+			$set_fields = "{$row['seq_no_field']}";
+		  $set_values = array('i',$new_id);
+		  $where_clause = "{$row['seq_no_field']}=?";
+		  $where_values = array('i',$row2[$row['seq_no_field']]);
+		  mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
 			if ($row['seq_method'] == 'repeat')
 			{
 				$first_sort_prev_value = $row2[$row['sort_1_field']];

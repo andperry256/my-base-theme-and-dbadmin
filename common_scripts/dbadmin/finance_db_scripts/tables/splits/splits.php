@@ -225,7 +225,11 @@ class tables_splits
 		rationalise_transaction($account,$transact_seq_no);
 
 		// Re-update record
-		mysqli_query_normal($db,"UPDATE splits SET split_no=$split_no,credit_amount=$credit_amount,debit_amount=$debit_amount,auto_amount=0,fund='$fund',category='$category',acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$old_split_no");
+		$set_fields = 'split_no,credit_amount,debit_amount,auto_amount,fund,category,acct_month';
+	  $set_values = array('i',$split_no,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'s',);
+	  $where_clause = 'account=? AND transact_seq_no=? AND split_no=?';
+	  $where_values = array('s',$account,'i',$transact_seq_no,'i',$old_split_no);
+	  mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
 
 		if (!headers_sent())
 		{

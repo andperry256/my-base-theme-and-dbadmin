@@ -77,7 +77,7 @@ class tables_splits
 		$auto_amount = $record->FieldVal('auto_amount');
 		$fund = $record->FieldVal('fund');
 		$category = $record->FieldVal('category');
-		$memo = addslashes($record->FieldVal('memo'));
+		$memo = $record->FieldVal('memo');
 		$acct_month = $record->FieldVal('acct_month');
 		$old_split_no = $record->FieldVal('split_no');
 		if ($action == 'new')

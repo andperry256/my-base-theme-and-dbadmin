@@ -42,12 +42,10 @@ else
 		elseif ($_POST['confirm'] == 'YES')
 		{
 				// Run the merge
-				$source = addslashes($_POST['source']);
-				$target = addslashes($_POST['target']);
 				$set_fields = "$entity";
-			  $set_values = array($target);
+			  $set_values = array('s',$_POST['target']);
 			  $where_clause = "$entity=?";
-			  $where_values = array('s',$source);
+			  $where_values = array('s',$_POST['source']);
 			  mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
 				if ($type != 'payees')
 				{

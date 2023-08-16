@@ -555,7 +555,7 @@ function run_relationship_update_queries($record)
 			{
 				$leading_char = substr($matches[0],0,1);
 				$field_name = substr($matches[0],3);
-				$value = addslashes($record->OldPKVal($field_name));
+				$value = $record->OldPKVal($field_name);
 				$value = str_replace('$','\\$',$value);
 				$query = str_replace($matches[0],"$leading_char$value",$query);
 			}
@@ -567,7 +567,7 @@ function run_relationship_update_queries($record)
 			{
 				$leading_char = substr($matches[0],0,1);
 				$field_name = substr($matches[0],2);
-				$value = addslashes($record->FieldVal($field_name));
+				$value = $record->FieldVal($field_name);
 				$value = str_replace('$','\\$',$value);
 				$query = str_replace($matches[0],"$leading_char$value",$query);
 			}
@@ -626,7 +626,7 @@ function run_relationship_delete_query($query,$remainder)
         		{
         			$leading_char = substr($matches[0],0,1);
         			$field_name = substr($matches[0],2);
-        			$value = addslashes($row[$field_name]);
+        			$value = $row[$field_name];
         			$value = str_replace('$','\\$',$value);
         			$query2 = str_replace($matches[0],"$leading_char$value",$query2);
         		}
@@ -665,7 +665,7 @@ function run_relationship_delete_queries($record)
 		{
 			$leading_char = substr($matches[0],0,1);
 			$field_name = substr($matches[0],2);
-			$value = addslashes($record->FieldVal($field_name));
+			$value = $record->FieldVal($field_name);
 			$value = str_replace('$','\\$',$value);
 			$query = str_replace($matches[0],"$leading_char$value",$query);
 		}

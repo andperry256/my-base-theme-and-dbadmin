@@ -450,20 +450,20 @@ function copy_transaction($account,$seq_no,$new_date)
 	  mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
 		mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_transactions");
 		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
-		mysqli_free_format_query($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no",array());
+		mysqli_query_normal($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
 		mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_splits");
 		mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
-		mysqli_free_format_query($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no",array());
+		mysqli_query_normal($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
 		$new_seq_no = next_seq_no($account);
 		$new_acct_month = accounting_month($new_date);
 		$set_fields = 'seq_no,date,acct_month,reconciled';
 	  $set_values = array('i',$new_seq_no,'s',$new_date,'s',$new_acct_month,'i',0);
 	  mysqli_update_query($db,'temp_transactions',$set_fields,$set_values,'',array());
-		mysqli_free_format_query($db,"INSERT INTO transactions SELECT * FROM temp_transactions",array());
+		mysqli_query_normal($db,"INSERT INTO transactions SELECT * FROM temp_transactions");
 		$set_fields = 'transact_seq_no,acct_month';
 	  $set_values = array('i',$new_seq_no,'s',$new_acct_month);
 	  mysqli_update_query($db,'temp_splits',$set_fields,$set_values,'',array());
-		mysqli_free_format_query($db,"INSERT INTO splits SELECT * FROM temp_splits",array());
+		mysqli_query_normal($db,"INSERT INTO splits SELECT * FROM temp_splits");
 		update_account_balances($account,$new_date);
 
 		// Create transfer if required
@@ -679,7 +679,9 @@ function initialise_archive_table_data($db)
 				  mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 				}
 				$splits_table = str_replace('transactions','splits',$table);
-				mysqli_free_format_query($db,"INSERT INTO dba_relationships VALUES ('$table','Splits','SELECT * FROM $splits_table WHERE transact_seq_no=$seq_no')",array());
+				$fields = 'table_name,relationship_name,query';
+			  $values = array('s',$table,'s','Splits','s',"SELECT * FROM $splits_table WHERE transact_seq_no=$seq_no");
+			  mysqli_insert_query($db,'dba_relationships',$fields,$values);
 			}
 			elseif (substr($table,9,5) == 'split')
 			{

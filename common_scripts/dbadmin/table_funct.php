@@ -1712,7 +1712,7 @@ function renumber_records($table)
 			$row['seq_method'] = 'continuous';   // Force continuous method if no first-level sort
 			$level_1_sort = false;
 		}
-		mysqli_free_format_query($db,"ALTER TABLE $table $saved_add_clause",array());
+		mysqli_query_normal($db,"ALTER TABLE $table $saved_add_clause");
 
 		// Renumber records to temporary range (outside existing range)
 	  $query_result = mysqli_select_query($db,$table,'*','',array(),'');

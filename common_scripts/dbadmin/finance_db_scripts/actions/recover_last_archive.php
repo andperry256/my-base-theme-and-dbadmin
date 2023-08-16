@@ -24,9 +24,9 @@ if (isset($_POST['archive_end_date']))
   mysqli_delete_query($db,'transactions',$where_clause,$where_values);
   print("Copying transactions from archive<br />\n");
   $query = "INSERT INTO transactions SELECT * FROM archived_transactions_$archive_year";
-  mysqli_free_format_query($db,$query,array());
+  mysqli_query_normal($db,$query);
   $query = "INSERT INTO splits SELECT * FROM archived_splits_$archive_year";
-  mysqli_free_format_query($db,$query,array());
+  mysqli_query_normal($db,$query);
   print("Operation completed.</p>\n");
 }
 else

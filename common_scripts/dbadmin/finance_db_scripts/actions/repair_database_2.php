@@ -22,7 +22,7 @@ function run_or_preview_query($ofp,$query,&$counter)
 	else
 	{
 		$db = admin_db_connect();
-		if (!mysqli_free_format_query($db,$query,array()))
+		if (!mysqli_query_normal($db,$query))
 		{
 			print("<p class=\"small\">$query<br />ERROR - ".mysqli_error($db)."</p>\n");
 		}

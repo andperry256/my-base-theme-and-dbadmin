@@ -568,7 +568,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         (is_dir("$AltIncludePath/tables/$table")) ||
         (substr($table,0,4) == 'dba_'))
         {
-          $where_clause = "table_name='?'";
+          $where_clause = "table_name=?";
           $where_values = array('s',$table);
           if (mysqli_num_rows(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0)
           {

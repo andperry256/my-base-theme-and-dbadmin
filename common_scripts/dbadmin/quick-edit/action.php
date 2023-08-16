@@ -21,13 +21,16 @@
   }
 
   $post_name = $_POST['post_name'];
-  $content_par = addslashes($_POST['content']);
   $where_clause = 'post_name=?';
   $where_values = array('s',$post_name);
   $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result))
   {
-    mysqli_query_normal($db,"UPDATE wp_posts SET post_content='$content_par' WHERE  post_name='$post_name'");
+    $set_fields = 'post_content';
+    $set_values = array('s',$_POST['content']);
+    $where_clause = 'post_name=?';
+    $where_values = array('s',$post_name);
+    mysqli_update_query($db,'wp_posts',$set_fields,$set_values,$where_clause,$where_values);
   }
   header("Location: {$_POST['returnurl']}");
   exit;

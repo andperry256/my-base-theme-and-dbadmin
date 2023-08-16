@@ -148,14 +148,19 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
 		$sort_1_name = $row['sort_1_field'];
 		$seq_no_name =  $row['seq_no_field'];
 		$primary_keys = array();
-		$query = "UPDATE $table SET $seq_no_name=$new_seq_no WHERE $seq_no_name=$seq_no";
+
+		$set_fields = "$seq_no_name";
+	  $set_values = array('i',$new_seq_no);
+	  $where_clause = "$seq_no_name=?";
+	  $where_values = array('i',$seq_no);
 		if (!empty($sort_1_name))
 		{
 			$primary_keys[$sort_1_name] = $sort_1_value;
-			$sort_1_value = addslashes($sort_1_value);
-			$query .= " AND $sort_1_name='$sort_1_value'";
+			$where_clause .= "AND $sort_1_name=?";
+			$where_values[count($where_values)] = 's';
+			$where_values[count($where_values)] = $sort_1_value;
 		}
-		mysqli_query_normal($db,$query);
+		mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
 		if (function_exists('update_session_var'))
 		{
 			$primary_keys[$seq_no_name] = $new_seq_no;
@@ -180,7 +185,11 @@ Function enable_non_null_empty
 function enable_non_null_empty($table,$field)
 {
 	$db = admin_db_connect();
-	mysqli_query_normal($db,"UPDATE dba_table_fields SET required=1 WHERE table_name='$table' AND field_name='$field'");
+	$set_fields = 'required';
+  $set_values = array('i',1);
+  $where_clause = 'table_name=? AND field_name=?';
+  $where_values = array('s',$table,'s',$field);
+  mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 }
 
 //==============================================================================

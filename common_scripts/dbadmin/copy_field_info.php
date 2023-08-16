@@ -88,16 +88,20 @@
         elseif (substr($line,0,12) == 'widget:label')
         {
           $label = addslashes(trim(substr($line,12)," =\"\n\r\t"));
-          $query = "UPDATE dba_table_fields SET alt_label='$label' WHERE table_name='$table' AND field_name='$field_name'";
-          print("$query<br />\n");
-          mysqli_query_normal($db,$query);
+          $set_fields = 'alt_label';
+          $set_values = array('s',$label);
+          $where_clause = 'table_name=? AND field_name=?';
+          $where_values = array('s',$table,'s',$field_name);
+          mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
         }
         elseif (substr($line,0,18) == 'widget:description')
         {
           $description = addslashes(trim(substr($line,18)," =\"\n\r\t"));
-          $query = "UPDATE dba_table_fields SET description='$description' WHERE table_name='$table' AND field_name='$field_name'";
-          print("$query<br />\n");
-          mysqli_query_normal($db,$query);
+          $set_fields = 'description';
+          $set_values = array('s',$description);
+          $where_clause = 'table_name=? AND field_name=?';
+          $where_values = array('s',$table,'s',$field_name);
+          mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
         }
         elseif (substr($line,0,10) == 'vocabulary')
         {
@@ -107,9 +111,11 @@
 
       foreach ($list_desktop as $field => $status)
       {
-        $query = "UPDATE dba_table_fields SET list_desktop=$status WHERE table_name='$table' AND field_name='$field'";
-        print("$query<br />\n");
-        mysqli_query_normal($db,$query);
+        $set_fields = 'list_desktop';
+        $set_values = array('i',$status);
+        $where_clause = 'table_name=? AND field_name=?';
+        $where_values = array('s',$table,'s',$field);
+        mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
       }
     }
   }

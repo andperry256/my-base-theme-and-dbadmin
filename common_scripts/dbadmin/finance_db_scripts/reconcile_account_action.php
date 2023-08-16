@@ -89,7 +89,11 @@
   elseif ($account_transaction == 'NONE')
   {
     // Bank transaction not to be matched
-    mysqli_query_normal($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_rec_id");
+    $set_fields = 'reconciled';
+    $set_values = array('i',1);
+    $where_clause = 'rec_id=?';
+    $where_values = array('i',$bank_rec_id);
+    mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
     $user_message = "<p>Bank transaction discarded.</p>\n";
   }
   elseif ($account_transaction == 'NEW')
@@ -148,12 +152,24 @@
       if ((is_numeric($bank_rec_id)) &&
           ($row = mysqli_fetch_assoc(mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,''))))
       {
-        mysqli_query_normal($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_rec_id");
-        mysqli_query_normal($db,"UPDATE _view_account_$account SET reconciled=1 WHERE seq_no=$account_seq_no");
+        $set_fields = 'reconciled';
+        $set_values = array('i',1);
+        $where_clause = 'rec_id=?';
+        $where_values = array('i',$bank_rec_id);
+        mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
+        $set_fields = 'reconciled';
+        $set_values = array('i',1);
+        $where_clause = 'seq_no=?';
+        $where_values = array('i',$account_seq_no);
+        mysqli_update_query($db,'_view_account_',$set_fields,$set_values,$where_clause,$where_values);
         if ((isset($_POST['auto_adjust'])) || (isset($_POST['update_schedule'])))
         {
           // Change register amount to match bank transaction
-          mysqli_query_normal($db,"UPDATE _view_account_$account SET credit_amount=$credit_amount,debit_amount=$debit_amount WHERE seq_no=$account_seq_no");
+          $set_fields = 'credit_amount,debit_amount';
+          $set_values = array('d',$credit_amount,'d',debit_amount);
+          $where_clause = 'seq_no=?';
+          $where_values = array('i',$account_seq_no);
+          mysqli_update_query($db,'_view_account_',$set_fields,$set_values,$where_clause,$where_values);
           if (isset($_POST['update_schedule']))
           {
             // Update associated scheduled transaction
@@ -163,7 +179,11 @@
             if ($row2 = mysqli_fetch_assoc($query_result2))
             {
               $payee = addslashes($row2['payee']);
-              mysqli_query_normal($db,"UPDATE transactions SET credit_amount=$credit_amount,debit_amount=$debit_amount WHERE account='$account' AND payee='$payee' AND sched_freq<>'#'");
+              $set_fields = 'credit_amount,debit_amount';
+              $set_values = array('d',$credit_amount,'d',$debit_amount);
+              $where_clause = "account=? AND payee=? AND sched_freq<>'#'";
+              $where_values = array('s',$account,'s',$payee);
+              mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
             }
           }
         }

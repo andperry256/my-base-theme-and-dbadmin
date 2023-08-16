@@ -44,10 +44,18 @@ else
 				// Run the merge
 				$source = addslashes($_POST['source']);
 				$target = addslashes($_POST['target']);
-				mysqli_query_normal($db,"UPDATE transactions SET $entity='$target' WHERE  $entity='$source'");
+				$set_fields = "$entity";
+			  $set_values = array($target);
+			  $where_clause = "$entity=?";
+			  $where_values = array('s',$source);
+			  mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
 				if ($type != 'payees')
 				{
-					mysqli_query_normal($db,"UPDATE splits SET $entity='$target' WHERE  $entity='$source'");
+					$set_fields = "$entity";
+				  $set_values = array($target);
+				  $where_clause = "$entity=?";
+				  $where_values = array('s',$source);
+				  mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
 				}
 				$where_clause = 'name=?';
 			  $where_values = array('s',$source);

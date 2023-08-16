@@ -28,64 +28,92 @@ if (isset($_GET['autodates']))
 
 // Account filter
 if (!isset($_GET['account']))
+{
 	$account_name = '%';
+}
 else
 {
 	$account_name = $_GET['account'];
 	if ($account_name == '-none-')
+	{
 		print("<h2>Account - Unallocated</h2>\n");
+	}
 	else
+	{
 		print("<h2>Account - $account_name</h2>\n");
+	}
 }
 
 // Fund filter
 if (!isset($_GET['fund']))
+{
 	$fund_name = '%';
+}
 else
 {
 	$fund_name = urldecode($_GET['fund']);
 	if ($fund_name == '-none-')
+	{
 		print("<h2>Fund - Unallocated</h2>\n");
+	}
 	elseif ($fund_name == '-transfer-')
+	{
 		print("<h2>Fund - Transfers</h2>\n");
+	}
 	elseif (strpos($fund_name,'%') !== false)
 	{
 		$superfund_name = strtok($fund_name,':');
 		print("<h2>Fund - $superfund_name [ALL]</h2>\n");
 	}
 	else
+	{
 		print("<h2>Fund - $fund_name</h2>\n");
+	}
 }
 
 // Category filter
 if (!isset($_GET['category']))
+{
 	$category_name = '%';
+}
 else
 {
 	$category_name = urldecode($_GET['category']);
 	if ($category_name == '-none-')
+	{
 		print("<h2>Category - Unallocated</h2>\n");
+	}
 	elseif ($category_name == '-transfer-')
+	{
 		print("<h2>Category - Transfers</h2>\n");
+	}
 	elseif (strpos($category_name,'%') !== false)
 	{
 		$supercategory_name = strtok($category_name,':');
 		print("<h2>Category - $supercategory_name [ALL]</h2>\n");
 	}
 	else
+	{
 		print("<h2>Category - $category_name</h2>\n");
+	}
 }
 
 // Payee filter
 if (!isset($_GET['payee']))
+{
 	$payee_name = '%';
+}
 else
 {
 	$payee_name = urldecode($_GET['payee']);
 	if ($payee_name == '-none-')
+	{
 		print("<h2>Payee - Unallocated</h2>\n");
+	}
 	else
+	{
 		print("<h2>Payee - $payee_name</h2>\n");
+	}
 }
 
 // Currency filter
@@ -105,14 +133,18 @@ if ($currency != 'GBP')
 // Determine start and end months
 $error = false;
 if (isset($_GET['start_month']))
+{
 	$start_month = $_GET['start_month'];
+}
 else
 {
 	// Default to no date limit
 	$start_month = NO_START_MONTH;
 }
 if (isset($_GET['end_month']))
+{
 	$end_month = $_GET['end_month'];
+}
 else
 {
 	// Default to no date limit
@@ -128,7 +160,9 @@ if (isset($_POST['submitted']))
 				// Set start year/month to an actual date. Set end date if specified as being the same.
 				$start_month = sprintf("%04d-%02d",$_POST['start_year'],$_POST['start_month']);
 				if (($_POST['end_year'] == 'same') && ($_POST['end_month'] = 'same'))
+				{
 					$end_month = $start_month;
+				}
 			}
 			if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
 			{
@@ -198,7 +232,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			$chq_no = 'NULL';
 		}
 		$fields = "account,seq_no,split_no,date,chq_no,payee,credit_amount,debit_amount,fund,category,memo,acct_month,reconciled,target_account,source_account";
-		$values = array('s',$row['account'],'i',$row['seq_no'],'i',0,'s',$row['date'],'i',$chq_no,'s','$payee','d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$memo,'s',$row['acct_month'],'i',$row['reconciled'],'s',$row['target_account'],'s',$row['source_account']);
+		$values = array('s',$row['account'],'i',$row['seq_no'],'i',0,'s',$row['date'],'i',$chq_no,'s',$payee,'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$memo,'s',$row['acct_month'],'i',$row['reconciled'],'s',$row['target_account'],'s',$row['source_account']);
 		mysqli_insert_query($db,'report',$fields,$values);
 	}
 
@@ -232,7 +266,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				{
 					$chq_no = 'NULL';
 				}
-				mysqli_query_normal($db,"UPDATE report SET date='{$row2['date']}', chq_no=$chq_no, payee='{$row2['payee']}', reconciled={$row2['reconciled']}, target_account='{$row2['target_account']}', source_account='{$row2['source_account']}' WHERE account='{$row['account']}' AND seq_no={$row['transact_seq_no']} AND split_no={$row['split_no']}");
+				$set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
+			  $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+			  $where_clause = 'account=? AND seq_no=? AND split_no=?';
+			  $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+			  mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
 			}
 
 			// Check for transaction at opposite end of transfer
@@ -254,7 +292,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				{
 					$chq_no = 'NULL';
 				}
-				mysqli_query_normal($db,"UPDATE report SET date='{$row2['date']}', chq_no=$chq_no, payee='{$row2['payee']}', reconciled={$row2['reconciled']}, target_account='{$row2['target_account']}', source_account='{$row2['source_account']}' WHERE account='{$row['account']}' AND seq_no={$row['transact_seq_no']} AND split_no={$row['split_no']}");
+				$set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
+			  $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+			  $where_clause = 'account=? AND seq_no=? AND split_no=?';
+			  $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+			  mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
 			}
 		}
 	}
@@ -285,7 +327,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				{
 					$chq_no = 'NULL';
 				}
-				mysqli_query_normal($db,"UPDATE report SET date='{$row2['date']}', chq_no='$chq_no, payee='{$row2['payee']}', reconciled={$row2['reconciled']}, target_account='{$row2['target_account']}', source_account='{$row2['source_account']}' WHERE account='{$row['account']}' AND seq_no={$row['transact_seq_no']} AND split_no={$row['split_no']}");
+				$set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
+			  $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+			  $where_clause = 'account=? AND seq_no=? AND split_no=?';
+			  $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+				mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
 			}
 		}
 	}

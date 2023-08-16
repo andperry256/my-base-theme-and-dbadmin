@@ -486,19 +486,24 @@ function handle_file_widget_after_save($record,$field)
 				}
 
 				// Update record with the filename.
-				$query = "UPDATE $table SET $field='$filename' WHERE";
 			  $where_clause = 'table_name=? AND is_primary=1';
 			  $where_values = array('s',$base_table);
 			  $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
+				$set_fields = "$field";
+			  $set_values = array('s',$filename);
+			  $where_clause = '';
+			  $where_values = array();
 				while ($row = mysqli_fetch_assoc($query_result))
 				{
 					$pk_field = $row['field_name'];
 					$pk_value = $record->FieldVal($pk_field);
-					$query .= " $pk_field='".addslashes($pk_value)."'";
-					$query .= " AND ";
 					$query = rtrim($query,' AND');
+					$where_clause .= "$pk_field=? AND ";
+					$where_values[count($where_values)] = 's';
+					$where_values[count($where_values)] = $pk_value;
 				}
-				mysqli_query_normal($db,$query);
+				$where_clause = rtrim($where_clause,' AND');
+				mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
 			}
 		}
 	}

@@ -91,10 +91,14 @@ if ($row = mysqli_fetch_assoc($query_result))
     		$category = '-transfer-';
     	}
     	else
-  	{
-        	$category = '-split-';
-      	}
-    	mysqli_query_normal($db,"UPDATE transactions SET fund='$fund',category='$category' WHERE account='$account' AND seq_no=$seq_no");
+  	  {
+      	$category = '-split-';
+    	}
+      $set_fields = 'fund,category';
+      $set_values = array('s',$fund,'s',$category);
+      $where_clause = 'account=? AND seq_no=?';
+      $where_values = array('s',$account,'i',$seq_no);
+      mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
     }
     else
     {

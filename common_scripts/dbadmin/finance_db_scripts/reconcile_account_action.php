@@ -74,7 +74,6 @@
   				$amount = - $amount;
   				$balance = 0;
   			}
-  			$description = addslashes($description);
   			$description = substr($description,0,31);
         $fields = 'date,description,amount,balance';
         $values = array('s',$mysql_date,'s',$description,'d',$amount,'d',$balance);
@@ -107,7 +106,7 @@
       // N.B. Multiple matches can be made against a given payee by creating additional table entries
       // using the original payee name with variable numbers of underscores added to the end.
       $date = $row['date'];
-      $payee = addslashes($row['description']);
+      $payee = $row['description'];
       $where_clause = "regex_match<>'^$'";
       $query_result2 = mysqli_select_query($db,'payees','*',$where_clause,array(),'');
       while ($row2 = mysqli_fetch_assoc($query_result2))
@@ -115,7 +114,7 @@
         $pattern = "/{$row2['regex_match']}/i";
         if (preg_match($pattern,$payee))
         {
-          $payee = addslashes(rtrim($row2['name'],'_'));
+          $payee = rtrim($row2['name'],'_');
           break;
         }
       }
@@ -178,7 +177,7 @@
             $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
             if ($row2 = mysqli_fetch_assoc($query_result2))
             {
-              $payee = addslashes($row2['payee']);
+              $payee = $row2['payee'];
               $set_fields = 'credit_amount,debit_amount';
               $set_values = array('d',$credit_amount,'d',$debit_amount);
               $where_clause = "account=? AND payee=? AND sched_freq<>'#'";

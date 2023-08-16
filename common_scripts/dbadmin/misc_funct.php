@@ -156,7 +156,7 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
 		if (!empty($sort_1_name))
 		{
 			$primary_keys[$sort_1_name] = $sort_1_value;
-			$where_clause .= "AND $sort_1_name=?";
+			$where_clause .= " AND $sort_1_name=?";
 			$where_values[count($where_values)] = 's';
 			$where_values[count($where_values)] = $sort_1_value;
 		}

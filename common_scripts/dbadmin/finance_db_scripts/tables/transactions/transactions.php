@@ -498,8 +498,8 @@ class tables_transactions
 		else
 		{
 			// Re-update record
-			$set_fields = 'seq_no,currency,credit_amount,debit_amount,auto_total,fund,category,save_defaults';
-		  $set_values = array('i',$seq_no,'s',$account_currency,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'i',0);
+			$set_fields = 'seq_no,acct_month,currency,credit_amount,debit_amount,auto_total,fund,category,save_defaults';
+		  $set_values = array('i',$seq_no,'s',$acct_month,'s',$account_currency,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'i',0);
 		  $where_clause = 'account=? AND seq_no=?';
 		  $where_values = array('s',$account,'i',$seq_no);
 		  mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);

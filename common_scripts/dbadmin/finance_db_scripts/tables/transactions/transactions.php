@@ -328,7 +328,7 @@ class tables_transactions
 		if (mysqli_num_rows($query_result) == 0)
 		{
 			$fields = 'name';
-		  $values = array('s','$payee');
+		  $values = array('s',$payee);
 		  mysqli_insert_query($db,'payees',$fields,$values);
 		}
 

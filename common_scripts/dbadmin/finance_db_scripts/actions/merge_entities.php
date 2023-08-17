@@ -52,11 +52,11 @@ else
 					$set_fields = "$entity";
 				  $set_values = array($target);
 				  $where_clause = "$entity=?";
-				  $where_values = array('s',$source);
+				  $where_values = array('s',$_POST['source']);
 				  mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
 				}
 				$where_clause = 'name=?';
-			  $where_values = array('s',$source);
+			  $where_values = array('s',$_POST['source']);
 			  mysqli_delete_query($db,$type,$where_clause,$where_values);
 				print("<p>$Entity <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
 				print("<p><a href=\"index.php?-action=merge_entities&type={$_POST['type']}\"><button>Go Back</button></a></p>\n");
@@ -95,7 +95,9 @@ else
 		print("<td>Target:</td>");
 		print("<td><select name=\"target\">\n");
 		print("<option value=\"\">Please select ...</option>");
-		$query_result = mysqli_query_normal($db,$query);
+		$where_clause = "name NOT LIKE '-%'";
+		$add_clause = 'ORDER BY name ASC';
+	  $query_result = mysqli_select_query($db,$type,'*',$where_clause,array(),$add_clause);
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			print("<option value=\"{$row['name']}\"");

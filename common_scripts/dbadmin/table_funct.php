@@ -1728,7 +1728,7 @@ function renumber_records($table)
 			$max_rec_id = 0;
 		}
 		$temp_rec_id = $max_rec_id + 10;
-		$query_result = mysqli_select_query($db,$table,'*','',array(),$saved_add_clause);
+		$query_result2 = mysqli_select_query($db,$table,'*','',array(),$saved_add_clause);
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if ($level_1_sort)
@@ -1753,7 +1753,7 @@ function renumber_records($table)
 		// Renumber records to final values
 		$new_id = 0;
 		$first_sort_prev_value = '';
-		$query_result2 = mysqli_query_normal($db,$select_query);
+		$query_result2 = mysqli_select_query($db,$table,'*','',array(),$saved_add_clause);
 		while ($row2 = mysqli_fetch_assoc($query_result2))
 		{
 			if (($row['seq_method'] == 'repeat') && ($row2[$row['sort_1_field']] != $first_sort_prev_value))

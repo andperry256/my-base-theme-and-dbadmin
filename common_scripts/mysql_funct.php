@@ -432,7 +432,8 @@ This function is called to run an INSERT query using a prepared statement.
 The following parameters are passed:-
 $db - Link to the connected database
 $table - Associated table
-$fields - List of specified fields (comma separated string)
+$fields - List of specified fields (comma separated string). Set to '*' to
+          indicate all fields in order.
 $values - Values associated with the field list (array). Each item occupies
           two array elements (variable type followed by value).
 $strict (optional) - See run_prepared_statement function.
@@ -444,21 +445,26 @@ The query result is returned.
 function mysqli_insert_query($db,$table,$fields,$values,$strict=false)
 {
 	$values_count = count($values);
-	if ( $values_count != (substr_count($fields,',') + 1)*2 )
+	$field_count =  ($fields == '*')
+		? mysqli_num_rows(mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
+		: substr_count($fields,',') + 1;
+	if ( $values_count != $field_count * 2 )
 	{
 		raise_query_validation_error("INSERT INTO $table ...");
 	}
-	$values_template = '';
 	if (USE_PREPARED_STATEMENTS)
 	{
 		$type_list = '';
-		for ($i=0; $i<$where_values_count; $i+=2)
+		$values_template = '';
+		for ($i=0; $i<$values_count; $i+=2)
 		{
-			$type_list .= $where_values[$i];
+			$type_list .= $values[$i];
 			$values_template .= '?,';
 		}
 		$values_template = rtrim($values_template,',');
-		$stmt = mysqli_prepare($db,"INSERT INTO $table ($fields) VALUES ($values_template)");
+		$stmt = ($fields == '*')
+			? mysqli_prepare($db,"INSERT INTO $table VALUES ($values_template)")
+			: mysqli_prepare($db,"INSERT INTO $table ($fields) VALUES ($values_template)");
 		mysqli_stmt_bind_param($stmt, $type_list, ...$values);
 		return run_prepared_statement($stmt,$strict);
 	}
@@ -482,7 +488,9 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false)
 			$values_list .= $param.',';
 		}
 		$values_list = rtrim($values_list,',');
-		return run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict);
+		return ($fields == '*')
+			? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict)
+			: run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict);
 	}
 }
 

@@ -10,6 +10,10 @@ if (!defined('USE_PREPARED_STATEMENTS'))
 	*/
 	define('USE_PREPARED_STATEMENTS',false);
 }
+if (!defined('NULLSTR'))
+{
+	define('NULLSTR',chr(0));
+}
 if (!function_exists('print_stack_trace_for_mysqli_error'))
 {
 //==============================================================================
@@ -325,11 +329,7 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
 		$pos = 0;
 		for ($i=0; $i<$where_values_count; $i+=2)
 		{
-			if ($where_values[$i+1] == chr(0))
-			{
-				$param = 'NULL';
-			}
-			elseif ($where_values[$i] == 's')
+			if ($where_values[$i] == 's')
 			{
 				$param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
 			}
@@ -403,7 +403,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
 		$pos = 0;
 		for ($i=0; $i<$all_values_count; $i+=2)
 		{
-			if ($all_values[$i+1] == chr(0))
+			if ($all_values[$i+1] == NULLSTR)
 			{
 				$param = 'NULL';
 			}
@@ -473,7 +473,7 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false)
 		$values_list = '';
 		for ($i=0; $i<$values_count; $i+=2)
 		{
-			if ($values[$i+1] == chr(0))
+			if ($values[$i+1] == NULLSTR)
 			{
 				$param = 'NULL';
 			}
@@ -544,11 +544,7 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
 		$pos = 0;
 		for ($i=0; $i<$where_values_count; $i+=2)
 		{
-			if ($where_values[$i+1] == chr(0))
-			{
-				$param = 'NULL';
-			}
-			elseif ($where_values[$i] == 's')
+			if ($where_values[$i] == 's')
 			{
 				$param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
 			}
@@ -612,11 +608,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true)
 			$pos = 0;
 			for ($i=0; $i<$where_values_count; $i+=2)
 			{
-				if ($where_values[$i+1] == chr(0))
-				{
-					$param = 'NULL';
-				}
-				elseif ($where_values[$i] == 's')
+				if ($where_values[$i] == 's')
 				{
 					$param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
 				}

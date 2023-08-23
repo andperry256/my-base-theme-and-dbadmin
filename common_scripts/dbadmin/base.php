@@ -6,8 +6,20 @@
   require("$RootDir/maintenance/db_master_location.php");
   $return_url = cur_url_par();
   $dummy = '{';  // To remove false positive from syntax checker
-  print("<script type=\"text/javascript\" src=\"$DBAdminURL/form_funct.js\"></script>\n");
+  //print("<script type=\"text/javascript\" src=\"$DBAdminURL/form_funct.js\"></script>\n");
+  include_inline_javascript("$DBAdminDir/form_funct.js");
 ?>
+<script>
+  // Functions to select desktop/mobile mode
+  function selectDesktopMode()
+  {
+    window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
+  }
+  function selectMobileMode()
+  {
+    window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
+  }
+</script>
 <?php if (get_session_var('theme_mode') == 'dark'): ?>
   <style>
     /* These styles are intentionally included inline */
@@ -48,7 +60,8 @@ function display_sidebar_content()
   else
   {
     print("<table class=\"sidebar-table\">");
-    $query_result = mysqli_query_strict($db,"SELECT * FROM dba_sidebar_config ORDER BY display_order ASC");
+    $add_clause = 'ORDER BY display_order ASC';
+    $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',array(),$add_clause);
     while ($row = mysqli_fetch_assoc($query_result))
     {
       $label = $row['label'];
@@ -304,7 +317,9 @@ function display_main_content($mode)
 
       case 'renumber_records2':
         print("<h1>Renumber Records</h1>\n");
-        $query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_info WHERE renumber_enabled=1 ORDER BY table_name ASC");
+        $fields = '';
+        $where_clause = 'renumber_enabled=1';
+        $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
         while ($row = mysqli_fetch_assoc($query_result))
         {
           renumber_records($row['table_name']);
@@ -446,6 +461,7 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
   print("</p>\n");
 }
 print("<script type=\"text/javascript\" src=\"$DBAdminURL/no_resubmit.js\"></script>\n");
+//include_inline_javascript("$DBAdminURL/no_resubmit.js");
 
 //==============================================================================
 ?>

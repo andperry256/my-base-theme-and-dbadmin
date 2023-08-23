@@ -10,7 +10,9 @@ $primary_keys = decode_record_id($record_id);
 $account = $primary_keys['account'];
 $seq_no = $primary_keys['seq_no'];
 rationalise_transaction($account,$seq_no);
-$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+$where_clause = ' account=? AND seq_no=?';
+$where_values = array('s',$account,'i',$seq_no);
+$query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
   if (!isset($_GET['summary']))
@@ -76,7 +78,10 @@ if ($row = mysqli_fetch_assoc($query_result))
     	$view = "_view_scheduled_transactions";
     }
 
-    $query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no ORDER BY split_no ASC");
+    $where_clause = 'account=? AND transact_seq_no=?';
+    $where_values = array('s',$account,'i',$seq_no);
+    $add_clause = 'ORDER BY split_no ASC';
+    $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
     if (mysqli_num_rows($query_result2) > 0)
     {
     	// Splits found - clear the main fund and category
@@ -86,10 +91,14 @@ if ($row = mysqli_fetch_assoc($query_result))
     		$category = '-transfer-';
     	}
     	else
-  	{
-        	$category = '-split-';
-      	}
-    	mysqli_query_normal($db,"UPDATE transactions SET fund='$fund',category='$category' WHERE account='$account' AND seq_no=$seq_no");
+  	  {
+      	$category = '-split-';
+    	}
+      $set_fields = 'fund,category';
+      $set_values = array('s',$fund,'s',$category);
+      $where_clause = 'account=? AND seq_no=?';
+      $where_values = array('s',$account,'i',$seq_no);
+      mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
     }
     else
     {
@@ -106,7 +115,9 @@ if ($row = mysqli_fetch_assoc($query_result))
     print("<table>\n");
 
     // Row 1 - Account Name
-    $query_result2 = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='$account'");
+    $where_clause = 'label=?';
+    $where_values = array('s',$account);
+    $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
     if ($row2 = mysqli_fetch_assoc($query_result2))
     {
       print("<tr><td>Account:</td><td>{$row2['name']}</td>");
@@ -239,7 +250,10 @@ if ($row = mysqli_fetch_assoc($query_result))
     $split_count = 0;
     print("<h2>Splits</h2>\n");
     print("<ul>\n");
-    $query_result2 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no ORDER BY split_no ASC");
+    $where_clause = 'account=? AND transact_seq_no=?';
+    $where_values = array('s',$account,'i',$seq_no);
+    $add_clause = 'ORDER BY split_no ASC';
+    $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
     while ($row2 = mysqli_fetch_assoc($query_result2))
     {
       $split_pks = array();

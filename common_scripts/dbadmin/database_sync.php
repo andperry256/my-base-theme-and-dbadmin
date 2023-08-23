@@ -19,7 +19,9 @@ function sync_databases($local_db_name)
 	{
 		$sync_direction = 'in';  // Default direction
 		$db_sites = sites_db_connect();
-		$query_result = mysqli_query_strict($db_sites,"SELECT * FROM dbases WHERE dbname='$local_db_name' AND domname='$Server_Station_ID'");
+	  $where_clause = 'dbname=? AND domname=?';
+	  $where_values = array('s',$local_db_name,'s',$Server_Station_ID);
+	  $query_result = mysqli_select_query($db_sites,'dbases','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			switch ($row['mode'])
@@ -62,7 +64,8 @@ function sync_databases($local_db_name)
 						$ofp = fopen($relationships_script_file,'w');
 						fprintf($ofp,"## LOCKED ##\n");
 						$count = 0;
-						$query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_relationships WHERE table_name NOT LIKE '%dba_%'");
+					  $where_clause = "table_name NOT LIKE '%dba_%'";
+					  $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,array(),'');
 						while ($row2 = mysqli_fetch_assoc($query_result2))
 						{
 							$relationship_name_par = addslashes($row2['relationship_name']);
@@ -105,7 +108,10 @@ function sync_databases($local_db_name)
 								$table = str_replace('V#','',$_POST['table']);
 								$pk_fields = '';
 								$field_added = false;
-								$query_result = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$table' AND is_primary=1 ORDER BY display_order ASC");
+							  $where_clause = 'table_name=? AND is_primary=1';
+							  $where_values = array('s',$table);
+							  $add_clause = 'ORDER BY display_order ASC';
+							  $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
 								if (mysqli_num_rows($query_result) == 0)
 								{
 									print("<p>ERROR - table <em>$table</em> not found (please refresh page to try again).</p>\n");

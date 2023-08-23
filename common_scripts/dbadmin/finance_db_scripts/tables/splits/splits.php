@@ -77,7 +77,7 @@ class tables_splits
 		$auto_amount = $record->FieldVal('auto_amount');
 		$fund = $record->FieldVal('fund');
 		$category = $record->FieldVal('category');
-		$memo = addslashes($record->FieldVal('memo'));
+		$memo = $record->FieldVal('memo');
 		$acct_month = $record->FieldVal('acct_month');
 		$old_split_no = $record->FieldVal('split_no');
 		if ($action == 'new')
@@ -97,7 +97,9 @@ class tables_splits
 			return;
 		}
 
-		$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no=$transact_seq_no");
+	  $where_clause = 'account=? AND seq_no=?';
+	  $where_values = array('s',$account,'i',$transact_seq_no);
+	  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 		if ($row = mysqli_fetch_assoc($query_result))
 		{
 			$date = $row['date'];
@@ -111,7 +113,9 @@ class tables_splits
 		if ($auto_amount)
 		{
 			$split_amount = $parent_amount;
-			$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no<>$split_no");
+		  $where_clause = 'account=? AND transact_seq_no=? AND split_no<>?';
+		  $where_values = array('s',$account,'i',$transact_seq_no,'i',$split_no);
+		  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 			while ($row = mysqli_fetch_assoc($query_result))
 			{
 				// Subtract value of other aplit from total
@@ -156,7 +160,9 @@ class tables_splits
 		// Select default category for fund or vice versa where appropriate.
 		if (($fund != '-default-') && ($category == '-default-'))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM funds WHERE name='$fund'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$fund);
+		  $query_result = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
 			if ($row = mysqli_fetch_assoc($query_result))
 			{
 				if ((!empty($row['default_income_cat'])) && ($credit_amount > 0))
@@ -171,7 +177,9 @@ class tables_splits
 		}
 		elseif (($category != '-default-') && ($fund == '-default-'))
 		{
-			$query_result = mysqli_query_strict($db,"SELECT * FROM categories WHERE name='$category'");
+		  $where_clause = 'name=?';
+		  $where_values = array('s',$category);
+		  $query_result = mysqli_select_query($db,'categories','*',$where_clause,$where_values,'');
 			if (($row = mysqli_fetch_assoc($query_result)) && (!empty($row['default_fund'])))
 			{
 				$fund = $row['default_fund'];
@@ -217,7 +225,11 @@ class tables_splits
 		rationalise_transaction($account,$transact_seq_no);
 
 		// Re-update record
-		mysqli_query_normal($db,"UPDATE splits SET split_no=$split_no,credit_amount=$credit_amount,debit_amount=$debit_amount,auto_amount=0,fund='$fund',category='$category',acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$old_split_no");
+		$set_fields = 'split_no,credit_amount,debit_amount,auto_amount,fund,category,acct_month';
+	  $set_values = array('i',$split_no,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'s',$acct_month);
+	  $where_clause = 'account=? AND transact_seq_no=? AND split_no=?';
+	  $where_values = array('s',$account,'i',$transact_seq_no,'i',$old_split_no);
+	  mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
 
 		if (!headers_sent())
 		{

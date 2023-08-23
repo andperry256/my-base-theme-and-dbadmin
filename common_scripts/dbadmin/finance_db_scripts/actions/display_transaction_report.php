@@ -28,64 +28,92 @@ if (isset($_GET['autodates']))
 
 // Account filter
 if (!isset($_GET['account']))
+{
 	$account_name = '%';
+}
 else
 {
 	$account_name = $_GET['account'];
 	if ($account_name == '-none-')
+	{
 		print("<h2>Account - Unallocated</h2>\n");
+	}
 	else
+	{
 		print("<h2>Account - $account_name</h2>\n");
+	}
 }
 
 // Fund filter
 if (!isset($_GET['fund']))
+{
 	$fund_name = '%';
+}
 else
 {
 	$fund_name = urldecode($_GET['fund']);
 	if ($fund_name == '-none-')
+	{
 		print("<h2>Fund - Unallocated</h2>\n");
+	}
 	elseif ($fund_name == '-transfer-')
+	{
 		print("<h2>Fund - Transfers</h2>\n");
+	}
 	elseif (strpos($fund_name,'%') !== false)
 	{
 		$superfund_name = strtok($fund_name,':');
 		print("<h2>Fund - $superfund_name [ALL]</h2>\n");
 	}
 	else
+	{
 		print("<h2>Fund - $fund_name</h2>\n");
+	}
 }
 
 // Category filter
 if (!isset($_GET['category']))
+{
 	$category_name = '%';
+}
 else
 {
 	$category_name = urldecode($_GET['category']);
 	if ($category_name == '-none-')
+	{
 		print("<h2>Category - Unallocated</h2>\n");
+	}
 	elseif ($category_name == '-transfer-')
+	{
 		print("<h2>Category - Transfers</h2>\n");
+	}
 	elseif (strpos($category_name,'%') !== false)
 	{
 		$supercategory_name = strtok($category_name,':');
 		print("<h2>Category - $supercategory_name [ALL]</h2>\n");
 	}
 	else
+	{
 		print("<h2>Category - $category_name</h2>\n");
+	}
 }
 
 // Payee filter
 if (!isset($_GET['payee']))
+{
 	$payee_name = '%';
+}
 else
 {
 	$payee_name = urldecode($_GET['payee']);
 	if ($payee_name == '-none-')
+	{
 		print("<h2>Payee - Unallocated</h2>\n");
+	}
 	else
+	{
 		print("<h2>Payee - $payee_name</h2>\n");
+	}
 }
 
 // Currency filter
@@ -105,14 +133,18 @@ if ($currency != 'GBP')
 // Determine start and end months
 $error = false;
 if (isset($_GET['start_month']))
+{
 	$start_month = $_GET['start_month'];
+}
 else
 {
 	// Default to no date limit
 	$start_month = NO_START_MONTH;
 }
 if (isset($_GET['end_month']))
+{
 	$end_month = $_GET['end_month'];
+}
 else
 {
 	// Default to no date limit
@@ -128,7 +160,9 @@ if (isset($_POST['submitted']))
 				// Set start year/month to an actual date. Set end date if specified as being the same.
 				$start_month = sprintf("%04d-%02d",$_POST['start_year'],$_POST['start_month']);
 				if (($_POST['end_year'] == 'same') && ($_POST['end_month'] = 'same'))
+				{
 					$end_month = $start_month;
+				}
 			}
 			if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
 			{
@@ -180,13 +214,12 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	mysqli_query_normal($db,"DROP TABLE IF EXISTS report");
 	mysqli_query_normal($db,"CREATE TEMPORARY TABLE report LIKE transaction_report");
 
-	$payee_name = addslashes($payee_name);
-	$query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND fund LIKE '$fund_name' AND category LIKE '$category_name' AND payee LIKE '$payee_name' AND sched_freq='#'");
+	$where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND fund LIKE ? AND category LIKE ? AND payee LIKE ? AND sched_freq='#'";
+  $where_values = array('s',$currency,'s',$account_name,'s',$fund_name,'s',$category_name,'s',$payee_name);
+  $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 	while ($row = mysqli_fetch_assoc($query_result))
 	{
 		// Add transaction with matching parameters into the table
-		$payee = addslashes($row['payee']);
-		$memo = addslashes($row['memo']);
 		if (!empty($row['chq_no']))
 		{
 			$chq_no = $row['chq_no'];
@@ -196,8 +229,8 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 			$chq_no = 'NULL';
 		}
 		$fields = "account,seq_no,split_no,date,chq_no,payee,credit_amount,debit_amount,fund,category,memo,acct_month,reconciled,target_account,source_account";
-		$values = "'{$row['account']}', {$row['seq_no']}, 0, '{$row['date']}', $chq_no, '$payee', {$row['credit_amount']}, {$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}', {$row['reconciled']}, '{$row['target_account']}', '{$row['source_account']}'";
-		mysqli_query_normal($db,"INSERT INTO report ($fields) VALUES ($values)");
+		$values = array('s',$row['account'],'i',$row['seq_no'],'i',0,'s',$row['date'],'i',$chq_no,'s',$row['payee'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month'],'i',$row['reconciled'],'s',$row['target_account'],'s',$row['source_account']);
+		mysqli_insert_query($db,'report',$fields,$values);
 	}
 
 	// Process associated splits as required
@@ -205,16 +238,21 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Fund and/or category has been specified. Process any splits relating
 		// to the given fund/category.
-		$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE fund LIKE '$fund_name' $fund_exclusions AND category LIKE '$category_name'");
+	  $where_clause = "fund LIKE ? $fund_exclusions AND category LIKE ?";
+	  $where_values = array('s',$fund_name,'s',$category_name);
+	  $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
+		  $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
+		  $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+		  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
-				$memo = addslashes($row['memo']);
-				mysqli_query_normal($db,"INSERT INTO report (account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES ('{$row['account']}', {$row['transact_seq_no']}, {$row['split_no']}, {$row['credit_amount']}, {$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}')");
+				$fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
+			  $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+			  mysqli_insert_query($db,'report',$fields,$values);
 				// Add record fields from parent transaction
 				if (!empty($row2['chq_no']))
 				{
@@ -224,16 +262,23 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				{
 					$chq_no = 'NULL';
 				}
-				mysqli_query_normal($db,"UPDATE report SET date='{$row2['date']}', chq_no=$chq_no, payee='{$row2['payee']}', reconciled={$row2['reconciled']}, target_account='{$row2['target_account']}', source_account='{$row2['source_account']}' WHERE account='{$row['account']}' AND seq_no={$row['transact_seq_no']} AND split_no={$row['split_no']}");
+				$set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
+			  $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+			  $where_clause = 'account=? AND seq_no=? AND split_no=?';
+			  $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+			  mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
 			}
 
 			// Check for transaction at opposite end of transfer
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND source_account='{$row['account']}' AND source_seq_no={$row['transact_seq_no']}");
+		  $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND source_account=? AND source_seq_no=?";
+		  $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+		  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
-				$memo = addslashes($row['memo']);
-				mysqli_query_normal($db,"INSERT INTO report (account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES ('{$row['account']}', {$row['transact_seq_no']}, {$row['split_no']}, -{$row['credit_amount']}, -{$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}')");
+				$fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
+			  $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',-$row['credit_amount'],'d',-$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+			  mysqli_insert_query($db,'report',$fields,$values);
 				// Add record fields from parent transaction
 				if (!empty($row2['chq_no']))
 				{
@@ -243,7 +288,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				{
 					$chq_no = 'NULL';
 				}
-				mysqli_query_normal($db,"UPDATE report SET date='{$row2['date']}', chq_no=$chq_no, payee='{$row2['payee']}', reconciled={$row2['reconciled']}, target_account='{$row2['target_account']}', source_account='{$row2['source_account']}' WHERE account='{$row['account']}' AND seq_no={$row['transact_seq_no']} AND split_no={$row['split_no']}");
+				$set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
+			  $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+			  $where_clause = 'account=? AND seq_no=? AND split_no=?';
+			  $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+			  mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
 			}
 		}
 	}
@@ -251,16 +300,20 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	{
 		// Account has been specified. All funds and categories are included.
 		// Process all associated splits.
-		$query_result = mysqli_query_strict($db,"SELECT * FROM splits WHERE account IS NOT NULL $fund_exclusions");
+	  $where_clause = "account IS NOT NULL $fund_exclusions";
+	  $query_result = mysqli_select_query($db,'splits','*',$where_clause,array(),'');
 		while ($row = mysqli_fetch_assoc($query_result))
 		{
 			// Check for transaction directly related to the split
-			$query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE currency='$currency' AND account LIKE '$account_name' $account_exclusions $fund_exclusions AND account='{$row['account']}' AND seq_no={$row['transact_seq_no']}");
+		  $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
+		  $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+		  $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 			if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
 			{
 				// Add split with matching parameters into the table
-				$memo = addslashes($row['memo']);
-				mysqli_query_normal($db,"INSERT INTO report (account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES ('{$row['account']}', {$row['transact_seq_no']}, {$row['split_no']}, {$row['credit_amount']}, {$row['debit_amount']}, '{$row['fund']}', '{$row['category']}', '$memo', '{$row['acct_month']}')");
+				$fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
+			  $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+			  mysqli_insert_query($db,'report',$fields,$values);
 				// Add record fields from parent transaction
 				if (!empty($row2['chq_no']))
 				{
@@ -270,7 +323,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 				{
 					$chq_no = 'NULL';
 				}
-				mysqli_query_normal($db,"UPDATE report SET date='{$row2['date']}', chq_no='$chq_no, payee='{$row2['payee']}', reconciled={$row2['reconciled']}, target_account='{$row2['target_account']}', source_account='{$row2['source_account']}' WHERE account='{$row['account']}' AND seq_no={$row['transact_seq_no']} AND split_no={$row['split_no']}");
+				$set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
+			  $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+			  $where_clause = 'account=? AND seq_no=? AND split_no=?';
+			  $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+				mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
 			}
 		}
 	}
@@ -290,7 +347,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	$table_header_style = $table_cell_style." font-weight:bold;";
 	$table_header_style_ra = $table_header_style." text-align:right;";
 
-	$query_result = mysqli_query_strict($db,"SELECT * FROM report WHERE acct_month<='$end_month'");
+  $where_clause = 'acct_month<=?';
+  $where_values = array('s',$end_month);
+  $query_result = mysqli_select_query($db,'report','*',$where_clause,$where_values,'');
 	if (mysqli_num_rows($query_result) == 0)
 	{
 		// Empty result
@@ -298,7 +357,8 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 	}
 	else
 	{
-		$query_result = mysqli_query_strict($db,"SELECT * FROM report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
+	  $add_clause = 'ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC';
+	  $query_result = mysqli_select_query($db,'report','*','',array(),$add_clause);
 		$row_count = mysqli_num_rows($query_result);
 		$row_no = 0;
 		while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))
@@ -410,7 +470,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 					print('[*]');
 				}
 				print("</td>");
-				$query_result2 = mysqli_query_strict($db,"SELECT * FROM accounts WHERE label='{$row['account']}'");
+			  $where_clause = 'label=?';
+			  $where_values = array('s',$row['account']);
+			  $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 
 				// Account
 				if ($row2 = mysqli_fetch_assoc($query_result2))

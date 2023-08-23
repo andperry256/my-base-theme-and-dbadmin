@@ -11,8 +11,10 @@
   $username = $_POST['username'];
   $password = $_POST['password'];
   $UserAuthenticated = false;
+  $where_clause = "$AuthDB_UsernameField=?";
+  $where_values = array('s',$username);
   if ((preg_match("/^[A-Z0-9.]*$/i", $username)) &&
-      ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM $AuthDB_Table WHERE $AuthDB_UsernameField='$username'"))))
+      ($row = mysqli_fetch_assoc(mysqli_select_query($db,$AuthDB_Table,'*',$where_clause,$where_values,''))))
   {
     if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))
     {

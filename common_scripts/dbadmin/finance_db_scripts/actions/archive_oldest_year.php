@@ -10,7 +10,7 @@ if (isset($_POST['new_start_date']))
   $archive_end_date = AddDays($new_start_date,-1);
   $balances = array();
   $error = false;
-  $query_result = mysqli_query_strict($db,"SELECT * from accounts");
+  $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
   print("<p>");
   while (($row = mysqli_fetch_assoc($query_result)) && ($error === false))
   {
@@ -20,13 +20,17 @@ if (isset($_POST['new_start_date']))
     {
       $balances[$account] = array();
     }
-    $query_result2 = mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND date<'$new_start_date'");
+    $where_clause = 'account=? AND date<?';
+    $where_values = array('s',$account,'s',$new_start_date);
+    $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
     while ($row2 = mysqli_fetch_assoc($query_result2))
     {
       if (($row2['fund'] == '-split-') && (empty($row2['source_account'])))
       {
         // Process splits
-        $query_result3 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='$account' AND transact_seq_no={$row2['seq_no']}");
+        $where_clause = 'account=? AND transact_seq_no=?';
+        $where_values = array('s',$account,'i',$row2['seq_no']);
+        $query_result3 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
         $splits_total = 0;
         while ($row3 = mysqli_fetch_assoc($query_result3))
         {
@@ -47,7 +51,9 @@ if (isset($_POST['new_start_date']))
       elseif ($row2['fund'] == '-split-')
       {
         // Process splits on other side of transfer
-        $query_result3 = mysqli_query_strict($db,"SELECT * FROM splits WHERE account='{$row2['source_account']}' AND transact_seq_no={$row2['source_seq_no']}");
+        $where_clause = 'account=? AND transact_seq_no=?';
+        $where_values = array('s',$row2['source_account'],'i',$row2['source_seq_no']);
+        $query_result3 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
         $splits_total = 0;
         while ($row3 = mysqli_fetch_assoc($query_result3))
         {
@@ -86,15 +92,21 @@ if (isset($_POST['new_start_date']))
   // Calculate the sequence number for the new 'Balance B/F' transaction
   // for each account.
   $bbf_seq_no = array();
-  $query_result = mysqli_query_strict($db,"SELECT * from accounts");
+  $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
   while (($row = mysqli_fetch_assoc($query_result)) && ($error === false))
   {
     $account = $row['label'];
-    if ($row2 = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND date>='$new_start_date' ORDER BY date ASC, seq_no ASC LIMIT 1")))
+    $where_clause1 = 'account=? AND date>=?';
+    $where_values1 = array('s',$account,'s',$new_start_date);
+    $add_clause1 = 'ORDER BY date ASC, seq_no ASC LIMIT 1';
+    $where_clause2 = 'account=? AND date<?';
+    $where_values2 = array('s',$account,'s',$new_start_date);
+    $add_clause2 = 'ORDER BY seq_no DESC LIMIT 1';
+    if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'transactions','*',$where_clause1,$where_values1,$add_clause1)))
     {
       $bbf_seq_no[$account] = $row2['seq_no'] - 5;
     }
-    elseif  ($row2 = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM transactions WHERE account='$account' AND date<'$new_start_date' ORDER BY seq_no DESC LIMIT 1")))
+    elseif ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'transactions','*',$where_clause2,$where_values2,$add_clause2)))
     {
       $bbf_seq_no[$account] = $row2['seq_no'] + 10;
     }
@@ -102,8 +114,10 @@ if (isset($_POST['new_start_date']))
     {
       $bbf_seq_no[$account] = 10;
     }
+    $where_clause = 'account=? AND seq_no=?';
+    $where_values = array('s',$account,'i',$bbf_seq_no[$account]);
     if (( $bbf_seq_no[$account] <= 0 ) ||
-        (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM transactions WHERE account='$account' AND seq_no={$bbf_seq_no[$account]}")) != 0))
+        (mysqli_num_rows(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'') != 0)))
     {
       print("ERROR - Unable to set record number for 'Balance B/F' in account {$row['name']}<br />\n");
       $error = true;
@@ -135,23 +149,31 @@ if (isset($_POST['new_start_date']))
     mysqli_query_normal($db,"DROP TABLE IF EXISTS archived_splits_$year");
     mysqli_query_normal($db,"CREATE TABLE archived_transactions_$year AS SELECT * FROM transactions WHERE date<='$archive_end_date'");
     mysqli_query_normal($db,"CREATE TABLE archived_splits_$year LIKE splits");
-    $query_result = mysqli_query_strict($db,"SELECT * FROM archived_transactions_$year");
+    $query_result = mysqli_select_query($db,"archived_transactions_$year",'*','',array(),'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
-      mysqli_query_normal($db,"INSERT INTO archived_splits_$year SELECT * FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");
+      $query = "INSERT INTO archived_splits_$year SELECT * FROM splits WHERE account=? AND transact_seq_no=?";
+      $where_values = array('s',$row['account'],'i',$row['seq_no']);
+      mysqli_free_format_query($db,$query,$where_values);
     }
 
     // Delete archived transactions from main tables
     print("Deleting old transactions<br />\n");
-    $query_result = mysqli_query_strict($db,"SELECT * FROM transactions WHERE date<'$new_start_date'");
+    $where_clause = 'date<?';
+    $where_values = array('s',$new_start_date);
+    $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
-      mysqli_query_normal($db,"DELETE FROM splits WHERE account='{$row['account']}' AND transact_seq_no={$row['seq_no']}");
+      $where_clause = 'account=? AND transact_seq_no=?';
+      $where_values = array('s',$row['account'],'i',$row['seq_no']);
+      mysqli_delete_query($db,'splits',$where_clause,$where_values);
     }
-    mysqli_query_normal($db,"DELETE FROM transactions WHERE date<'$new_start_date'");
+    $where_clause = 'date<?';
+    $where_values = array('s',$new_start_date);
+    mysqli_delete_query($db,'transactions',$where_clause,$where_values);
 
     // Add new 'Balance B/F' transactions
-    $query_result = mysqli_query_strict($db,"SELECT * from accounts");
+    $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
       print("Creating 'Balance B/F' transaction for account {$row['name']}<br />\n");
@@ -170,33 +192,37 @@ if (isset($_POST['new_start_date']))
           // This loop should only be executed once.
           $credit = ($balance > 0) ? $balance : 0;
           $debit = ($balance < 0) ? -$balance : 0;
-          $query = "INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled)";
-          $query .= " VALUES ('$account',$transaction_seq_no,'$new_start_date','{$row['currency']}','Balance B/F',$credit,$debit,'$acct_month','$fund','-none-',1)";
-          mysqli_query_normal($db,$query);
+          $fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled';
+          $values = array('s',$account,'i',$transaction_seq_no,'s',$new_start_date,'s',$row['currency'],'s','Balance B/F','d',$credit,'d',$debit,'s',$acct_month,'s',$fund,'s','-none-','i',1);
+          mysqli_insert_query($db,'transactions',$fields,$values);
         }
         update_account_balances($account,$new_start_date);
       }
       else
       {
         // Add transaction with splits
-        $query = "INSERT INTO transactions (account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled)";
-        $query .= " VALUES ('$account',$transaction_seq_no,'$new_start_date','{$row['currency']}','Balance B/F',0,0,'$acct_month','-split-','-split-',1)";
-        mysqli_query_normal($db,$query);
+        $fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,acct_month,fund,category,reconciled';
+        $values = array('s',$account,'i',$transaction_seq_no,'s',$new_start_date,'s',$row['currency'],'s','Balance B/F','i',0,'i',0,'s',$acct_month,'s','-split-','s','-split-','i',1);
+        mysqli_insert_query($db,'transactions',$fields,$values);
         $splits_total = 0;
         $split_no = 10;
         foreach ($balances[$account] as $fund => $balance)
         {
           $credit = ($balance > 0) ? $balance : 0;
           $debit = ($balance < 0) ? -$balance : 0;
-          $query = "INSERT INTO splits (account,transact_seq_no,split_no,credit_amount,debit_amount,fund,category,acct_month)";
-          $query .= " VALUES ('$account',$transaction_seq_no,$split_no,$credit,$debit,'$fund','-none-','$acct_month')";
-          mysqli_query_normal($db,$query);
+          $fields = 'account,transact_seq_no,split_no,credit_amount,debit_amount,fund,category,acct_month';
+          $values = array('s',$account,'i',$transaction_seq_no,'i',$split_no,'d',$credit,'d',$debit,'s',$fund,'s','-none-','s',$acct_month);
+          mysqli_insert_query($db,'splits',$fields,$values);
           $split_no += 10;
           $splits_total = add_money($splits_total,subtract_money($credit,$debit));
         }
         $credit = ($splits_total > 0) ? $splits_total : 0;
         $debit = ($splits_total < 0) ? -$splits_total : 0;
-        mysqli_query_normal($db,"UPDATE transactions SET credit_amount=$credit,debit_amount=$debit WHERE account='$account' AND seq_no=$transaction_seq_no");
+        $set_fields = 'credit_amount,debit_amount';
+        $set_values = array('d',$credit,'d',$debit);
+        $where_clause = 'account=? AND seq_no=?';
+        $where_values = array('s',$account,'d',$transaction_seq_no);
+        mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         update_account_balances($account,$new_start_date);
       }
     }
@@ -210,7 +236,9 @@ else
   {
     $year_start = sprintf("%04d-%02d-%02d",$year,YEAR_START_MONTH,MONTH_START_DAY);
     $next_year_start = sprintf("%04d-%02d-%02d",$year+1,YEAR_START_MONTH,MONTH_START_DAY);
-    if (mysqli_num_rows(mysqli_query_normal($db,"SELECT * FROM transactions WHERE date>='$year_start' AND date<'$next_year_start'")) > 20)
+    $where_clause = 'date>=? AND date<?';
+    $where_values = array('s',$year_start,'s',$next_year_start);
+    if (mysqli_num_rows(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'')) > 20)
     {
       // Full year found
       $new_start_date = $next_year_start;

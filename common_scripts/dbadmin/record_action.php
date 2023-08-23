@@ -123,18 +123,20 @@ $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 while ($row = mysqli_fetch_assoc($query_result))
 {
   $field_name = $row['Field'];
-  $query_result2 = mysqli_query_strict($db,"SELECT * FROM dba_table_fields WHERE table_name='$base_table' AND field_name='$field_name'");
+  $where_clause = 'table_name=? AND field_name=?';
+  $where_values = array('s',$base_table,'s',$field_name);
+  $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
   if ($row2 = mysqli_fetch_assoc($query_result2))
   {
     if ($row2['widget_type'] == 'checkbox')
     {
       if (isset($_POST["field_$field_name"]))
       {
-        $record->SetField($field_name,1);
+        $record->SetField($field_name,1,'i');
       }
       else
       {
-        $record->SetField($field_name,0);
+        $record->SetField($field_name,0,'i');
       }
     }
     elseif ($row2['widget_type'] == 'checklist')
@@ -148,15 +150,15 @@ while ($row = mysqli_fetch_assoc($query_result))
           $field_value .= "$item^";
         }
       }
-      $record->SetField($field_name,addslashes($field_value));
+      $record->SetField($field_name,$field_value,'s');
     }
     elseif(($row2['widget_type'] == 'file') && (!empty(basename($_FILES["file_$field_name"]['name']))))
     {
-      $record->SetField($field_name,basename($_FILES["file_$field_name"]['name']));
+      $record->SetField($field_name,basename($_FILES["file_$field_name"]['name']),'s');
     }
     else
     {
-      $record->SetField($field_name,stripslashes($_POST["field_$field_name"]));
+      $record->SetField($field_name,stripslashes($_POST["field_$field_name"]),query_field_type($db,$table,$field_name));
     }
 
     if ($row2['is_primary'])
@@ -164,7 +166,9 @@ while ($row = mysqli_fetch_assoc($query_result))
       if (($action == 'new') && ($row2['widget_type'] == 'auto-increment'))
       {
         // Predict the next auto-increment value for the field
-        $query_result3 = mysqli_query_strict($db,"SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA='$dbase' AND TABLE_NAME='$base_table'");
+        $where_clause = 'TABLE_SCHEMA=? AND TABLE_NAME=?';
+        $where_values = array('s',$dbase,'s',$base_table);
+        $query_result3 = mysqli_select_query($db,'information_schema.TABLES','AUTO_INCREMENT',$where_clause,$where_values,'');
         if ($row3 = mysqli_fetch_assoc($query_result3))
         {
           $new_primary_keys[$field_name] = $row3['AUTO_INCREMENT'];

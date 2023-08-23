@@ -60,7 +60,9 @@
   }
 
   print("<h1>Edit page/post [$page_slug]</h1>\n");
-  $query_result = mysqli_query_strict($db,"SELECT * FROM wp_posts WHERE post_name='$page_slug'");
+  $where_clause = 'post_name=?';
+  $where_values = array('s',$page_slug);
+  $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result))
   {
     print("<form method=\"post\" action=\"$DBAdminURL/quick-edit/action.php\">\n");

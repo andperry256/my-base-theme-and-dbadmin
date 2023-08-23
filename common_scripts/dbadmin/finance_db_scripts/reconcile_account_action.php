@@ -33,7 +33,7 @@
   if (($bank_transaction == 'IMPORT') && ($account_transaction == 'IMPORT'))
   {
     // Populate bank import table from CSV file
-    mysqli_query_normal($db,"DELETE FROM bank_import");
+    mysqli_delete_query($db,'bank_import','1',array());
   	$import_data = array();
   	$import_data = file("$BankImportDir/Account_$account.csv");
   	$first_line_skipped = false;
@@ -74,9 +74,10 @@
   				$amount = - $amount;
   				$balance = 0;
   			}
-  			$description = addslashes($description);
   			$description = substr($description,0,31);
-  			mysqli_query_normal($db,"INSERT INTO bank_import (date,description,amount,balance) VALUES ('$mysql_date','$description',$amount,$balance)");
+        $fields = 'date,description,amount,balance';
+        $values = array('s',$mysql_date,'s',$description,'d',$amount,'d',$balance);
+        mysqli_insert_query($db,'bank_import',$fields,$values);
   		}
   	}
   }
@@ -87,31 +88,40 @@
   elseif ($account_transaction == 'NONE')
   {
     // Bank transaction not to be matched
-    mysqli_query_normal($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_rec_id");
+    $set_fields = 'reconciled';
+    $set_values = array('i',1);
+    $where_clause = 'rec_id=?';
+    $where_values = array('i',$bank_rec_id);
+    mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
     $user_message = "<p>Bank transaction discarded.</p>\n";
   }
   elseif ($account_transaction == 'NEW')
   {
-    $query_result = mysqli_query_strict($db,"SELECT * FROM bank_import WHERE rec_id=$bank_rec_id");
+    $where_clause = 'rec_id=?';
+    $where_values = array('i',$bank_rec_id);
+    $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'');
     if ($row = mysqli_fetch_assoc($query_result))
     {
       // Create new transaction. Update payee if regex match is found.
       // N.B. Multiple matches can be made against a given payee by creating additional table entries
       // using the original payee name with variable numbers of underscores added to the end.
       $date = $row['date'];
-      $payee = addslashes($row['description']);
-      $query_result2 = mysqli_query_strict($db,"SELECT * FROM payees WHERE regex_match<>'^$'");
+      $payee = $row['description'];
+      $where_clause = "regex_match<>'^$'";
+      $query_result2 = mysqli_select_query($db,'payees','*',$where_clause,array(),'');
       while ($row2 = mysqli_fetch_assoc($query_result2))
       {
         $pattern = "/{$row2['regex_match']}/i";
         if (preg_match($pattern,$payee))
         {
-          $payee = addslashes(rtrim($row2['name'],'_'));
+          $payee = rtrim($row2['name'],'_');
           break;
         }
       }
       $seq_no = next_seq_no($account);
-      mysqli_query_normal($db,"INSERT INTO transactions (account,seq_no,date,payee,credit_amount,debit_amount,bank_import_id) VALUES ('$account',$seq_no,'$date','$payee',$credit_amount,$debit_amount,$bank_rec_id)");
+      $fields = 'account,seq_no,date,payee,credit_amount,debit_amount,bank_import_id';
+      $values = array('s',$account,'i',$seq_no,'s',$date,'s',$payee,'d',$credit_amount,'d',$debit_amount,'i',$bank_rec_id);
+      mysqli_insert_query($db,'transactions',$fields,$values);
 
       // Go to the record edit screen.
       $primary_keys = array();
@@ -136,32 +146,55 @@
     else
     {
       // Transaction to be reconciled
+      $where_clause = 'rec_id=?';
+      $where_values = array('i',$bank_rec_id);
       if ((is_numeric($bank_rec_id)) &&
-          ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SELECT * FROM bank_import WHERE rec_id=$bank_rec_id"))))
+          ($row = mysqli_fetch_assoc(mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,''))))
       {
-        mysqli_query_normal($db,"UPDATE bank_import SET reconciled=1 WHERE rec_id=$bank_rec_id");
-        mysqli_query_normal($db,"UPDATE _view_account_$account SET reconciled=1 WHERE seq_no=$account_seq_no");
+        $set_fields = 'reconciled';
+        $set_values = array('i',1);
+        $where_clause = 'rec_id=?';
+        $where_values = array('i',$bank_rec_id);
+        mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
+        $set_fields = 'reconciled';
+        $set_values = array('i',1);
+        $where_clause = 'seq_no=?';
+        $where_values = array('i',$account_seq_no);
+        mysqli_update_query($db,'_view_account_',$set_fields,$set_values,$where_clause,$where_values);
         if ((isset($_POST['auto_adjust'])) || (isset($_POST['update_schedule'])))
         {
           // Change register amount to match bank transaction
-          mysqli_query_normal($db,"UPDATE _view_account_$account SET credit_amount=$credit_amount,debit_amount=$debit_amount WHERE seq_no=$account_seq_no");
+          $set_fields = 'credit_amount,debit_amount';
+          $set_values = array('d',$credit_amount,'d',debit_amount);
+          $where_clause = 'seq_no=?';
+          $where_values = array('i',$account_seq_no);
+          mysqli_update_query($db,'_view_account_',$set_fields,$set_values,$where_clause,$where_values);
           if (isset($_POST['update_schedule']))
           {
             // Update associated scheduled transaction
-            $query_result2 = mysqli_query_strict($db,"SELECT * FROM _view_account_$account WHERE seq_no=$account_seq_no");
+            $where_clause = 'seq_no=?';
+            $where_values = array('i',$account_seq_no);
+            $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
             if ($row2 = mysqli_fetch_assoc($query_result2))
             {
-              $payee = addslashes($row2['payee']);
-              mysqli_query_normal($db,"UPDATE transactions SET credit_amount=$credit_amount,debit_amount=$debit_amount WHERE account='$account' AND payee='$payee' AND sched_freq<>'#'");
+              $payee = $row2['payee'];
+              $set_fields = 'credit_amount,debit_amount';
+              $set_values = array('d',$credit_amount,'d',$debit_amount);
+              $where_clause = "account=? AND payee=? AND sched_freq<>'#'";
+              $where_values = array('s',$account,'s',$payee);
+              mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
             }
           }
         }
-        $query_result2 = mysqli_query_strict($db,"SELECT * FROM _view_account_$account WHERE seq_no=$account_seq_no");
+        $where_clause = 'seq_no=?';
+        $where_values = array('i',$account_seq_no);
+        $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
           update_account_balances($account,$row2['date']);
         }
-        $query_result2 = mysqli_query_strict($db,"SELECT * FROM _view_account_$account ORDER BY date DESC, seq_no DESC LIMIT 1");
+        $add_clause = 'ORDER BY date DESC, seq_no DESC LIMIT 1';
+        $query_result2 = mysqli_select_query($db,"_view_account_$account",'*','',array(),$add_clause);
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
           $user_message = "<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['reconciled_balance']}</p>\n";

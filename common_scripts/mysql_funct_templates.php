@@ -25,6 +25,7 @@ mysqli_insert_query($db,'',$fields,$values);
 $where_clause = '';
 $where_values = array('s',);
 mysqli_delete_query($db,'',$where_clause,$where_values);
+mysqli_delete_query($db,'','',array());
 
 // FREE FORMAT
 $query = "";

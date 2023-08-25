@@ -558,7 +558,7 @@ function display_table($params)
 								}
 								$field_processed = true;
 								$search_clause .= " LOWER($field_name) LIKE '%";
-								$search_clause .= addslashes($lc_search_string);
+								$search_clause .= mysqli_real_escape_string($db,$lc_search_string);
 								$search_clause .= "%'";
 								update_session_var('search_clause',$search_clause);
 							}
@@ -922,7 +922,7 @@ function display_table($params)
 				{
 					$leading_char = substr($matches[0],0,1);
 					$field_name = substr($matches[0],2);
-					$value = addslashes($row[$field_name]);
+					$value = mysqli_real_escape_string($db,$row[$field_name]);
 					$value = str_replace('$','\\$',$value);
 					$query = str_replace($matches[0],"$leading_char$value",$query);
 				}

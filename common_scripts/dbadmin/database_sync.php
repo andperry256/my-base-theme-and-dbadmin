@@ -68,7 +68,7 @@ function sync_databases($local_db_name)
 					  $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,array(),'');
 						while ($row2 = mysqli_fetch_assoc($query_result2))
 						{
-							$relationship_name_par = addslashes($row2['relationship_name']);
+							$relationship_name_par = mysqli_real_escape_string($db,$row2['relationship_name']);
 							$line = "INSERT INTO dba_relationships VALUES ('{$row2['table_name']}','$relationship_name_par',\"{$row2['query']}\");";
 							$line = str_replace('%','%%',$line);
 							fprintf($ofp,"$line\n");

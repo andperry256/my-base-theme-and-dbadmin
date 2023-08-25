@@ -68,6 +68,7 @@ require("$PrivateScriptsDir/mysql_connect.php");
 require("$BaseDir/wp-content/themes/my-base-theme/shared/functions.php");
 require("$DBAdminDir/functions.php");
 require("$DBAdminDir/classes.php");
+$post_copy = deslash($_POST);
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
@@ -158,7 +159,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     }
     else
     {
-      $record->SetField($field_name,stripslashes($_POST["field_$field_name"]),query_field_type($db,$table,$field_name));
+      $record->SetField($field_name,$post_copy["field_$field_name"],query_field_type($db,$table,$field_name));
     }
 
     if ($row2['is_primary'])
@@ -189,7 +190,7 @@ while ($row = mysqli_fetch_assoc($query_result))
       }
       else
       {
-        $new_primary_keys[$field_name] = stripslashes($_POST["field_$field_name"]);
+        $new_primary_keys[$field_name] = $post_copy["field_$field_name"];
       }
     }
   }

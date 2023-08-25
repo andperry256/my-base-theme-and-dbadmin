@@ -87,7 +87,7 @@
         }
         elseif (substr($line,0,12) == 'widget:label')
         {
-          $label = addslashes(trim(substr($line,12)," =\"\n\r\t"));
+          $label = trim(substr($line,12)," =\"\n\r\t");
           $set_fields = 'alt_label';
           $set_values = array('s',$label);
           $where_clause = 'table_name=? AND field_name=?';
@@ -96,7 +96,7 @@
         }
         elseif (substr($line,0,18) == 'widget:description')
         {
-          $description = addslashes(trim(substr($line,18)," =\"\n\r\t"));
+          $description = trim(substr($line,18)," =\"\n\r\t");
           $set_fields = 'description';
           $set_values = array('s',$description);
           $where_clause = 'table_name=? AND field_name=?';

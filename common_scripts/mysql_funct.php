@@ -14,8 +14,30 @@ if (!defined('NULLSTR'))
 {
 	define('NULLSTR',chr(0));
 }
-if (!function_exists('print_stack_trace_for_mysqli_error'))
+if (!function_exists('deslash'))
 {
+//==============================================================================
+/*
+Function deslash
+
+Although not a MySQL function as such, this function is included here as it is
+most likely to be used when MySQL functions are also in use.
+
+It is used to perform the 'stripslashes' function on all elements of an array,
+mainly for use in processing the global $_POST array (in which strings are
+always escaped).
+*/
+//==============================================================================
+
+function deslash (array $data)
+{
+	foreach ($data as $key => $val)
+	{
+  	$data [$key] = is_array ($val) ? deslash ($val) : stripslashes ($val);
+	}
+	return $data;
+}
+
 //==============================================================================
 
 function print_stack_trace_for_mysqli_error($ofp=false)

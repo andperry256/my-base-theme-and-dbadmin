@@ -1215,7 +1215,7 @@ Function run_update
 function run_update($table,$option)
 {
 	global $Location;
-	$_POST = array_map( 'stripslashes_deep', $_POST );
+	$post_copy = deslash($_POST);
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
 	$primary_keys = array();
@@ -1224,7 +1224,7 @@ function run_update($table,$option)
 	// Build up array of updates indexed by record ID.
 	if ($option == 'selection')
 	{
-		foreach ($_POST as $key => $value)
+		foreach ($post_copy as $key => $value)
 		{
 			if (substr($key,0,7) == 'select_')
 			{
@@ -1532,14 +1532,14 @@ Function run_copy
 function run_copy($table)
 {
 	global $Location;
-	$_POST = array_map( 'stripslashes_deep', $_POST );
+	$post_copy = deslash($_POST);
 	$db = admin_db_connect();
 	$base_table = get_base_table($table);
 	$primary_keys = array();
 	$updates = array();
 
 	// Build up array of updates indexed by record ID.
-	foreach ($_POST as $key => $value)
+	foreach ($post_copy as $key => $value)
 	{
 		if (substr($key,0,7) == 'select_')
 		{

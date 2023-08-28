@@ -988,6 +988,7 @@ function save_record($record,$old_record_id,$new_record_id)
 			$set_values[count($set_values)] = $record->FieldType($field);
 			$set_values[count($set_values)] = $value;
 		}
+		$set_fields = rtrim($set_fields,',');
 	  $where_clause = '';
 	  $where_values = array();
 		foreach ($old_primary_keys as $field => $value)

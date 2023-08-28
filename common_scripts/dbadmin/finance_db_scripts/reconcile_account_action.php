@@ -160,15 +160,15 @@
         $set_values = array('i',1);
         $where_clause = 'seq_no=?';
         $where_values = array('i',$account_seq_no);
-        mysqli_update_query($db,'_view_account_',$set_fields,$set_values,$where_clause,$where_values);
+        mysqli_update_query($db,"_view_account_$account",$set_fields,$set_values,$where_clause,$where_values);
         if ((isset($_POST['auto_adjust'])) || (isset($_POST['update_schedule'])))
         {
           // Change register amount to match bank transaction
           $set_fields = 'credit_amount,debit_amount';
-          $set_values = array('d',$credit_amount,'d',debit_amount);
+          $set_values = array('d',$credit_amount,'d',$debit_amount);
           $where_clause = 'seq_no=?';
           $where_values = array('i',$account_seq_no);
-          mysqli_update_query($db,'_view_account_',$set_fields,$set_values,$where_clause,$where_values);
+          mysqli_update_query($db,"_view_account_$account",$set_fields,$set_values,$where_clause,$where_values);
           if (isset($_POST['update_schedule']))
           {
             // Update associated scheduled transaction

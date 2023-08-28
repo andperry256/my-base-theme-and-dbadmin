@@ -611,7 +611,7 @@ $strict (optional) - See run_prepared_statement function.
 
 function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=false)
 {
-	$where_clause_count = substr_count($where_clause,'?');
+	$where_clause_count = substr_count($query,'?');
 	$where_values_count = count($where_values);
 	if ($where_values_count != $where_clause_count*2)
 	{

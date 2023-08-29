@@ -273,18 +273,50 @@ Function raise_query_validation_error
 
 This function is called to raise an exception when a query fails validations
 in one of the below functions. It is currently only used to trap situations
-where the number of question marks in the query does not relate correctly to
-the number of supplied parameters.
+where the number of items in the query does not relate correctly to the number
+of supplied values.
+
+The following parameters are passed:-
+$query - The MySQL query being processed. This is only for output to the user
+         and in some cases is a partial rather than whole query.
+$param_count - The number of items to which values should be applied.
+$fields - A comma separated list of field names for an UPDATE or INSERT query.
+          Otherwise empty.
+$values - The values being applied in the query (array). In a correct
+          configutaion, each item would occupy two array elements (variable
+					type followed by value).
 */
 //==============================================================================
 
-function raise_query_validation_error($query,$param_count,$value_count)
+function raise_query_validation_error($query,$param_count,$fields,$values)
 {
 	$eol = (isset($argc)) ? "\n" : "<br />\n";
+	$error_id = substr(md5(date('YmdHis')),0,8);
+	$date_and_time = date('Y-m-d H:i:s');
 	if (is_file("/Config/linux_pathdefs.php"))
 	{
 		// Local server
-		print("Failed to validate MySQL query:$eol$query$eol(params=$param_count, values=$value_count)$eol");
+		print("Failed to validate MySQL query:$eol$query$eol");
+		$value_count = count($values);
+		$total_count = ($value_count > $param_count*2)
+			? $value_count
+			: $param_count*2;
+		print("(Params=$param_count, Values=$value_count)$eol");
+		print("<table>\n");
+		for ($i=0; $i<=$total_count; $i++)
+		{
+			print("<tr><td>");
+			if (($i%2 == 0) && ($i < $param_count*2))
+			{
+				$param = strtok($fields,',');
+				$fields = substr($fields,strlen($param)+1);
+				print (empty($param))
+					? '***'
+					: $param;
+			}
+			print("</td><td>{$values[$i]}</td></tr>\n");
+		}
+		print("</table>\n");
 		print_stack_trace_for_mysqli_error();
 	}
 	else
@@ -308,10 +340,11 @@ This function is called to run a SELECT query using a prepared statement.
 The following parameters are passed:-
 $db - Link to the connected database
 $table - Associated table
-$fields - List of fields being select ('*' or comma separated string)
+$fields - List of fields being selected ('*' or comma separated string)
 $where_clause - WHERE clause to be used in the query (optional). Values to
                 compare with are included as question marks.
-$where_values - Values associated with the WHERE clause (array).
+$where_values - Values associated with the WHERE clause (array).Each item
+                occupies two array elements (variable type followed by value).
 $add_clause - Any additional clause to be added to the query (opitional -
               includes for example ORDER or LIMIT direactive).
 $strict (optional) - See run_prepared_statement function.
@@ -327,7 +360,7 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
 	$where_values_count = count($where_values);
 	if ($where_values_count != $where_clause_count*2)
 	{
-		raise_query_validation_error("$query WHERE $where_clause ...",$where_clause_count,$where_values_count);
+		raise_query_validation_error("$query WHERE $where_clause ...",$where_clause_count,'',$where_values);
 	}
 	if (!empty($where_clause))
 	{
@@ -413,7 +446,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
 	$all_values_count = count($all_values);
 	if ($all_values_count != $param_count*2)
 	{
-		raise_query_validation_error($query,$param_count,$all_values_count);
+		raise_query_validation_error($query,$param_count,$set_fields,$all_values);
 	}
 	if (USE_PREPARED_STATEMENTS)
 	{
@@ -478,7 +511,7 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
 	$values_count = count($values);
 	if ($values_count != $field_count*2)
 	{
-		raise_query_validation_error("INSERT INTO $table ...",$field_count,$values_count);
+		raise_query_validation_error("INSERT INTO $table ...",$field_count,$fields,$values);
 	}
 	if (USE_PREPARED_STATEMENTS)
 	{
@@ -548,7 +581,7 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
 	$where_values_count = count($where_values);
 	if ($where_values_count != $where_clause_count*2)
 	{
-		raise_query_validation_error($query,$where_clause_count,$where_values_count);
+		raise_query_validation_error($query,$where_clause_count,'',$where_values);
 	}
 	if (!empty($where_clause))
 	{
@@ -602,8 +635,8 @@ paramaters.
 The following parameters are passed:-
 $db - Link to the connected database
 $query - Query text,
-$where_values - Parameters to be bound. Each item occupies two array elements
-                (variable type followed by value).
+$where_values - Parameters to be bound (array). Each item occupies two array
+                elements (variable type followed by value).
 $strict (optional) - See run_prepared_statement function.
 
 */
@@ -615,7 +648,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
 	$where_values_count = count($where_values);
 	if ($where_values_count != $where_clause_count*2)
 	{
-		raise_query_validation_error($query,$where_clause_count,$where_values_count);
+		raise_query_validation_error($query,$where_clause_count,'',$where_values);
 	}
 	if (USE_PREPARED_STATEMENTS)
 	{

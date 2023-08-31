@@ -302,10 +302,14 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
 			? $value_count
 			: $param_count*2;
 		print("(Params=$param_count, Values=$value_count)$eol");
+		print("<style>\n");
+		print("table { border-collapse: collapse; }\n");
+		print("td { border: solid 1px #ccc; padding-left: 0.5em }\n");
+		print("</style>\n");
 		print("<table>\n");
 		for ($i=0; $i<=$total_count; $i++)
 		{
-			print("<tr><td>");
+			print("<tr><td style=\"width:15.0em\">");
 			if (($i%2 == 0) && ($i < $param_count*2))
 			{
 				$param = strtok($fields,',');

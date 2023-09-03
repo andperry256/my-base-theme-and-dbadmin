@@ -885,7 +885,7 @@ function save_record($record,$old_record_id,$new_record_id)
 			{
 				// Field is empty. Set it to null if allowed, otherwise to an empty string
 				if (($row['Null'] == 'YES') &&
-				    (($row2['widget_type'] == 'date') || ($record->FieldType($field_name) != 's')))
+				    (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
 				{
 					$new_mysql_fields[$field_name] = chr(0);
 				}

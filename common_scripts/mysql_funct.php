@@ -14,6 +14,11 @@ if (!defined('NULLSTR'))
 {
 	define('NULLSTR',chr(0));
 }
+global $RootDir,$error_logfile;
+$error_logfile = "$RootDir/logs/php_error.log";
+
+//==============================================================================
+
 if (!function_exists('deslash'))
 {
 //==============================================================================
@@ -40,20 +45,21 @@ function deslash (array $data)
 
 //==============================================================================
 
-function print_stack_trace_for_mysqli_error($ofp=false)
+function print_stack_trace_for_mysqli_error($display_errors)
 {
-	global $argc;
+	global $argc, $error_logfile;
 	$eol = (isset($argc)) ? "\n" : "<br />\n";
 	ob_start();
 	debug_print_backtrace();
 	$trace = ob_get_contents();
 	ob_end_clean();
-	if ($ofp === false)
+	if ($display_errors)
 	{
 		print(str_replace("\n",$eol,$trace));
 	}
 	else
 	{
+		$ofp = fopen($error_logfile,'a');
 		$content = explode("\n",$trace);
 		foreach ($content as $line)
 		{
@@ -78,7 +84,7 @@ On an online server, errors are output to a log file rather than the screen.
 
 function run_mysqli_query($db,$query,$strict=false,$debug=false)
 {
-	global $argc, $RootDir;
+	global $argc, $error_logfile;
 	if ($debug)
 	{
 		exit ("$query\n");
@@ -99,16 +105,16 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
 			// Local server
 			print("Error caught on running MySQL query:$eol$query$eol");
 			print($e->getMessage().$eol);
-			print_stack_trace_for_mysqli_error();
+			print_stack_trace_for_mysqli_error(true);
 		}
 		else
 		{
 			// Online server
-			$ofp = fopen("$RootDir/logs/php_error.log",'a');
+			$ofp = fopen($error_logfile,'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
 			fprintf($ofp,'  '.$e->getMessage()."\n");
 			fclose($ofp);
-			print_stack_trace_for_mysqli_error($ofp);
+			print_stack_trace_for_mysqli_error(false);
 			print($fatal_error_message);
 		}
 		exit;
@@ -119,15 +125,15 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
 		{
 			// Local server
 			print("Error result returned from MySQL query:$eol$query$eol");
-			print_stack_trace_for_mysqli_error();
+			print_stack_trace_for_mysqli_error(true);
 		}
 		else
 		{
 			// Online server
-			$ofp = fopen("$RootDir/logs/php_error.log",'a');
+			$ofp = fopen($error_logfile,'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
 			fclose($ofp);
-			print_stack_trace_for_mysqli_error($ofp);
+			print_stack_trace_for_mysqli_error(false);
 			print($fatal_error_message);
 		}
 		exit;
@@ -171,7 +177,7 @@ On an online server, errors are output to a log file rather than the screen.
 
 function run_prepared_statement($stmt,$strict)
 {
-	global $argc, $RootDir;
+	global $argc, $error_logfile;
 	$eol = (isset($argc)) ? "\n" : "<br />\n";
 	$error_id = substr(md5(date('YmdHis')),0,8);
 	$date_and_time = date('Y-m-d H:i:s');
@@ -188,16 +194,16 @@ function run_prepared_statement($stmt,$strict)
 			// Local server
 			print("Error caught on running MySQL query:$eol$query$eol");
 			print($e->getMessage().$eol);
-			print_stack_trace_for_mysqli_error();
+			print_stack_trace_for_mysqli_error(true);
 		}
 		else
 		{
 			// Online server
-			$ofp = fopen("$RootDir/logs/php_error.log",'a');
+			$ofp = fopen($error_logfile,'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
 			fprintf($ofp,'  '.$e->getMessage()."\n");
 			fclose($ofp);
-			print_stack_trace_for_mysqli_error($ofp);
+			print_stack_trace_for_mysqli_error(false);
 			print($fatal_error_message);
 		}
 		exit;
@@ -209,15 +215,15 @@ function run_prepared_statement($stmt,$strict)
 		{
 			// Local server
 			print("Error result returned from MySQL query:$eol$query$eol");
-			print_stack_trace_for_mysqli_error();
+			print_stack_trace_for_mysqli_error(true);
 		}
 		else
 		{
 			// Online server
-			$ofp = fopen("$RootDir/logs/php_error.log",'a');
+			$ofp = fopen($error_logfile,'a');
 			fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
 			fclose($ofp);
-			print_stack_trace_for_mysqli_error($ofp);
+			print_stack_trace_for_mysqli_error(false);
 			print($fatal_error_message);
 		}
 		exit;
@@ -290,6 +296,7 @@ $values - The values being applied in the query (array). In a correct
 
 function raise_query_validation_error($query,$param_count,$fields,$values)
 {
+	global $error_logfile;
 	$eol = (isset($argc)) ? "\n" : "<br />\n";
 	$error_id = substr(md5(date('YmdHis')),0,8);
 	$date_and_time = date('Y-m-d H:i:s');
@@ -321,15 +328,15 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
 			print("</td><td>{$values[$i]}</td></tr>\n");
 		}
 		print("</table>\n");
-		print_stack_trace_for_mysqli_error();
+		print_stack_trace_for_mysqli_error(true);
 	}
 	else
 	{
 		// Online server
-		$ofp = fopen("$RootDir/logs/php_error.log",'a');
+		$ofp = fopen($error_logfile,'a');
 		fprintf($ofp,"[$date_and_time] [$error_id] Failed to validate MySQL query:\n  $query\n");
 		fclose($ofp);
-		print_stack_trace_for_mysqli_error($ofp);
+		print_stack_trace_for_mysqli_error(false);
 		print($fatal_error_message);
 	}
 	exit;

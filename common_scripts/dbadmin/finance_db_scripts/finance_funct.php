@@ -37,7 +37,6 @@ function update_account_balances($account,$start_date)
 		// This should not occur
 		$use_quoted_balance = false;
 	}
-	$fields = '';
   $where_clause = 'date<?';
   $where_values = array('s',$start_date);
   $add_clause = 'ORDER BY date DESC,seq_no DESC LIMIT 1';
@@ -88,7 +87,6 @@ function update_account_balances($account,$start_date)
   $where_values = array('s',$date);
   mysqli_update_query($db,$view,$set_fields,$set_values,$where_clause,$where_values);
 
-	$fields = '';
   $where_clause = 'date>=?';
   $where_values = array('s',$start_date);
   $add_clause = ' ORDER BY date ASC,seq_no ASC';
@@ -124,7 +122,6 @@ function update_account_balances($account,$start_date)
 function next_seq_no($account)
 {
 	$db = admin_db_connect();
-	$fields = '';
   $where_clause = 'account=?';
   $where_values = array('s',$account);
   $add_clause = 'ORDER BY seq_no DESC LIMIT 1';
@@ -145,7 +142,6 @@ function next_seq_no($account)
 function next_split_no($account,$transact_seq_no)
 {
 	$db = admin_db_connect();
-	$fields = '';
   $where_clause = 'account=? AND transact_seq_no=?';
   $where_values = array('s',$account,'i',$transact_seq_no);
   $add_clause = 'ORDER BY split_no DESC LIMIT 1';

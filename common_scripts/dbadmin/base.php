@@ -317,7 +317,6 @@ function display_main_content($mode)
 
       case 'renumber_records2':
         print("<h1>Renumber Records</h1>\n");
-        $fields = '';
         $where_clause = 'renumber_enabled=1';
         $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
         while ($row = mysqli_fetch_assoc($query_result))

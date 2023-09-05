@@ -6,11 +6,20 @@ a number of key variables as global.
 */
 //==============================================================================
 
-global $Location,$RootDir,$DBMode;
-global $BaseDir,$BaseURL,$RelativePath;
-global $DBAdminDir,$DBAdminURL;
-global $CustomPagesPath,$CustomPagesURL;
-global $CustomScriptsPath,$CustomScriptsURL;
+global $BaseDir;
+global $BaseURL;
+global $CustomPagesPath;
+global $CustomPagesURL;
+global $CustomScriptsPath;
+global $CustomScriptsURL;
+global $DBAdminDir;
+global $DBAdminURL;
+global $DBMode;
+global $Location;
+global $MaintenanceDir;
+global $PrivateScriptsDir;
+global $RelativePath;
+global $RootDir;
 
 //==============================================================================
 ?>

@@ -2,15 +2,15 @@
 
 class tables_payees
 {
-	function beforeSave($record)
-	{
+  function beforeSave($record)
+  {
 
-	}
+  }
 
-	function afterSave($record)
-	{
+  function afterSave($record)
+  {
 
 
-	}
+  }
 }
 ?>

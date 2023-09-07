@@ -11,7 +11,7 @@ print("<p>Please select the required date. You will be redirected to the page co
 print(" using defaut pagination.</p>\n");
 if (isset($error_message))
 {
-	print("<p>ERROR - $error_message</p>\n");
+  print("<p>ERROR - $error_message</p>\n");
 }
 
 $return_url = cur_url_par();

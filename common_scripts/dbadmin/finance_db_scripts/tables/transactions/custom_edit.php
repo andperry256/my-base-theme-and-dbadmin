@@ -49,7 +49,7 @@ if ($row = mysqli_fetch_assoc($query_result))
     $sched_freq = $row['sched_freq'];
     if ($sched_freq == '#')
     {
-    	print("<h1>Transaction Record (Account)</h1>\n");
+      print("<h1>Transaction Record (Account)</h1>\n");
       print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=list&-table=_view_account_$account\">Show All</a></div>");
       print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=_view_account_$account\">New Record</a></div>");
       print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>");
@@ -70,12 +70,12 @@ if ($row = mysqli_fetch_assoc($query_result))
         print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=edit&-table=_view_account_{$row['source_account']}&-recordid=$record_id2&summary\">Source Transaction</a></div>");
       }
       print("<div style=\"clear:both\"></div>\n");
-    	$view = "_view_account_$account";
+      $view = "_view_account_$account";
     }
     else
     {
-    	print("<h1>Transaction Record (Scheduled)</h1>\n");
-    	$view = "_view_scheduled_transactions";
+      print("<h1>Transaction Record (Scheduled)</h1>\n");
+      $view = "_view_scheduled_transactions";
     }
 
     $where_clause = 'account=? AND transact_seq_no=?';
@@ -84,16 +84,16 @@ if ($row = mysqli_fetch_assoc($query_result))
     $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
     if (mysqli_num_rows($query_result2) > 0)
     {
-    	// Splits found - clear the main fund and category
-    	$fund = '-split-';
-    	if ($row['category'] == '-transfer-')
-    	{
-    		$category = '-transfer-';
-    	}
-    	else
-  	  {
-      	$category = '-split-';
-    	}
+      // Splits found - clear the main fund and category
+      $fund = '-split-';
+      if ($row['category'] == '-transfer-')
+      {
+        $category = '-transfer-';
+      }
+      else
+      {
+        $category = '-split-';
+      }
       $set_fields = 'fund,category';
       $set_values = array('s',$fund,'s',$category);
       $where_clause = 'account=? AND seq_no=?';
@@ -102,15 +102,15 @@ if ($row = mysqli_fetch_assoc($query_result))
     }
     else
     {
-    	$fund = $row['fund'];
-    	$category = $row['category'];
+      $fund = $row['fund'];
+      $category = $row['category'];
     }
 
     // Print main transaction detail
     $splits_discrepancy = $row['splits_discrepancy'];
     if ($splits_discrepancy != 0)
     {
-    	print("<p><b>WARNING</b> - There is a split discrepancy of {$row['splits_discrepancy']}</p>\n");
+      print("<p><b>WARNING</b> - There is a split discrepancy of {$row['splits_discrepancy']}</p>\n");
     }
     print("<table>\n");
 
@@ -186,13 +186,13 @@ if ($row = mysqli_fetch_assoc($query_result))
     // Row 11 (optional) - Target/Source Account
     if (!empty($row['target_account']))
     {
-    	$target_account_name = str_replace('_',' ',$row['target_account']);
-    	print("<tr><td>Target Account:</td><td>$target_account_name</td></tr>\n");
+      $target_account_name = str_replace('_',' ',$row['target_account']);
+      print("<tr><td>Target Account:</td><td>$target_account_name</td></tr>\n");
     }
     elseif (!empty($row['source_account']))
     {
-    	$source_account_name = str_replace('_',' ',$row['source_account']);
-    	print("<tr><td>Source Account:</td><td>$source_account_name</td></tr>\n");
+      $source_account_name = str_replace('_',' ',$row['source_account']);
+      print("<tr><td>Source Account:</td><td>$source_account_name</td></tr>\n");
     }
 
     // Row 12 - Main Balance
@@ -261,37 +261,37 @@ if ($row = mysqli_fetch_assoc($query_result))
       $split_pks['transact_seq_no'] = $seq_no;
       $split_pks['split_no'] = $row2['split_no'];
       $record_id = encode_record_id($split_pks);
-    	print("<li><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=splits&-recordid=$record_id&-returnurl=$return_url\">");
-    	print("Fund: {$row2['fund']} | ");
-    	print("Cat: {$row2['category']} | ");
-    	if ($row2['credit_amount'] > 0)
-    	{
-    		$split_total = add_money($split_total,$row2['credit_amount']);
-    		print("Credit: {$row2['credit_amount']}");
-    	}
-    	elseif ($row2['debit_amount'] > 0)
-    	{
-    		$split_total = subtract_money($split_total,$row2['debit_amount']);
-    		print("Debit: {$row2['debit_amount']}");
-    	}
-    	$tempstr = str_replace('%','%%',$row2['memo']);
-    	print("<br />Memo: $tempstr");
-    	print("");
-    	print("</a></li>\n");
-    	$split_count++;
+      print("<li><a href=\"$BaseURL/$RelativePath/index.php?-action=edit&-table=splits&-recordid=$record_id&-returnurl=$return_url\">");
+      print("Fund: {$row2['fund']} | ");
+      print("Cat: {$row2['category']} | ");
+      if ($row2['credit_amount'] > 0)
+      {
+        $split_total = add_money($split_total,$row2['credit_amount']);
+        print("Credit: {$row2['credit_amount']}");
+      }
+      elseif ($row2['debit_amount'] > 0)
+      {
+        $split_total = subtract_money($split_total,$row2['debit_amount']);
+        print("Debit: {$row2['debit_amount']}");
+      }
+      $tempstr = str_replace('%','%%',$row2['memo']);
+      print("<br />Memo: $tempstr");
+      print("");
+      print("</a></li>\n");
+      $split_count++;
     }
     if (($split_count != 0) && ($splits_discrepancy != 0))
     {
-    	print("<li>Discrepancy: $splits_discrepancy</li>\n");
+      print("<li>Discrepancy: $splits_discrepancy</li>\n");
     }
     print("</ul>\n");
     if ($split_count == 0)
     {
-    	if (($fund == '-split-') && ($category == '-transfer-'))
+      if (($fund == '-split-') && ($category == '-transfer-'))
       {
         print("<p>See other side of transfer.</p>\n");
       }
-    	else
+      else
       {
         print("<p>NONE</p>\n");
       }

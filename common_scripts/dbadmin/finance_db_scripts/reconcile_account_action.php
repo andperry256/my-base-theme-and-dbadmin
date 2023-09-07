@@ -34,52 +34,52 @@
   {
     // Populate bank import table from CSV file
     mysqli_delete_query($db,'bank_import','1',array());
-  	$import_data = array();
-  	$import_data = file("$BankImportDir/Account_$account.csv");
-  	$first_line_skipped = false;
-  	foreach ($import_data as $line)
-  	{
-  		if (!$first_line_skipped)
-  		{
-  			$first_line_skipped = true;
-  		}
-  		else
-  		{
-  			$line_elements = array();
-  			$line_elements = str_getcsv($line,',','"');
-  			$date = $line_elements[0];
-  			$day = substr($date,0,2);
-  			$month = substr($date,3,2);
-  			$year = substr($date,6,4);
-  			$mysql_date = "$year-$month-$day";
-  			if ($account_type == 'bank')
-  			{
-  				$description = $line_elements[4];
-  				$debit_amount = $line_elements[5];
-  				$credit_amount = $line_elements[6];
-  				if (!empty($debit_amount))
+    $import_data = array();
+    $import_data = file("$BankImportDir/Account_$account.csv");
+    $first_line_skipped = false;
+    foreach ($import_data as $line)
+    {
+      if (!$first_line_skipped)
+      {
+        $first_line_skipped = true;
+      }
+      else
+      {
+        $line_elements = array();
+        $line_elements = str_getcsv($line,',','"');
+        $date = $line_elements[0];
+        $day = substr($date,0,2);
+        $month = substr($date,3,2);
+        $year = substr($date,6,4);
+        $mysql_date = "$year-$month-$day";
+        if ($account_type == 'bank')
+        {
+          $description = $line_elements[4];
+          $debit_amount = $line_elements[5];
+          $credit_amount = $line_elements[6];
+          if (!empty($debit_amount))
           {
             $amount = -$debit_amount;
           }
-  				elseif (!empty($credit_amount))
-  				{
-  					$amount = $credit_amount;
-  				}
-  				$balance = $line_elements[7];
-  			}
-  			elseif ($account_type == 'credit-card')
-  			{
-  				$description = $line_elements[3];
-  				$amount = $line_elements[4];
-  				$amount = - $amount;
-  				$balance = 0;
-  			}
-  			$description = substr($description,0,31);
+          elseif (!empty($credit_amount))
+          {
+            $amount = $credit_amount;
+          }
+          $balance = $line_elements[7];
+        }
+        elseif ($account_type == 'credit-card')
+        {
+          $description = $line_elements[3];
+          $amount = $line_elements[4];
+          $amount = - $amount;
+          $balance = 0;
+        }
+        $description = substr($description,0,31);
         $fields = 'date,description,amount,balance';
         $values = array('s',$mysql_date,'s',$description,'d',$amount,'d',$balance);
         mysqli_insert_query($db,'bank_import',$fields,$values);
-  		}
-  	}
+      }
+    }
   }
   elseif (($bank_transaction == 'IMPORT') || ($account_transaction == 'IMPORT'))
   {

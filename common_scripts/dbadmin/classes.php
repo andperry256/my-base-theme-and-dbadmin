@@ -103,13 +103,13 @@ class tables_dba_table_info
   }
 
   function afterDelete($record)
-	{
+  {
     $db = admin_db_connect();
     $table = $record->FieldVal('table_name');
     $where_clause = 'table_name=?';
     $where_values = array('s',$table);
     mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
-	}
+  }
 }
 
 class tables__view_orphan_table_info_records extends tables_dba_table_info {}
@@ -119,7 +119,7 @@ class tables__view_orphan_table_info_records extends tables_dba_table_info {}
 class tables_dba_table_fields
 {
   function widget_type__validate($record,$value)
-	{
+  {
     $table = $record->FieldVal('table_name');
     $field = $record->FieldVal('field_name');
     $db = admin_db_connect();
@@ -182,10 +182,10 @@ class tables_dba_table_fields
         }
       }
     }
-	}
+  }
 
   function beforeSave($record)
-	{
+  {
     /*
     Check to ensure that the table name field is not being altered unless the
     record is being copied.
@@ -195,7 +195,7 @@ class tables_dba_table_fields
     {
       return report_error("<p class=\"highlight-error\">Table name field can only be modified when creating a copy of the record.</p>\n");
     }
-	}
+  }
 }
 
 class tables__view_orphan_table_field_records extends tables_dba_table_fields {}
@@ -211,8 +211,8 @@ class tables_dba_relationships
 
 class tables_dba_sidebar_config
 {
-	function afterSave($record)
-	{
+  function afterSave($record)
+  {
     $db = admin_db_connect();
     $display_order = $record->FieldVal('display_order');
     $default_seq_no = DEFAULT_SEQ_NO;
@@ -234,7 +234,7 @@ class tables_dba_sidebar_config
       $where_values = array('i',$default_seq_no);
       mysqli_update_query($db,'dba_sidebar_config',$set_fields,$set_values,$where_clause,$where_values);
     }
-	}
+  }
 }
 
 //==============================================================================
@@ -242,46 +242,46 @@ class tables_dba_sidebar_config
 class tables_dba_change_log
 {
 
-	function afterSave($record)
-	{
-		$delete_record = $record->FieldVal('delete_record');
+  function afterSave($record)
+  {
+    $delete_record = $record->FieldVal('delete_record');
     if ($delete_record)
     {
-			// Delete flag is set
+      // Delete flag is set
       delete_record_on_save($record);
     }
-	}
+  }
 }
 
 //==============================================================================
 
 class tables_admin_passwords
 {
-	function beforeSave($record)
-	{
-		$new_passwd = $record->FieldVal('new_passwd');
-		$conf_new_passwd = $record->FieldVal('conf_new_passwd');
-		if ($conf_new_passwd != $new_passwd)
+  function beforeSave($record)
+  {
+    $new_passwd = $record->FieldVal('new_passwd');
+    $conf_new_passwd = $record->FieldVal('conf_new_passwd');
+    if ($conf_new_passwd != $new_passwd)
     {
       return report_error("Passwords do not match");
     }
-	}
+  }
 
-	function afterSave($record)
-	{
-		$db = admin_db_connect();
-		$username = $record->FieldVal('username');
-		$new_passwd = $record->FieldVal('new_passwd');
-		if (!empty($new_passwd))
-		{
-			$enc_passwd = password_hash($new_passwd,PASSWORD_DEFAULT);
+  function afterSave($record)
+  {
+    $db = admin_db_connect();
+    $username = $record->FieldVal('username');
+    $new_passwd = $record->FieldVal('new_passwd');
+    if (!empty($new_passwd))
+    {
+      $enc_passwd = password_hash($new_passwd,PASSWORD_DEFAULT);
       $set_fields = 'new_passwd,conf_new_passwd,enc_passwd';
       $set_values = array('s','','s','','s',$enc_passwd);
       $where_clause = 'username=?';
       $where_values = array('s',$username);
       mysqli_update_query($db,'admin_passwords',$set_fields,$set_values,$where_clause,$where_values);
-		}
-	}
+    }
+  }
 }
 
 //==============================================================================

@@ -24,10 +24,10 @@
   <style>
     /* These styles are intentionally included inline */
     #page a:link, #page a:visited {
-    	color: #ddd;
+      color: #ddd;
     }
     #page a:hover {
-    	color: #ff9;
+      color: #ff9;
     }
   </style>
 <?php endif; ?>

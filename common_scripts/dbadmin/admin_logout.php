@@ -1,7 +1,7 @@
 <?php
 if (session_status() ==  PHP_SESSION_NONE)
 {
-	session_start();
+  session_start();
 }
 /*
 Log the user off by clearing the username but leaving the $_SESSION[SV_USER]
@@ -20,15 +20,15 @@ $where_values = array('s',$user_key);
 mysqli_delete_query($db,'wp_session_updates',$where_clause,$where_values);
 if (defined('SV_ACCESS_LEVEL'))
 {
-	$access_level_key = SV_ACCESS_LEVEL;
-	$_SESSION[$access_level_key] = 0;
-	$where_clause = 'name=?';
+  $access_level_key = SV_ACCESS_LEVEL;
+  $_SESSION[$access_level_key] = 0;
+  $where_clause = 'name=?';
   $where_values = array('s',$access_level_key);
   mysqli_delete_query($db,'wp_session_updates',$where_clause,$where_values);
 }
 if (isset($_COOKIE[$LoginCookieID]))
 {
-	setcookie($LoginCookieID,'',time()-3600,$LoginCookiePath);
+  setcookie($LoginCookieID,'',time()-3600,$LoginCookiePath);
 }
 header("Location: $BaseURL");
 exit;

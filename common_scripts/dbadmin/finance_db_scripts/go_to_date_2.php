@@ -23,20 +23,20 @@ else
 if (isset($_POST['submitted']))
 {
   if (!DateIsValid($_POST['date_selection']))
-	{
+  {
     print("<p>Invalid Date</p>\n");
     print("<p><a href=\"{$_GET['-returnurl']}\">Try again</a></p>\n");
-	}
+  }
   else
-	{
+  {
     $where_clause = 'date>?';
     $where_values = array('s',$_POST['date_selection']);
     $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
-		$display_offset = mysqli_num_rows($query_result);
+    $display_offset = mysqli_num_rows($query_result);
     $display_offset = floor($display_offset/$list_size) * $list_size;
     header("Location: $BaseURL/$RelativePath/?-table=$table&-startoffset=$display_offset");
     exit;
-	}
+  }
 }
 
 //==============================================================================

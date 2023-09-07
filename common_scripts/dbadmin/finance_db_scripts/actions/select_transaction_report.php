@@ -21,7 +21,7 @@ $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-	print("<option value=\"{$row['label']}\">{$row['name']}</option>\n");
+  print("<option value=\"{$row['label']}\">{$row['name']}</option>\n");
 }
 print("</select>\n");
 print("</td></tr>\n");
@@ -36,16 +36,16 @@ $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'funds','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-	$fund = $row['name'];
-	$superfund = strtok($fund,':');
-	if (($superfund != $previous_superfund ) && (strpos($fund,':') !== false))
-	{
-		$superfund_par = urlencode($superfund);
-		print("<option value=\"$superfund_par:%\">$superfund [ALL]</option>\n");
-	}
-	$fund_par = urlencode($fund);
-	print("<option value=\"$fund_par\">$fund</option>\n");
-	$previous_superfund = $superfund;
+  $fund = $row['name'];
+  $superfund = strtok($fund,':');
+  if (($superfund != $previous_superfund ) && (strpos($fund,':') !== false))
+  {
+    $superfund_par = urlencode($superfund);
+    print("<option value=\"$superfund_par:%\">$superfund [ALL]</option>\n");
+  }
+  $fund_par = urlencode($fund);
+  print("<option value=\"$fund_par\">$fund</option>\n");
+  $previous_superfund = $superfund;
 }
 print("</select>\n");
 print("</td></tr>\n");
@@ -59,16 +59,16 @@ $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'categories','*','',array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-	$category = $row['name'];
-	$supercategory = strtok($category,':');
-	if (($supercategory != $previous_supercategory ) && (strpos($category,':') !== false))
-	{
-		$supercategory_par = urlencode($supercategory);
-		print("<option value=\"$supercategory_par:%\">$supercategory [ALL]</option>\n");
-	}
-	$category_par = urlencode($category);
-	print("<option value=\"$category_par\">$category</option>\n");
-	$previous_supercategory = $supercategory;
+  $category = $row['name'];
+  $supercategory = strtok($category,':');
+  if (($supercategory != $previous_supercategory ) && (strpos($category,':') !== false))
+  {
+    $supercategory_par = urlencode($supercategory);
+    print("<option value=\"$supercategory_par:%\">$supercategory [ALL]</option>\n");
+  }
+  $category_par = urlencode($category);
+  print("<option value=\"$category_par\">$category</option>\n");
+  $previous_supercategory = $supercategory;
 }
 print("</select>\n");
 print("</td></tr>\n");
@@ -81,8 +81,8 @@ $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'payees','*','',array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-	$payee_par = urlencode($row['name']);
-	print("<option value=\"$payee_par\">{$row['name']}</option>\n");
+  $payee_par = urlencode($row['name']);
+  print("<option value=\"$payee_par\">{$row['name']}</option>\n");
 }
 print("</select>\n");
 print("</td></tr>\n");
@@ -94,13 +94,13 @@ $add_clause = 'ORDER BY id ASC';
 $query_result = mysqli_select_query($db,'currencies','*','',array(),$add_clause);
 while($row = mysqli_fetch_assoc($query_result))
 {
-	$id = $row['id'];
-	print("<option value=\"$id\"");
-	if ($id == 'GBP')
-	{
-		print(" SELECTED");
-	}
-	print(">$id</option>\n");
+  $id = $row['id'];
+  print("<option value=\"$id\"");
+  if ($id == 'GBP')
+  {
+    print(" SELECTED");
+  }
+  print(">$id</option>\n");
 }
 print("</select></td>\n");
 

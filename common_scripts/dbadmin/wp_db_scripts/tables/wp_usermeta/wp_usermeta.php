@@ -2,14 +2,14 @@
 
 class tables_wp_usermeta
 {
-	function beforeSave($record)
-	{
+  function beforeSave($record)
+  {
 
-	}
+  }
 
-	function afterSave($record)
-	{
+  function afterSave($record)
+  {
 
-	}
+  }
 }
 ?>

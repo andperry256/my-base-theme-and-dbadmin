@@ -8,7 +8,7 @@ $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'payees','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-	print("<p>Payee <em>{$row['name']}</em> deleted.</p>\n");
+  print("<p>Payee <em>{$row['name']}</em> deleted.</p>\n");
 }
 $where_clause = 'instances=0';
 $where_values = array();

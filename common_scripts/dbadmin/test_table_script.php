@@ -4,7 +4,7 @@
   if (isset($_GET['site']))
   {
     $local_site_dir = $_GET['site'];
-  	require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+    require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
   }
   else
   {

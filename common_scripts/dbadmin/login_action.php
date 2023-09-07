@@ -6,7 +6,7 @@
 
   $local_site_dir = $_GET['site'];
   require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-	require_once("$PrivateScriptsDir/mysql_connect.php");
+  require_once("$PrivateScriptsDir/mysql_connect.php");
   $db = db_connect($AuthDBID);
   $username = $_POST['username'];
   $password = $_POST['password'];

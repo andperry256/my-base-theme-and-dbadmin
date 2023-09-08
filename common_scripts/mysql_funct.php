@@ -14,6 +14,10 @@ if (!defined('NULLSTR'))
 {
   define('NULLSTR',chr(0));
 }
+if (!defined('NOINSERT'))
+{
+  define('NOINSERT',-2);
+}
 global $RootDir,$error_logfile;
 $error_logfile = "$RootDir/logs/php_error.log";
 
@@ -563,6 +567,104 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
     return ($fields == '*')
       ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug)
       : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug);
+  }
+}
+
+//==============================================================================
+/*
+Function mysqli_conditional_insert_query
+
+This function performs a similar operation to mysqli_insert_query, except that
+it performs an additional check to determine whether a record with matching
+primary keys already exists. It takes the same parameters as mysqli_insert_query
+plus $where_clause and $where_values as used in other functions.
+
+If a matching record is found it returns NOINSERT.
+*/
+//==============================================================================
+
+function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_clause,$where_values,$strict=false,$debug=false)
+{
+  // Check INSERT query
+  $field_count =  ($fields == '*')
+    ? mysqli_num_rows(mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
+    : substr_count($fields,',') + 1;
+  $values_count = count($values);
+  if ($values_count != $field_count*2)
+  {
+    raise_query_validation_error("INSERT INTO $table ...",$field_count,$fields,$values);
+  }
+
+  // Build SELECT query
+  $where_clause_count = substr_count($where_clause,'?');
+  $where_values_count = count($where_values);
+  $select_query = "SELECT * FROM $table WHERE $where_clause";
+  if ($where_values_count != $where_clause_count*2)
+  {
+    raise_query_validation_error("$select_query ...",$where_clause_count,'',$where_values);
+  }
+  else
+  {
+    $pos = 0;
+    for ($i=0; $i<$where_values_count; $i+=2)
+    {
+      if ($where_values[$i] == 's')
+      {
+        $param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
+      }
+      else
+      {
+        $param = $where_values[$i+1];
+      }
+      $pos = strpos($select_query,'?',$pos);
+      $select_query = substr($select_query,0,$pos).$param.substr($select_query,$pos+1);
+      $pos += strlen($param) + 1;
+    }
+  }
+
+  if (mysqli_num_rows($db,$select_query) > 0)
+  {
+    return NOINSERT;
+  }
+  elseif (USE_PREPARED_STATEMENTS)
+  {
+    $type_list = '';
+    $values_template = '';
+    for ($i=0; $i<$values_count; $i+=2)
+    {
+      $type_list .= $values[$i];
+      $values_template .= '?,';
+    }
+    $values_template = rtrim($values_template,',');
+    $stmt = ($fields == '*')
+      ? mysqli_prepare($db,"INSERT INTO $table VALUES ($values_template)")
+      : mysqli_prepare($db,"INSERT INTO $table ($fields) VALUES ($values_template)");
+    mysqli_stmt_bind_param($stmt, $type_list, ...$values);
+    return run_prepared_statement($stmt,$strict);
+  }
+  else
+  {
+    $values_list = '';
+    for ($i=0; $i<$values_count; $i+=2)
+    {
+      if ($values[$i+1] == NULLSTR)
+      {
+        $param = 'NULL';
+      }
+      elseif ($values[$i] == 's')
+      {
+        $param = "'".mysqli_real_escape_string($db,$values[$i+1])."'";
+      }
+      else
+      {
+        $param = $values[$i+1];
+      }
+      $values_list .= $param.',';
+    }
+    $values_list = rtrim($values_list,',');
+    return ($fields == '*')
+    ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug)
+    : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug);
   }
 }
 

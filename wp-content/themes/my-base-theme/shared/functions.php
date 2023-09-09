@@ -251,13 +251,16 @@ function output_stylesheet_link($path,$sub_path)
   $dir_path = str_replace($BaseURL,$BaseDir,$path);
   print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-css'  href='$path/$sub_path/styles.css?v=$link_version' type='text/css' media='all' />\n");
 
-  if ((get_session_var('theme_mode') == 'light') && (is_file("$dir_path/$sub_path/styles-light.css")))
+  if (function_exists('get_session_var'))
   {
-    print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-light-css'  href='$path/$sub_path/styles-light.css?v=$link_version' type='text/css' media='all' />\n");
-  }
-  elseif ((get_session_var('theme_mode') == 'dark') && (is_file("$dir_path/$sub_path/styles-dark.css")))
-  {
-    print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-dark-css'  href='$path/$sub_path/styles-dark.css?v=$link_version' type='text/css' media='all' />\n");
+    if ((get_session_var('theme_mode') == 'light') && (is_file("$dir_path/$sub_path/styles-light.css")))
+    {
+      print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-light-css'  href='$path/$sub_path/styles-light.css?v=$link_version' type='text/css' media='all' />\n");
+    }
+    elseif ((get_session_var('theme_mode') == 'dark') && (is_file("$dir_path/$sub_path/styles-dark.css")))
+    {
+      print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-dark-css'  href='$path/$sub_path/styles-dark.css?v=$link_version' type='text/css' media='all' />\n");
+    }
   }
 }
 
@@ -284,14 +287,16 @@ function include_inline_stylesheet($path)
   }
   $light_theme_path = str_replace('.css','-light.css',$path);
   $dark_theme_path = str_replace('.css','-dark.css',$path);
-  if (!function_exists('get_session_var'))
+  if (function_exists('get_session_var'))
   {
-    require_once("$BaseDir/common_scripts/core_funct.php");
-    die("we are here 2");
-  }
-  elseif ((get_session_var('theme_mode') == 'dark') && (is_file($dark_theme_path)))
-  {
-    include($dark_theme_path);
+    if ((get_session_var('theme_mode') == 'light') && (is_file($light_theme_path)))
+    {
+      require_once("$BaseDir/common_scripts/core_funct.php");
+    }
+    elseif ((get_session_var('theme_mode') == 'dark') && (is_file($dark_theme_path)))
+    {
+      include($dark_theme_path);
+    }
   }
   print("</style>\n");
 }

@@ -622,7 +622,7 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
     }
   }
 
-  if (mysqli_num_rows($db,$select_query) > 0)
+  if (mysqli_num_rows(mysqli_query($db,$select_query)) > 0)
   {
     return NOINSERT;
   }

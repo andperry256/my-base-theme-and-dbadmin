@@ -35,6 +35,7 @@ else
 
 $update_charsets = false;
 $optimise = false;
+$purge = false;
 foreach($argv as $key => $value)
 {
   if ($value == '-ucs')

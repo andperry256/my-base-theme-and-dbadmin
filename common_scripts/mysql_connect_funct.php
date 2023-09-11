@@ -102,7 +102,7 @@ returns an object.
 
 function wp_db_connect()
 {
-  return db_connect(WP_DBID,'o');
+  return db_connect(WP_DBID,'p');
 }
 
 //==============================================================================

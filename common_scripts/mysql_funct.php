@@ -406,7 +406,9 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
     {
       if ($where_values[$i] == 's')
       {
-        $param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
+        $param = (!empty($where_values[$i+1]))
+          ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
+          : "''";
       }
       else
       {
@@ -485,7 +487,9 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
       }
       elseif ($all_values[$i] == 's')
       {
-        $param = "'".mysqli_real_escape_string($db,$all_values[$i+1])."'";
+        $param = (!empty($all_values[$i+1]))
+          ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
+          : "''";
       }
       else
       {
@@ -555,7 +559,9 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
       }
       elseif ($values[$i] == 's')
       {
-        $param = "'".mysqli_real_escape_string($db,$values[$i+1])."'";
+        $param = (!empty($values[$i+1]))
+          ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
+          : "''";
       }
       else
       {
@@ -610,7 +616,9 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
     {
       if ($where_values[$i] == 's')
       {
-        $param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
+        $param = (!empty($where_values[$i+1]))
+          ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
+          : "''";
       }
       else
       {
@@ -653,7 +661,9 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
       }
       elseif ($values[$i] == 's')
       {
-        $param = "'".mysqli_real_escape_string($db,$values[$i+1])."'";
+        $param = (!empty($values[$i+1]))
+          ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
+          : "''";
       }
       else
       {
@@ -721,7 +731,9 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
     {
       if ($where_values[$i] == 's')
       {
-        $param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
+        $param = (!empty($where_values[$i+1]))
+          ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
+          : "''";
       }
       else
       {
@@ -786,7 +798,9 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
       {
         if ($where_values[$i] == 's')
         {
-          $param = "'".mysqli_real_escape_string($db,$where_values[$i+1])."'";
+          $param = (!empty($where_values[$i+1]))
+            ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
+            : "''";
         }
         else
         {

@@ -322,15 +322,11 @@ class tables_transactions
     }
 
     // Add payee to payees table
+    $fields = 'name';
+    $values = array('s',$payee);
     $where_clause = 'name=?';
     $where_values = array('s',$payee);
-    $query_result = mysqli_select_query($db,'payees','*',$where_clause,$where_values,'');
-    if (mysqli_num_rows($query_result) == 0)
-    {
-      $fields = 'name';
-      $values = array('s',$payee);
-      mysqli_insert_query($db,'payees',$fields,$values);
-    }
+    mysqli_conditional_insert_query($db,'payees',$fields,$values,$where_clause,$where_values);
 
     // Adjust credit/debit amounts as necessary.
     if ($auto_total)

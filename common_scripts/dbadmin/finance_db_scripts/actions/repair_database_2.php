@@ -275,7 +275,9 @@ while ($row = mysqli_fetch_assoc($query_result))
     }
   }
   else
+  {
     run_or_preview_query($ofp,"DELETE FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_delete_orphan_split);
+  }
 }
 // END - Main loop for processing splits
 

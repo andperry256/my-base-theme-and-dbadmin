@@ -16,7 +16,9 @@ while ($row = mysqli_fetch_assoc($query_result))
   $fund = $row['name'];
   $superfund = strtok($fund,':');
   if (($superfund != $previous_superfund ) && (strpos($fund,':') !== false))
+  {
     print("<li><a href=\"index.php?-action=display_transaction_report&fund=$superfund:%%\">$superfund [ALL]</a></li>\n");
+  }
   print("<li><a href=\"index.php?-action=display_transaction_report&fund=$fund\">$fund</a></li>\n");
   $previous_superfund = $superfund;
 }

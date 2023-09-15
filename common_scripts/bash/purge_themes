@@ -1,8 +1,12 @@
 #!/bin/bash
 if [ -d  "$sub_root_dir/wp-content/themes" ]; then
+  {
   themes_dir="$sub_root_dir/wp-content/themes"
+  }
 else
+  {
   themes_dir="$root_dir/public_html/wp-content/themes"
+  }
 fi
 default_theme="twentytwelve"
 redundant_themes="twentynineteen twentytwenty twentytwentyone twentytwentytwo twentytwentythree"

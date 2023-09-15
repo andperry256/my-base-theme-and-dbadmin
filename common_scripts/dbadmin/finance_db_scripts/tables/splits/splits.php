@@ -5,7 +5,9 @@ class tables_splits
   function acct_month__validate($record, $value)
   {
     if (empty($value))
+    {
       return true;
+    }
     $year = (int)substr($value,0,4);
     $separator = substr($value,4,1);
     $month = (int)substr($value,5,2);

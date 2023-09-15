@@ -375,7 +375,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
         $accounting_month = '#';
       }
       else
+      {
         $accounting_month = $row['acct_month'];
+      }
       if (($accounting_month < $start_month) && ($accounting_month != '#'))
       {
         // Prior to start month
@@ -422,9 +424,13 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
             print("<td style=\"$table_cell_style\">&nbsp;</td>");
             print("<td style=\"$table_cell_style_ra\">");
             if ($monthly_total >= 0)
+            {
               printf("%01.2f", $monthly_total);
+            }
             else
+            {
               printf("<span style=\"color:red\">%01.2f</span>", $monthly_total);
+            }
             $running_total = add_money($running_total,$monthly_total);
             print("</td>");
             print("<td style=\"$table_cell_style\">&nbsp;</td></tr>\n");
@@ -443,9 +449,13 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
               print("<td style=\"$table_cell_style\" colspan=\"3\">&nbsp;</td>");
               print("<td style=\"$table_cell_style_ra\">");
               if ($running_total >= 0)
+              {
                 printf("%01.2f", $running_total);
+              }
               else
+              {
                 printf("<span style=\"color:red\">%01.2f</span>", $running_total);
+              }
               print("</table>\n");
               break;
             }
@@ -561,9 +571,13 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
           print("<td style=\"$table_cell_style_ra\">&nbsp;</td>");
         }
         elseif ($running_balance < 0)
+        {
           printf("<td style=\"$table_cell_style_ra\"><span style=\"color:red\">%01.2f</span></td>",$running_balance);
+        }
         else
+        {
           printf("<td style=\"$table_cell_style_ra\">%01.2f</td>",$running_balance);
+        }
 
         print("</td></tr>\n");
 

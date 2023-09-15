@@ -435,27 +435,49 @@ function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
   global $MailLogDir;
 
   if (!is_dir("$MailLogDir"))
+  {
     return;
+  }
   if (isset($mail_info['message_id']))
+  {
     $id = $mail_info['message_id'];
+  }
   else
+  {
     $id = 0;
+  }
   if (isset($mail_info['from_name']))
+  {
     $from_name = trim($mail_info['from_name']);
+  }
   else
+  {
     $from_name = '';
+  }
   if (isset($mail_info['from_addr']))
+  {
     $from_addr = trim($mail_info['from_addr']);
+  }
   else
+  {
     $from_addr = '';
+  }
   if (isset($mail_info['to_name']))
+  {
     $to_name = trim($mail_info['to_name']);
+  }
   else
+  {
     $to_name = '';
+  }
   if (isset($mail_info['to_addr']))
+  {
     $to_addr = trim($mail_info['to_addr']);
+  }
   else
+  {
     $to_addr = '';
+  }
   $log_file_name = 'mail-'.date('Y-m-d').'.log';
   $ofp = fopen("$MailLogDir/$log_file_name",'a');
   if ($ofp !== false)

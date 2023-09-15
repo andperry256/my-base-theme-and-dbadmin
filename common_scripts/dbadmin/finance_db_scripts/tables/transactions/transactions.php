@@ -9,7 +9,9 @@ class tables_transactions
       return report_error("Account not specified.");
     }
     else
+    {
       return true;
+    }
   }
 
   function date__validate($record, $value)
@@ -19,7 +21,9 @@ class tables_transactions
       return report_error("Invalid date.");
     }
     else
+    {
       return true;
+    }
   }
 
   function seq_no__validate($record, $value)
@@ -44,7 +48,9 @@ class tables_transactions
       return report_error("Sequence number must be ".NEXT_SEQ_NO_INDICATOR." for a new/changed account field.");
     }
     else
+    {
       return true;
+    }
   }
 
   function acct_month__validate($record, $value)
@@ -73,7 +79,9 @@ class tables_transactions
       return report_error("Invalid credit amount.");
     }
     else
+    {
       return true;
+    }
   }
 
   function debit_amount__validate($record, $value)

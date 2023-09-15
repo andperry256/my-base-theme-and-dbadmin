@@ -95,7 +95,9 @@ if (isset($_POST['submitted']))
         $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
       }
       else
+      {
         $end_month = accounting_month(date('Y-m-d'));
+      }
       break;
   }
 }

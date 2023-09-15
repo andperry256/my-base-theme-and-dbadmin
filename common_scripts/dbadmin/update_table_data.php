@@ -450,7 +450,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
   $fields = 'table_name,parent_table';
   $values = array('s','_view_orphan_table_field_records','s','dba_table_fields');
   $where_clause = "table_name='_view_orphan_table_field_records'";
-  mysqli_conditional_insert_query($db,'dba_table_info','s',$fields,$values,$where_clause,array());
+  mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,array());
   mysqli_query_normal($db,"UPDATE dba_table_info SET orphan=1");
   mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=1");
 

@@ -68,7 +68,7 @@ require("$PrivateScriptsDir/mysql_connect.php");
 require("$BaseDir/wp-content/themes/my-base-theme/shared/functions.php");
 require("$DBAdminDir/functions.php");
 require("$DBAdminDir/classes.php");
-$post_copy = deslash($_POST);
+$post_copy = $_POST;  // deslash does not seem to be required any longer here
 $NoAction = true;
 require("$CustomPagesPath/$RelativePath/_home.php");
 $RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)

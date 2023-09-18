@@ -589,7 +589,7 @@ The function returns one of the following:-
 * true/false from running the insert query.
 * NOINSERT if a matching record was found.
 
-The calling software must check the return result against true/false/NOINSERT
+The calling software must check the returned result against true/false/NOINSERT
 using the '===' operator.
 */
 //==============================================================================

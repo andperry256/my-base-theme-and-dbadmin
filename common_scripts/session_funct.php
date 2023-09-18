@@ -311,7 +311,7 @@ function run_session()
        $where_clause = 'session_id=? AND name=? AND name2=?';
        $where_values = array('s',$GlobalSessionID,'s',$name[0],'s',$name[1]);
      }
-     if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) == NOINSERT)
+     if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
      {
        $set_fields = 'value,type';
        $set_values = array('s',$value,'s','update');
@@ -378,7 +378,7 @@ function run_session()
        $where_clause = 'session_id=? AND name=? AND name2=?';
        $where_values = array('s',$GlobalSessionID,'s',$name[0],'s',$name[1]);
      }
-     if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) == NOINSERT)
+     if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
      {
        $set_fields = 'type';
        $set_values = array('s','update');

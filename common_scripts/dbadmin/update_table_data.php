@@ -737,8 +737,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 $where_values = array('s',$table,'s',$field_name);
                 $fields = 'table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order';
                 $values = array('s',$table,'s',$field_name,'i',$is_primary,'i',$required,'s',$default_widget_type,'i',$is_primary,'i',$is_primary,'i',$display_order);
-                $result = mysqli_conditional_insert_query($db,'dba_table_fields',$fields,$values,$where_clause,$where_values);
-                if ($result != NOINSERT);
+                if (mysqli_conditional_insert_query($db,'dba_table_fields',$fields,$values,$where_clause,$where_values) === true);
                 {
                   print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
                 }

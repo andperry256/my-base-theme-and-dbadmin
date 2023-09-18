@@ -364,7 +364,7 @@ $add_clause - Any additional clause to be added to the query (opitional -
               includes for example ORDER or LIMIT direactive).
 $strict (optional) - See run_prepared_statement function.
 
-The query result is returned.
+The query result (data or false) is returned.
 */
 //==============================================================================
 
@@ -440,7 +440,7 @@ $where_values - Values associated with the WHERE clause (array). Each item
                 occupies two array elements (variable type followed by value).
 $strict (optional) - See run_prepared_statement function.
 
-The query result is returned.
+The query result (true/false) is returned.
 */
 //==============================================================================
 
@@ -518,7 +518,7 @@ $values - Values associated with the field list (array). Each item occupies
           two array elements (variable type followed by value).
 $strict (optional) - See run_prepared_statement function.
 
-The query result is returned.
+The query result (true/false) is returned.
 */
 //==============================================================================
 
@@ -585,7 +585,12 @@ it performs an additional check to determine whether a record with matching
 primary keys already exists. It takes the same parameters as mysqli_insert_query
 plus $where_clause and $where_values as used in other functions.
 
-If a matching record is found it returns NOINSERT.
+The function returns one of the following:-
+* true/false from running the insert query.
+* NOINSERT if a matching record was found.
+
+The calling software must check the return result against true/false/NOINSERT
+using the '===' operator.
 */
 //==============================================================================
 
@@ -693,7 +698,7 @@ $where_values - Values associated with the WHERE clause (array). Each item
                 occupies two array elements (variable type followed by value).
 $strict (optional) - See run_prepared_statement function.
 
-The query result is returned.
+The query result (true/false) is returned.
 */
 //==============================================================================
 
@@ -764,6 +769,7 @@ $where_values - Parameters to be bound (array). Each item occupies two array
                 elements (variable type followed by value).
 $strict (optional) - See run_prepared_statement function.
 
+The query result (true/false or data) is returned.
 */
 //==============================================================================
 

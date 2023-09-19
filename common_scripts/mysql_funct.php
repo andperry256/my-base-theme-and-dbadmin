@@ -18,8 +18,9 @@ if (!defined('NOINSERT'))
 {
   define('NOINSERT',-2);
 }
-global $RootDir,$error_logfile;
+global $RootDir,$error_logfile, $home_remote_ip_addr, $display_error_online;
 $error_logfile = "$RootDir/logs/php_error.log";
+$display_error_online = ((isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr));
 
 //==============================================================================
 
@@ -67,6 +68,7 @@ function print_stack_trace_for_mysqli_error($display_errors)
     $content = explode("\n",$trace);
     foreach ($content as $line)
     {
+      $line = str_replace('%','%%',$line);
       fprintf($ofp,"  $line$eol");
     }
   }
@@ -88,7 +90,7 @@ On an online server, errors are output to a log file rather than the screen.
 
 function run_mysqli_query($db,$query,$strict=false,$debug=false)
 {
-  global $argc, $error_logfile;
+  global $argc, $error_logfile, $display_error_online;
   if ($debug)
   {
     exit ("$query\n");
@@ -118,7 +120,7 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
       fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
       fprintf($ofp,'  '.$e->getMessage()."\n");
       fclose($ofp);
-      print_stack_trace_for_mysqli_error(false);
+      print_stack_trace_for_mysqli_error($display_error_online);
       print($fatal_error_message);
     }
     exit;
@@ -137,7 +139,7 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
       $ofp = fopen($error_logfile,'a');
       fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
       fclose($ofp);
-      print_stack_trace_for_mysqli_error(false);
+      print_stack_trace_for_mysqli_error($display_error_online);
       print($fatal_error_message);
     }
     exit;
@@ -181,7 +183,7 @@ On an online server, errors are output to a log file rather than the screen.
 
 function run_prepared_statement($stmt,$strict)
 {
-  global $argc, $error_logfile;
+  global $argc, $error_logfile, $display_error_online;
   $eol = (isset($argc)) ? "\n" : "<br />\n";
   $error_id = substr(md5(date('YmdHis')),0,8);
   $date_and_time = date('Y-m-d H:i:s');
@@ -207,7 +209,7 @@ function run_prepared_statement($stmt,$strict)
       fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
       fprintf($ofp,'  '.$e->getMessage()."\n");
       fclose($ofp);
-      print_stack_trace_for_mysqli_error(false);
+      print_stack_trace_for_mysqli_error($display_error_online);
       print($fatal_error_message);
     }
     exit;
@@ -227,7 +229,7 @@ function run_prepared_statement($stmt,$strict)
       $ofp = fopen($error_logfile,'a');
       fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
       fclose($ofp);
-      print_stack_trace_for_mysqli_error(false);
+      print_stack_trace_for_mysqli_error($display_error_online);
       print($fatal_error_message);
     }
     exit;
@@ -300,13 +302,13 @@ $values - The values being applied in the query (array). In a correct
 
 function raise_query_validation_error($query,$param_count,$fields,$values)
 {
-  global $error_logfile;
+  global $error_logfile, $display_error_online;
   $eol = (isset($argc)) ? "\n" : "<br />\n";
   $error_id = substr(md5(date('YmdHis')),0,8);
   $date_and_time = date('Y-m-d H:i:s');
-  if (is_file("/Config/linux_pathdefs.php"))
+  if ((is_file("/Config/linux_pathdefs.php")) || ($display_error_online))
   {
-    // Local server
+    // Local server or online server from home
     print("Failed to validate MySQL query:$eol$query$eol");
     $value_count = count($values);
     $total_count = ($value_count > $param_count*2)
@@ -340,7 +342,7 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
     $ofp = fopen($error_logfile,'a');
     fprintf($ofp,"[$date_and_time] [$error_id] Failed to validate MySQL query:\n  $query\n");
     fclose($ofp);
-    print_stack_trace_for_mysqli_error(false);
+    print_stack_trace_for_mysqli_error($display_error_online);
     print($fatal_error_message);
   }
   exit;

@@ -881,17 +881,23 @@ function save_record($record,$old_record_id,$new_record_id)
         // is one present.
         $auto_inc_field_present = true;
       }
-      elseif ((!is_numeric($field_value)) && (empty($field_value)))
+      elseif (empty($field_value))
       {
-        // Field is empty. Set it to null if allowed, otherwise to an empty string
+        // Field is empty. Set it to null if allowed, otherwise to an empty string or zero
         if (($row['Null'] == 'YES') &&
             (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
         {
           $new_mysql_fields[$field_name] = chr(0);
         }
-        else
+        else switch ($record->FieldType($field_name))
         {
-          $new_mysql_fields[$field_name] = '';
+          case 's':
+            $new_mysql_fields[$field_name] = '';
+            break;
+          case 'i':
+          case 'd':
+            $new_mysql_fields[$field_name] = 0;
+            break;
         }
       }
       else
@@ -1240,6 +1246,7 @@ function handle_record($action,$params)
     while ($row2 = mysqli_fetch_assoc($query_result2))
     {
       $field_name = $row2['Field'];
+      $field_is_numeric = ((strpos($row2['Type'],'int') !== false) || (strpos($row2['Type'],'dec') !== false));
       $where_clause = 'table_name=? AND field_name=?';
       $where_values = array('s',$base_table,'s',$field_name);
       $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
@@ -1352,6 +1359,12 @@ function handle_record($action,$params)
           else
           {
             $value = get_session_var(array('post_vars',"field_$field_name"));
+            if (empty($value))
+            {
+              $value = ($field_is_numeric)
+              ? 0
+              : '';
+            }
           }
         }
         elseif (($action == 'edit') || ($action == 'update'))

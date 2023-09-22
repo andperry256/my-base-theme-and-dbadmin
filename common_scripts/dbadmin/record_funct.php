@@ -887,17 +887,15 @@ function save_record($record,$old_record_id,$new_record_id)
         if (($row['Null'] == 'YES') &&
             (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
         {
-          $new_mysql_fields[$field_name] = chr(0);
+          $new_mysql_fields[$field_name] = NULLSTR;
         }
-        else switch ($record->FieldType($field_name))
+        elseif($record->FieldType($field_name) == 's')
         {
-          case 's':
-            $new_mysql_fields[$field_name] = '';
-            break;
-          case 'i':
-          case 'd':
-            $new_mysql_fields[$field_name] = 0;
-            break;
+          $new_mysql_fields[$field_name] = '';
+        }
+        else
+        {
+          $new_mysql_fields[$field_name] = 0;
         }
       }
       else
@@ -1246,7 +1244,6 @@ function handle_record($action,$params)
     while ($row2 = mysqli_fetch_assoc($query_result2))
     {
       $field_name = $row2['Field'];
-      $field_is_numeric = ((strpos($row2['Type'],'int') !== false) || (strpos($row2['Type'],'dec') !== false));
       $where_clause = 'table_name=? AND field_name=?';
       $where_values = array('s',$base_table,'s',$field_name);
       $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
@@ -1361,9 +1358,9 @@ function handle_record($action,$params)
             $value = get_session_var(array('post_vars',"field_$field_name"));
             if (empty($value))
             {
-              $value = ($field_is_numeric)
-              ? 0
-              : '';
+              $value = (query_field_type($db,$base_table,$field_name) == 's')
+                ? ''
+                : 0;
             }
           }
         }

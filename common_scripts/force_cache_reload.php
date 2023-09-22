@@ -9,6 +9,10 @@
     exit("Site not specified");
   }
   require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+  if (!is_dir($BaseDir))
+  {
+    exit("Site directory not found\n");
+  }
   if (is_file("$BaseDir/last_preset_link_version.php"))
   {
     include("$BaseDir/last_preset_link_version.php");

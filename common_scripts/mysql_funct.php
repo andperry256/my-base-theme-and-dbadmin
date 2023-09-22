@@ -21,9 +21,7 @@ $error_logfile = "$RootDir/logs/php_error.log";
 $display_error_online = ((isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr));
 
 //==============================================================================
-
-if (!function_exists('deslash'))
-{
+if (!function_exists('deslash')) {
 //==============================================================================
 /*
 Function deslash

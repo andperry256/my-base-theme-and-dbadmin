@@ -26,7 +26,7 @@ function get_table_access_level($table)
   $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
   if ((session_var_is_set('read_only')) && (get_session_var('read_only')))
   {
-    $access_level = 'read-only';
+    return 'read-only';
   }
   elseif ($row = mysqli_fetch_assoc($query_result))
   {
@@ -60,7 +60,7 @@ function get_table_access_level($table)
   }
   else
   {
-    $access_level = 'read-only';  // This should not occur
+    return 'read-only';  // This should not occur
   }
 }
 

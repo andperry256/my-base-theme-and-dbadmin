@@ -1,22 +1,20 @@
 <?php
 //==============================================================================
+/*
+N.B. The option for running with prepared statements has been removed and the
+alternative mechanism adopted. If this option needs to be reinstated, then
+please obtain a old version of the code from the Git repository or alternatively
+the home backup archive for September 2023.
+*/
+//==============================================================================
 
-if (!defined('USE_PREPARED_STATEMENTS'))
-{
-  /*
-  This is a temporary definition for use during development of new MySQL
-  functions. It is yet to be determined whether the final system will use
-  prepared statements or an alternative mechanism.
-  */
-  define('USE_PREPARED_STATEMENTS',false);
-}
 if (!defined('NULLSTR'))
 {
   define('NULLSTR',chr(0));
 }
 if (!defined('NOINSERT'))
 {
-  define('NOINSERT',-2);
+  define('NOINSERT',2);
 }
 global $RootDir,$error_logfile, $home_remote_ip_addr, $display_error_online;
 $error_logfile = "$RootDir/logs/php_error.log";
@@ -33,9 +31,7 @@ Function deslash
 Although not a MySQL function as such, this function is included here as it is
 most likely to be used when MySQL functions are also in use.
 
-It is used to perform the 'stripslashes' function on all elements of an array,
-mainly for use in processing the global $_POST array (in which strings are
-always escaped).
+It is used to perform the 'stripslashes' function on all elements of an array.
 */
 //==============================================================================
 
@@ -48,6 +44,14 @@ function deslash (array $data)
   return $data;
 }
 
+//==============================================================================
+/*
+Function print_stack_trace_for_mysqli_error
+
+This function is called to output the PHP stack trace when an exeception is
+raised in one of the other functions. It outputs to the screen or log file
+according to the setting of the parameter $display_errors.
+*/
 //==============================================================================
 
 function print_stack_trace_for_mysqli_error($display_errors)
@@ -163,84 +167,6 @@ function mysqli_query_strict($db,$query,$debug=false)
 
 //==============================================================================
 /*
-Function run_prepared_statement
-
-This is called in place of a regular call to mysqli_stmt_execute and is used to
-output a more useful error message if the MySQL function call raises an
-exception.
-
-If the $strict option is set, then it will also abort with an error message if
-the MySQL function call runs without an exception but returns a value that
-indicates a potential error condition making it unsafe for the calling script
-to continue execution. This parameter is passed by all calling functions and is
-contained within the call line to each of these as an optional parameter with a
-default (see functions below). Normally the $strict option would be set to
-'true' for select queries and 'false' for other query types (to be ratified).
-
-On an online server, errors are output to a log file rather than the screen.
-*/
-//==============================================================================
-
-function run_prepared_statement($stmt,$strict)
-{
-  global $argc, $error_logfile, $display_error_online;
-  $eol = (isset($argc)) ? "\n" : "<br />\n";
-  $error_id = substr(md5(date('YmdHis')),0,8);
-  $date_and_time = date('Y-m-d H:i:s');
-  $fatal_error_message = "There has been a fatal error, details of which have been logged.$eol";
-  $fatal_error_message .= "Please report this to the webmaster quoting code <strong>$error_id</strong>.$eol";
-  try
-  {
-    mysqli_stmt_execute($stmt);
-  }
-  catch (Exception $e)
-  {
-    if (is_file("/Config/linux_pathdefs.php"))
-    {
-      // Local server
-      print("Error caught on running MySQL query:$eol$query$eol");
-      print($e->getMessage().$eol);
-      print_stack_trace_for_mysqli_error(true);
-    }
-    else
-    {
-      // Online server
-      $ofp = fopen($error_logfile,'a');
-      fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
-      fprintf($ofp,'  '.$e->getMessage()."\n");
-      fclose($ofp);
-      print_stack_trace_for_mysqli_error($display_error_online);
-      print($fatal_error_message);
-    }
-    exit;
-  }
-  $result = mysqli_stmt_get_result($stmt);
-  if (($result === false) && ($strict))
-  {
-    if (is_file("/Config/linux_pathdefs.php"))
-    {
-      // Local server
-      print("Error result returned from MySQL query:$eol$query$eol");
-      print_stack_trace_for_mysqli_error(true);
-    }
-    else
-    {
-      // Online server
-      $ofp = fopen($error_logfile,'a');
-      fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
-      fclose($ofp);
-      print_stack_trace_for_mysqli_error($display_error_online);
-      print($fatal_error_message);
-    }
-    exit;
-  }
-  return (!empty($result))
-    ? $result
-    : true;
-}
-
-//==============================================================================
-/*
 Function query_field_type
 
 This function returns the variable type for a given field given the table and
@@ -275,6 +201,7 @@ function query_field_type($db,$table,$field_name)
   }
   else
   {
+    // This should not occur
     return 's';
   }
 }
@@ -352,7 +279,7 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
 /*
 Function mysqli_select_query
 
-This function is called to run a SELECT query using a prepared statement.
+This function is called to run a SELECT query.
 
 The following parameters are passed:-
 $db - Link to the connected database
@@ -364,7 +291,7 @@ $where_values - Values associated with the WHERE clause (array).Each item
                 occupies two array elements (variable type followed by value).
 $add_clause - Any additional clause to be added to the query (opitional -
               includes for example ORDER or LIMIT direactive).
-$strict (optional) - See run_prepared_statement function.
+$strict (optional) - See run_mysqli_query function.
 
 The query result (data or false) is returned.
 */
@@ -387,48 +314,31 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
   {
     $query .= " $add_clause";
   }
-  if (USE_PREPARED_STATEMENTS)
+  $pos = 0;
+  for ($i=0; $i<$where_values_count; $i+=2)
   {
-    $type_list = '';
-    for ($i=0; $i<$where_values_count; $i+=2)
+    if ($where_values[$i] == 's')
     {
-      $type_list .= $where_values[$i];
+      $param = (!empty($where_values[$i+1]))
+        ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
+        : "''";
     }
-    $stmt = mysqli_prepare($db,$query);
-    if (!empty($type_list))
+    else
     {
-      mysqli_stmt_bind_param($stmt, $type_list, ...$where_values);
+      $param = $where_values[$i+1];
     }
-    return run_prepared_statement($stmt,$strict);
+    $pos = strpos($query,'?',$pos);
+    $query = substr($query,0,$pos).$param.substr($query,$pos+1);
+    $pos += strlen($param) + 1;
   }
-  else
-  {
-    $pos = 0;
-    for ($i=0; $i<$where_values_count; $i+=2)
-    {
-      if ($where_values[$i] == 's')
-      {
-        $param = (!empty($where_values[$i+1]))
-          ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
-          : "''";
-      }
-      else
-      {
-        $param = $where_values[$i+1];
-      }
-      $pos = strpos($query,'?',$pos);
-      $query = substr($query,0,$pos).$param.substr($query,$pos+1);
-      $pos += strlen($param) + 1;
-    }
-    return run_mysqli_query($db,$query,$strict,$debug);
-  }
+  return run_mysqli_query($db,$query,$strict,$debug);
 }
 
 //==============================================================================
 /*
 Function mysqli_update_query
 
-This function is called to run an UPDATE query using a prepared statement.
+This function is called to run an UPDATE query.
 
 The following parameters are passed:-
 $db - Link to the connected database
@@ -440,7 +350,7 @@ $where_clause - WHERE clause to be used in the query (optional). Values to
                 compare with are included as question marks.
 $where_values - Values associated with the WHERE clause (array). Each item
                 occupies two array elements (variable type followed by value).
-$strict (optional) - See run_prepared_statement function.
+$strict (optional) - See run_mysqli_query function.
 
 The query result (true/false) is returned.
 */
@@ -467,49 +377,35 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
   {
     raise_query_validation_error($query,$param_count,$set_fields,$all_values);
   }
-  if (USE_PREPARED_STATEMENTS)
+  $pos = 0;
+  for ($i=0; $i<$all_values_count; $i+=2)
   {
-    $type_list = '';
-    for ($i=0; $i<$where_values_count; $i+=2)
+    if ($all_values[$i+1] == NULLSTR)
     {
-      $type_list .= $where_values[$i];
+      $param = 'NULL';
     }
-    $stmt = mysqli_prepare($db,$query);
-    mysqli_stmt_bind_param($stmt, $type_list, ...$all_values);
-    return run_prepared_statement($stmt,$strict);
-  }
-  else
-  {
-    $pos = 0;
-    for ($i=0; $i<$all_values_count; $i+=2)
+    elseif ($all_values[$i] == 's')
     {
-      if ($all_values[$i+1] == NULLSTR)
-      {
-        $param = 'NULL';
-      }
-      elseif ($all_values[$i] == 's')
-      {
-        $param = (!empty($all_values[$i+1]))
-          ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
-          : "''";
-      }
-      else
-      {
-        $param = $all_values[$i+1];
-      }
-      $pos = strpos($query,'?',$pos);
-      $query = substr($query,0,$pos).$param.substr($query,$pos+1);
-      $pos += strlen($param) + 1;
+      $param = (!empty($all_values[$i+1]))
+        ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
+        : "''";
     }
-    return run_mysqli_query($db,$query,$strict,$debug);
+    else
+    {
+      $param = $all_values[$i+1];
+    }
+    $pos = strpos($query,'?',$pos);
+    $query = substr($query,0,$pos).$param.substr($query,$pos+1);
+    $pos += strlen($param) + 1;
   }
+  return run_mysqli_query($db,$query,$strict,$debug);
 }
 
 //==============================================================================
 /*
 Function mysqli_insert_query
 
-This function is called to run an INSERT query using a prepared statement.
+This function is called to run an INSERT query.
 
 The following parameters are passed:-
 $db - Link to the connected database
@@ -518,7 +414,7 @@ $fields - List of specified fields (comma separated string). Set to '*' to
           indicate all fields in order.
 $values - Values associated with the field list (array). Each item occupies
           two array elements (variable type followed by value).
-$strict (optional) - See run_prepared_statement function.
+$strict (optional) - See run_mysqli_query function.
 
 The query result (true/false) is returned.
 */
@@ -534,48 +430,29 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
   {
     raise_query_validation_error("INSERT INTO $table ...",$field_count,$fields,$values);
   }
-  if (USE_PREPARED_STATEMENTS)
+  $values_list = '';
+  for ($i=0; $i<$values_count; $i+=2)
   {
-    $type_list = '';
-    $values_template = '';
-    for ($i=0; $i<$values_count; $i+=2)
+    if ($values[$i+1] == NULLSTR)
     {
-      $type_list .= $values[$i];
-      $values_template .= '?,';
+      $param = 'NULL';
     }
-    $values_template = rtrim($values_template,',');
-    $stmt = ($fields == '*')
-      ? mysqli_prepare($db,"INSERT INTO $table VALUES ($values_template)")
-      : mysqli_prepare($db,"INSERT INTO $table ($fields) VALUES ($values_template)");
-    mysqli_stmt_bind_param($stmt, $type_list, ...$values);
-    return run_prepared_statement($stmt,$strict);
-  }
-  else
-  {
-    $values_list = '';
-    for ($i=0; $i<$values_count; $i+=2)
+    elseif ($values[$i] == 's')
     {
-      if ($values[$i+1] == NULLSTR)
-      {
-        $param = 'NULL';
-      }
-      elseif ($values[$i] == 's')
-      {
-        $param = (!empty($values[$i+1]))
-          ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
-          : "''";
-      }
-      else
-      {
-        $param = $values[$i+1];
-      }
-      $values_list .= $param.',';
+      $param = (!empty($values[$i+1]))
+        ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
+        : "''";
     }
-    $values_list = rtrim($values_list,',');
-    return ($fields == '*')
-      ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug)
-      : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug);
+    else
+    {
+      $param = $values[$i+1];
+    }
+    $values_list .= $param.',';
   }
+  $values_list = rtrim($values_list,',');
+  return ($fields == '*')
+    ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug)
+    : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug);
 }
 
 //==============================================================================
@@ -641,22 +518,6 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
   {
     return NOINSERT;
   }
-  elseif (USE_PREPARED_STATEMENTS)
-  {
-    $type_list = '';
-    $values_template = '';
-    for ($i=0; $i<$values_count; $i+=2)
-    {
-      $type_list .= $values[$i];
-      $values_template .= '?,';
-    }
-    $values_template = rtrim($values_template,',');
-    $stmt = ($fields == '*')
-      ? mysqli_prepare($db,"INSERT INTO $table VALUES ($values_template)")
-      : mysqli_prepare($db,"INSERT INTO $table ($fields) VALUES ($values_template)");
-    mysqli_stmt_bind_param($stmt, $type_list, ...$values);
-    return run_prepared_statement($stmt,$strict);
-  }
   else
   {
     $values_list = '';
@@ -689,7 +550,7 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
 /*
 Function mysqli_delete_query
 
-This function is called to run a DELETE query using a prepared statement.
+This function is called to run a DELETE query.
 
 The following parameters are passed:-
 $db - Link to the connected database
@@ -698,7 +559,7 @@ $where_clause - WHERE clause to be used in the query. Values to compare with
                 are included as question marks.
 $where_values - Values associated with the WHERE clause (array). Each item
                 occupies two array elements (variable type followed by value).
-$strict (optional) - See run_prepared_statement function.
+$strict (optional) - See run_mysqli_query function.
 
 The query result (true/false) is returned.
 */
@@ -717,21 +578,56 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
   {
     $query .= " WHERE $where_clause";
   }
-  if (USE_PREPARED_STATEMENTS)
+  $pos = 0;
+  for ($i=0; $i<$where_values_count; $i+=2)
   {
-    $type_list = '';
-    for ($i=0; $i<$where_values_count; $i+=2)
+    if ($where_values[$i] == 's')
     {
-      $type_list .= $where_values[$i];
+      $param = (!empty($where_values[$i+1]))
+        ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
+        : "''";
     }
-    $stmt = mysqli_prepare($db,$query);
-    if (!empty($type_list))
+    else
     {
-      mysqli_stmt_bind_param($stmt, $type_list, ...$where_values);
+      $param = $where_values[$i+1];
     }
-    return run_prepared_statement($stmt,$strict);
+    $pos = strpos($query,'?',$pos);
+    $query = substr($query,0,$pos).$param.substr($query,$pos+1);
+    $pos += strlen($param) + 1;
   }
-  else
+  return run_mysqli_query($db,$query,$strict,$debug);
+}
+
+//==============================================================================
+/*
+Function mysqli_free_format_query
+
+This function is called to run a query which does not exactly fit a category
+covered by one of the preceding functions.
+
+It basically takes a ready-made query but with the option to supply and bind
+paramaters.
+
+The following parameters are passed:-
+$db - Link to the connected database
+$query - Query text,
+$where_values - Parameters to be bound (array). Each item occupies two array
+                elements (variable type followed by value).
+$strict (optional) - See run_mysqli_query function.
+
+The query result (true/false or data) is returned.
+*/
+//==============================================================================
+
+function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=false)
+{
+  $where_clause_count = substr_count($query,'?');
+  $where_values_count = count($where_values);
+  if ($where_values_count != $where_clause_count*2)
+  {
+    raise_query_validation_error($query,$where_clause_count,'',$where_values);
+  }
+  for ($i=0; $i<$where_values_count; $i+=2)
   {
     $pos = 0;
     for ($i=0; $i<$where_values_count; $i+=2)
@@ -750,77 +646,8 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
       $query = substr($query,0,$pos).$param.substr($query,$pos+1);
       $pos += strlen($param) + 1;
     }
-    return run_mysqli_query($db,$query,$strict,$debug);
   }
-}
-
-//==============================================================================
-/*
-Function mysqli_free_format_query
-
-This function is called to run a query using a prepared statement.and which
-does not exactly fit a category covered by one of the preceding functions.
-
-It basically takes a ready-made query but with the option to supply and bind
-paramaters.
-
-The following parameters are passed:-
-$db - Link to the connected database
-$query - Query text,
-$where_values - Parameters to be bound (array). Each item occupies two array
-                elements (variable type followed by value).
-$strict (optional) - See run_prepared_statement function.
-
-The query result (true/false or data) is returned.
-*/
-//==============================================================================
-
-function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=false)
-{
-  $where_clause_count = substr_count($query,'?');
-  $where_values_count = count($where_values);
-  if ($where_values_count != $where_clause_count*2)
-  {
-    raise_query_validation_error($query,$where_clause_count,'',$where_values);
-  }
-  if (USE_PREPARED_STATEMENTS)
-  {
-    $type_list = '';
-    for ($i=0; $i<$where_values_count; $i+=2)
-    {
-      $type_list .= $where_values[$i];
-    }
-    $stmt = mysqli_prepare($db,$query);
-    if (!empty($type_list))
-    {
-      mysqli_stmt_bind_param($stmt, $type_list, ...$where_values);
-    }
-    return run_prepared_statement($stmt,$strict);
-  }
-  else
-  {
-    for ($i=0; $i<$where_values_count; $i+=2)
-    {
-      $pos = 0;
-      for ($i=0; $i<$where_values_count; $i+=2)
-      {
-        if ($where_values[$i] == 's')
-        {
-          $param = (!empty($where_values[$i+1]))
-            ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
-            : "''";
-        }
-        else
-        {
-          $param = $where_values[$i+1];
-        }
-        $pos = strpos($query,'?',$pos);
-        $query = substr($query,0,$pos).$param.substr($query,$pos+1);
-        $pos += strlen($param) + 1;
-      }
-    }
-    return run_mysqli_query($db,$query,$strict,$debug);
-  }
+  return run_mysqli_query($db,$query,$strict,$debug);
 }
 
 //==============================================================================

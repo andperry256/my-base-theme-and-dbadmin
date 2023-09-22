@@ -1,10 +1,10 @@
 <?php
 //==============================================================================
 /*
-N.B. The option for running with prepared statements has been removed and the
-alternative mechanism adopted. If this option needs to be reinstated, then
-please obtain a old version of the code from the Git repository or alternatively
-the home backup archive for September 2023.
+N.B. The option for running with prepared statements has been removed in favour
+of the alternative mechanism. If this needs to be reinstated, then please refer
+to an old version of the code from the Git repository or alternatively the home
+backup archive for September 2023.
 */
 //==============================================================================
 

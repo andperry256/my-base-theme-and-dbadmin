@@ -1180,6 +1180,11 @@ function handle_record($action,$params)
     if ($_GET['-saveresult'] == 1)
     {
       print("<p class=\"highlight-success\">Record successfully saved</p>\n");
+      if (!empty(get_session_var('save_info')))
+      {
+        print("<p>".get_session_var('save_info')."</p>\n");
+        delete_session_var('save_info');
+        }
     }
     else
     {

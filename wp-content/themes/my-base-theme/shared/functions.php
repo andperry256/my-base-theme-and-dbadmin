@@ -437,9 +437,6 @@ function simpify_html_tag($content,$tag)
  * exported as HTML. Its main purpose is to remove any built-in style
  * information that is otherwise defined in CSS.
  *
- * The local copy of the $allowed_tags array can be overridden by an externally
- * declared version.
- *
  * If further edits are required, then it is suggested that this function is
  * called from a site specific function with the necessary additional
  * functionality.
@@ -448,10 +445,24 @@ function simpify_html_tag($content,$tag)
 
 function simplify_html($content)
 {
-  global $allowed_tags;
+  global $allowed_tags, $simplified_tags;
   if (!isset($allowed_tags))
   {
+    /*
+     The '$allowed_tags' array specifies those tags that are to be retained in the
+     generated HTML code. This is the default version but can be overridden by 
+     declaring a custom version outside the function call.
+     */
     $allowed_tags = array('<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<i>','<u>');
+  }
+  if (!isset($simplified_tags))
+  {
+    /*
+     The '$simplified_tags' array specifies those tag types for which the
+     'simplify_html_tag' function is to be run. This is the default version but
+     can be overridden by declaring a custom version outside the function call.
+     */
+    $simplified_tags = array('p');
   }
 
   // Strip out any <style> tags. This is done long-hand as there have been
@@ -464,8 +475,15 @@ function simplify_html($content)
     $pos1 = strpos($content,'<style',$pos1+1);
   }
 
+  // Run the main operation
   $content = strip_tags($content,$allowed_tags);
-  $content = simpify_html_tag($content,'p');
+
+  // Apply the simplify_html_tag function to selected tag types
+  foreach ($simplified_tags as $tag)
+  {
+    $content = simpify_html_tag($content,$tag);
+  }
+
   return $content;
 }
 

@@ -21,10 +21,10 @@ $error_logfile = "$RootDir/logs/php_error.log";
 $display_error_online = ((isset($home_remote_ip_addr)) && (isset($_SERVER['REMOTE_ADDR'])) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr));
 
 //==============================================================================
-if (!function_exists('deslash')):
+if (!function_exists('array_deslash')):
 //==============================================================================
 /*
-Function deslash
+Function array_deslash
 
 Although not a MySQL function as such, this function is included here as it is
 most likely to be used when MySQL functions are also in use.
@@ -33,11 +33,11 @@ It is used to perform the 'stripslashes' function on all elements of an array.
 */
 //==============================================================================
 
-function deslash (array $data)
+function array_deslash (array $data)
 {
   foreach ($data as $key => $val)
   {
-    $data [$key] = is_array ($val) ? deslash ($val) : stripslashes ($val);
+    $data [$key] = is_array ($val) ? array_deslash ($val) : stripslashes ($val);
   }
   return $data;
 }

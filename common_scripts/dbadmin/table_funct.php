@@ -1215,7 +1215,7 @@ Function run_update
 function run_update($table,$option)
 {
   global $Location;
-  $post_copy = deslash($_POST);
+  $post_copy = array_deslash($_POST);
   $db = admin_db_connect();
   $base_table = get_base_table($table);
   $primary_keys = array();
@@ -1532,7 +1532,7 @@ Function run_copy
 function run_copy($table)
 {
   global $Location;
-  $post_copy = deslash($_POST);
+  $post_copy = array_deslash($_POST);
   $db = admin_db_connect();
   $base_table = get_base_table($table);
   $primary_keys = array();

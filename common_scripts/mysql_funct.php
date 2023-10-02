@@ -173,6 +173,10 @@ field name. The following results may be returned:-
 i - Integer (including Boolean).
 d - Double (any non-integer number type).
 s - String.
+
+N.B. These field types are passed to the various query functions in this script
+as elements of the associated 'values' arrays. Additionally the type 'f' may be
+passed to indicate a table field name.
 */
 //==============================================================================
 

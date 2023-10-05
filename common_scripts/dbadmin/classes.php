@@ -130,13 +130,13 @@ class tables_dba_table_fields
       $field_size = strtok(')');
 
       // Ensure that the widget type is set to 'date' for any date field
-      if (($field_type == 'date') && ($value != 'date'))
+      if (($field_type == 'date') && ($value != 'date') && ($value != 'static-date'))
       {
         return report_error("Attempt to set non <em>date</em> widget type on date field <em>$field</em>");
       }
 
       // Ensure that the widget type is not set to 'date' for a non date field
-      if (($field_type != 'date') && ($value == 'date'))
+      if (($field_type != 'date') && (($value == 'date') || ($value == 'static-date')))
       {
         return report_error("Attempt to set <em>date</em> widget type on non date field <em>$field</em>");
       }

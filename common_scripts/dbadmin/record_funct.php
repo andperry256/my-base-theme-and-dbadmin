@@ -302,12 +302,13 @@ function generate_widget($table,$field_name,$field_value)
         print(">");
         break;
 
-      case 'auto-increment';
+      case 'auto-increment':
         print("AI [$field_value]");
         print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
         break;
 
-      case 'static';
+      case 'static':
+      case 'static-date':
         print("$field_value");
         print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
         break;
@@ -885,7 +886,7 @@ function save_record($record,$old_record_id,$new_record_id)
       {
         // Field is empty. Set it to null if allowed, otherwise to an empty string or zero
         if (($row['Null'] == 'YES') &&
-            (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
+            (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'static-date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
         {
           $new_mysql_fields[$field_name] = NULLSTR;
         }

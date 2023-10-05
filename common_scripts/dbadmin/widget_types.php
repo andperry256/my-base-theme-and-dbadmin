@@ -23,6 +23,7 @@ $WidgetTypes = array (
   'password' => false,
   'select' => true,
   'static' => true,
+  'static-date' => false,
   'textarea' => true,
   'time' => false,
 );

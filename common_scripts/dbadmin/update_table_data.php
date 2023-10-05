@@ -671,7 +671,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 the current table definition and that they are set as static
                 widgets.
                 2. Set the widget type for a nnumeric primary key to 'input-num'.
-                3. Set the widget type to 'date' for any date field.
+                3. Set the widget type to 'date' for any date field (unless already set to 'static-date').
                 4. Set the widget type to 'enum' for any enum field.
                 5. Set the widget type to 'auto-increment' for any auto-increment field.
                 */
@@ -699,7 +699,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 }
                 if ($default_widget_type == 'date')
                 {
-                  mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='date' WHERE table_name='$table' AND field_name='$field_name'");
+                  mysqli_query_normal($db,"UPDATE dba_table_fields SET widget_type='date' WHERE table_name='$table' AND field_name='$field_name' AND widget_type<>'static-date'");
                 }
                 if ($default_widget_type == 'enum')
                 {

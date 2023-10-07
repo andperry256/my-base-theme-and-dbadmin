@@ -122,7 +122,7 @@ Function generate_widget
 
 function generate_widget($table,$field_name,$field_value)
 {
-  global $BaseDir, $BaseURL, $DBAdminURL, $NewDateStartYear;
+  global $BaseDir, $BaseURL, $DBAdminURL;
   $db = admin_db_connect();
   $mode = get_viewing_mode();
   $base_table = get_table_for_field($table,$field_name);

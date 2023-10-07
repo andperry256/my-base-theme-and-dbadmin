@@ -226,7 +226,7 @@ function run_session()
 
  //================================================================================
 
- function get_session_var($name,$check=true)
+ function get_session_var($name)
  {
    global $GlobalSessionVars;
    if (!is_array($name))
@@ -238,28 +238,24 @@ function run_session()
    {
      return false;
    }
-   elseif (($check) && (!session_var_is_set($name[0],$name[1])))
-   {
-     return false;
-   }
    elseif (isset($GlobalSessionVars))
    {
      if (empty($name[1]))
      {
-       return $GlobalSessionVars[$name[0]];
+       return $GlobalSessionVars[$name[0]] ?? false;
      }
      else
      {
-       return $GlobalSessionVars[$name[0]][$name[1]];
+       return $GlobalSessionVars[$name[0]][$name[1]] ?? false;
      }
    }
    elseif (empty($name[1]))
    {
-     return $_SESSION[$name[0]];
+     return $_SESSION[$name[0]] ?? false;
    }
    else
    {
-     return $_SESSION[$name[0]][$name[1]];
+     return $_SESSION[$name[0]][$name[1]] ?? false;
    }
  }
 

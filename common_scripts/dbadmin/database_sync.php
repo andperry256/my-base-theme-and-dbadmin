@@ -5,9 +5,14 @@ if (!function_exists('sync_databases'))
 //==============================================================================
 function sync_databases($local_db_name)
 {
-  global $Location, $CustomPagesPath, $RelativePath, $local_site_dir,
+  global $Location, $CustomPagesPath, $RelativePath, $local_site_dir, $local_site_dir2,
   $Localhost_ID, $DBAdminURL, $db_master_location, $Server_Station_ID,
   $TableExportDir;
+  if (isset($local_site_dir2))
+  {
+    // Override the global setting of $local_site_dir
+    $local_site_dir = $local_site_dir2;
+  }
 
   set_time_limit(300);
   print("<h1>Synchronise Databases</h1>\n");

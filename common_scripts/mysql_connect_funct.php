@@ -28,67 +28,67 @@ parameter (e.g. to gain elevated access).
 
 function db_connect($dbid,$mode='p',$alt_user='')
 {
-  global $DBMode, $Location, $dbinfo;
-  $main_user = (!empty($alt_user))
-    ? $alt_user
-    : REAL_DB_USER;
-  switch ($DBMode)
-  {
-    case 'normal':
-    $connect_params = ($Location == 'local')
-    ? array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][0] )
-    : array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
-    break;
-    case 'local':
-    $connect_params = array( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, $dbinfo[$dbid][0] );
-    break;
-    case 'remote':
-    $connect_params = array( REMOTE_DB_HOST, $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
-    break;
-  }
-  $connect_error = false;
-  switch ($mode)
-  {
-    case 'o':
-    // Object orientated style
-    $link = new mysqli( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
-    if ($link->connect_errno)
+    global $DBMode, $Location, $dbinfo;
+    $main_user = (!empty($alt_user))
+        ? $alt_user
+        : REAL_DB_USER;
+    switch ($DBMode)
     {
-      $connect_error = true;
+        case 'normal':
+        $connect_params = ($Location == 'local')
+          ? array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][0] )
+          : array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
+        break;
+        case 'local':
+        $connect_params = array( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, $dbinfo[$dbid][0] );
+        break;
+        case 'remote':
+        $connect_params = array( REMOTE_DB_HOST, $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
+        break;
     }
-    elseif (!empty($dbinfo[$dbid][2]))
+    $connect_error = false;
+    switch ($mode)
     {
-      $link->set_charset($dbinfo[$dbid][2]);
+        case 'o':
+        // Object orientated style
+        $link = new mysqli( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
+        if ($link->connect_errno)
+        {
+            $connect_error = true;
+        }
+        elseif (!empty($dbinfo[$dbid][2]))
+        {
+            $link->set_charset($dbinfo[$dbid][2]);
+        }
+        break;
+        case 'p':
+        // Procedural style
+        $link = mysqli_connect( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
+        if (mysqli_connect_errno())
+        {
+            $connect_error = true;
+        }
+        elseif (!empty($dbinfo[$dbid][2]))
+        {
+            mysqli_set_charset($link,$dbinfo[$dbid][2]);
+        }
+        break;
     }
-    break;
-    case 'p':
-    // Procedural style
-    $link = mysqli_connect( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
-    if (mysqli_connect_errno())
+    if ($connect_error)
     {
-      $connect_error = true;
-    }
-    elseif (!empty($dbinfo[$dbid][2]))
-    {
-      mysqli_set_charset($link,$dbinfo[$dbid][2]);
-    }
-    break;
-  }
-  if ($connect_error)
-  {
-    if (($Location == 'local') && (function_exists('print_stack_trace_for_mysqli_error')))
-    {
-      print_stack_trace_for_mysqli_error();
+        if (($Location == 'local') && (function_exists('print_stack_trace_for_mysqli_error')))
+        {
+            print_stack_trace_for_mysqli_error();
+        }
+        else
+        {
+            exit("Unable to establish a database connection\n");
+        }
     }
     else
     {
-      exit("Unable to establish a database connection\n");
+        return $link;
     }
-  }
-  else
-  {
-    return $link;
-  }
 }
 
 //==============================================================================
@@ -102,7 +102,7 @@ returns an object.
 
 function wp_db_connect()
 {
-  return db_connect(WP_DBID,'p');
+    return db_connect(WP_DBID,'p');
 }
 
 //==============================================================================
@@ -116,26 +116,26 @@ defined in the $dbinfo array for the site.
 
 function db_name($dbid)
 {
-  global $dbinfo, $DBMode, $Location;
-  switch ($DBMode)
-  {
-    case 'normal':
-      if ($Location == 'local')
-      {
-        return $dbinfo[$dbid][0];
-      }
-      else
-      {
-        return $dbinfo[$dbid][1];
-      }
-      break;
-    case 'local':
-      return $dbinfo[$dbid][0];
-      break;
-    case 'remote':
-      return $dbinfo[$dbid][1];
-      break;
-  }
+    global $dbinfo, $DBMode, $Location;
+    switch ($DBMode)
+    {
+        case 'normal':
+          if ($Location == 'local')
+          {
+              return $dbinfo[$dbid][0];
+          }
+          else
+          {
+              return $dbinfo[$dbid][1];
+          }
+          break;
+        case 'local':
+          return $dbinfo[$dbid][0];
+          break;
+        case 'remote':
+          return $dbinfo[$dbid][1];
+          break;
+    }
 }
 
 //==============================================================================

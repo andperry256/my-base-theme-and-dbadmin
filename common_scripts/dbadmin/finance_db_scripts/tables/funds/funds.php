@@ -1,30 +1,28 @@
 <?php
+//==============================================================================
 
 class tables_funds
 {
-  function beforeDelete($record)
-  {
-    $type = $record->FieldVal('type');
-    if ($type == 'built-in')
+    function beforeDelete($record)
     {
-      return report_error("This is a built-in system fund - please delete using phpMyAdmin.");
+        $type = $record->FieldVal('type');
+        if ($type == 'built-in')
+        {
+            return report_error("This is a built-in system fund - please delete using phpMyAdmin.");
+        }
     }
-  }
-
-  function beforeSave($record)
-  {
-    $action = $record->action;
-    $table = $record->table;
-    $type = $record->FieldVal('type');
-    if ($type == 'built-in')
+  
+    function beforeSave($record)
     {
-      return report_error("This is a built-in system fund - please edit using phpMyAdmin.");
-    }
-}
-
-  function afterSave($record)
-  {
-
+        $action = $record->action;
+        $table = $record->table;
+        $type = $record->FieldVal('type');
+        if ($type == 'built-in')
+        {
+            return report_error("This is a built-in system fund - please edit using phpMyAdmin.");
+        }
   }
 }
+
+//==============================================================================
 ?>

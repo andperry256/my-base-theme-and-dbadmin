@@ -11,9 +11,9 @@
   $query_result = mysqli_query_normal($db,"SELECT post_id,post_name FROM wp_postmeta LEFT JOIN wp_posts ON wp_posts.ID=wp_postmeta.post_ID WHERE ID IS NULL");
   while ($row = mysqli_fetch_assoc($query_result))
   {
-    $where_clause = 'post_id=?';
-    $where_values = array('i',$row['post_id']);
-    mysqli_delete_query($db,'wp_postmeta',$where_clause,$where_values);
+      $where_clause = 'post_id=?';
+      $where_values = array('i',$row['post_id']);
+      mysqli_delete_query($db,'wp_postmeta',$where_clause,$where_values);
   }
 ?>
 <p>Action Completed</p>

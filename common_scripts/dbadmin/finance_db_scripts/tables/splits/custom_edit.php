@@ -4,7 +4,7 @@
 $db = admin_db_connect();
 if (!isset($record_id))
 {
-  exit("Record ID not specified - this should not occur");
+    exit("Record ID not specified - this should not occur");
 }
 $primary_keys = decode_record_id($record_id);
 $account = $primary_keys['account'];

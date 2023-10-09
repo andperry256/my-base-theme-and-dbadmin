@@ -1,32 +1,36 @@
 <?php
-  if (!isset($argc))
-  {
+//==============================================================================
+
+if (!isset($argc))
+{
     exit("Script allowed in command line mode only\n");
-  }
-  $tok1 = strtok(__DIR__,'/');
-  $tok2 = strtok('/');
-  $root_dir = "/$tok1/$tok2";
-  $domain = $argv[1];
-  $mailbox_data = '';
-  require("$root_dir/public_html/path_defs.php");
-  $mailbox = strtok($argv[2],'+');
-  while ($mailbox !== false)
-  {
+}
+$tok1 = strtok(__DIR__,'/');
+$tok2 = strtok('/');
+$root_dir = "/$tok1/$tok2";
+$domain = $argv[1];
+$mailbox_data = '';
+require("$root_dir/public_html/path_defs.php");
+$mailbox = strtok($argv[2],'+');
+while ($mailbox !== false)
+{
     $content = file("$root_dir/mail/$domain/$mailbox/dovecot-quota");
     if (empty($content))
     {
-      print("Email account $mailbox@domain not found\n");
+        print("Email account $mailbox@domain not found\n");
     }
     else
     {
-      $last_line = $content[count($content) -1];
-      $used_storage = trim($last_line);
-      $mailbox_data .= $mailbox.'+'.$used_storage.'+';
+        $last_line = $content[count($content) -1];
+        $used_storage = trim($last_line);
+        $mailbox_data .= $mailbox.'+'.$used_storage.'+';
     }
     $mailbox = strtok('+');
-  }
-  $mailbox_data = rtrim($mailbox_data,'+');
-  $date_and_time = date('YmdHis');
-  $temp = file_get_contents("http://remote.andperry.com/report_email_storage.php?domain=$domain&mailbox_data=$mailbox_data&datetime=$date_and_time");
-  print($temp);
+}
+$mailbox_data = rtrim($mailbox_data,'+');
+$date_and_time = date('YmdHis');
+$temp = file_get_contents("http://remote.andperry.com/report_email_storage.php?domain=$domain&mailbox_data=$mailbox_data&datetime=$date_and_time");
+print($temp);
+
+//==============================================================================
 ?>

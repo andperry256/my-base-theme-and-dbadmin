@@ -9,20 +9,20 @@ $add_clause = ' ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'payees','*','',array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-    $payee = $row['name'];
-    $where_clause = 'payee=?';
-    $where_values = array('s',$payee);
-    $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-    $count = mysqli_num_rows($query_result2);
-    $set_fields = 'instances';
-    $set_values = array('i',$count);
-    $where_clause = 'name=?';
-    $where_values = array('s',$payee);
-    mysqli_update_query($db,'payees',$set_fields,$set_values,$where_clause,$where_values);
-    if (($count == 0) && ($row['locked'] == 0))
-    {
-      print("<li>{$row['name']}</li>\n");
-    }
+      $payee = $row['name'];
+      $where_clause = 'payee=?';
+      $where_values = array('s',$payee);
+      $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+      $count = mysqli_num_rows($query_result2);
+      $set_fields = 'instances';
+      $set_values = array('i',$count);
+      $where_clause = 'name=?';
+      $where_values = array('s',$payee);
+      mysqli_update_query($db,'payees',$set_fields,$set_values,$where_clause,$where_values);
+      if (($count == 0) && ($row['locked'] == 0))
+      {
+          print("<li>{$row['name']}</li>\n");
+      }
 }
 print("</ul>\n");
 print("<p><a href=\"index.php?-action=delete_unused_payees_2\"><button>Continue</button></a></p>\n");

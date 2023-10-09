@@ -14,12 +14,12 @@ $where_values = array('s',$account);
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
-  $account_type = $row['type'];
-  $account_name = $row['name'];
+    $account_type = $row['type'];
+    $account_name = $row['name'];
 }
 else
 {
-  $account_name = '';  // This should not occur
+    $account_name = '';  // This should not occur
 }
 print("<h1>Reconcile Account ($account_name)</h1>\n");
 print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
@@ -27,7 +27,7 @@ print("<div style=\"clear:both\"></div>\n");
 
 if ((isset($_GET['message'])) && (!empty($_GET['message'])))
 {
-  print($_GET['message']);
+    print($_GET['message']);
 }
 
 $query_result = mysqli_select_query($db,'bank_import','*','',array(),'');
@@ -48,29 +48,29 @@ $add_clause = 'ORDER BY rec_id DESC';
 $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-  $text = $row['date'].' | '.$row['description'].' | ';
-  $amount = $row['amount'];
-  if (($account_type == 'bank') && ($amount > 0))
-  {
-    $text .= sprintf("C %01.2f",$amount);
-  }
-  elseif (($account_type == 'bank') && ($amount < 0))
-  {
-    $text .= sprintf("D %01.2f",-$amount);
-  }
-  elseif (($account_type == 'credit-card') && ($amount > 0))
-  {
-    $text .= sprintf("Pmt %01.2f",$amount);
-  }
-  elseif (($account_type == 'credit-card') && ($amount < 0))
-  {
-    $text .= sprintf("Chg %01.2f",-$amount);
-  }
-  if ($row['balance'] != 0)
-  {
-    $text .= ' | '.$row['balance'];
-  }
-  print("<option value=\"{$row['rec_id']}[{$row['amount']}]_[{$row['balance']}]\">$text</option>\n");
+    $text = $row['date'].' | '.$row['description'].' | ';
+    $amount = $row['amount'];
+    if (($account_type == 'bank') && ($amount > 0))
+    {
+        $text .= sprintf("C %01.2f",$amount);
+    }
+    elseif (($account_type == 'bank') && ($amount < 0))
+    {
+        $text .= sprintf("D %01.2f",-$amount);
+    }
+    elseif (($account_type == 'credit-card') && ($amount > 0))
+    {
+        $text .= sprintf("Pmt %01.2f",$amount);
+    }
+    elseif (($account_type == 'credit-card') && ($amount < 0))
+    {
+        $text .= sprintf("Chg %01.2f",-$amount);
+    }
+    if ($row['balance'] != 0)
+    {
+        $text .= ' | '.$row['balance'];
+    }
+    print("<option value=\"{$row['rec_id']}[{$row['amount']}]_[{$row['balance']}]\">$text</option>\n");
 }
 print("</select>\n");
 print("<br /><span class=\"small\">(N.B. To re-import CSV file, select this option on BOTH lists)</span></td></tr>\n");
@@ -87,33 +87,33 @@ $add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
 $query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
-  $date = $row['date'];
-  $chq_no = $row['chq_no'];
-  $payee = $row['payee'];
-  $text = "$date | ";
-  if (!empty($chq_no))
-  {
-    $text .= "$chq_no | ";
-  }
-  $text .= "$payee | ";
-  $credit_amount = $row['credit_amount'];
-  $debit_amount = $row['debit_amount'];
-  if ($credit_amount != 0)
-  {
-    $text .= "C $credit_amount";
-    $amount = $credit_amount;
-  }
-  elseif ($debit_amount != 0)
-  {
-    $text .= "D $debit_amount";
-    $amount = -$debit_amount;
-  }
-  else
-  {
-    $text .= "* Zero *";
-    $amount = 0;
-  }
-  print("<option value=\"{$row['seq_no']}[$amount]\">$text</option>\n");
+    $date = $row['date'];
+    $chq_no = $row['chq_no'];
+    $payee = $row['payee'];
+    $text = "$date | ";
+    if (!empty($chq_no))
+    {
+        $text .= "$chq_no | ";
+    }
+    $text .= "$payee | ";
+    $credit_amount = $row['credit_amount'];
+    $debit_amount = $row['debit_amount'];
+    if ($credit_amount != 0)
+    {
+        $text .= "C $credit_amount";
+        $amount = $credit_amount;
+    }
+    elseif ($debit_amount != 0)
+    {
+        $text .= "D $debit_amount";
+        $amount = -$debit_amount;
+    }
+    else
+    {
+        $text .= "* Zero *";
+        $amount = 0;
+    }
+    print("<option value=\"{$row['seq_no']}[$amount]\">$text</option>\n");
 }
 print("</select>\n");
 print("</td></tr>\n");

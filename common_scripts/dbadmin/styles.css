@@ -1,317 +1,317 @@
 /* ============ Variations on main theme styles ============ */
 
 #super-container {
-  max-width: 100%;
+    max-width: 100%;
 }
 
 .main-navigation {
-  margin-top: 1vw;
+    margin-top: 1vw;
 }
 
 #page {
-  max-width: 100%;
+    max-width: 100%;
 }
 
 ul, ol, li > ul, li > ol {
-  margin-left: 0;
+    margin-left: 0;
 }
 
 p {
 }
 
 table {
-  width: auto;
+    width: auto;
 }
 td {
-  padding: 0.3em;
-  border: solid 1px #ccc;
-  vertical-align:middle;
+    padding: 0.3em;
+    border: solid 1px #ccc;
+    vertical-align:middle;
 }
 
 /* ============ Handling of desktop/mobile modes ============ */
 
 @media screen and (max-width: 40.0em) {
-  .site-branding {
-    display: none;
-  }
-  #desktop-content {
-    display: none;
-  }
-  .no-mobile-support {
-    display: block;
-    margin: 0.1em;
-    padding: 0.2em;
-    background-color: #ffc;
-  }
+    .site-branding {
+        display: none;
+    }
+    #desktop-content {
+        display: none;
+    }
+    .no-mobile-support {
+        display: block;
+        margin: 0.1em;
+        padding: 0.2em;
+        background-color: #ffc;
+    }
 }
 
 @media screen and (min-width: 40.01em) {
-  #mobile-content {
-    display: none;
-  }
-  .no-mobile-support {
-    display: none;
-  }
+    #mobile-content {
+        display: none;
+    }
+    .no-mobile-support {
+        display: none;
+    }
 }
 
 @media screen and (max-width: 60.0em) {
-  #select-mobile {
-    display: block;
-  }
-  #select-desktop {
-    display: none;
-  }
+    #select-mobile {
+        display: block;
+    }
+    #select-desktop {
+        display: none;
+    }
 }
 @media screen and (min-width: 60.01em) {
-  #select-mobile {
-    display: none;
-  }
-  #select-desktop {
-    display: block;
-  }
+    #select-mobile {
+        display: none;
+    }
+    #select-desktop {
+        display: block;
+    }
 }
 #select-desktop, #select-mobile {
-  float: left;
-  text-align: center;
+    float: left;
+    text-align: center;
 }
 
 /* ============ Styles for main layout ============ */
 
 #dbadmin-main {
-  display: grid;
+    display: grid;
 }
 @media screen and (max-width: 60.0em) {
-  #dbadmin-main {
-    grid-template-areas: "sidebar"
-                         "content";
-  }
-  #dbadmin-mobile-sidebar {
-    grid-area: sidebar;
-    padding: 10px;
-  }
-  #dbadmin-desktop-sidebar {
-    display: none;
-  }
+    #dbadmin-main {
+        grid-template-areas: "sidebar"
+                             "content";
+    }
+    #dbadmin-mobile-sidebar {
+        grid-area: sidebar;
+        padding: 10px;
+    }
+    #dbadmin-desktop-sidebar {
+        display: none;
+    }
 }
 @media screen and (min-width: 60.01em) {
-  #dbadmin-main {
-    grid-template-areas: "sidebar content";
-    grid-template-columns: 150px 1fr;
-  }
-  #dbadmin-mobile-sidebar {
-    display: none;
-  }
-  #dbadmin-desktop-sidebar {
-    grid-area: sidebar;
-    padding: 10px;
-    border: solid 1px #ccc;
-    vertical-align: top;
-  }
+    #dbadmin-main {
+        grid-template-areas: "sidebar content";
+        grid-template-columns: 150px 1fr;
+    }
+    #dbadmin-mobile-sidebar {
+        display: none;
+    }
+    #dbadmin-desktop-sidebar {
+        grid-area: sidebar;
+        padding: 10px;
+        border: solid 1px #ccc;
+        vertical-align: top;
+    }
 }
 #dbadmin-content {
-  grid-area: content;
-  padding: 0.4em;
-  padding-top: 0;
-  vertical-align: top;
+    grid-area: content;
+    padding: 0.4em;
+    padding-top: 0;
+    vertical-align: top;
 }
 
 /* ============ Styles for sidebar ============ */
 
 table.sidebar-table {
-  width: 100%
+    width: 100%
 }
 
 td.sidebar-item {
-  font-size: 0.8em;
-  padding: 0.3em;
-  vertical-align: bottom;
-  border: none;
+    font-size: 0.8em;
+    padding: 0.3em;
+    vertical-align: bottom;
+    border: none;
 }
 
 p.sidebar-item {
-  font-size: 0.8em;
-  padding: 0.3em;
-  line-height: 0.8em;
+    font-size: 0.8em;
+    padding: 0.3em;
+    line-height: 0.8em;
 }
 
 /* ============ Styles for table listing screen ============ */
 
 .top-navigation-item {
-  display: inline-block;
-  float: left;
-  height: 2.0em;
-  margin: 0.1em;
+    display: inline-block;
+    float: left;
+    height: 2.0em;
+    margin: 0.1em;
 }
 
 table.table-listing {
-  table-layout: auto;
-  width: auto;
+    table-layout: auto;
+    width: auto;
 }
 td.table-listing-header {
-  font-size: 0.9em;
-  padding: 0.15em;
-  padding: 5px;
+    font-size: 0.9em;
+    padding: 0.15em;
+    padding: 5px;
 }
 .table-listing-header {
-  background-color: #ccc;
-  border: solid 1px #999;
+    background-color: #ccc;
+    border: solid 1px #999;
 }
 td.table-listing-odd-row, td.table-listing-even-row {
-  font-size: 0.9em;
-  padding: 0.15em;
-  border-left: solid 1px #999;
-  border-right: solid 1px #999;
+    font-size: 0.9em;
+    padding: 0.15em;
+    border-left: solid 1px #999;
+    border-right: solid 1px #999;
 }
 .table-listing-odd-row {
-  background-color: #eee;
+    background-color: #eee;
 }
 .table-listing-even-row {
-  background-color: #fff;
+    background-color: #fff;
 }
 table.table-listing a {
-  text-decoration: none;
+    text-decoration: none;
 }
 div.table-listing {
-  display: grid;
-  justify-content: left;
-  width: 100%;
-  grid-gap: 0.1em;
-  margin-bottom: 0.1em;
+    display: grid;
+    justify-content: left;
+    width: 100%;
+    grid-gap: 0.1em;
+    margin-bottom: 0.1em;
 }
 div.table-listing-cell {
-  padding: 0.1em;
-  border: solid 1px #ccc;
+    padding: 0.1em;
+    border: solid 1px #ccc;
 }
 
 /* ============ Styles for record edit screen ============ */
 
 table.table-record {
-  table-layout: auto;
-  width: auto;
+    table-layout: auto;
+    width: auto;
 }
 table.table-record a {
-  text-decoration: none;
+    text-decoration: none;
 }
 table.table-record a.required,
 div.edit-field-cell a.required {
-  color: #c00;
+    color: #c00;
 }
 table.table-record a.not-required {
 }
 table.table-record  td {
-  border: solid 1px #ccc;
-  padding: 0.15em;
+    border: solid 1px #ccc;
+    padding: 0.15em;
 }
 
 .field-description {
-  font-size: 0.75em;
-  line-height: 1.5em;
+    font-size: 0.75em;
+    line-height: 1.5em;
 }
 
 .widget-image {
-  max-width: 200px;
-  max-height: 150px;
+    max-width: 200px;
+    max-height: 150px;
 }
 
 div.edit-field {
-  display: grid;
-  width: 100%;
-  grid-gap: 0.1em;
-  margin-bottom: 0.1em;
+    display: grid;
+    width: 100%;
+    grid-gap: 0.1em;
+    margin-bottom: 0.1em;
 }
 div.edit-field-cell {
-  padding: 0.1em;
-  border: solid 1px #ccc;
+    padding: 0.1em;
+    border: solid 1px #ccc;
 }
 div.edit-field-name {
-  grid-row: 1;
-  background-color: #eee;
+    grid-row: 1;
+    background-color: #eee;
 }
 div.edit-field-value {
-  grid-row: 2;
+    grid-row: 2;
 }
 
 /* ============ Styles for table update screen ============ */
 
 table.update-selection {
-  table-layout: auto;
-  width: auto;
+    table-layout: auto;
+    width: auto;
 }
 td.update-selection-header {
-  font-size: 0.9em;
-  padding: 0.15em;
-  padding: 5px;
-  background-color: #ccc;
-  border: solid 1px #999;
+    font-size: 0.9em;
+    padding: 0.15em;
+    padding: 5px;
+    background-color: #ccc;
+    border: solid 1px #999;
 }
 td.update-selection {
-  font-size: 0.9em;
-  padding: 0.15em;
-  border: solid 1px #ccc;
+    font-size: 0.9em;
+    padding: 0.15em;
+    border: solid 1px #ccc;
 }
 div.update-field {
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1.5em 1fr;
-  grid-gap: 0.1em;
-  margin-bottom: 0.1em;
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1.5em 1fr;
+    grid-gap: 0.1em;
+    margin-bottom: 0.1em;
 }
 div.update-field-cell {
-  padding: 0.1em;
-  border: solid 1px #ccc;
+    padding: 0.1em;
+    border: solid 1px #ccc;
 }
 div.update-field-select {
-  grid-row: 1 / 3;
-  grid-column: 1;
+    grid-row: 1 / 3;
+    grid-column: 1;
 }
 div.update-field-name {
-  grid-row: 1;
-  grid-column: 2;
-  background-color: #eee;
+    grid-row: 1;
+    grid-column: 2;
+    background-color: #eee;
 }
 div.update-field-value {
-  grid-row: 2;
-  grid-column: 2;
+    grid-row: 2;
+    grid-column: 2;
 }
 
 /* ============ Miscellaneous styles ============ */
 
 .small {
-  font-size: 0.85em;
+    font-size: 0.85em;
 }
 
 .halfspace {
-  height: 0.5em;
+    height: 0.5em;
 }
 
 .horizontal-divide {
-  display: block;
-  border-top: solid 1px #ddd;
-  height: 4pt;
+    display: block;
+    border-top: solid 1px #ddd;
+    height: 4pt;
 }
 
 .highlight-error {
-  font-weight:bold;
-  font-style:normal;
-  color:tomato;
+    font-weight:bold;
+    font-style:normal;
+    color:tomato;
 }
 
 .highlight-warning {
-  font-weight:bold;
-  font-style:normal;
-  color:orange;
+    font-weight:bold;
+    font-style:normal;
+    color:orange;
 }
 
 .highlight-success {
-  font-weight:bold;
-  font-style:normal;
-  color:steelblue;
+    font-weight:bold;
+    font-style:normal;
+    color:steelblue;
 }
 
 a.admin-link {
-  font-size: 0.9em;
-  border: solid 1px #999;
-  padding: 0.3em;
-  text-decoration: none;
-  line-height: 2.2em;
+    font-size: 0.9em;
+    border: solid 1px #999;
+    padding: 0.3em;
+    text-decoration: none;
+    line-height: 2.2em;
 }

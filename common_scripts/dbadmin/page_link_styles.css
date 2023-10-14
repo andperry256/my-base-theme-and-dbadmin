@@ -1,19 +1,19 @@
 a.current-page-link, a.other-page-link {
-  border: solid 1px steelblue;
-  font-size: 0.9em;
-  padding: 0.3em;
-  text-decoration: none;
-  line-height: 3.0em;
+    border: solid 1px steelblue;
+    font-size: 0.9em;
+    padding: 0.3em;
+    text-decoration: none;
+    line-height: 3.0em;
 }
 a.current-page-link:link,
 a.current-page-link:hover,
 a.current-page-link:visited {
-  color: #fff;
-  background-color: steelblue;
+    color: #fff;
+    background-color: steelblue;
 }
 a.other-page-link:link,
 a.other-page-link:hover,
 a.other-page-link:visited {
-  color: steelblue;
-  background-color: #fff;
+    color: steelblue;
+    background-color: #fff;
 }

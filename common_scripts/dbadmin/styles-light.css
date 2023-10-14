@@ -1,42 +1,42 @@
 @media screen and (max-width: 40.0em) {
-  .no-mobile-support {
-    background-color: #ffc;
-  }
+    .no-mobile-support {
+        background-color: #ffc;
+    }
 }
 @media screen and (min-width: 60.01em) {
-  #dbadmin-desktop-sidebar {
-    background-color: #f4f4f4;
-  }
+    #dbadmin-desktop-sidebar {
+        background-color: #f4f4f4;
+    }
 }
 
 td.table-listing-header {
-  background-color: #ccc;
+    background-color: #ccc;
 }
 
 .table-listing-odd-row {
-  background-color: #eee;
+    background-color: #eee;
 }
 
 .table-listing-even-row {
-  background-color: #fff;
+    background-color: #fff;
 }
 
 table.table-record a.required {
-  color: #c00;
+    color: #c00;
 }
 
 td.update-selection-header {
-  background-color: #ccc;
+    background-color: #ccc;
 }
 
 .highlight-error {
-  color:tomato;
+    color:tomato;
 }
 
 .highlight-warning {
-  color:orange;
+    color:orange;
 }
 
 .highlight-success {
-  color:steelblue;
+    color:steelblue;
 }

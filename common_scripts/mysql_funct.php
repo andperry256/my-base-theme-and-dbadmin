@@ -5,13 +5,28 @@ N.B. The option for running with prepared statements has been removed in favour
 of the alternative mechanism. If this needs to be reinstated, then please refer
 to an old version of the code from the Git repository or alternatively the home
 backup archive for September 2023.
-*/
+
 //==============================================================================
 
-if (!defined('NULLSTR'))
-{
-    define('NULLSTR',chr(0));
-}
+Field/Variable Types
+
+The following field types are returned from the function 'query_field_type' and
+are also used as field types in the arrays of field values passed as parameters
+to the various MySQL query handling functions:-
+
+i - Integer (including Boolean).
+d - Double (any non-integer number type).
+s - String.
+
+The following field types are also available to be passed in array parameters
+to functions (for special settings of the field value):-
+
+f - Field Name.
+n - Null.
+
+//==============================================================================
+*/
+
 if (!defined('NOINSERT'))
 {
     define('NOINSERT',2);
@@ -168,15 +183,8 @@ function mysqli_query_strict($db,$query,$debug=false)
 Function query_field_type
 
 This function returns the variable type for a given field given the table and
-field name. The following results may be returned:-
-
-i - Integer (including Boolean).
-d - Double (any non-integer number type).
-s - String.
-
-N.B. These field types are passed to the various query functions in this script
-as elements of the associated 'values' arrays. Additionally the type 'f' may be
-passed to indicate a table field name.
+field name. The possible values that can be returned as as specified in the 
+comment at the top of this script.
 */
 //==============================================================================
 
@@ -382,7 +390,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
     $pos = 0;
     for ($i=0; $i<$all_values_count; $i+=2)
     {
-        if ($all_values[$i+1] === NULLSTR)
+        if ($all_values[$i] == 'n')
         {
             $param = 'NULL';
         }
@@ -435,7 +443,7 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
     $values_list = '';
     for ($i=0; $i<$values_count; $i+=2)
     {
-        if ($values[$i+1] === NULLSTR)
+        if ($values[$i] == 'n')
         {
             $param = 'NULL';
         }
@@ -468,7 +476,7 @@ plus $where_clause and $where_values as used in other functions.
 
 The function returns one of the following:-
 * true/false from running the insert query.
-* NOINSERT if a matching record was found.
+* NOINSERT if a matching record was found and no insert made.
 
 The calling software must check the returned result against true/false/NOINSERT
 using the '===' operator.
@@ -525,7 +533,7 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
         $values_list = '';
         for ($i=0; $i<$values_count; $i+=2)
         {
-            if ($values[$i+1] === NULLSTR)
+            if ($values[$i] == 'n')
             {
                 $param = 'NULL';
             }

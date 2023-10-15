@@ -440,7 +440,7 @@ function copy_transaction($account,$seq_no,$new_date)
     
         // Create copy of transaction using new sequence number
         $set_fields = 'copy_to_date';
-        $set_values = array('s',NULLSTR);
+        $set_values = array('n',null);
         $where_clause = 'account=? AND seq_no=?';
         $where_values = array('s',$account,'i',$seq_no);
         mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);

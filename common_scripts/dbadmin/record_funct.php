@@ -863,6 +863,7 @@ function save_record($record,$old_record_id,$new_record_id)
     // would be used in a MySQL query.
     $old_mysql_fields = array();
     $new_mysql_fields = array();
+    $field_is_null = array();
 
     $auto_inc_field_present = false;
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
@@ -887,7 +888,8 @@ function save_record($record,$old_record_id,$new_record_id)
                 if (($row['Null'] == 'YES') &&
                     (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'static-date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
                 {
-                    $new_mysql_fields[$field_name] = NULLSTR;
+                    $field_is_null[$field_name] = true;
+                    $new_mysql_fields[$field_name] = null;
                 }
                 elseif($record->FieldType($field_name) == 's')
                 {
@@ -989,8 +991,9 @@ function save_record($record,$old_record_id,$new_record_id)
         foreach ($new_mysql_fields AS $field => $value)
         {
             $set_fields .= "$field,";
-            $set_values[count($set_values)] = $record->FieldType($field);
-            $set_values[count($set_values)] = $value;
+            $set_values = (isset($field_is_null[$field]))
+                ? array_merge($set_values,(array('n',null)))
+                : array_merge($set_values,(array($record->FieldType($field),$value)));
         }
         $set_fields = rtrim($set_fields,',');
         $where_clause = '';

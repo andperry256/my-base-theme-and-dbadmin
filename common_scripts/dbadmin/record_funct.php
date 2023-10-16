@@ -1022,8 +1022,9 @@ function save_record($record,$old_record_id,$new_record_id)
         foreach ($new_mysql_fields as $field => $value)
         {
             $fields .= "$field,";
-            $values[count($values)] = $record->FieldType($field);
-            $values[count($values)] = "$value";
+            $values = (isset($field_is_null[$field]))
+                ? array_merge($values,(array('n',null)))
+                : array_merge($values,(array($record->FieldType($field),$value)));
         }
         $fields = rtrim($fields,',');
         $main_query_result = mysqli_insert_query($db,$table,$fields,$values);

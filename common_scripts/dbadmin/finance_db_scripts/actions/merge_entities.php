@@ -50,7 +50,7 @@ else
               if ($type != 'payees')
               {
                   $set_fields = "$entity";
-                  $set_values = array($target);
+                  $set_values = array('s',$target);
                   $where_clause = "$entity=?";
                   $where_values = array('s',$_POST['source']);
                   mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);

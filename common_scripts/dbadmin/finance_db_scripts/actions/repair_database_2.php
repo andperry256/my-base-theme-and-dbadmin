@@ -13,7 +13,7 @@ function show_count($value)
     }
 }
 
-function run_or_preview_query($ofp,$query,&$counter)
+function run_or_preview_query($query,&$counter)
 {
     if (isset($_GET['dry-run']))
     {
@@ -79,7 +79,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     }
     else
     {
-        $where_clause = 'account=? AND transact_seq_no?';
+        $where_clause = 'account=? AND transact_seq_no=?';
         $where_values = array('s',$account,'i',$seq_no);
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
     }
@@ -90,13 +90,13 @@ while ($row = mysqli_fetch_assoc($query_result))
         // Check for a fund that wrongly indicates a split
         if ($fund == '-split-')
         {
-            run_or_preview_query($ofp,"UPDATE transactions SET fund='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_fund_from_split);
+            run_or_preview_query("UPDATE transactions SET fund='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_fund_from_split);
         }
     
         // Check for a category that wrongly indicates a split
         if ($category == '-split-')
         {
-            run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_split);
+            run_or_preview_query("UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_split);
         }
     }
     else
@@ -104,13 +104,13 @@ while ($row = mysqli_fetch_assoc($query_result))
         // Check for a fund that needs to be changed to a split
         if ($fund != '-split-')
         {
-            run_or_preview_query($ofp,"UPDATE transactions SET fund='-split-' WHERE account='$account' AND seq_no=$seq_no",$count_change_fund_to_split);
+            run_or_preview_query("UPDATE transactions SET fund='-split-' WHERE account='$account' AND seq_no=$seq_no",$count_change_fund_to_split);
         }
     
         // Check for a category that needs to be changed to a split
         if ($category != '-split-')
         {
-            run_or_preview_query($ofp,"UPDATE transactions SET category='-split-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_split);
+            run_or_preview_query("UPDATE transactions SET category='-split-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_split);
         }
     }
   
@@ -121,7 +121,7 @@ while ($row = mysqli_fetch_assoc($query_result))
        ($category != '-transfer-') &&
        ($category != '-split-'))
        {
-           run_or_preview_query($ofp,"UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_transfer);
+           run_or_preview_query("UPDATE transactions SET category='-transfer-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_to_transfer);
        }
   
     // Check for a transaction that is wrongly categorised as a transfer
@@ -129,7 +129,7 @@ while ($row = mysqli_fetch_assoc($query_result))
            ((empty($source_account)) || (empty($source_seq_no))) &&
          ($category == '-transfer-'))
          {
-             run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_transfer);
+             run_or_preview_query("UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no",$count_change_cat_from_transfer);
          }
   
     // Check for a dead target link
@@ -144,8 +144,8 @@ while ($row = mysqli_fetch_assoc($query_result))
         }
         else
         {
-            run_or_preview_query($ofp,"UPDATE transactions SET target_account='',target_seq_no=NULL WHERE account='$account' AND seq_no=$seq_no",$count_dead_target_links);
-            run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND category='-transfer-'",$dummy_count);
+            run_or_preview_query("UPDATE transactions SET target_account='',target_seq_no=NULL WHERE account='$account' AND seq_no=$seq_no",$count_dead_target_links);
+            run_or_preview_query("UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND category='-transfer-'",$dummy_count);
         }
     }
   
@@ -154,15 +154,15 @@ while ($row = mysqli_fetch_assoc($query_result))
     {
         $where_clause = 'account=? AND seq_no=?';
         $where_values = array('s',$source_account,'i',$source_seq_no);
-        $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+        $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
         if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['target_account'] == $account) && ($row2['target_seq_no'] == $seq_no))
         {
             // No action
         }
         else
         {
-            run_or_preview_query($ofp,"UPDATE transactions SET source_account='',source_seq_no=NULL WHERE account='$account' AND seq_no=$seq_no",$count_dead_source_links);
-            run_or_preview_query($ofp,"UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND category='-transfer-'",$dummy_count);
+            run_or_preview_query("UPDATE transactions SET source_account='',source_seq_no=NULL WHERE account='$account' AND seq_no=$seq_no",$count_dead_source_links);
+            run_or_preview_query("UPDATE transactions SET category='-none-' WHERE account='$account' AND seq_no=$seq_no AND category='-transfer-'",$dummy_count);
         }
     }
   
@@ -170,7 +170,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     if (empty($acct_month))
     {
         $acct_month = accounting_month($date);
-        run_or_preview_query($ofp,"UPDATE transactions SET acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no",$count_set_acct_month);
+        run_or_preview_query("UPDATE transactions SET acct_month='$acct_month' WHERE account='$account' AND seq_no=$seq_no",$count_set_acct_month);
     }
   
     // Check for -split- fund with no splits present
@@ -180,8 +180,8 @@ while ($row = mysqli_fetch_assoc($query_result))
         (mysqli_num_rows(mysqli_select_query($db,'splits','*',$where_clause,$where_values,'')) == 0))
     {
         // Update the fund to '-nosplit-' and if applicable on the other side of the transfer
-        run_or_preview_query($ofp,"UPDATE transactions SET fund='-nosplit-' WHERE account='{$row['account']}' AND seq_no={$row['seq_no']},$count_no_splits");
-        run_or_preview_query($ofp,"UPDATE transactions SET fund='-nosplit-' WHERE fund='-split-' AND source_account='{$row['account']}' AND source_seq_no={$row['seq_no']},$dummy_count");
+        run_or_preview_query("UPDATE transactions SET fund='-nosplit-' WHERE account='{$row['account']}' AND seq_no={$row['seq_no']}",$count_no_splits);
+        run_or_preview_query("UPDATE transactions SET fund='-nosplit-' WHERE fund='-split-' AND source_account='{$row['account']}' AND source_seq_no={$row['seq_no']}",$dummy_count);
     }
   
     // Check for unmatching split total
@@ -215,12 +215,12 @@ while ($row = mysqli_fetch_assoc($query_result))
                 $split_seq_no = next_split_no($account,$seq_no);
                 $query = "INSERT INTO splits (account,transact_seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month) VALUES";
                 $query .= " ('$account',$seq_no,$split_seq_no,$missing_split_credit,$missing_split_debit,'TBD','-none-','Missing split','$acct_month')";
-                run_or_preview_query($ofp,$query,$count_missing_splits);
+                run_or_preview_query($query,$count_missing_splits);
             }
         }
         else
         {
-            run_or_preview_query($ofp,"DELETE FROM splits WHERE  account='$account' AND transact_seq_no=$seq_no",$count_surplus_splits);
+            run_or_preview_query("DELETE FROM splits WHERE  account='$account' AND transact_seq_no=$seq_no",$count_surplus_splits);
         }
     }
 }
@@ -256,7 +256,7 @@ while ($row = mysqli_fetch_assoc($query_result))
            ($category != '-transfer-') &&
            ($category != '-split-'))
            {
-               run_or_preview_query($ofp,"UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_to_transfer);
+               run_or_preview_query("UPDATE splits SET category='-transfer-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_to_transfer);
            }
     
         // Check for a split that is wrongly categorised as a transfer
@@ -264,19 +264,19 @@ while ($row = mysqli_fetch_assoc($query_result))
              ((empty($source_account)) || (empty($source_seq_no))) &&
            ($category == '-transfer-'))
            {
-               run_or_preview_query($ofp,"UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_from_transfer);
+               run_or_preview_query("UPDATE splits SET category='-none-' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_change_cat_from_transfer);
            }
     
         // Check for an empty accounting month
         if (empty($acct_month))
         {
             $acct_month = accounting_month($parent_date);
-            run_or_preview_query($ofp,"UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_set_acct_month);
+            run_or_preview_query("UPDATE splits SET acct_month='$acct_month' WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_set_acct_month);
         }
     }
     else
     {
-        run_or_preview_query($ofp,"DELETE FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_delete_orphan_split);
+        run_or_preview_query("DELETE FROM splits WHERE account='$account' AND transact_seq_no=$transact_seq_no AND split_no=$split_no",$count_delete_orphan_split);
     }
 }
 // END - Main loop for processing splits

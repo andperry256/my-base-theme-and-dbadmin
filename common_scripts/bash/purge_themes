@@ -1,21 +1,26 @@
 #!/bin/bash
-if [ -d  "$sub_root_dir/wp-content/themes" ]; then
-  themes_dir="$sub_root_dir/wp-content/themes"
+if [ -d  "$sub_root_dir/wp-content/themes" ]
+then
+    themes_dir="$sub_root_dir/wp-content/themes"
 else
-  themes_dir="$root_dir/public_html/wp-content/themes"
+    themes_dir="$root_dir/public_html/wp-content/themes"
 fi
 default_theme="twentytwelve"
 redundant_themes="twentynineteen twentytwenty twentytwentyone twentytwentytwo twentytwentythree"
 
-if [ -d "$themes_dir/$default_theme" ]; then
-  for theme in $redundant_themes; do
-    if [ -d  "$themes_dir/$theme" ]; then
-      echo "  Removing theme $theme"
-      rm -rf "$themes_dir/$theme"
-    fi
-    if [ -L  "$themes_dir/$theme" ]; then
-      echo "  Unlinking theme $theme"
-      rm "$themes_dir/$theme"
-    fi
-  done
+if [ -d "$themes_dir/$default_theme" ]
+then
+    for theme in $redundant_themes
+    do
+        if [ -d  "$themes_dir/$theme" ]
+        then
+            echo "  Removing theme $theme"
+            rm -rf "$themes_dir/$theme"
+        fi
+        if [ -L  "$themes_dir/$theme" ]
+        then
+            echo "  Unlinking theme $theme"
+            rm "$themes_dir/$theme"
+        fi
+    done
 fi

@@ -22,6 +22,10 @@ if (!isset($local_site_dir))
 {
     exit("Site not specified");
 }
+if (!isset($BaseDir))
+{
+    exit("Site structure not present");
+}
 
 // Set up debug file paths
 $debug_file_path = array();

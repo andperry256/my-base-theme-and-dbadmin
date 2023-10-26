@@ -12,4 +12,10 @@ then
     exit
 fi
 cd $sitepath/public_html
-$phpcmd ./common_scripts/wp-cli/wp-cli.phar cron event run --due-now
+cmd="$phpcmd ./common_scripts/wp-cli/wp-cli.phar cron event run --due-now"
+if [ -f "/Config/localhost.php" ]
+then
+    # Allow root access on local host
+    cmd="$cmd --allow-root"
+fi
+$cmd

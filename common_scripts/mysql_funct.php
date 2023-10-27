@@ -396,7 +396,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
         }
         elseif ($all_values[$i] == 's')
         {
-            $param = (!empty($all_values[$i+1]))
+            $param = ($all_values[$i+1] != '')
                 ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
                 : "''";
         }

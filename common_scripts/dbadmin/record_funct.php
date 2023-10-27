@@ -884,20 +884,23 @@ function save_record($record,$old_record_id,$new_record_id)
             }
             elseif (empty($field_value))
             {
-                // Field is empty. Set it to null if allowed, otherwise to an empty string or zero
+                // Field is empty.
                 if (($row['Null'] == 'YES') &&
-                    (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'static-date') || ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
+                    (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'static-date') || 
+                     ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
                 {
+                    // Set to null if allowed.
                     $field_is_null[$field_name] = true;
                     $new_mysql_fields[$field_name] = null;
                 }
-                elseif($record->FieldType($field_name) == 's')
+                elseif (($record->FieldType($field_name) == 'i') || ($record->FieldType($field_name) == 'd'))
                 {
-                    $new_mysql_fields[$field_name] = '';
+                    // Set to zero if numeric.
+                    $new_mysql_fields[$field_name] = 0;
                 }
                 else
                 {
-                    $new_mysql_fields[$field_name] = 0;
+                    $new_mysql_fields[$field_name] = $field_value;
                 }
             }
             else

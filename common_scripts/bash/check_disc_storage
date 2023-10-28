@@ -1,0 +1,12 @@
+#!/bin/bash
+# This script must be invoked via the 'source' directive
+# with all required variables preset.
+if [ -d "$root_dir" ]
+then
+    du $root_dir > $root_dir/maintenance/disc_storage.txt 2>/dev/null
+    php $root_dir/public_html/common_scripts/check_disc_storage.php
+    if [ "$mailbox_list" != "" ] 
+    then
+        php $root_dir/public_html/common_scripts/check_email_storage.php $domain $mailbox_list
+    fi
+fi

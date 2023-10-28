@@ -1,0 +1,25 @@
+#!/bin/bash
+# This script must be invoked via the 'source' directive
+# with all required variables preset.
+if [ -d "$root_dir/public_html" ]
+then
+    echo "Processing [public_html]"
+    cd $root_dir/public_html
+    find  -type d -exec chmod 775 '{}' \;
+    find  -type f -name "*.php" -exec chmod 664 '{}' \;
+    cd common_scripts/bash/
+    find  -type f -exec chmod 775 '{}' \;
+fi
+if [ -d "$root_dir/private_scripts" ]
+then
+    echo "Processing [private_scripts]"
+    cd $root_dir/private_scripts
+    chmod 664 *
+fi
+if [ -d "$root_dir/maintenance" ]
+then
+    echo "Processing [maintenance]"
+    cd $root_dir/maintenance
+    chmod 775 *
+    chmod 664 *.php
+fi

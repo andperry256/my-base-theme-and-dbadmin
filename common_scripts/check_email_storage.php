@@ -17,7 +17,7 @@ while ($mailbox !== false)
     $content = file("$root_dir/mail/$domain/$mailbox/dovecot-quota");
     if (empty($content))
     {
-        print("Email account $mailbox@domain not found\n");
+        print("Email account $mailbox@$domain not found\n");
     }
     else
     {

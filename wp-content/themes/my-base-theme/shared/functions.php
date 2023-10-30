@@ -408,7 +408,7 @@
   
   //================================================================================
   /*
-   * Function simpify_html_tag
+   * Function simplify_html_tag
    *
    * This function is called by the simplify_html function or a site specific
    * function that calls the latter.
@@ -417,7 +417,7 @@
    */
   //================================================================================
   
-  function simpify_html_tag($content,$tag)
+  function simplify_html_tag($content,$tag)
   {
       $pos1 = strpos($content,"<$tag");
       while ($pos1 !== false)
@@ -481,7 +481,7 @@
       // Apply the simplify_html_tag function to selected tag types
       foreach ($simplified_tags as $tag)
       {
-          $content = simpify_html_tag($content,$tag);
+          $content = simplify_html_tag($content,$tag);
       }
     
       return $content;

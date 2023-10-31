@@ -1,0 +1,28 @@
+#!/bin/bash
+# This script must be invoked from the calling script using the 'source'
+# directive and with the variables $root_dir and $site_path preset.
+# The variable $action is optionally set by the calling script.
+if [ -d "$root_dir" ]
+then
+    if [ "$action" == "" ]
+    then
+        action=`wget -q -O - https://remote.andperry.com/crontab_action.php`
+    fi
+    if [ "$action" == "save" ]
+    then
+        echo "Saving crontab ..."
+        crontab -l > $root_dir/maintenance/crontab.txt
+        php $root_dir/public_html/common_scripts/save_crontab.php $site_path
+        rm $root_dir/maintenance/crontab.txt
+    elif [ "$action" == "restore" ]
+    then
+        echo "Restoring crontab ..."
+        wget -q -O - https://remote.andperry.com/get_crontab.php?site_path=$site_path > $root_dir/maintenance/crontab.txt
+        if [ -e "$root_dir/maintenance/crontab.txt" ]
+        then
+            crontab $root_dir/maintenance/crontab.txt
+            rm $root_dir/maintenance/crontab.txt
+            crontab -l
+        fi
+    fi
+fi

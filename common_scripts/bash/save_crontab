@@ -1,9 +1,0 @@
-#!/bin/bash
-# This script must be invoked from the calling script using the 'source'
-# directive and with the variables $root_dir and $site_path preset.
-if [ -d "$root_dir" ]
-then
-    crontab -l > $root_dir/maintenance/crontab.txt
-    php $root_dir/public_html/common_scripts/save_crontab.php $site_path
-    rm $root_dir/maintenance/crontab.txt
-fi

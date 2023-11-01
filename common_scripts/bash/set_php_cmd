@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ -e "/Config/php_pars" ]
+then
+    source /Config/php_pars
+else
+    phpcmd="php"
+fi

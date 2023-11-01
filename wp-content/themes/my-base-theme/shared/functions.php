@@ -291,8 +291,8 @@
       {
           if ((get_session_var('theme_mode') == 'light') && (is_file($light_theme_path)))
           {
-              require_once("$BaseDir/common_scripts/core_funct.php");
-          }
+            include($light_theme_path);
+        }
           elseif ((get_session_var('theme_mode') == 'dark') && (is_file($dark_theme_path)))
           {
               include($dark_theme_path);

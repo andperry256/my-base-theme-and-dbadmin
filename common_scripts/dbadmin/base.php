@@ -375,7 +375,25 @@ $db_sub_path = str_replace('dbadmin/','',$RelativePath);
 if (($db_master_location[$db_sub_path] != $Location) &&
     ((!isset($override_db_sync_warning[$db_sub_path])) || (!$override_db_sync_warning[$db_sub_path])))
 {
-    print("<p class=\"small\"><span class=\"highlight-warning\">WARNING</span> - You are not using the master copy of the database. Any changes are liable to be lost on the next database synchronisation.<p>\n");
+    // Output warning(s) about not using the master copy of the database
+    print("<p class=\"small\"><span class=\"highlight-warning\">WARNING</span> - You are not using the master copy of the database. Any changes are liable to be lost on the next database synchronisation.");
+    if ((isset($_GET['-table'])) && ($db_itservices = itservices_db_connect()))
+    {
+        $table = get_base_table($_GET['-table']);
+        $where_clause = 'site_path=? AND table_name=?';
+        $where_values = array('s',$local_site_dir,'s',$table);
+        if (function_exists('admin_sub_path'))
+        {
+            $sub_path = admin_sub_path();
+            $where_clause .= ' AND sub_path=?';
+            $where_values = array_merge($where_values,array('s',$sub_path));
+        }
+        if (mysqli_num_rows(mysqli_select_query($db_itservices,'nosync_tables','*',$where_clause,$where_values,'')) > 0)
+        {
+            print("<br /><span class=\"highlight-success\">BUT NOTE</span> - The current table appears to be designated as 'no sync', which means that data may not be lost.\n");
+        }
+    }
+    print("</p>\n");
 }
 create_view_structure('_view_dba_table_fields','dba_table_fields','table_name IS NOT NULL');
 mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_dba_table_fields AS SELECT * FROM dba_table_fields ORDER BY table_name ASC, display_order ASC");

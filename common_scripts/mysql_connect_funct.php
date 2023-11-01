@@ -139,4 +139,45 @@ function db_name($dbid)
 }
 
 //==============================================================================
+/*
+Function itservices_db_connect
+*/
+//==============================================================================
+
+if (!function_exists('itservices_db_connect'))
+{
+    function itservices_db_connect($mode='p')
+    {
+        global $Location, $WWWRootDir;
+        if (($Location == 'local') && (function_exists('local_itservices_db_connect')))
+        {
+            return local_itservices_db_connect($mode);
+        }
+        elseif (($Location == 'local') && (is_dir("$WWWRootDir/Sites/andperry.com/private_scripts")))
+        {
+            switch ($mode)
+            {
+                case 'o':
+                return new mysqli( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
+                break;
+                case 'p':
+                return mysqli_connect( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
+                break;
+                default:
+                return false;
+                break;
+            }
+        }
+        elseif (($Location == 'real') && (function_exists('online_itservices_db_connect')))
+        {
+            return online_itservices_db_connect($mode);
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
+//==============================================================================
 ?>

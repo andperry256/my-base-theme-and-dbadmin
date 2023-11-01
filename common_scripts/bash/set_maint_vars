@@ -1,0 +1,17 @@
+#!/bin/bash
+# This script must be invoked via the 'source' directive
+# and with the variables $cpuser and $site_path preset.
+if [ -e "/Config/php_pars" ]
+then
+    source /Config/php_pars
+else
+    phpcmd="php"
+fi
+if [ -d "/home/$cpuser" ]
+then
+    location="real"
+    root_dir="/home/$cpuser"
+else
+    location="local"
+    root_dir="/media/Data/Users/Common/Documents/WebSite/Sites/$site_path"
+fi

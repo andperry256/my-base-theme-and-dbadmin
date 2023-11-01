@@ -23,7 +23,7 @@ function sync_databases($local_db_name)
     if ($Location == 'local')
     {
         $sync_direction = 'in';  // Default direction
-        $db_sites = sites_db_connect();
+        $db_sites = itservices_db_connect();
         $where_clause = 'dbname=? AND domname=?';
         $where_values = array('s',$local_db_name,'s',$Server_Station_ID);
         $query_result = mysqli_select_query($db_sites,'dbases','*',$where_clause,$where_values,'');

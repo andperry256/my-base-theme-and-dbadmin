@@ -1,5 +1,18 @@
 <?php
 //==============================================================================
+/*
+  This script is called to run maintenance on all databases in a given web site.
+  The following parameters are passed:
+
+  Par 1 - cPanel username.
+  Par 2 - Local site directory sub-path.
+  Par 3 - Relative path for given database.
+  Par 4 onwards - optional parameters as follows:-
+    -ucs - Include updating of charsets.
+    -opt - Include table optimisation.
+    -pur - Purge all dynamically generated views (i.e. _view_*).
+*/
+//==============================================================================
 
 // Handle main parameters
 if (!isset($argc))

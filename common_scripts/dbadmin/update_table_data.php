@@ -845,11 +845,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     $query = str_replace('{query}','UPDATE dba_relationships SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'',$query);
     mysqli_query_normal($db,$query);
 
-    // Uncomment the following line to activate it
-    // mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name LIKE '_view_%'");
-
+    $where_clause = 'orphan=1';
+    $where_values = array();
+    mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
+    mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
     print("Operation completed.$eol");
-    if ($mode == 'web')
+    if ((false) && ($mode == 'web'))  // Functionality deprecated
     {
         print("<p><a href=\"./?-table=_view_orphan_table_info_records\" target=\"_blank\">Orphan Table Info Records</a><br />\n");
         print("<a href=\"./?-table=_view_orphan_table_field_records\" target=\"_blank\">Orphan Table Field Records</a></p>\n");

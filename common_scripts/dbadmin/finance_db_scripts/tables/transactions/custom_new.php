@@ -13,6 +13,7 @@ if (substr($table,0,14) == '_view_account_')
     $where_clause = 'label=?';
     $where_values = array('s',$account);
     $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
+    $presets['date'] = date('Y-m-d');
     if ($row = mysqli_fetch_assoc($query_result))
     {
         $presets['currency'] = $row['currency'];

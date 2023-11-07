@@ -10,16 +10,24 @@
 //==============================================================================
 
 print("<script type=\"text/javascript\" src=\"$BaseURL/common_scripts/js_for_email_link_funct.js\"></script>\n");
+
 function display_email_addr($address)
 {
     $address = str_replace('@','@<span class="pseudo-hidden">aaa</span>',$address);
     return $address;
 }
+
+function display_email_addr_image($address_id)
+{
+    global $EmailAddrImagesURL;
+    return "<img align =\"absmiddle\" src=\"$EmailAddrImagesURL/$address_id.svg\">";
+}
+
 function display_email_copy_button($address,$include_mail_client_link=false)
 {
     $id = strtok($address,'@');
     $address = str_replace('@','#',$address);
-    $result = "<div style=\"display:block\">";
+    $result = "<div style=\"display:inline-block\">";
     $result .= "<button onclick=\"copyAddresses('$id')\">Copy Address</button>";
     if ($include_mail_client_link)
     {
@@ -29,10 +37,11 @@ function display_email_copy_button($address,$include_mail_client_link=false)
     $result .= "</div>";
     return $result;
 }
+
 function display_email_list_copy_button($list_id,$address_list,$include_mail_client_link=false)
 {
     $address_list = str_replace('@','#',$address_list);
-    $result = "<div style=\"display:block\">";
+    $result = "<div style=\"display:inline-block\">";
     $result .= "<div style=\"display:block\"><button onclick=\"copyAddresses('$list_id')\">Copy Addresses</button>";
     if ($include_mail_client_link)
     {

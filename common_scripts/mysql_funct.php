@@ -23,6 +23,7 @@ to functions (for special settings of the field value):-
 
 f - Field Name.
 n - Null.
+sn - String/Null (set to null if empty).
 
 //==============================================================================
 */
@@ -390,11 +391,12 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
     $pos = 0;
     for ($i=0; $i<$all_values_count; $i+=2)
     {
-        if ($all_values[$i] == 'n')
+        if (($all_values[$i] == 'n') || 
+            (($all_values[$i] == 'sn') && (empty($all_values[$i+1]))))
         {
             $param = 'NULL';
         }
-        elseif ($all_values[$i] == 's')
+        elseif (($all_values[$i] == 's') || ($all_values[$i] == 'sn'))
         {
             $param = ($all_values[$i+1] != '')
                 ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
@@ -443,11 +445,12 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
     $values_list = '';
     for ($i=0; $i<$values_count; $i+=2)
     {
-        if ($values[$i] == 'n')
+        if (($values[$i] == 'n') || 
+            (($values[$i] == 'sn') && (empty($values[$i+1]))))
         {
             $param = 'NULL';
         }
-        elseif ($values[$i] == 's')
+        elseif (($values[$i] == 's') || ($values[$i] == 'sn'))
         {
             $param = (!empty($values[$i+1]))
                 ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
@@ -533,11 +536,12 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
         $values_list = '';
         for ($i=0; $i<$values_count; $i+=2)
         {
-            if ($values[$i] == 'n')
+            if (($values[$i] == 'n') || 
+                (($values[$i] == 'sn') && (empty($values[$i+1]))))
             {
                 $param = 'NULL';
             }
-            elseif ($values[$i] == 's')
+            elseif (($values[$i] == 's') || ($values[$i] == 'sn'))
             {
                 $param = (!empty($values[$i+1]))
                     ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"

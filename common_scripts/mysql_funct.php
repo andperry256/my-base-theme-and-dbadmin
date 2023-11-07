@@ -21,8 +21,8 @@ s - String.
 The following field types are also available to be passed in array parameters
 to functions (for special settings of the field value):-
 
-f - Field Name.
-n - Null.
+f  - Field Name.
+n  - Null.
 sn - String/Null (set to null if empty).
 
 //==============================================================================

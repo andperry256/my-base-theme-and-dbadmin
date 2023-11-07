@@ -468,7 +468,7 @@ function copy_transaction($account,$seq_no,$new_date)
             $target_account = $row['target_account'];
             $target_seq_no = next_seq_no($target_account);
             $fields = 'account,seq_no,date,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no';
-            $values = array('s',$target_account,'i',$target_seq_no,'s',$new_date,'s',$row['payee'],'d',$row['debit_amount'],'d',$row['credit_amount'],'s',$row['fund'],'s','-transfer-','s',$row['memo'],'s',$acct_month,'s',$account,'i',$new_seq_no);
+            $values = array('s',$target_account,'i',$target_seq_no,'s',$new_date,'s',$row['payee'],'d',$row['debit_amount'],'d',$row['credit_amount'],'s',$row['fund'],'s','-transfer-','s',$row['memo'],'s',accounting_month($new_date),'s',$account,'i',$new_seq_no);
             mysqli_insert_query($db,'transactions',$fields,$values);
             update_account_balances($target_account,$new_date);
             $set_fields = 'category,target_seq_no';

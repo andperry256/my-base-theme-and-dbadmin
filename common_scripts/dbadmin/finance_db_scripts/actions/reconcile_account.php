@@ -30,11 +30,6 @@ if ((isset($_GET['message'])) && (!empty($_GET['message'])))
     print($_GET['message']);
 }
 
-$query_result = mysqli_select_query($db,'bank_import','*','',array(),'');
-if (mysqli_num_rows($query_result) == 0)
-{
-}
-
 print("<form method=\"post\" action=\"$CustomPagesURL/$RelativePath/reconcile_account_action.php\">\n");
 print("<table cellpadding=\"10\">\n");
 

@@ -42,7 +42,38 @@ print("<table cellpadding=\"10\">\n");
 print("<tr><td>Bank Transaction:</td><td>\n");
 print("<select name=\"bank_transaction\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
-print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
+
+$dirlist = scandir($BankImportDir);
+$csvlist = array();
+foreach ($dirlist as $file)
+{
+    if ((preg_match("/^Account_$account/",$file)) && (pathinfo($file,PATHINFO_EXTENSION) == 'csv'))
+    {
+        $statement_date = substr(pathinfo($file,PATHINFO_FILENAME),strlen($account)+9);
+        $csvlist["#$statement_date"] = true;
+        krsort($csvlist);
+    }
+}
+$count = 0;
+foreach ($csvlist as $key => $value)
+{
+    if ($key == '#')
+    {
+        // Single (continuous) CSV file
+        print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
+    }
+    else
+    {
+        // Separate (dated) CSV files
+        $date = substr($key,1);
+        print("<option value=\"IMPORT-$date\">Re-Import CSV [$date]</option>\n");
+    }
+    if (++$count >= 4)
+    {
+        break;
+    }
+}
+
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY rec_id DESC';
 $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,array(),$add_clause);

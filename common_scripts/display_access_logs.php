@@ -27,7 +27,7 @@
 <?php
 //==============================================================================
 
-print("<script type=\"text/javascript\" src=\"$BaseURL/common_scripts/js_for_display_access_logs.js\"></script>\n");
+print("<script type=\"text/javascript\" src=\"$base_url/common_scripts/js_for_display_access_logs.js\"></script>\n");
 require("allowed_hosts.php");
 if (isset($_GET['site']))
 {
@@ -49,7 +49,7 @@ if (!isset($local_site_dir))
 {
     exit("Site not specified");
 }
-if ((!isset($AccessLogsDir)) || (!is_dir($AccessLogsDir)))
+if ((!isset($access_logs_dir)) || (!is_dir($access_logs_dir)))
 {
     exit("Access log directory not found");
 }
@@ -84,7 +84,7 @@ else
 print("<h1>Display Access Logs</h1>\n");
 
 // Output the date selector
-$files = scandir($AccessLogsDir);
+$files = scandir($access_logs_dir);
 arsort($files);
 $select1 = "<select name=\"file1\" onchange=\"selectFile(this,'$local_site_dir','count_summary&$incexc')\">\n";
 $first_item_processed = false;
@@ -120,9 +120,9 @@ $select2 = str_replace('$file1','$file2',$select1);
 $select2 = str_replace('count_summary','full_log',$select2);
 print("<table>\n");
 print("<tr><td>Count Summary:</td><td>$select1</td>");
-print("<td><a href=\"$BaseURL/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
+print("<td><a href=\"$base_url/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
 print("<tr><td>Full Log:</td><td>$select2</td>");
-print("<td><a href=\"$BaseURL/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=full_log\">Select</a></td></tr>\n");
+print("<td><a href=\"$base_url/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=full_log\">Select</a></td></tr>\n");
 print("<tr><td colspan=3>");
 if ($incexc =='exclude-me')
 {
@@ -138,7 +138,7 @@ print("</table>\n");
 // Output the access data for the given date
 $date = substr($current_file,0,10);
 print("<h2>".long_title_date($date)."</h2>\n");
-$content = file("$AccessLogsDir/$current_file");
+$content = file("$access_logs_dir/$current_file");
 
 if ($display_mode == 'count_summary')
 {
@@ -151,10 +151,10 @@ if ($display_mode == 'count_summary')
     {
         $ip = substr($line,22,15);
         $page = strtok(substr($line,38),' ');
-        $pattern = "/wp-includes.*$BaseURL";
+        $pattern = "/wp-includes.*$base_url";
         $pattern = str_replace('/','\\/',$pattern);
         $page = preg_replace("/$pattern/",'',$page);
-        $page = str_replace($BaseURL,'',$page);
+        $page = str_replace($base_url,'',$page);
         $page_accesses["$ip $page"] = true;
         $page_counts[$page] = 0;
     }
@@ -257,7 +257,7 @@ else
       
             // The remainder of the line should constitute the page URL
             $url = trim($line);
-            $url = str_replace($BaseURL,"<br/>",$url);
+            $url = str_replace($base_url,"<br/>",$url);
             if (substr($url,0,5) == '<br/>')
             {
                 $url = substr($url,5);

@@ -191,9 +191,9 @@
       global $meta_refresh_interval;
       global $meta_refresh_url;
       global $meta_refresh_url_pars;
-      global $Location;
+      global $location;
     
-      if ((isset($Location)) && ($Location == 'local'))
+      if ((isset($location)) && ($location == 'local'))
       {
           print("<meta name=\"robots\" content=\"noindex,nofollow\">\n");
       }
@@ -246,9 +246,9 @@
   
   function output_stylesheet_link($path,$sub_path)
   {
-      global $link_version, $BaseDir, $BaseURL;
+      global $link_version, $base_dir, $base_url;
       $stylesheet_id = str_replace('/','-',$sub_path);
-      $dir_path = str_replace($BaseURL,$BaseDir,$path);
+      $dir_path = str_replace($base_url,$base_dir,$path);
       print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-css'  href='$path/$sub_path/styles.css?v=$link_version' type='text/css' media='all' />\n");
     
       if (function_exists('get_session_var'))
@@ -323,23 +323,23 @@
   
   function save_php_error_log()
   {
-      global $RootDir;
-      if (is_file("$RootDir/logs/php_error.log"))
+      global $root_dir;
+      if (is_file("$root_dir/logs/php_error.log"))
       {
-          copy("$RootDir/logs/php_error.log","$RootDir/logs/php_error.log.sav");
+          copy("$root_dir/logs/php_error.log","$root_dir/logs/php_error.log.sav");
       }
   }
   
   function restore_php_error_log()
   {
-      global $RootDir;
-      if (is_file("$RootDir/logs/php_error.log"))
+      global $root_dir;
+      if (is_file("$root_dir/logs/php_error.log"))
       {
-          unlink("$RootDir/logs/php_error.log");
+          unlink("$root_dir/logs/php_error.log");
       }
-      if (is_file("$RootDir/logs/php_error.log.sav"))
+      if (is_file("$root_dir/logs/php_error.log.sav"))
       {
-          rename("$RootDir/logs/php_error.log.sav","$RootDir/logs/php_error.log");
+          rename("$root_dir/logs/php_error.log.sav","$root_dir/logs/php_error.log");
       }
   }
   
@@ -351,13 +351,13 @@
   
   function output_to_access_log($user='',$add_info='')
   {
-      global $AccessLogsDir;
-      global $BaseDir;
-      include("$BaseDir/common_scripts/allowed_hosts.php");
-      if (is_dir($AccessLogsDir))
+      global $access_logs_dir;
+      global $base_dir;
+      include("$base_dir/common_scripts/allowed_hosts.php");
+      if (is_dir($access_logs_dir))
       {
           $date = date('Y-m-d');
-          $ofp = fopen("$AccessLogsDir/$date.log",'a');
+          $ofp = fopen("$access_logs_dir/$date.log",'a');
           $time = date('H:i:s');
           $addr_str = $_SERVER['REMOTE_ADDR'];
           if (is_local_ip($_SERVER['REMOTE_ADDR']))

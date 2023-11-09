@@ -10,7 +10,7 @@
     script:-
 
     $local_site_dir
-    $DBAdminURL
+    $db_admin_url
     $dbid
     PAGE_EDIT_KEYCODE
   */
@@ -22,7 +22,7 @@
   {
       exit("Local site directory not set.");
   }
-  elseif (!isset($DBAdminURL))
+  elseif (!isset($db_admin_url))
   {
       exit("DB Admin URL not set.");
   }
@@ -34,7 +34,7 @@
   {
       exit("Page edit keycode not set.");
   }
-  require_once("$PrivateScriptsDir/mysql_connect.php");
+  require_once("$private_scripts_dir/mysql_connect.php");
   $db = db_connect($dbid);
 
   $return_url = urldecode($_GET['-returnurl']);
@@ -49,7 +49,7 @@
       // Normal situation (i.e. when editing from the page/post itself).
       $page_url = strtok($return_url,'?');
   }
-  if (trim($page_url,'/') == $BaseURL)
+  if (trim($page_url,'/') == $base_url)
   {
       $page_slug = 'home';
   }
@@ -65,7 +65,7 @@
   $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result))
   {
-      print("<form method=\"post\" action=\"$DBAdminURL/quick-edit/action.php\">\n");
+      print("<form method=\"post\" action=\"$db_admin_url/quick-edit/action.php\">\n");
       print("<textarea name=\"content\" rows=\"12\">{$row['post_content']}</textarea>\n");
       print("<input type=\"submit\" value=\"Save\" />\n");
       print("<input type=\"hidden\" name=\"post_name\" value=\"$page_slug\" />\n");

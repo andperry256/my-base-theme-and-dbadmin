@@ -47,7 +47,7 @@ else
 
 if (isset($_GET['-basedir']))
 {
-    $BaseDir = $_GET['-basedir'];
+    $base_dir = $_GET['-basedir'];
 }
 else
 {
@@ -56,22 +56,22 @@ else
 
 if (isset($_GET['-relpath']))
 {
-    $RelativePath = $_GET['-relpath'];
+    $relative_path = $_GET['-relpath'];
 }
 else
 {
     exit("No relative path specified\n");
 }
 
-require("$BaseDir/path_defs.php");
-require("$PrivateScriptsDir/mysql_connect.php");
-require("$BaseDir/wp-content/themes/my-base-theme/shared/functions.php");
-require("$DBAdminDir/functions.php");
-require("$DBAdminDir/classes.php");
+require("$base_dir/path_defs.php");
+require("$private_scripts_dir/mysql_connect.php");
+require("$base_dir/wp-content/themes/my-base-theme/shared/functions.php");
+require("$db_admin_dir/functions.php");
+require("$db_admin_dir/classes.php");
 $post_copy = $_POST;  // deslash does not seem to be required any longer here
-$NoAction = true;
-require("$CustomPagesPath/$RelativePath/_home.php");
-$RelativePath = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
+$no_action = true;
+require("$custom_pages_path/$relative_path/_home.php");
+$relative_path = $_GET['-relpath'];  // Required because value is getting corrupted (not sure why)
 
 if (($action == 'edit') && (isset($_POST['save_as_new'])))
 {
@@ -98,13 +98,13 @@ foreach ($_POST as $key => $value)
 {
     update_session_var(array('post_vars',$key),$value);
 }
-if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
+if (is_file("$custom_pages_path/$relative_path/tables/$table/$table.php"))
 {
-    require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
+    require("$custom_pages_path/$relative_path/tables/$table/$table.php");
 }
-elseif (is_file("$AltIncludePath/tables/$table/$table.php"))
+elseif (is_file("$alt_include_path/tables/$table/$table.php"))
 {
-    require("$AltIncludePath/tables/$table/$table.php");
+    require("$alt_include_path/tables/$table/$table.php");
 }
 $base_table = get_base_table($table);
 $classname = "tables_$table";
@@ -222,13 +222,13 @@ if (save_record($record,$old_record_id,$new_record_id))
         // a repeat save.
         $action = 'edit';
     }
-    header("Location: $BaseURL/$RelativePath/?-action=$action&-table=$table&-recordid=".get_session_var('saved_record_id')."&-saveresult=1");
+    header("Location: $base_url/$relative_path/?-action=$action&-table=$table&-recordid=".get_session_var('saved_record_id')."&-saveresult=1");
     exit;
 }
 else
 {
     // An error condition has occurred
-    header("Location: $BaseURL/$RelativePath/?-action=$action&-table=$table&-recordid=$old_record_id&-saveresult=0");
+    header("Location: $base_url/$relative_path/?-action=$action&-table=$table&-recordid=$old_record_id&-saveresult=0");
     exit;
 }
 

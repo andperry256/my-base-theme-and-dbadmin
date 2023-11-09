@@ -19,7 +19,7 @@
         global $site_path_defs_path;
         global $custom_footer_script;
         require($site_path_defs_path);
-        $home_path = rtrim($BaseDir,'/');
+        $home_path = rtrim($base_dir,'/');
         $page_uri = trim(get_page_uri(get_the_ID()),'/');
         if (is_file("$custom_footer_script"))
         {

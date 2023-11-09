@@ -19,15 +19,15 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-if (!is_dir($PHPMailerDir))
+if (!is_dir($php_mailer_dir))
 {
     exit("PHPMailer directory not defined");
 }
 else
 {
-    require_once("$PHPMailerDir/src/PHPMailer.php");
-    require_once("$PHPMailerDir/src/SMTP.php");
-    require_once("$PHPMailerDir/src/Exception.php");
+    require_once("$php_mailer_dir/src/PHPMailer.php");
+    require_once("$php_mailer_dir/src/SMTP.php");
+    require_once("$php_mailer_dir/src/Exception.php");
 }
 
 //================================================================================
@@ -44,18 +44,18 @@ The function returns an array with the following elements:-
 
 In order to handle attachments, the following global variables need to be
 declared and used by the calling software:-
-  $AttachmentsDir
-  $TotalAttachmentSize
+  $attachments_dir
+  $total_attachment_size
 */
 //================================================================================
 
 function get_imap_message($mbox,$mid,$noattach=false)
 {
-    global $TotalAttachmentSize;
+    global $total_attachment_size;
     global $htmlmsg,$plainmsg,$charset,$attachments;
     $htmlmsg = $plainmsg = $charset = '';
     $attachments = array();
-    $TotalAttachmentSize = 0;
+    $total_attachment_size = 0;
   
     // Header
     $header = imap_headerinfo($mbox,$mid);
@@ -91,8 +91,8 @@ function get_imap_message($mbox,$mid,$noattach=false)
 
 function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
 {
-    global $AttachmentsDir;
-    global $TotalAttachmentSize;
+    global $attachments_dir;
+    global $total_attachment_size;
     global $htmlmsg,$plainmsg,$charset,$attachments;
   
     // Extract decode data
@@ -162,31 +162,31 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
         // filename may be encoded, so see imap_mime_header_decode()
         set_time_limit(300);
         $attachments[$filename] = $data;
-        $ofp = fopen("$AttachmentsDir/$filename","w");
+        $ofp = fopen("$attachments_dir/$filename","w");
         fwrite($ofp,$data);
     
         // Add missing file extensions to image files where possible
         if (empty($ext))
         {
-            $image_type = exif_imagetype("$AttachmentsDir/$filename");
+            $image_type = exif_imagetype("$attachments_dir/$filename");
              if ($image_type == IMAGETYPE_JPEG)
             {
-                rename("$AttachmentsDir/$filename","$AttachmentsDir/$filename.jpg");
+                rename("$attachments_dir/$filename","$attachments_dir/$filename.jpg");
             }
             elseif ($image_type == IMAGETYPE_PNG)
             {
-                rename("$AttachmentsDir/$filename","$AttachmentsDir/$filename.png");
+                rename("$attachments_dir/$filename","$attachments_dir/$filename.png");
             }
             elseif ($image_type == IMAGETYPE_GIF)
             {
-                rename("$AttachmentsDir/$filename","$AttachmentsDir/$filename.gif");
+                rename("$attachments_dir/$filename","$attachments_dir/$filename.gif");
             }
             elseif ($image_type == IMAGETYPE_BMP)
             {
-                rename("$AttachmentsDir/$filename","$AttachmentsDir/$filename.bmp");
+                rename("$attachments_dir/$filename","$attachments_dir/$filename.bmp");
             }
         }
-        $TotalAttachmentSize += filesize("$AttachmentsDir/$filename");
+        $total_attachment_size += filesize("$attachments_dir/$filename");
         fclose($ofp);
     }
   
@@ -270,8 +270,8 @@ Offset 1 = Additional error information
 
 function output_mail($mail_info,$host,$attachments=array())
 {
-    global $DefaultSenderEmail;
-    global $AltSenderEmail;
+    global $default_sender_email;
+    global $alt_sender_email;
     foreach ($mail_info as $key => $value)
     {
         $mail_info[$key] = trim($value);
@@ -432,9 +432,9 @@ Function log_message_info_to_file
 
 function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
 {
-    global $MailLogDir;
+    global $mail_log_dir;
   
-    if (!is_dir("$MailLogDir"))
+    if (!is_dir("$mail_log_dir"))
     {
         return;
     }
@@ -479,7 +479,7 @@ function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
         $to_addr = '';
     }
     $log_file_name = 'mail-'.date('Y-m-d').'.log';
-    $ofp = fopen("$MailLogDir/$log_file_name",'a');
+    $ofp = fopen("$mail_log_dir/$log_file_name",'a');
     if ($ofp !== false)
     {
         $line = date('H:i:s');
@@ -508,12 +508,12 @@ Function email_previous_day_log
 */
 //================================================================================
 
-require_once("$BaseDir/common_scripts/date_funct.php");
+require_once("$base_dir/common_scripts/date_funct.php");
 function email_previous_day_mail_log($station_id,$from_addr)
 {
-    global $MailLogDir;
+    global $mail_log_dir;
     $yesterday_date = PreviousDate(TODAY_DATE);
-    $log_file = "$MailLogDir/mail-"."$yesterday_date.log";
+    $log_file = "$mail_log_dir/mail-"."$yesterday_date.log";
     if (is_file($log_file))
     {
         $message_info = array();

@@ -90,7 +90,7 @@ add_action( 'after_setup_theme', 'my_base_theme_setup' );
  */
 function my_base_theme_content_width()
 {
-    $GLOBALS['content_width'] = apply_filters( 'my_base_theme_content_width', 640 );
+    $globals['content_width'] = apply_filters( 'my_base_theme_content_width', 640 );
 }
 add_action( 'after_setup_theme', 'my_base_theme_content_width', 0 );
 

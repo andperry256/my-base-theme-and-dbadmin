@@ -1,10 +1,10 @@
 <?php
 //==============================================================================
 
-global $BaseURL,$RelativePath;
+global $base_url,$relative_path;
 global $local_site_dir;
-global $BankImportDir;
-global $CustomPagesURL;
+global $bank_import_dir;
+global $custom_pages_url;
 
 $db = admin_db_connect();
 
@@ -22,7 +22,7 @@ else
     $account_name = '';  // This should not occur
 }
 print("<h1>Reconcile Account ($account_name)</h1>\n");
-print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
+print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
 print("<div style=\"clear:both\"></div>\n");
 
 if ((isset($_GET['message'])) && (!empty($_GET['message'])))
@@ -30,7 +30,7 @@ if ((isset($_GET['message'])) && (!empty($_GET['message'])))
     print($_GET['message']);
 }
 
-print("<form method=\"post\" action=\"$CustomPagesURL/$RelativePath/reconcile_account_action.php\">\n");
+print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/reconcile_account_action.php\">\n");
 print("<table cellpadding=\"10\">\n");
 
 // Build select list for bank transactions
@@ -38,7 +38,7 @@ print("<tr><td>Bank Transaction:</td><td>\n");
 print("<select name=\"bank_transaction\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
 
-$dirlist = scandir($BankImportDir);
+$dirlist = scandir($bank_import_dir);
 $csvlist = array();
 foreach ($dirlist as $file)
 {
@@ -151,7 +151,7 @@ print("</table>\n");
 print("<input type=\"hidden\" name=\"account\" value=\"$account\">\n");
 print("<input type=\"hidden\" name=\"account_type\" value=\"$account_type\">\n");
 print("<input type=\"hidden\" name=\"site\" value=\"$local_site_dir\">\n");
-print("<input type=\"hidden\" name=\"relpath\" value=\"$RelativePath\">\n");
+print("<input type=\"hidden\" name=\"relpath\" value=\"$relative_path\">\n");
 print("</form>\n");
 
 //==============================================================================

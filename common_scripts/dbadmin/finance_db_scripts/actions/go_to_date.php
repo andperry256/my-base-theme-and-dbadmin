@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 
-global $CustomPagesURL, $RelativePath;
+global $custom_pages_url, $relative_path;
 
 $db = admin_db_connect();
 $account = $_GET['account'];
@@ -15,7 +15,7 @@ if (isset($error_message))
 }
 
 $return_url = cur_url_par();
-print("<form method=\"post\" action=\"$CustomPagesURL/$RelativePath/go_to_date_2.php?table=$table&account=$account&-returnurl=$return_url\">\n");
+print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/go_to_date_2.php?table=$table&account=$account&-returnurl=$return_url\">\n");
 print("<table cellpadding=\"5\">\n");
 print("<tr><td>Date:</td>\n");
 print("<td>");

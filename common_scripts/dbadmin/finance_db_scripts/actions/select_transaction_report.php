@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 
-global $CustomPagesURL, $RelativePath;
+global $custom_pages_url, $relative_path;
 
 $db = admin_db_connect();
 $account_exclusions = select_excluded_accounts('label');
@@ -9,7 +9,7 @@ $fund_exclusions = select_excluded_funds('name');
 
 print("<h1>Transaction Report</h1>\n");
 
-print("<form method=\"post\" action=\"$CustomPagesURL/$RelativePath/load_multi_report.php\">\n");
+print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/load_multi_report.php\">\n");
 print("<table cellpadding=\"10\">\n");
 
 // Build select list for accounts

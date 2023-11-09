@@ -1,7 +1,7 @@
 <?php
-  // Variables $local_site_dir and $RelativePath must be set up beforehand
+  // Variables $local_site_dir and $relative_path must be set up beforehand
   require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-  $url = "$BaseURL/$RelativePath/?-action=display_transaction_report";
+  $url = "$base_url/$relative_path/?-action=display_transaction_report";
   if (!empty($_POST['account']))
   {
       $url .= "&account={$_POST['account']}";

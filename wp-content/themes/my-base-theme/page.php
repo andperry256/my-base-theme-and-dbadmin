@@ -23,13 +23,13 @@ get_header();
         {
             require($site_path_defs_path);
             $page_uri = trim(get_page_uri(get_the_ID()),'/');
-            if (is_file("$CustomPagesPath/$page_uri/_home.php"))
+            if (is_file("$custom_pages_path/$page_uri/_home.php"))
             {
-                $custom_script = "$CustomPagesPath/$page_uri/_home.php";
+                $custom_script = "$custom_pages_path/$page_uri/_home.php";
             }
             else
             {
-                $custom_script = "$CustomPagesPath/$page_uri.php";
+                $custom_script = "$custom_pages_path/$page_uri.php";
             }
         }
         if ((isset($custom_script)) && (is_file($custom_script)))

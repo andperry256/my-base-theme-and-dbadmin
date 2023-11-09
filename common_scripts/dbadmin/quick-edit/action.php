@@ -7,7 +7,7 @@
   */
   $local_site_dir = $_POST['local_site_dir'];
   require_once("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-  require_once("$PrivateScriptsDir/mysql_connect.php");
+  require_once("$private_scripts_dir/mysql_connect.php");
   $db = db_connect($_POST['dbid']);
 
   if ((!isset($_POST['post_name'])) || (!isset($_POST['content'])) ||

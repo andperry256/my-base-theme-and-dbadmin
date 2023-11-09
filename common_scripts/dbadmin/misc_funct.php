@@ -9,9 +9,9 @@ Function get_table_access_level
 
 function get_table_access_level($table)
 {
-    global $Location, $RelativePath, $db_master_location;
+    global $location, $relative_path, $db_master_location;
     $db = admin_db_connect();
-    $db_sub_path = str_replace('dbadmin/','',$RelativePath);
+    $db_sub_path = str_replace('dbadmin/','',$relative_path);
     if (isset($db_master_location[$db_sub_path]))
     {
         $master_location = $db_master_location[$db_sub_path];
@@ -30,10 +30,10 @@ function get_table_access_level($table)
     }
     elseif ($row = mysqli_fetch_assoc($query_result))
     {
-        $access_level = $row[$Location.'_access'];
+        $access_level = $row[$location.'_access'];
         if ($access_level == 'auto-full')
         {
-            if ($Location == $master_location)
+            if ($location == $master_location)
             {
                 return 'full';
             }
@@ -44,7 +44,7 @@ function get_table_access_level($table)
         }
         elseif ($access_level == 'auto-edit')
         {
-            if ($Location == $master_location)
+            if ($location == $master_location)
             {
                 return 'edit';
             }

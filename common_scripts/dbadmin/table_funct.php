@@ -135,22 +135,22 @@ Function page_link_url
 
 function page_link_url($page_no,$relationships='')
 {
-    global $BaseURL, $RelativePath;
-    global $PageURLTable,$PageURLListSize,$PageURLSearchString,$PageURLSortField,$PageURLSortOrder;
-    $page_offset = $PageURLListSize * ($page_no - 1);
-    $url = "$BaseURL/$RelativePath/?-table=$PageURLTable&-startoffset=$page_offset&-listsize=$PageURLListSize";
-    if (!empty($PageURLSearchString))
+    global $base_url, $relative_path;
+    global $page_url_table,$page_url_list_size,$page_url_search_string,$page_url_sort_field,$page_url_sort_order;
+    $page_offset = $page_url_list_size * ($page_no - 1);
+    $url = "$base_url/$relative_path/?-table=$page_url_table&-startoffset=$page_offset&-listsize=$page_url_list_size";
+    if (!empty($page_url_search_string))
     {
-        $search_par = urlencode($PageURLSearchString);
+        $search_par = urlencode($page_url_search_string);
         $url .= "&-search=$search_par";
     }
-    if (!empty($PageURLSortField))
+    if (!empty($page_url_sort_field))
     {
-        $url .= "&-sortfield=$PageURLSortField";
+        $url .= "&-sortfield=$page_url_sort_field";
     }
-    if (!empty($PageURLSortOrder))
+    if (!empty($page_url_sort_order))
     {
-        $url .= "&-sortorder=$PageURLSortOrder";
+        $url .= "&-sortorder=$page_url_sort_order";
     }
     if ($relationships == 'show')
     {
@@ -383,14 +383,14 @@ Function display_table
 
 function display_table($params)
 {
-    global $BaseURL, $RelativePath, $Location;
+    global $base_url, $relative_path, $location;
     global $search_clause;
-    global $WidgetTypes;
-    global $DBAdminDir;
+    global $widget_types;
+    global $db_admin_dir;
     global $display_table;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
-    print("<style>\n".file_get_contents("$DBAdminDir/page_link_styles.css")."</style>\n");
+    print("<style>\n".file_get_contents("$db_admin_dir/page_link_styles.css")."</style>\n");
 
     //============================================================================
     // Part 1 - Data Initialisation
@@ -547,7 +547,7 @@ function display_table($params)
                     $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
                     if ($row2 = mysqli_fetch_assoc($query_result2))
                     {
-                        if (($WidgetTypes[$row2['widget_type']]) && (!$row2['exclude_from_search']))
+                        if (($widget_types[$row2['widget_type']]) && (!$row2['exclude_from_search']))
                         {
                             if ($field_processed)
                             {
@@ -650,12 +650,12 @@ function display_table($params)
     $current_page = floor($start_offset / $list_size +1);
 
     // Generate the page links
-    global $PageURLTable,$PageURLListSize,$PageURLSearchString,$PageURLSortField,$PageURLSortOrder;
-    $PageURLTable = $table;
-    $PageURLListSize = $list_size;
-    $PageURLSearchString = $lc_search_string;
-    $PageURLSortField = $sort_field;
-    $PageURLSortOrder = $sort_order;
+    global $page_url_table,$page_url_list_size,$page_url_search_string,$page_url_sort_field,$page_url_sort_order;
+    $page_url_table = $table;
+    $page_url_list_size = $list_size;
+    $page_url_search_string = $lc_search_string;
+    $page_url_sort_field = $sort_field;
+    $page_url_sort_order = $sort_order;
     $page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url');
 
     // Determine the access level for the table
@@ -669,7 +669,7 @@ function display_table($params)
         search, for all of which the next stage is performed by a second iteration
         of the current script.
         */
-        print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-table=$table\">\n");
+        print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
     }
 
     // Ensure that certain parameters are propagated through any subsquent form submission.
@@ -700,9 +700,9 @@ function display_table($params)
     print("</p>\n");
     if ($access_level == 'full')
     {
-        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></div>\n");
+        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=$table\">New&nbsp;Record</a></div>\n");
     }
-    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-showall\">Show&nbsp;All</a></div>\n");
+    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table&-showall\">Show&nbsp;All</a></div>\n");
     if (isset($params['additional_links']))
     {
         print($params['additional_links']);
@@ -875,11 +875,11 @@ function display_table($params)
         {
             if ($mode == 'desktop')
             {
-                print("<td class=\"$style\"><a href=\"$BaseURL/$RelativePath/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></td>");
+                print("<td class=\"$style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></td>");
             }
             else
             {
-                print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$BaseURL/$RelativePath/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></div> <!-- .table-listing-cell -->");
+                print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></div> <!-- .table-listing-cell -->");
             }
         }
         print("\n");
@@ -1080,7 +1080,7 @@ Function select_update
 
 function select_update($table,$option)
 {
-    global $BaseURL, $RelativePath;
+    global $base_url, $relative_path;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     $base_table = get_base_table($table);
@@ -1107,7 +1107,7 @@ function select_update($table,$option)
         print("<h2>Update All Records</h2>\n");
     }
 
-    print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-table=$table\">\n");
+    print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
     if ($option == 'all')
     {
         print("<p><strong>Important</strong> - You are updating all records in the table - please check to confirm&nbsp;&nbsp;<input type=\"checkbox\" name=\"confirm_update_all\"></p>\n");
@@ -1211,7 +1211,7 @@ Function run_update
 
 function run_update($table,$option)
 {
-    global $Location;
+    global $location;
     $post_copy = array_deslash($_POST);
     $db = admin_db_connect();
     $base_table = get_base_table($table);
@@ -1391,7 +1391,7 @@ function run_update($table,$option)
         }
     }
     $alert_message = "$success_count record(s) updated, $failure_count record(s) not updated.";
-    if ((isset($Location)) && ($Location == 'local') && (isset($_POST['show_progress'])))
+    if ((isset($location)) && ($location == 'local') && (isset($_POST['show_progress'])))
     {
         print("<script>alert(\"$alert_message\")</script>\n");
     }
@@ -1410,7 +1410,7 @@ Function select_copy
 
 function select_copy($table)
 {
-    global $BaseURL, $RelativePath;
+    global $base_url, $relative_path;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     $base_table = get_base_table($table);
@@ -1431,7 +1431,7 @@ function select_copy($table)
     print("<h2>Copy Records</h2>\n");
     print("<p class=\"small\">* = Primary key field - at least one must be selected (unless there is an auto-increment field).</p>\n");
 
-    print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-table=$table\">\n");
+    print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
     $last_display_group = '';
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
     while ($row = mysqli_fetch_assoc($query_result))
@@ -1528,7 +1528,7 @@ Function run_copy
 
 function run_copy($table)
 {
-    global $Location;
+    global $location;
     $post_copy = array_deslash($_POST);
     $db = admin_db_connect();
     $base_table = get_base_table($table);
@@ -1668,7 +1668,7 @@ function run_copy($table)
         }
     }
     $alert_message = "$success_count record(s) copied, $failure_count record(s) not copied.";
-    if ((isset($Location)) && ($Location == 'local') && (isset($_POST['show_progress'])))
+    if ((isset($location)) && ($location == 'local') && (isset($_POST['show_progress'])))
     {
         print("<script>alert(\"$alert_message\")</script>\n");
     }

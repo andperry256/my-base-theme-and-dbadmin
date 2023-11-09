@@ -34,10 +34,10 @@ function update_table_data_with_dbid($dbid,$update_charsets=false,$optimise=fals
 
 function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 {
-    global $CustomPagesPath, $RelativePath, $AltIncludePath;
-    global $WidgetTypes;
+    global $custom_pages_path, $relative_path, $alt_include_path;
+    global $widget_types;
     global $argc;
-    global $dbinfo, $Location;
+    global $dbinfo, $location;
     if (isset($argc))
     {
         $mode = 'command';
@@ -54,13 +54,13 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         $rtag = '</em>';
         $nbsp = '&nbsp;';
     }
-    if (!isset($WidgetTypes))
+    if (!isset($widget_types))
     {
         exit("ERROR - Attempt to run script out of context.\n");
     }
 
     print($eol);
-    print("Processing database at relative path [$RelativePath] ...$eol");
+    print("Processing database at relative path [$relative_path] ...$eol");
     if ($update_charsets)
     {
         print("[Updating of charsets/collation included]$eol");
@@ -86,7 +86,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         {
             $db = db_connect($dbid);
         }
-        if ($Location == 'local')
+        if ($location == 'local')
         {
             $dbname = $dbinfo[$dbid][0];
         }
@@ -116,7 +116,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     $access_types = "'read-only','edit','auto-edit','full','auto-full'";
     $default_access_type = 'full';
     $widget_types = '';
-    foreach ($WidgetTypes as $key => $value)
+    foreach ($widget_types as $key => $value)
     {
         $widget_types .= "'$key',";
     }
@@ -558,8 +558,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
             mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
             if ($table == get_base_table($table,$db))
             {
-                if ((is_dir("$CustomPagesPath/$RelativePath/tables/$table")) ||
-                (is_dir("$AltIncludePath/tables/$table")) ||
+                if ((is_dir("$custom_pages_path/$relative_path/tables/$table")) ||
+                (is_dir("$alt_include_path/tables/$table")) ||
                 (substr($table,0,4) == 'dba_'))
                 {
                     $fields = 'table_name';

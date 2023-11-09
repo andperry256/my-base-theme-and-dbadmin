@@ -37,7 +37,7 @@ Function create_view_structure
 
 function create_view_structure($view,$table,$conditions)
 {
-    global $CustomPagesPath, $RelativePath, $AltIncludePath;
+    global $custom_pages_path, $relative_path, $alt_include_path;
     $db = admin_db_connect();
 
     // Create the view and drop any old tables/views that may conflict with the
@@ -52,31 +52,31 @@ function create_view_structure($view,$table,$conditions)
 
     // Add new class definition and symbolic link to directory if the directory
     // for the table already exists.
-    if (!is_dir("$CustomPagesPath/$RelativePath/tables/$table"))
+    if (!is_dir("$custom_pages_path/$relative_path/tables/$table"))
     {
-        mkdir("$CustomPagesPath/$RelativePath/tables/$table",0755);
+        mkdir("$custom_pages_path/$relative_path/tables/$table",0755);
     }
-    $file = "$CustomPagesPath/$RelativePath/tables/$table/$view.php";
+    $file = "$custom_pages_path/$relative_path/tables/$table/$view.php";
     if (!is_file($file))
     {
         $ofp = fopen($file,'w');
         fprintf($ofp,"<?php\n");
-        if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
+        if (is_file("$custom_pages_path/$relative_path/tables/$table/$table.php"))
         {
-            fprintf($ofp,"include(\"\$CustomPagesPath/\$RelativePath/tables/$table/$table.php\");\n");
+            fprintf($ofp,"include(\"\$custom_pages_path/\$relative_path/tables/$table/$table.php\");\n");
         }
-        elseif (is_file("$AltIncludePath/tables/$table/$table.php"))
+        elseif (is_file("$alt_include_path/tables/$table/$table.php"))
         {
-            fprintf($ofp,"include(\"\$AltIncludePath/tables/$table/$table.php\");\n");
+            fprintf($ofp,"include(\"\$alt_include_path/tables/$table/$table.php\");\n");
         }
         fprintf($ofp,"class tables_$view extends tables_$table {}\n");
         fprintf($ofp,"?>\n");
         fclose($ofp);
     }
-    $link = "$CustomPagesPath/$RelativePath/tables/$view";
+    $link = "$custom_pages_path/$relative_path/tables/$view";
     if (!is_link($link))
     {
-        symlink("$CustomPagesPath/$RelativePath/tables/$table","$link");
+        symlink("$custom_pages_path/$relative_path/tables/$table","$link");
     }
 
     // Set the parent table in the table info record for the view
@@ -130,16 +130,16 @@ Function delete_view_structure
 
 function delete_view_structure($view,$table)
 {
-    global $CustomPagesPath, $RelativePath;
+    global $custom_pages_path, $relative_path;
     $db = admin_db_connect();
 
     mysqli_query_normal($db,"DROP VIEW IF EXISTS $view");
-    $file = "$CustomPagesPath/$RelativePath/tables/$table/$view.php";
+    $file = "$custom_pages_path/$relative_path/tables/$table/$view.php";
     if (is_file($file))
     {
         unlink($file);
     }
-    $link = "$CustomPagesPath/$RelativePath/tables/$view";
+    $link = "$custom_pages_path/$relative_path/tables/$view";
     if (is_link($link))
     {
         unlink($link);
@@ -157,24 +157,24 @@ Function create_child_table_structure
 
 function create_child_table_structure($child,$parent)
 {
-    global $CustomPagesPath, $RelativePath;
+    global $custom_pages_path, $relative_path;
     $db = admin_db_connect();
 
     mysqli_query_normal($db,"CREATE TABLE IF NOT EXISTS $child LIKE $parent");
-    $file = "$CustomPagesPath/$RelativePath/tables/$parent/$child.php";
+    $file = "$custom_pages_path/$relative_path/tables/$parent/$child.php";
     if (!is_file($file))
     {
         $ofp = fopen($file,'w');
         fprintf($ofp,"<?php\n");
-        fprintf($ofp,"include(\"\$CustomPagesPath/\$RelativePath/tables/$parent/$parent.php\");\n");
+        fprintf($ofp,"include(\"\$custom_pages_path/\$relative_path/tables/$parent/$parent.php\");\n");
         fprintf($ofp,"class tables_$child extends tables_$parent {}\n");
         fprintf($ofp,"?>\n");
         fclose($ofp);
     }
-    $link = "$CustomPagesPath/$RelativePath/tables/$child";
+    $link = "$custom_pages_path/$relative_path/tables/$child";
     if (!is_link($link))
     {
-        symlink("$CustomPagesPath/$RelativePath/tables/$parent","$link");
+        symlink("$custom_pages_path/$relative_path/tables/$parent","$link");
     }
 
     // Set the parent table in the table info record for the child table
@@ -228,16 +228,16 @@ Function delete_child_table_structure
 
 function delete_child_table_structure($child,$parent)
 {
-    global $CustomPagesPath, $RelativePath;
+    global $custom_pages_path, $relative_path;
     $db = admin_db_connect();
 
     mysqli_query_normal($db,"DROP TABLE $child");
-    $file = "$CustomPagesPath/$RelativePath/tables/$parent/$child.php";
+    $file = "$custom_pages_path/$relative_path/tables/$parent/$child.php";
     if (is_file($file))
     {
         unlink($file);
     }
-    $link = "$CustomPagesPath/$RelativePath/tables/$child";
+    $link = "$custom_pages_path/$relative_path/tables/$child";
     if (is_link($link))
     {
         unlink($link);

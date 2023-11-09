@@ -13,7 +13,7 @@ network environment, which may occasionally be required for testing purposes.
 The variables from path_defs.php must be preset by the calling script along
 with $dbid which indicates the WordPress database.
 */
-require_once("$PrivateScriptsDir/mysql_connect.php");
+require_once("$private_scripts_dir/mysql_connect.php");
 $db = db_connect($dbid);
 $user_key = SV_USER;
 $_SESSION[$user_key] = '';
@@ -28,11 +28,11 @@ if (defined('SV_ACCESS_LEVEL'))
     $where_values = array('s',$access_level_key);
     mysqli_delete_query($db,'wp_session_updates',$where_clause,$where_values);
 }
-if (isset($_COOKIE[$LoginCookieID]))
+if (isset($_COOKIE[$login_cookie_id]))
 {
-    setcookie($LoginCookieID,'',time()-3600,$LoginCookiePath);
+    setcookie($login_cookie_id,'',time()-3600,$login_cookie_path);
 }
-header("Location: $BaseURL");
+header("Location: $base_url");
 exit;
 
 //==============================================================================

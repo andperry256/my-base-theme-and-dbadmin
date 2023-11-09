@@ -7,7 +7,7 @@ if (isset($_GET['site']))
 {
     $local_site_dir = $_GET['site'];
     require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-    require("$PrivateScriptsDir/mysql_connect.php");
+    require("$private_scripts_dir/mysql_connect.php");
 }
 else
 {
@@ -24,13 +24,13 @@ else
 
 if (isset($_GET['subpath']))
 {
-    $tables_dir = "$BaseDir/admin2/{$_GET['subpath']}/tables";
-    require("$CustomPagesPath/dbadmin/db-"."{$_GET['subpath']}/db_funct.php");
+    $tables_dir = "$base_dir/admin2/{$_GET['subpath']}/tables";
+    require("$custom_pages_path/dbadmin/db-"."{$_GET['subpath']}/db_funct.php");
 }
 else
 {
-    $tables_dir = "$BaseDir/admin2/tables";
-    require("$CustomPagesPath/dbadmin/db_funct.php");
+    $tables_dir = "$base_dir/admin2/tables";
+    require("$custom_pages_path/dbadmin/db_funct.php");
 }
 
 $tables = array();

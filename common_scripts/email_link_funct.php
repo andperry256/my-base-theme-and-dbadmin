@@ -9,7 +9,7 @@
 <?php
 //==============================================================================
 
-print("<script type=\"text/javascript\" src=\"$BaseURL/common_scripts/js_for_email_link_funct.js\"></script>\n");
+print("<script type=\"text/javascript\" src=\"$base_url/common_scripts/js_for_email_link_funct.js\"></script>\n");
 
 function display_email_addr($address)
 {
@@ -19,8 +19,8 @@ function display_email_addr($address)
 
 function display_email_addr_image($address_id)
 {
-    global $EmailAddrImagesURL;
-    return "<img align =\"absmiddle\" src=\"$EmailAddrImagesURL/$address_id.svg\">";
+    global $email_addr_images_url;
+    return "<img align =\"absmiddle\" src=\"$email_addr_images_url/$address_id.svg\">";
 }
 
 function display_email_copy_button($address,$include_mail_client_link=false)

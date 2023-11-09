@@ -5,16 +5,16 @@ if (!function_exists('search_and_replace')) :
 
 function search_and_replace($local_db_name)
 {
-    global $Location, $Server_Station_ID, $MaintenanceDir;
+    global $location, $server_station_id, $maintenance_dir;
     $dummy = '))';  // To prevent false positive in syntax checker
 
     print("<h1>Search and Replace</h1>\n");
     $db = admin_db_connect();
-    if ($Location == 'local')
+    if ($location == 'local')
     {
         $db_sites = itservices_db_connect();
         $where_clause = 'dbname=? AND domname=?';
-        $where_values = array('s',$local_db_name,'s',$Server_Station_ID);
+        $where_values = array('s',$local_db_name,'s',$server_station_id);
         $query_result = mysqli_select_query($db,'dbases','*',$where_clause,$where_values,'');
         if ($row = mysqli_fetch_assoc($query_result))
         {
@@ -30,7 +30,7 @@ function search_and_replace($local_db_name)
             }
             $dbname = admin_db_name();
             $password = REAL_DB_PASSWD;
-            $dumpfile = "$MaintenanceDir/temp.sql";
+            $dumpfile = "$maintenance_dir/temp.sql";
             if (isset($_POST['submitted1']))
             {
                 if ($_POST['table'] == '#all#')

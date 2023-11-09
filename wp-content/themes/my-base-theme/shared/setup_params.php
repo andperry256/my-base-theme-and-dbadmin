@@ -12,7 +12,7 @@ global $meta_refresh_url_pars;
 global $desktop_header_image_path, $desktop_header_image_url;
 global $intermediate_header_image_path, $intermediate_header_image_url;
 global $mobile_header_image_path, $mobile_header_image_url;
-global $PrivateScriptsDir;
+global $private_scripts_dir;
 global $custom_footer_script;
 global $wpdb;
 global $favicon_loaded;
@@ -45,30 +45,30 @@ if (!is_file($site_path_defs_path))
 
   $my_base_theme_mode = 'full';
   require($site_path_defs_path);
-  if (!isset($CustomScriptsPath))
+  if (!isset($custom_scripts_path))
   {
-      $CustomScriptsPath = "$BaseDir/wp-custom-scripts";
+      $custom_scripts_path = "$base_dir/wp-custom-scripts";
   }
-  if (!isset($CustomScriptsURL))
+  if (!isset($custom_scripts_url))
   {
-      $CustomScriptsURL = "$BaseURL/wp-custom-scripts";
+      $custom_scripts_url = "$base_url/wp-custom-scripts";
   }
-  $CustomPagesURL = "$CustomScriptsURL/pages";
-  $CustomPagesPath = "$CustomScriptsPath/pages";
-  $custom_categories_path = "$CustomScriptsPath/categories";
-  $custom_categories_url = "$CustomScriptsURL/categories";
-  require("$CustomPagesPath/select_menu.php");
+  $custom_pages_url = "$custom_scripts_url/pages";
+  $custom_pages_path = "$custom_scripts_path/pages";
+  $custom_categories_path = "$custom_scripts_path/categories";
+  $custom_categories_url = "$custom_scripts_url/categories";
+  require("$custom_pages_path/select_menu.php");
   $page_uri = get_page_uri(get_the_ID());
 
-  if (is_file("$CustomScriptsPath/functions.php"))
+  if (is_file("$custom_scripts_path/functions.php"))
   {
-      include("$CustomScriptsPath/functions.php");
+      include("$custom_scripts_path/functions.php");
   }
   set_default_header_image_paths();
 
-  if (is_file("$CustomScriptsPath/footer.php"))
+  if (is_file("$custom_scripts_path/footer.php"))
   {
-      $custom_footer_script = "$CustomScriptsPath/footer.php";
+      $custom_footer_script = "$custom_scripts_path/footer.php";
   }
   else
   {
@@ -92,10 +92,10 @@ if (!is_file($site_path_defs_path))
   if (is_page())
   {
       $minimum_access_level = '';
-      if (is_file("$CustomPagesPath/init.php"))
+      if (is_file("$custom_pages_path/init.php"))
       {
           // Run any custom initialisation sequence
-          include("$CustomPagesPath/init.php");
+          include("$custom_pages_path/init.php");
       }
   
       // Move down the page hierarchy to the given address, matching various items along the way.
@@ -113,47 +113,47 @@ if (!is_file($site_path_defs_path))
           $uri_sub_path .= "/$key";
           $subpath = ltrim($uri_sub_path,'/');
           set_header_image_paths($subpath,'page');
-          if (is_file("$CustomPagesPath/$uri_sub_path/footer.php"))
+          if (is_file("$custom_pages_path/$uri_sub_path/footer.php"))
           {
               // Select custom footer script
-              $custom_footer_script = "$CustomPagesPath/$uri_sub_path/footer.php";
+              $custom_footer_script = "$custom_pages_path/$uri_sub_path/footer.php";
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/select_menu.php"))
+          if (is_file("$custom_pages_path/$uri_sub_path/select_menu.php"))
           {
               // Select menu
-              include("$CustomPagesPath/$uri_sub_path/select_menu.php");
+              include("$custom_pages_path/$uri_sub_path/select_menu.php");
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/styles.css"))
+          if (is_file("$custom_pages_path/$uri_sub_path/styles.css"))
           {
               // Add linked stylesheet
-              output_stylesheet_link($CustomPagesURL,$uri_sub_path);
+              output_stylesheet_link($custom_pages_url,$uri_sub_path);
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/inline-styles.css"))
+          if (is_file("$custom_pages_path/$uri_sub_path/inline-styles.css"))
           {
               // Add inline stylesheet
-              include_inline_stylesheet("$CustomPagesPath/$uri_sub_path/inline-styles.css");
+              include_inline_stylesheet("$custom_pages_path/$uri_sub_path/inline-styles.css");
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/authentication.php"))
+          if (is_file("$custom_pages_path/$uri_sub_path/authentication.php"))
           {
               // Set access level for user authentication
-              include("$CustomPagesPath/$uri_sub_path/authentication.php");
+              include("$custom_pages_path/$uri_sub_path/authentication.php");
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/metadata.php"))
+          if (is_file("$custom_pages_path/$uri_sub_path/metadata.php"))
           {
               // Include any meta tag variables
-              include("$CustomPagesPath/$uri_sub_path/metadata.php");
+              include("$custom_pages_path/$uri_sub_path/metadata.php");
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/favicon.png"))
+          if (is_file("$custom_pages_path/$uri_sub_path/favicon.png"))
           {
               // Add favicon link
               $favicon_loaded = true;
               $favicon_path = $uri_sub_path;
-              print("<link rel=\"icon\" href=\"$CustomPagesURL/$uri_sub_path/favicon.png?v=$link_version\" type=\"image/x-icon\" />\n");
+              print("<link rel=\"icon\" href=\"$custom_pages_url/$uri_sub_path/favicon.png?v=$link_version\" type=\"image/x-icon\" />\n");
           }
-          if (is_file("$CustomPagesPath/$uri_sub_path/init.php"))
+          if (is_file("$custom_pages_path/$uri_sub_path/init.php"))
           {
               // Run any custom initialisation sequence
-              include("$CustomPagesPath/$uri_sub_path/init.php");
+              include("$custom_pages_path/$uri_sub_path/init.php");
           }
       }
   }
@@ -187,7 +187,7 @@ if (!is_file($site_path_defs_path))
           {
               $uri_sub_path .= "/$tok";
               set_header_image_paths($tok,'category');
-              if (is_file("$CustomPagesPath/$tok/footer.php"))
+              if (is_file("$custom_pages_path/$tok/footer.php"))
               {
                   // Select custom footer script
                   $custom_footer_script = "$custom_categories_path/$tok/footer.php";
@@ -225,7 +225,7 @@ if (!is_file($site_path_defs_path))
       {
           $uri_sub_path .= "/$tok";
           set_header_image_paths($tok,'category');
-          if (is_file("$CustomPagesPath/$tok/footer.php"))
+          if (is_file("$custom_pages_path/$tok/footer.php"))
           {
               // Select custom footer script
               $custom_footer_script = "$custom_categories_path/$tok/footer.php";
@@ -263,7 +263,7 @@ if (!is_file($site_path_defs_path))
 
   if ((function_exists('GetAccessLevel')) && (isset($minimum_access_level)) && (GetAccessLevel() < $minimum_access_level))
   {
-      exit("<p>User authentication failed. Please return to the <a href=\"$BaseURL\">main site home page</a> and log back into the required facility.</p>");
+      exit("<p>User authentication failed. Please return to the <a href=\"$base_url\">main site home page</a> and log back into the required facility.</p>");
   }
 
 //================================================================================

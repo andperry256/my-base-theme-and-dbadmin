@@ -1,11 +1,11 @@
 <?php
 //==============================================================================
 
-// Variables $local_site_dir and $RelativePath must be set up beforehand
+// Variables $local_site_dir and $relative_path must be set up beforehand
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-require_once("$BaseDir/common_scripts/date_funct.php");
-require_once("$PrivateScriptsDir/mysql_connect.php");
-require("$CustomPagesPath/$RelativePath/db_funct.php");
+require_once("$base_dir/common_scripts/date_funct.php");
+require_once("$private_scripts_dir/mysql_connect.php");
+require("$custom_pages_path/$relative_path/db_funct.php");
 $db = admin_db_connect();
 $table = $_GET['table'];
 
@@ -34,7 +34,7 @@ if (isset($_POST['submitted']))
         $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
         $display_offset = mysqli_num_rows($query_result);
         $display_offset = floor($display_offset/$list_size) * $list_size;
-        header("Location: $BaseURL/$RelativePath/?-table=$table&-startoffset=$display_offset");
+        header("Location: $base_url/$relative_path/?-table=$table&-startoffset=$display_offset");
         exit;
     }
 }

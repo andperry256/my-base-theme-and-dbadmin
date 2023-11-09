@@ -8,23 +8,23 @@ if (session_status() ==  PHP_SESSION_NONE)
 
 $local_site_dir = $_GET['site'];
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-require_once("$PrivateScriptsDir/mysql_connect.php");
-$db = db_connect($AuthDBID);
+require_once("$private_scripts_dir/mysql_connect.php");
+$db = db_connect($auth_dbid);
 $username = $_POST['username'];
 $password = $_POST['password'];
-$UserAuthenticated = false;
-$where_clause = "$AuthDB_UsernameField=?";
+$user_authenticated = false;
+$where_clause = "$auth_db_username_field=?";
 $where_values = array('s',$username);
 if ((preg_match("/^[A-Z0-9.]*$/i", $username)) &&
-    ($row = mysqli_fetch_assoc(mysqli_select_query($db,$AuthDB_Table,'*',$where_clause,$where_values,''))))
+    ($row = mysqli_fetch_assoc(mysqli_select_query($db,$auth_db_table,'*',$where_clause,$where_values,''))))
 {
     if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd']))
     {
         // User authorised
         $_SESSION[SV_USER] = $username;
-        if ((isset($row[$AuthDB_AccessLevelField])) && (defined('SV_ACCESS_LEVEL')))
+        if ((isset($row[$auth_db_access_level_field])) && (defined('SV_ACCESS_LEVEL')))
         {
-            $_SESSION[SV_ACCESS_LEVEL] = $row[$AuthDB_AccessLevelField];
+            $_SESSION[SV_ACCESS_LEVEL] = $row[$auth_db_access_level_field];
         }
         header("Location: {$_GET['returnurl']}");
         exit;

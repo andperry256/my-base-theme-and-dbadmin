@@ -1,11 +1,11 @@
 <?php
 //==============================================================================
 
-global $FinanceReportDir;
-global $Location;
+global $finance_report_dir;
+global $location;
 $db = admin_db_connect();
 $csv_file = 'report_'.date('Ymd').'_'.date('His').'.csv';
-$ofp2 = fopen("$FinanceReportDir/$csv_file", "w");
+$ofp2 = fopen("$finance_report_dir/$csv_file", "w");
 fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
 print("<h1>Transaction Report</h1>\n");
 $account_exclusions = select_excluded_accounts('account');
@@ -336,7 +336,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     mysqli_query_normal($db,"ALTER TABLE report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
   
     // Create link to CSV report.
-    print("<p><a href=\"$BaseURL/admin_data/finances/$csv_file\" target=\"_blank\">CSV Report</a> (opens in new window)</p>\n");
+    print("<p><a href=\"$base_url/admin_data/finances/$csv_file\" target=\"_blank\">CSV Report</a> (opens in new window)</p>\n");
   
     // Print report
     $running_total = 0;

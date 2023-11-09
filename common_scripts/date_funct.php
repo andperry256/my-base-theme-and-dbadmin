@@ -10,9 +10,9 @@ if (is_file(__DIR__."../alt_date_funct.php"))
 {
     require(__DIR__."../alt_date_funct.php");
 }
-elseif( (isset($BaseDir)) &&  (is_file("$BaseDir/alt_date_funct.php")))
+elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php")))
 {
-    require("$BaseDir/alt_date_funct.php");
+    require("$base_dir/alt_date_funct.php");
 }
 
 //==============================================================================
@@ -21,9 +21,9 @@ if (!function_exists('DayName'))
 {
     function DayName($day)
     {
-        $Name = array("Sunday","Monday","Tuesday","Wednesday",
+        $name = array("Sunday","Monday","Tuesday","Wednesday",
                       "Thursday","Friday","Saturday");
-        return $Name[$day];
+        return $name[$day];
     }
 }
 
@@ -33,8 +33,8 @@ if (!function_exists('ShortDayName'))
 {
     function ShortDayName($day)
     {
-        $Name = array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
-        return $Name[$day];
+        $name = array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
+        return $name[$day];
     }
 }
 
@@ -42,20 +42,20 @@ if (!function_exists('ShortDayName'))
 
 if (!function_exists('DayNumber'))
 {
-    function DayNumber($Day)
+    function DayNumber($day)
     {
-        $Day = strtolower($Day);
-        $ShortName = array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
+        $day = strtolower($day);
+        $short_name = array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
                            "thu" => 4, "fri" => 5, "sat" => 6);
-        $LongName = array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
+        $long_name = array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
                           "thursday" => 4, "friday" => 5, "saturday" => 6);
-        if (isset($ShortName[$Day]))
+        if (isset($short_name[$day]))
         {
-            return $ShortName[$Day];
+            return $short_name[$day];
         }
-        elseif (isset($LongName[$Day]))
+        elseif (isset($long_name[$day]))
         {
-            return $LongName[$Day];
+            return $long_name[$day];
         }
         else
         {
@@ -70,10 +70,10 @@ if (!function_exists('MonthName'))
 {
     function MonthName($month)
     {
-        $Name = array("","January","February","March","April",
+        $name = array("","January","February","March","April",
                       "May","June","July","August","September",
                       "October","November","December");
-        return $Name[$month];
+        return $name[$month];
     }
 }
 
@@ -83,9 +83,9 @@ if (!function_exists('ShortMonthName'))
 {
     function ShortMonthName($month)
     {
-        $Name = array("","Jan","Feb","Mar","Apr","May","Jun",
+        $name = array("","Jan","Feb","Mar","Apr","May","Jun",
                       "Jul","Aug","Sep","Oct","Nov","Dec");
-        return $Name[$month];
+        return $name[$month];
     }
 }
 
@@ -96,21 +96,21 @@ if (!function_exists('MonthNumber'))
     function MonthNumber($month)
     {
         $month = strtolower($month);
-        $ShortName = array("jan" => 1, "feb" => 2, "mar" => 3,
+        $short_name = array("jan" => 1, "feb" => 2, "mar" => 3,
                            "apr" => 4, "may" => 5, "jun" => 6,
                            "jul" => 7, "aug" => 8, "sep" => 9,
                            "oct" => 10, "nov" => 11, "dec" => 12);
-        $LongName = array("january" => 1, "february" => 2, "march" => 3,
+        $long_name = array("january" => 1, "february" => 2, "march" => 3,
                           "april" => 4, "may" => 5, "june" => 6,
                           "july" => 7, "august" => 8, "september" => 9,
                           "october" => 10, "november" => 11, "december" => 12);
-        if (isset($ShortName[$month]))
+        if (isset($short_name[$month]))
         {
-            return $ShortName[$month];
+            return $short_name[$month];
         }
-        elseif (isset($LongName[$month]))
+        elseif (isset($long_name[$month]))
         {
-            return $LongName[$month];
+            return $long_name[$month];
         }
         else
         {
@@ -125,8 +125,8 @@ if (!function_exists('NonLeapYearDays'))
 {
     function NonLeapYearDays($month)
     {
-        $Days = array(0,31,28,31,30,31,30,31,31,30,31,30,31);
-        return $Days[$month];
+        $days = array(0,31,28,31,30,31,30,31,31,30,31,30,31);
+        return $days[$month];
     }
 }
 
@@ -136,8 +136,8 @@ if (!function_exists('LeapYearDays'))
 {
     function LeapYearDays($month)
     {
-        $Days = array(0,31,29,31,30,31,30,31,31,30,31,30,31);
-        return $Days[$month];
+        $days = array(0,31,29,31,30,31,30,31,31,30,31,30,31);
+        return $days[$month];
     }
 }
 
@@ -185,9 +185,9 @@ if (!function_exists('GregorianDoW'))
 {
     function GregorianDoW($day,$month,$year)
     {
-        $LeapYearMonthAdjust   = array(0,6,2,3,6,1,4,6,2,5,0,3,5);
-        $NonLeapYearMonthAdjust = array(0,0,3,3,6,1,4,6,2,5,0,3,5);
-        $GregorianCenturyAdjust = array(6,4,2,0);
+        $leap_year_month_adjust   = array(0,6,2,3,6,1,4,6,2,5,0,3,5);
+        $non_leap_year_month_adjust = array(0,0,3,3,6,1,4,6,2,5,0,3,5);
+        $gregorian_century_adjust = array(6,4,2,0);
     
         if (!checkdate((int)$month,(int)$day,(int)$year))
         {
@@ -196,9 +196,9 @@ if (!function_exists('GregorianDoW'))
         $result = floor((($year % 100) * 5) / 4);
         $result += $day;
         $result += (IsLeapYear($year))
-             ? $LeapYearMonthAdjust[$month]
-             : $NonLeapYearMonthAdjust[$month];
-        $result += $GregorianCenturyAdjust[floor(($year % 400) / 100)];
+             ? $leap_year_month_adjust[$month]
+             : $non_leap_year_month_adjust[$month];
+        $result += $gregorian_century_adjust[floor(($year % 400) / 100)];
         $result %= 7;
         return $result;
     }
@@ -253,37 +253,37 @@ if (!function_exists('StartWeekOfMonth'))
 {
     function StartWeekOfMonth($month,$year)
     {
-        $StartDoW = DMYToDoW(1,$month,$year);
-        if ($StartDoW == 0)
+        $start_do_w = DMYToDoW(1,$month,$year);
+        if ($start_do_w == 0)
         {
             // Month starts on a Sunday
-            $SoWYear = $year;
-            $SoWMonth = $month;
-            $SoWDay = 1;
+            $so_wyear = $year;
+            $so_wmonth = $month;
+            $so_wday = 1;
         }
         else
         {
             // Start of week is in previous month
             if ($month==1)
             {
-                $SoWYear = $year - 1;
-                $SoWMonth = 12;
+                $so_wyear = $year - 1;
+                $so_wmonth = 12;
             }
             else
             {
-                $SoWYear = $year;
-                $SoWMonth = $month - 1;
+                $so_wyear = $year;
+                $so_wmonth = $month - 1;
             }
-            if (IsLeapYear($SoWYear))
+            if (IsLeapYear($so_wyear))
             {
-                $SoWDay = LeapYearDays($SoWMonth) + 1 - $StartDoW;
+                $so_wday = LeapYearDays($so_wmonth) + 1 - $start_do_w;
             }
             else
             {
-                $SoWDay = NonLeapYearDays($SoWMonth) + 1 - $StartDoW;
+                $so_wday = NonLeapYearDays($so_wmonth) + 1 - $start_do_w;
             }
         }
-        return sprintf("%04d-%02d-%02d",$SoWYear,$SoWMonth,$SoWDay);
+        return sprintf("%04d-%02d-%02d",$so_wyear,$so_wmonth,$so_wday);
     }
 }
 
@@ -293,12 +293,12 @@ if (!function_exists('EndWeekOfMonth'))
 {
     function EndWeekOfMonth($month,$year)
     {
-        $LastDay = (IsLeapYear($year))
+        $last_day = (IsLeapYear($year))
             ? LeapYearDays($month)
             : NonLeapYearDays($month);
-        $EndDoW = DMYToDoW($LastDay,$month,$year);
-        $SoWDay = $LastDay - $EndDoW;
-        return sprintf("%04d-%02d-%02d",$year,$month,$SoWDay);
+        $end_do_w = DMYToDoW($last_day,$month,$year);
+        $so_wday = $last_day - $end_do_w;
+        return sprintf("%04d-%02d-%02d",$year,$month,$so_wday);
     }
 }
 
@@ -403,8 +403,8 @@ if (!function_exists('DateOfEaster'))
 {
     function DateOfEaster($year)
     {
-        $PaschalFullMoonMonth = array(0,4,4,3,4,3,4,4,3,4,4,3,4,4,3,4,3,4,4,3);
-        $PaschalFullMoonDay = array(0,14,3,23,11,31,18,8,28,16,5,25,13,2,22,10,30,17,7,27);
+        $paschal_full_moon_month = array(0,4,4,3,4,3,4,4,3,4,4,3,4,4,3,4,3,4,4,3);
+        $paschal_full_moon_day = array(0,14,3,23,11,31,18,8,28,16,5,25,13,2,22,10,30,17,7,27);
     
         if (($year < 1900) || ($year > 2099))
         {
@@ -412,9 +412,9 @@ if (!function_exists('DateOfEaster'))
         }
         else
         {
-            $GoldenNumber = ($year % 19) + 1;
-            $day = $PaschalFullMoonDay[$GoldenNumber];
-            $month = $PaschalFullMoonMonth[$GoldenNumber];
+            $golden_number = ($year % 19) + 1;
+            $day = $paschal_full_moon_day[$golden_number];
+            $month = $paschal_full_moon_month[$golden_number];
             $dayofweek = DMYToDoW($day, $month, $year);
             $day += (7 - $dayofweek);
             if ($day > 31)
@@ -490,20 +490,20 @@ if (!function_exists('StartOfTerm'))
     function StartOfTerm()
     {
         // Determine the start of the current school term.
-        $Today = TODAY_DATE;
-        $ThisYear = date('Y');
-        $Easter = DateOfEaster($ThisYear);
-        if ($Today >= "$ThisYear-09-01")
+        $today = TODAY_DATE;
+        $this_year = date('Y');
+        $easter = DateOfEaster($this_year);
+        if ($today >= "$this_year-09-01")
         {
-            return ("$ThisYear-09-01");
+            return ("$this_year-09-01");
         }
-        elseif ($Today >= $Easter)
+        elseif ($today >= $easter)
         {
-            return ($Easter);
+            return ($easter);
         }
         else
         {
-            return ("$ThisYear-01-01");
+            return ("$this_year-01-01");
         }
     }
 }
@@ -542,29 +542,29 @@ if (!function_exists('EndOfThisTerm'))
     function EndOfThisTerm()
     {
         // Determine the end of the current school term.
-        $Today = TODAY_DATE;
-        $ThisYear = date('Y');
-        $Easter = DateOfEaster($ThisYear);
-        if ($Today >= "$ThisYear-09-01")
+        $today = TODAY_DATE;
+        $this_year = date('Y');
+        $easter = DateOfEaster($this_year);
+        if ($today >= "$this_year-09-01")
         {
-            return ("$ThisYear-12-31");
+            return ("$this_year-12-31");
         }
-        elseif ($Today >= $Easter)
+        elseif ($today >= $easter)
         {
-            return ("$ThisYear-08-31");
+            return ("$this_year-08-31");
         }
         else
         {
-            $EasterDay = (int)substr($Easter,8,2);
-            if ($EasterDay == 1)
+            $easter_day = (int)substr($easter,8,2);
+            if ($easter_day == 1)
             {
-                $EndOfTerm = "$Year-03-31";
+                $end_of_term = "$year-03-31";
             }
             else
             {
-                $EndOfTerm = substr($Easter,0,8).sprintf("%02d",$EasterDay-1);
+                $end_of_term = substr($easter,0,8).sprintf("%02d",$easter_day-1);
             }
-            return ($EndOfTerm);
+            return ($end_of_term);
         }
     }
 }
@@ -576,32 +576,32 @@ if (!function_exists('EndOfNextTerm'))
     function EndOfNextTerm()
     {
         // Determine the end of the current school term.
-        $Today = TODAY_DATE;
-        $ThisYear = date('Y');
-        $NextYear = $ThisYear+1;
-        $Easter = DateOfEaster($ThisYear);
-        $NextEaster = DateOfEaster($ThisYear+1);
+        $today = TODAY_DATE;
+        $this_year = date('Y');
+        $next_year = $this_year+1;
+        $easter = DateOfEaster($this_year);
+        $next_easter = DateOfEaster($this_year+1);
     
-        if ($Today >= "$ThisYear-09-01")
+        if ($today >= "$this_year-09-01")
         {
-            $NextEasterDay = (int)substr($NextEaster,8,2);
-            if ($NextEasterDay == 1)
+            $next_easter_day = (int)substr($next_easter,8,2);
+            if ($next_easter_day == 1)
             {
-                $EndOfTerm = "$NextYear-03-31";
+                $end_of_term = "$next_year-03-31";
             }
             else
             {
-                $EndOfTerm = substr($NextEaster,0,8).sprintf("%02d",$NextEasterDay-1);
+                $end_of_term = substr($next_easter,0,8).sprintf("%02d",$next_easter_day-1);
             }
-            return ($EndOfTerm);
+            return ($end_of_term);
         }
-        elseif ($Today >= $Easter)
+        elseif ($today >= $easter)
         {
-            return ("$ThisYear-12-31");
+            return ("$this_year-12-31");
         }
         else
         {
-            return ("$ThisYear-08-31");
+            return ("$this_year-08-31");
         }
     }
 }

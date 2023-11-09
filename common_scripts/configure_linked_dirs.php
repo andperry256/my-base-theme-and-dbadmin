@@ -9,11 +9,11 @@ script. On entry the following conditions must be met:-
 */
 //==============================================================================
 
-if (!isset($BaseDir))
+if (!isset($base_dir))
 {
     exit("Path definitions file not found");
 }
-require_once("$BaseDir/keycode.php");
+require_once("$base_dir/keycode.php");
 
 if (isset($argc))
 {
@@ -31,7 +31,7 @@ $rewrite_rules = array();
 foreach ($dirs as $dir)
 {
     print("$eol*** Processing $dir ***$eol");
-    $dir_path = "$FilesSubdomainDir/$dir";
+    $dir_path = "$files_subdomain_dir/$dir";
     $dirlist = scandir($dir_path);
     foreach ($dirlist as $file)
     {

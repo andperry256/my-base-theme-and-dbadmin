@@ -25,22 +25,22 @@ if (count($argv) < 4)
 }
 $cpuser = $argv[1];
 $local_site_dir = $argv[2];
-$RelativePath = $argv[3];
-$OnlineRootDir = "/home/$cpuser";
-$RootDir = (is_dir($OnlineRootDir))
-    ? $OnlineRootDir
+$relative_path = $argv[3];
+$online_root_dir = "/home/$cpuser";
+$root_dir = (is_dir($online_root_dir))
+    ? $online_root_dir
     : "/media/Data/Users/Common/Documents/WebSite/Sites/$local_site_dir";
 
 if (is_file("/Config/linux_pathdefs.php"))
 {
     // Local Server
     require_once("/Config/linux_pathdefs.php");
-    require_once("$WWWRootDir/Sites/$local_site_dir/public_html/path_defs.php");
+    require_once("$www_root_dir/Sites/$local_site_dir/public_html/path_defs.php");
 }
-elseif (is_file("$OnlineRootDir/public_html/path_defs.php"))
+elseif (is_file("$online_root_dir/public_html/path_defs.php"))
 {
     // Online Server
-    require_once("$OnlineRootDir/public_html/path_defs.php");
+    require_once("$online_root_dir/public_html/path_defs.php");
 }
 else
 {
@@ -68,20 +68,20 @@ foreach($argv as $key => $value)
 }
 
 // Run the maintenance
-require("$PrivateScriptsDir/mysql_connect.php");
-require("$BaseDir/common_scripts/dbadmin/widget_types.php");
-require("$BaseDir/common_scripts/dbadmin/table_funct.php");
-require("$BaseDir/common_scripts/dbadmin/record_funct.php");
-require("$BaseDir/common_scripts/dbadmin/view_funct.php");
-require("$BaseDir/common_scripts/dbadmin/update_table_data.php");
-if (is_file("$CustomPagesPath/$RelativePath/db_funct.php"))
+require("$private_scripts_dir/mysql_connect.php");
+require("$base_dir/common_scripts/dbadmin/widget_types.php");
+require("$base_dir/common_scripts/dbadmin/table_funct.php");
+require("$base_dir/common_scripts/dbadmin/record_funct.php");
+require("$base_dir/common_scripts/dbadmin/view_funct.php");
+require("$base_dir/common_scripts/dbadmin/update_table_data.php");
+if (is_file("$custom_pages_path/$relative_path/db_funct.php"))
 {
-    require("$CustomPagesPath/$RelativePath/db_funct.php");
+    require("$custom_pages_path/$relative_path/db_funct.php");
     update_table_data($update_charsets,$optimise,$purge);
 }
 else
 {
-    exit("File $CustomPagesPath/$RelativePath/db_funct.php not found.\n");
+    exit("File $custom_pages_path/$relative_path/db_funct.php not found.\n");
 }
 
 //==============================================================================

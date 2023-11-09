@@ -23,13 +23,13 @@ else
 if (isset($_GET['subpath']))
 {
     $sub_path = "db-".$_GET['subpath'];
-    $file_path = "$CustomPagesPath/dbadmin/$sub_path/tables/$table/$table.php";
-    $RelativePath = "dbadmin/$sub_path";
+    $file_path = "$custom_pages_path/dbadmin/$sub_path/tables/$table/$table.php";
+    $relative_path = "dbadmin/$sub_path";
 }
 else
 {
-    $file_path = "$CustomPagesPath/dbadmin/tables/$table/$table.php";
-    $RelativePath = "dbadmin";
+    $file_path = "$custom_pages_path/dbadmin/tables/$table/$table.php";
+    $relative_path = "dbadmin";
 }
 if (is_file($file_path))
 {

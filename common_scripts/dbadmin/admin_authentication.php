@@ -3,18 +3,18 @@
 
 if (!function_exists('db_connect'))
 {
-    require_once("$PrivateScriptsDir/mysql_connect.php");
+    require_once("$private_scripts_dir/mysql_connect.php");
 }
-require_once("$DBAdminDir/common_funct.php");
-$db = db_connect($AuthDBID);
+require_once("$db_admin_dir/common_funct.php");
+$db = db_connect($auth_dbid);
 
 // Determine whether access is internal to the local network
 $remote_ip = $_SERVER['REMOTE_ADDR'];
-if (($Location == 'local') && (isset($IP_Subnet_Addr)) && (substr($_SERVER['REMOTE_ADDR'],0,strlen($IP_Subnet_Addr)) == $IP_Subnet_Addr))
+if (($location == 'local') && (isset($ip_subnet_addr)) && (substr($_SERVER['REMOTE_ADDR'],0,strlen($ip_subnet_addr)) == $ip_subnet_addr))
 {
     $local_access = true;
 }
-elseif (($Location == 'local') && (isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr))
+elseif (($location == 'local') && (isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr))
 {
     $local_access = true;
 }
@@ -23,18 +23,18 @@ else
     $local_access = false;
 }
 
-if (($Location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
+if (($location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
 {
     /*
     Access is internal to the local network and there is no logged on user
     but with no active logout (i.e. where $_SESSION[SV_USER] is set but empty).
     Automatically log on as the default user.
     */
-    if (!isset($DefaultLocalUser))
+    if (!isset($default_local_user))
     {
-        $DefaultLocalUser = 'local';
+        $default_local_user = 'local';
     }
-    update_session_var(SV_USER,$DefaultLocalUser);
+    update_session_var(SV_USER,$default_local_user);
     if (defined('SV_ACCESS_LEVEL'))
     {
         update_session_var(SV_ACCESS_LEVEL,9);
@@ -44,11 +44,11 @@ if (($Location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
 if ((session_var_is_set(SV_USER)) && (!empty(get_session_var(SV_USER))))
 {
     // User is logged on
-    $UserAuthenticated = true;
+    $user_authenticated = true;
 }
 else
 {
-    $UserAuthenticated = false;
+    $user_authenticated = false;
 }
 
 // Process result of login form
@@ -58,7 +58,7 @@ if (isset($_GET['noauth']))
 }
 
 // Output login form is no user authenicated
-if (!$UserAuthenticated):
+if (!$user_authenticated):
 ?>
   <style>
     p,td {
@@ -66,7 +66,7 @@ if (!$UserAuthenticated):
       font-size: 12pt;
     }
   </style>
-  <form method="post" action="<?php echo "$DBAdminURL/login_action.php?site=$local_site_dir&returnurl=".cur_url_par(); ?>">
+  <form method="post" action="<?php echo "$db_admin_url/login_action.php?site=$local_site_dir&returnurl=".cur_url_par(); ?>">
     <fieldset>
       <br />
       <table width="500" cellpadding=5><tr>

@@ -4,23 +4,23 @@
 The following variables are pre-defined as required:-
 
 $dbid (mandatory) - Database ID for the 'db_connect' function
-$DisplayCounter (optional) - Indicates that the counter is to be displayed
+$display_counter (optional) - Indicates that the counter is to be displayed
                                 on the page.
-$StandaloneCounter (optional) - Indicates that the counter is being
+$standalone_counter (optional) - Indicates that the counter is being
                                 displayed on the "web site index" page
                                 rather than its native website.
-$MultilingualDates (optional) - Indicates that a multi-lingual version of
+$multilingual_dates (optional) - Indicates that a multi-lingual version of
                                 the 'ShortMonthName' function is in use.
 */
 //==============================================================================
 
 if (!function_exists('DayName'))
 {
-    require("$BaseDir/common_scripts/date_funct.php");
+    require("$base_dir/common_scripts/date_funct.php");
 }
 if (!function_exists('db_connect'))
 {
-    require("$PrivateScriptsDir/mysql_connect.php");
+    require("$private_scripts_dir/mysql_connect.php");
 }
 $db = db_connect($dbid);
 
@@ -120,7 +120,7 @@ if ($counter_enabled)
         exit;
     }
 
-    if (((!isset($StandaloneCounter)) || (!$StandaloneCounter)) && (!$is_bot))
+    if (((!isset($standalone_counter)) || (!$standalone_counter)) && (!$is_bot))
     {
         $ip_addr = $_SERVER['REMOTE_ADDR'];
         mysqli_query($db,"DELETE FROM counter_hits WHERE date<'$today_date'");
@@ -146,7 +146,7 @@ if ($counter_enabled)
     $daily_average = sprintf("%01.1f",$counter_val/$days_counting);
     mysqli_query($db,"UPDATE counter_info SET value='$daily_average' WHERE id='$end_year"."_daily'");
 
-    if ((isset($StandaloneCounter)) && ($StandaloneCounter))
+    if ((isset($standalone_counter)) && ($standalone_counter))
     {
         // Generate 'standalone counter' display (i.e. not on native web page).
         $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date'");
@@ -163,7 +163,7 @@ if ($counter_enabled)
     }
     else
     {
-        if (($DisplayCounter) || (isset($_GET['showcount'])))
+        if (($display_counter) || (isset($_GET['showcount'])))
         {
             // Generate normal counter display (i.e. on native web page).
             print("You are visitor number ");
@@ -172,7 +172,7 @@ if ($counter_enabled)
                 $counter_val = $own_counter;
             }
             print(sprintf("<span class=\"counter\">&nbsp;%05d&nbsp;</span>",$counter_val));
-            if ((isset($MultilingualDates)) && ($MultilingualDates))
+            if ((isset($multilingual_dates)) && ($multilingual_dates))
             {
                 print(sprintf("<br />since %02d %s $start_year",$start_day, MonthName($start_month,'en')));
             }

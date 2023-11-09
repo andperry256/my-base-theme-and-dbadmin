@@ -11,13 +11,13 @@ elseif (is_dir('/media/Data'))
     exit("Site not specified");
 }
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-if (!is_dir($BaseDir))
+if (!is_dir($base_dir))
 {
     exit("Site directory not found\n");
 }
-if (is_file("$BaseDir/last_preset_link_version.php"))
+if (is_file("$base_dir/last_preset_link_version.php"))
 {
-    include("$BaseDir/last_preset_link_version.php");
+    include("$base_dir/last_preset_link_version.php");
 }
 if (!isset($last_preset_link_version))
 {
@@ -43,7 +43,7 @@ else
         $last_preset_link_version = "$today_date-$link_version_seq";
     }
 }
-$ofp = fopen("$BaseDir/last_preset_link_version.php",'w');
+$ofp = fopen("$base_dir/last_preset_link_version.php",'w');
 fprintf($ofp,"<?php\n");
 fprintf($ofp,"  // Update this variable to force theme stylesheets and images to be reloaded in cache.\n");
 fprintf($ofp,"  // Set it to the date in format 'yymmdd' with an additional suffix if multiple versions are needed on a single day.\n");
@@ -53,7 +53,7 @@ fprintf($ofp,"?>\n");
 fclose($ofp);
 print("<p>Last preset link version set to <em>$last_preset_link_version</em></p>");
 print("<p>Site =  <em>$local_site_dir</em></p>");
-print("<p>Location =  <em>$Location</em></p>");
+print("<p>Location =  <em>$location</em></p>");
 
 //==============================================================================
 ?>

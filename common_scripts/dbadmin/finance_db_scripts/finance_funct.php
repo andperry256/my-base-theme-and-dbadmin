@@ -489,7 +489,7 @@ function copy_transaction($account,$seq_no,$new_date)
 
 function record_scheduled_transaction($account,$seq_no)
 {
-    global $DBAdminURL, $local_site_dir, $FinanceDBId;
+    global $db_admin_url, $local_site_dir, $finance_db_id;
     $db = admin_db_connect();
     $where_clause = "account=? AND seq_no=? AND sched_freq<>'#' and sched_count<>0";
     $where_values = array('s',$account,'i',$seq_no);
@@ -553,7 +553,7 @@ function record_scheduled_transaction($account,$seq_no)
         // Send e-mail alert if required
         if (!empty($row['email_alert_id']))
         {
-            $url = "$DBAdminURL/finance_db_scripts/send_email_alert.php";
+            $url = "$db_admin_url/finance_db_scripts/send_email_alert.php";
             $url .= "?site=$local_site_dir&recid={$row['email_alert_id']}&dt={$row['date']}";
             if ($row['debit_amount'] > 0)
             {
@@ -639,8 +639,8 @@ function select_excluded_funds($field_name)
 
 function initialise_archive_table_data($db)
 {
-    global $CustomPagesPath;
-    global $RelativePath;
+    global $custom_pages_path;
+    global $relative_path;
     $dbname = admin_db_name();
     $directory_created = false;
     $query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname`");
@@ -649,11 +649,11 @@ function initialise_archive_table_data($db)
         $table = $row["Tables_in_$dbname"];
         if (substr($table,0,9) == 'archived_')
         {
-            if (!is_dir("$CustomPagesPath/$RelativePath/tables/$table"))
+            if (!is_dir("$custom_pages_path/$relative_path/tables/$table"))
             {
                 // Create directory and class script for the table.
-                mkdir("$CustomPagesPath/$RelativePath/tables/$table",0755);
-                $ofp = fopen("$CustomPagesPath/$RelativePath/tables/$table/$table.php",'w');
+                mkdir("$custom_pages_path/$relative_path/tables/$table",0755);
+                $ofp = fopen("$custom_pages_path/$relative_path/tables/$table/$table.php",'w');
                 fprintf($ofp,"<?php class tables_$table {} ?>\n");
                 fclose($ofp);
                 $directory_created = true;

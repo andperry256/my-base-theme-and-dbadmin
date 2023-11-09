@@ -10,7 +10,7 @@
 ?>
 <p><strong>WARNING</strong> - You are editing the main WordPress database. Please do so with caution!!<p>
   <ul>
-    <li><a href="<?php echo $BaseURL; ?>/wp-admin" target="_blank">Wordpress Dashboard</a></li>
+    <li><a href="<?php echo $base_url; ?>/wp-admin" target="_blank">Wordpress Dashboard</a></li>
   </ul>
 <div class="horizontal-divide">&nbsp;</div>
 <h2>Tables/Views</h2>

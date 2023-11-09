@@ -9,7 +9,7 @@ if ((isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER['
     exit("Authentication Failure");
 }
 print("<p>Setting directory and file permissions ...</p>\n");
-$command = "$RootDir/maintenance/set_php_file_perms_$Location";
+$command = "$root_dir/maintenance/set_php_file_perms_$location";
 exec($command);
 print("<p>Operation completed</p>\n");
 

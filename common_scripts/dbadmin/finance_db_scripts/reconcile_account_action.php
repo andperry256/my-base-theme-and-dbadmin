@@ -2,14 +2,14 @@
 $local_site_dir = $_POST['site'];
 $account = $_POST['account'];
 $account_type = $_POST['account_type'];
-$RelativePath = $_POST['relpath'];
+$relative_path = $_POST['relpath'];
 $bank_transaction = $_POST['bank_transaction'];
 $account_transaction = $_POST['account_transaction'];
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-require("$PrivateScriptsDir/mysql_connect.php");
-require("$BaseDir/common_scripts/date_funct.php");
-require("$DBAdminDir/common_funct.php");
-require("$CustomPagesPath/$RelativePath/db_funct.php");
+require("$private_scripts_dir/mysql_connect.php");
+require("$base_dir/common_scripts/date_funct.php");
+require("$db_admin_dir/common_funct.php");
+require("$custom_pages_path/$relative_path/db_funct.php");
 require("finance_funct.php");
 $db = finance_db_connect();
 
@@ -37,8 +37,8 @@ if ((substr($bank_transaction,0,6) == 'IMPORT') && ($account_transaction == 'IMP
     $statement_date = substr($bank_transaction,7);
     $import_data = array();
     $import_data = empty($statement_date)
-        ? file("$BankImportDir/Account_$account.csv")
-        : file("$BankImportDir/Account_$account"."_$statement_date.csv");
+        ? file("$bank_import_dir/Account_$account.csv")
+        : file("$bank_import_dir/Account_$account"."_$statement_date.csv");
     $first_line_skipped = false;
     foreach ($import_data as $line)
     {
@@ -131,7 +131,7 @@ elseif ($account_transaction == 'NEW')
         $primary_keys['account'] = $account;
         $primary_keys['seq_no'] = $seq_no;
         $record_id = encode_record_id($primary_keys);
-        header("Location: $BaseURL/$RelativePath/?-table=_view_account_$account&-action=edit&-recordid=$record_id");
+        header("Location: $base_url/$relative_path/?-table=_view_account_$account&-action=edit&-recordid=$record_id");
         exit;
     }
 }
@@ -206,6 +206,6 @@ else
     }
 }
 $message = urlencode($user_message);
-header("Location: $BaseURL/$RelativePath/?-action=reconcile_account&-account=$account&message=$message");
+header("Location: $base_url/$relative_path/?-action=reconcile_account&-account=$account&message=$message");
 exit;
 ?>

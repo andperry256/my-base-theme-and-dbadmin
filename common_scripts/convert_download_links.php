@@ -3,7 +3,7 @@
 
 function convert_download_links($content)
 {
-    global $BaseURL, $FilesSubdomainURL, $DownloadLinksURL;
+    global $base_url, $files_subdomain_url, $download_links_url;
     $subdir = '';
     $content_lines = explode("\n",$content);
   
@@ -39,7 +39,7 @@ function convert_download_links($content)
                 $pos2 += 1;
                 $path = urlencode("$subdir/$filename");
                 $description = trim(substr($line,$pos2,$pos3-$pos2));
-                $line = substr($line,0,$pos0)."<a href=\"$FilesSubdomainURL/download.php?path=$path\">$description</a>".substr($line,$pos3+5);
+                $line = substr($line,0,$pos0)."<a href=\"$files_subdomain_url/download.php?path=$path\">$description</a>".substr($line,$pos3+5);
             }
         }
     
@@ -59,7 +59,7 @@ function convert_download_links($content)
                 $pos2 += 1;
                 $path = "$subdir/$filename";
                 $description = trim(substr($line,$pos2,$pos3-$pos2));
-                $line = substr($line,0,$pos0)."<a href=\"$DownloadLinksURL/$path\">$description</a>".substr($line,$pos3+5);
+                $line = substr($line,0,$pos0)."<a href=\"$download_links_url/$path\">$description</a>".substr($line,$pos3+5);
             }
         }
     
@@ -79,7 +79,7 @@ function convert_download_links($content)
                 $pos2 += 1;
                 $path = "$subdir/$filename";
                 $description = trim(substr($line,$pos2,$pos3-$pos2));
-                $line = substr($line,0,$pos0)."<a href=\"$DownloadLinksURL/$path\" target=\"_blank\">$description</a>".substr($line,$pos3+5);
+                $line = substr($line,0,$pos0)."<a href=\"$download_links_url/$path\" target=\"_blank\">$description</a>".substr($line,$pos3+5);
             }
         }
     

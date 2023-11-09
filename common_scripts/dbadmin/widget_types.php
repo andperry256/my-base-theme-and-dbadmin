@@ -9,7 +9,7 @@
 */
 //==============================================================================
 
-$WidgetTypes = array (
+$widget_types = array (
   'auto-increment' => false,
   'checkbox' => false,
   'checklist' => false,

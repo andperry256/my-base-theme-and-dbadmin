@@ -253,7 +253,7 @@ class tables_transactions
   
     function afterSave($record)
     {
-        global $BaseURL, $RelativePath;
+        global $base_url, $relative_path;
     
         $db = admin_db_connect();
         $action = $record->action;
@@ -614,7 +614,7 @@ class tables_transactions
             if ((!headers_sent()) && ($action != 'update') && ($action != 'copy'))
             {
                 $record_id = encode_record_id($primary_keys);
-                header("Location: $BaseURL/$RelativePath/?-action=edit&-table=$table&-recordid=$record_id&summary");
+                header("Location: $base_url/$relative_path/?-action=edit&-table=$table&-recordid=$record_id&summary");
                 exit;
             }
         }

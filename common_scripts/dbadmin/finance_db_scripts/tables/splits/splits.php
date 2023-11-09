@@ -67,7 +67,7 @@ class tables_splits
   
     function afterSave($record)
     {
-        global $BaseURL, $RelativePath;
+        global $base_url, $relative_path;
     
         $db = admin_db_connect();
         $action = $record->action;
@@ -240,7 +240,7 @@ class tables_splits
             $transaction_pks['account'] = $account;
             $transaction_pks['seq_no'] = $transact_seq_no;
             $record_id = encode_record_id($transaction_pks);
-            header("Location: $BaseURL/$RelativePath/?-action=edit&-table=_view_account_$account&-recordid=$record_id&summary");
+            header("Location: $base_url/$relative_path/?-action=edit&-table=_view_account_$account&-recordid=$record_id&summary");
             exit;
         }
     }

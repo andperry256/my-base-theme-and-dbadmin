@@ -5,11 +5,11 @@ require("classes.php");
 require("functions.php");
 require("datepicker_include.php");
 require("widget_types.php");
-require("$RootDir/maintenance/db_master_location.php");
+require("$root_dir/maintenance/db_master_location.php");
 $return_url = cur_url_par();
 $dummy = '{';  // To remove false positive from syntax checker
-//print("<script type=\"text/javascript\" src=\"$DBAdminURL/form_funct.js\"></script>\n");
-include_inline_javascript("$DBAdminDir/form_funct.js");
+//print("<script type=\"text/javascript\" src=\"$db_admin_url/form_funct.js\"></script>\n");
+include_inline_javascript("$db_admin_dir/form_funct.js");
 
 //==============================================================================
 ?>
@@ -17,11 +17,11 @@ include_inline_javascript("$DBAdminDir/form_funct.js");
   // Functions to select desktop/mobile mode
   function selectDesktopMode()
   {
-    window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
+    window.location.href = "<?php echo "$db_admin_url/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
   }
   function selectMobileMode()
   {
-    window.location.href = "<?php echo "$DBAdminURL/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
+    window.location.href = "<?php echo "$db_admin_url/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
   }
 </script>
 <?php if (get_session_var('theme_mode') == 'dark'): ?>
@@ -41,25 +41,25 @@ include_inline_javascript("$DBAdminDir/form_funct.js");
 
 function display_sidebar_content()
 {
-    global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath;
+    global $custom_pages_path,$custom_pages_url,$base_url,$relative_path;
     $db = admin_db_connect();
   
-    if (is_file("$CustomPagesPath/$RelativePath/page_logo.php"))
+    if (is_file("$custom_pages_path/$relative_path/page_logo.php"))
     {
-        include("$CustomPagesPath/$RelativePath/page_logo.php");
+        include("$custom_pages_path/$relative_path/page_logo.php");
     }
-    elseif (is_file("$CustomPagesPath/$RelativePath/page_logo.png"))
+    elseif (is_file("$custom_pages_path/$relative_path/page_logo.png"))
     {
-        print("<a href=\"$BaseURL/$RelativePath\"><img src=\"$CustomPagesURL/$RelativePath/page_logo.png\" /></a>\n");
+        print("<a href=\"$base_url/$relative_path\"><img src=\"$custom_pages_url/$relative_path/page_logo.png\" /></a>\n");
     }
-    elseif (is_file("$CustomPagesPath/$RelativePath/page_logo.jpg"))
+    elseif (is_file("$custom_pages_path/$relative_path/page_logo.jpg"))
     {
-        print("<a href=\"$BaseURL/$RelativePath\"><img src=\"$CustomPagesURL/$RelativePath/page_logo.jpg\" /></a>\n");
+        print("<a href=\"$base_url/$relative_path\"><img src=\"$custom_pages_url/$relative_path/page_logo.jpg\" /></a>\n");
     }
-    print("<p class=\"sidebar-item\"><a href=\"$BaseURL/$RelativePath/?-action=main\">Main Page</a>");
-    if (is_file("$CustomPagesPath/$RelativePath/custom_sidebar.php"))
+    print("<p class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=main\">Main Page</a>");
+    if (is_file("$custom_pages_path/$relative_path/custom_sidebar.php"))
     {
-        require("$CustomPagesPath/$RelativePath/custom_sidebar.php");
+        require("$custom_pages_path/$relative_path/custom_sidebar.php");
     }
     else
     {
@@ -76,7 +76,7 @@ function display_sidebar_content()
             if (!empty($link))
             {
                 // Sidebar item is a custom link
-                print("<tr><td class=\"sidebar-item\"><a href=\"$CustomPagesURL/$RelativePath/$link\"");
+                print("<tr><td class=\"sidebar-item\"><a href=\"$custom_pages_url/$relative_path/$link\"");
                 if ($row['new_window'])
                 {
                       print(" target=\"_blank\"");
@@ -86,7 +86,7 @@ function display_sidebar_content()
             elseif ((!empty($action_name)) || (!empty($table_name)))
             {
                 // Sidebar item is an action and/or table reference
-                print("<tr><td class=\"sidebar-item\"><a href=\"$BaseURL/$RelativePath/?");
+                print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?");
                 if (!empty($action_name))
                 {
                     print("-action=$action_name");
@@ -115,8 +115,8 @@ function display_sidebar_content()
 
 function display_mobile_close_sidebar_button()
 {
-    global $BaseURL,$RelativePath;
-    $return_url = "$BaseURL/$RelativePath";
+    global $base_url,$relative_path;
+    $return_url = "$base_url/$relative_path";
     $par_processed = false;
     foreach ($_GET as $key => $value)
     {
@@ -142,7 +142,7 @@ function display_mobile_close_sidebar_button()
 
 function display_main_content($mode)
 {
-    global $CustomPagesPath,$CustomPagesURL,$BaseURL,$RelativePath, $AltIncludePath;
+    global $custom_pages_path,$custom_pages_url,$base_url,$relative_path, $alt_include_path;
     $db = admin_db_connect();
   
     // Process the URL parameters
@@ -179,23 +179,23 @@ function display_main_content($mode)
     if ((!isset($action)) || ((isset($action)) && ($action == 'home')))
     {
         // No action specified so open the default page
-        if (is_file("$CustomPagesPath/$RelativePath/actions/home.php"))
+        if (is_file("$custom_pages_path/$relative_path/actions/home.php"))
         {
-            include("$CustomPagesPath/$RelativePath/actions/home.php");
+            include("$custom_pages_path/$relative_path/actions/home.php");
         }
-        elseif (is_file("$CustomPagesPath/$RelativePath/actions/main.php"))
+        elseif (is_file("$custom_pages_path/$relative_path/actions/main.php"))
         {
             output_page_header();
-            include("$CustomPagesPath/$RelativePath/actions/main.php");
+            include("$custom_pages_path/$relative_path/actions/main.php");
         }
-        elseif (is_file("$AltIncludePath/actions/home.php"))
+        elseif (is_file("$alt_include_path/actions/home.php"))
         {
-            include("$AltIncludePath/actions/home.php");
+            include("$alt_include_path/actions/home.php");
         }
-        elseif (is_file("$AltIncludePath/actions/main.php"))
+        elseif (is_file("$alt_include_path/actions/main.php"))
         {
             output_page_header();
-            include("$AltIncludePath/actions/main.php");
+            include("$alt_include_path/actions/main.php");
         }
     }
     elseif (isset($action))
@@ -217,23 +217,23 @@ function display_main_content($mode)
         switch ($action)
         {
             case 'list':
-              if ((is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php")) &&
+              if ((is_file("$custom_pages_path/$relative_path/tables/$table/$table.php")) &&
                   (!class_exists ("tables_$table",false)))
               {
-                  require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
+                  require("$custom_pages_path/$relative_path/tables/$table/$table.php");
               }
-              elseif ((is_file("$AltIncludePath/tables/$table/$table.php")) &&
+              elseif ((is_file("$alt_include_path/tables/$table/$table.php")) &&
                       (!class_exists ("tables_$table",false)))
               {
-                  require("$AltIncludePath/tables/$table/$table.php");
+                  require("$alt_include_path/tables/$table/$table.php");
               }
-              if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_list.php"))
+              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_list.php"))
               {
-                  require("$CustomPagesPath/$RelativePath/tables/$table/custom_list.php");
+                  require("$custom_pages_path/$relative_path/tables/$table/custom_list.php");
               }
-              elseif (is_file("$AltIncludePath/tables/$base_table/custom_list.php"))
+              elseif (is_file("$alt_include_path/tables/$base_table/custom_list.php"))
               {
-                  require("$AltIncludePath/tables/$base_table/custom_list.php");
+                  require("$alt_include_path/tables/$base_table/custom_list.php");
               }
               else
               {
@@ -244,13 +244,13 @@ function display_main_content($mode)
               break;
       
             case 'edit':
-              if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_edit.php"))
+              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_edit.php"))
               {
-                  require("$CustomPagesPath/$RelativePath/tables/$table/custom_edit.php");
+                  require("$custom_pages_path/$relative_path/tables/$table/custom_edit.php");
               }
-              elseif (is_file("$AltIncludePath/tables/$base_table/custom_edit.php"))
+              elseif (is_file("$alt_include_path/tables/$base_table/custom_edit.php"))
               {
-                  require("$AltIncludePath/tables/$base_table/custom_edit.php");
+                  require("$alt_include_path/tables/$base_table/custom_edit.php");
               }
               else
               {
@@ -260,13 +260,13 @@ function display_main_content($mode)
               break;
       
             case 'new':
-              if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_new.php"))
+              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_new.php"))
               {
-                  require("$CustomPagesPath/$RelativePath/tables/$table/custom_new.php");
+                  require("$custom_pages_path/$relative_path/tables/$table/custom_new.php");
               }
-              elseif (is_file("$AltIncludePath/tables/$base_table/custom_new.php"))
+              elseif (is_file("$alt_include_path/tables/$base_table/custom_new.php"))
               {
-                  require("$AltIncludePath/tables/$base_table/custom_new.php");
+                  require("$alt_include_path/tables/$base_table/custom_new.php");
               }
               else
               {
@@ -280,13 +280,13 @@ function display_main_content($mode)
               break;
       
             case 'view':
-              if (is_file("$CustomPagesPath/$RelativePath/tables/$table/custom_view.php"))
+              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_view.php"))
               {
-                  require("$CustomPagesPath/$RelativePath/tables/$table/custom_view.php");
+                  require("$custom_pages_path/$relative_path/tables/$table/custom_view.php");
               }
-              elseif (is_file("$AltIncludePath/tables/$base_table/custom_view.php"))
+              elseif (is_file("$alt_include_path/tables/$base_table/custom_view.php"))
               {
-                  require("$AltIncludePath/tables/$base_table/custom_view.php");
+                  require("$alt_include_path/tables/$base_table/custom_view.php");
               }
               else
               {
@@ -299,7 +299,7 @@ function display_main_content($mode)
               print("<h1>Update Table Data</h1>\n");
               print("<p><strong>N.B.</strong>This operation will cause a bulk database update.");
               print(" Ticking one or both of the options below may cause adverse performace in web mode and may therefore need to be reserved for command line mode.</p>\n");
-              print("<form method=\"post\" action=\"$BaseURL/$RelativePath/?-action=update_table_data2\">\n");
+              print("<form method=\"post\" action=\"$base_url/$relative_path/?-action=update_table_data2\">\n");
               print("<p><input type=\"checkbox\" name=\"update_charsets\">&nbsp;&nbsp;Update charsets and collation</p>\n");
               print("<p><input type=\"checkbox\" name=\"optimise\">&nbsp;&nbsp;Optimise tables</p>\n");
               print("<input type=\"submit\" value=\"Continue\">\n");
@@ -316,7 +316,7 @@ function display_main_content($mode)
             case 'renumber_records1':
               print("<h1>Renumber Records</h1>\n");
               print("<p>This operation will cause a bulk database update.</p>\n");
-              print("<p><a href=\"$BaseURL/$RelativePath/?-action=renumber_records2\"><button>Continue</button></a></p>\n");
+              print("<p><a href=\"$base_url/$relative_path/?-action=renumber_records2\"><button>Continue</button></a></p>\n");
               break;
       
             case 'renumber_records2':
@@ -339,13 +339,13 @@ function display_main_content($mode)
               break;
       
             default:
-              if (is_file("$CustomPagesPath/$RelativePath/actions/$action.php"))
+              if (is_file("$custom_pages_path/$relative_path/actions/$action.php"))
               {
-                  include("$CustomPagesPath/$RelativePath/actions/$action.php");
+                  include("$custom_pages_path/$relative_path/actions/$action.php");
               }
-              elseif (is_file("$AltIncludePath/actions/$action.php"))
+              elseif (is_file("$alt_include_path/actions/$action.php"))
               {
-                  include("$AltIncludePath/actions/$action.php");
+                  include("$alt_include_path/actions/$action.php");
               }
               else
               {
@@ -367,12 +367,12 @@ if (!isset($db_master_location))
 {
     exit("ERROR - Master location cannot be determined");
 }
-if ((!isset($SupportMobile)) || (!($SupportMobile)))
+if ((!isset($support_mobile)) || (!($support_mobile)))
 {
     print("<div class=\"no-mobile-support\"><strong>N.B. </strong>This page is not optimised for mobile viewing. For a better user experience please use a computer or tablet.</div>\n");
 }
-$db_sub_path = str_replace('dbadmin/','',$RelativePath);
-if (($db_master_location[$db_sub_path] != $Location) &&
+$db_sub_path = str_replace('dbadmin/','',$relative_path);
+if (($db_master_location[$db_sub_path] != $location) &&
     ((!isset($override_db_sync_warning[$db_sub_path])) || (!$override_db_sync_warning[$db_sub_path])))
 {
     // Output warning(s) about not using the master copy of the database
@@ -399,9 +399,9 @@ create_view_structure('_view_dba_table_fields','dba_table_fields','table_name IS
 mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_dba_table_fields AS SELECT * FROM dba_table_fields ORDER BY table_name ASC, display_order ASC");
 
 // Load the table class if applicable
-if ((isset($_GET['-table'])) && (is_file("$CustomPagesPath/$RelativePath/tables/{$_GET['-table']}/{$_GET['-table']}.php")))
+if ((isset($_GET['-table'])) && (is_file("$custom_pages_path/$relative_path/tables/{$_GET['-table']}/{$_GET['-table']}.php")))
 {
-    require("$CustomPagesPath/$RelativePath/tables/{$_GET['-table']}/{$_GET['-table']}.php");
+    require("$custom_pages_path/$relative_path/tables/{$_GET['-table']}/{$_GET['-table']}.php");
 }
 
 print("<div id=\"dbadmin-main\">\n");
@@ -463,26 +463,26 @@ print("</div> <!--#dbadmin-main-->\n");
 // Output common links at foot of page
 if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
 {
-    print("<p class=\"small\"><a href=\"$BaseURL/$RelativePath/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");
-    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_table_info\">Table&nbsp;Info</a>");
-    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=_view_dba_table_fields\">Table&nbsp;Fields</a>");
-    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_relationships\">Relationships</a>");
-    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-table=dba_change_log\">Change Log</a>");
-    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
-    print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
-    if ($Location == 'local')
+    print("<p class=\"small\"><a href=\"$base_url/$relative_path/?-table=dba_sidebar_config\">Sidebar&nbsp;Config</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-table=dba_table_info\">Table&nbsp;Info</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-table=_view_dba_table_fields\">Table&nbsp;Fields</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-table=dba_relationships\">Relationships</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-table=dba_change_log\">Change Log</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
+    if ($location == 'local')
     {
-        print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=dbsync\">Sync&nbsp;Databases</a>");
-        print("&nbsp;&nbsp; <a href=\"$BaseURL/$RelativePath/?-action=search_and_replace\">Search&nbsp;&amp;&nbsp;Replace</a>");
+        print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=dbsync\">Sync&nbsp;Databases</a>");
+        print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=search_and_replace\">Search&nbsp;&amp;&nbsp;Replace</a>");
     }
-    if ((is_file("$BaseDir/admin_logout.php")) && (!is_file("$CustomPagesPath/$RelativePath/logout.php")))
+    if ((is_file("$base_dir/admin_logout.php")) && (!is_file("$custom_pages_path/$relative_path/logout.php")))
     {
-        print("&nbsp;&nbsp; <a href=\"$BaseURL/admin_logout.php\">Logout</a>");
+        print("&nbsp;&nbsp; <a href=\"$base_url/admin_logout.php\">Logout</a>");
     }
     print("</p>\n");
 }
-print("<script type=\"text/javascript\" src=\"$DBAdminURL/no_resubmit.js\"></script>\n");
-//include_inline_javascript("$DBAdminURL/no_resubmit.js");
+print("<script type=\"text/javascript\" src=\"$db_admin_url/no_resubmit.js\"></script>\n");
+//include_inline_javascript("$db_admin_url/no_resubmit.js");
 
 //==============================================================================
 ?>

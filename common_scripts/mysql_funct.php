@@ -32,8 +32,8 @@ if (!defined('NOINSERT'))
 {
     define('NOINSERT',2);
 }
-global $RootDir,$error_logfile, $home_remote_ip_addr, $display_error_online;
-$error_logfile = "$RootDir/logs/php_error.log";
+global $root_dir,$error_logfile, $home_remote_ip_addr, $display_error_online;
+$error_logfile = "$root_dir/logs/php_error.log";
 $display_error_online = ((isset($home_remote_ip_addr)) && (isset($_SERVER['REMOTE_ADDR'])) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr));
 
 //==============================================================================

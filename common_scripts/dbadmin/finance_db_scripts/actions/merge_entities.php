@@ -23,12 +23,12 @@ else
     {
         $type = $_GET['type'];
     }
-    $Type = ucfirst($type);
+    $type = ucfirst($type);
     $entity = $entities[$type];
-    $Entity = ucfirst($entity);
+    $entity = ucfirst($entity);
     $show_form = true;
   
-    print("<h1>Merge $Type</h1>\n");
+    print("<h1>Merge $type</h1>\n");
     if (isset($_POST['type']))
     {
         if ((empty($_POST['source'])) && (empty($_POST['target'])))
@@ -58,7 +58,7 @@ else
               $where_clause = 'name=?';
               $where_values = array('s',$_POST['source']);
               mysqli_delete_query($db,$type,$where_clause,$where_values);
-              print("<p>$Entity <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
+              print("<p>$entity <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
               print("<p><a href=\"index.php?-action=merge_entities&type={$_POST['type']}\"><button>Go Back</button></a></p>\n");
               $show_form = false;
         }
@@ -115,7 +115,7 @@ else
         print("<td><input type=\"radio\" name=\"confirm\" value=\"NO\" checked> No<br/>");
         print("<input type=\"radio\" name=\"confirm\" value=\"YES\"> Yes</td>");
         print("</tr></table>\n");
-        print("<input value=\"Merge $Type\" type=\"submit\">\n");
+        print("<input value=\"Merge $type\" type=\"submit\">\n");
         print("<input type=\"hidden\" name=\"type\" value=\"$type\" />\n");
         print("</form>\n");
     }

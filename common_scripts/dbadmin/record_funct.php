@@ -121,7 +121,7 @@ Function generate_widget
 
 function generate_widget($table,$field_name,$field_value)
 {
-    global $BaseDir, $BaseURL, $DBAdminURL;
+    global $base_dir, $base_url, $db_admin_url;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     $base_table = get_table_for_field($table,$field_name);
@@ -333,10 +333,10 @@ function generate_widget($table,$field_name,$field_value)
                 (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png')))
             {
                 // Output thumbnail image in widget
-                $file_path = "$BaseDir/{$row['relative_path']}/$field_value";
+                $file_path = "$base_dir/{$row['relative_path']}/$field_value";
                 if (is_file($file_path))
                 {
-                    $file_url = "$BaseURL/{$row['relative_path']}/$field_value";
+                    $file_url = "$base_url/{$row['relative_path']}/$field_value";
                     print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
                 }
             }
@@ -353,7 +353,7 @@ Function handle_file_widget_before_save
 
 function handle_file_widget_before_save(&$record,$field)
 {
-    global $BaseDir;
+    global $base_dir;
     $db = admin_db_connect();
     $table = $record->table;
     $base_table = get_base_table($table);
@@ -373,7 +373,7 @@ function handle_file_widget_before_save(&$record,$field)
                 either an orphan file or associated with a different record and therefore
                 cannot be dealt with automatically.
                 */
-                $target_file = "$BaseDir/{$row['relative_path']}/{$_POST["field_$field"]}";
+                $target_file = "$base_dir/{$row['relative_path']}/{$_POST["field_$field"]}";
                 if (is_file($target_file))
                 {
                     return report_error("File of new name already exists on server.");
@@ -409,8 +409,8 @@ function handle_file_widget_before_save(&$record,$field)
             if (!empty($filename))
             {
                 $target_file = (isset($_POST["existing_$field"]))
-                ? "$BaseDir/{$row['relative_path']}/{$_POST["existing_$field"]}"
-                : "$BaseDir/{$row['relative_path']}/$filename";
+                ? "$base_dir/{$row['relative_path']}/{$_POST["existing_$field"]}"
+                : "$base_dir/{$row['relative_path']}/$filename";
                 if ((is_file($target_file)) && (!isset($_POST["overwrite_$field"])))
                 {
                     return report_error("File already exists on server and <em>overwrite</em> option not selected.");
@@ -434,7 +434,7 @@ Function handle_file_widget_after_save
 
 function handle_file_widget_after_save($record,$field)
 {
-    global $BaseDir;
+    global $base_dir;
     $db = admin_db_connect();
     $table = $record->table;
     $base_table = get_base_table($table);
@@ -445,8 +445,8 @@ function handle_file_widget_after_save($record,$field)
     $where_values = array('s',$base_table,'s',$field);
     if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'')))
     {
-        $old_target_file = "$BaseDir/{$row['relative_path']}/$old_filename";
-        $new_target_file = "$BaseDir/{$row['relative_path']}/$filename";
+        $old_target_file = "$base_dir/{$row['relative_path']}/$old_filename";
+        $new_target_file = "$base_dir/{$row['relative_path']}/$filename";
         if ((empty(basename($_FILES["file_$field"]['name']))) && (isset($_POST["existing_$field"])))
         {
             // Existing file but no new file.
@@ -683,7 +683,7 @@ Function previous_record_link
 
 function previous_record_link($table,$record_id)
 {
-    global $BaseURL, $RelativePath;
+    global $base_url, $relative_path;
     global $select_this_record;
     if (empty($record_id))
     {
@@ -741,7 +741,7 @@ function previous_record_link($table,$record_id)
                     $prev_rec_primary_keys[$key] = $row[$key];
                 }
                 $previous_record_id = encode_record_id($prev_rec_primary_keys);
-                print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
+                print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table&-action=edit&-recordid=$previous_record_id\">Previous</a></div>");
                 return;
             }
             elseif (count(array_diff_assoc($row,$current_record)) == 0)
@@ -762,7 +762,7 @@ Function next_record_link
 
 function next_record_link($table,$record_id)
 {
-    global $BaseURL, $RelativePath;
+    global $base_url, $relative_path;
     global $select_this_record;
     if (empty($record_id))
     {
@@ -821,7 +821,7 @@ function next_record_link($table,$record_id)
                     $next_rec_primary_keys[$key] = $row[$key];
                 }
                 $next_record_id = encode_record_id($next_rec_primary_keys);
-                print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
+                print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table&-action=edit&-recordid=$next_record_id\">Next</a></div>");
                 return;
             }
             elseif (count(array_diff_assoc($row,$current_record)) == 0)
@@ -842,10 +842,10 @@ Function save_record
 
 function save_record($record,$old_record_id,$new_record_id)
 {
-    global $CustomPagesPath, $RelativePath;
+    global $custom_pages_path, $relative_path;
     $action = $record->action;
     $table = $record->table;
-    global $CustomPagesPath, $RelativePath;
+    global $custom_pages_path, $relative_path;
     $db = admin_db_connect();
     $base_table = get_base_table($table);
     $old_primary_keys = fully_decode_record_id($old_record_id);
@@ -1125,7 +1125,7 @@ associated base table for widget information.
 
 function handle_record($action,$params)
 {
-    global $BaseURL, $BaseDir, $DBAdminURL, $RelativePath, $Location, $presets;
+    global $base_url, $base_dir, $db_admin_url, $relative_path, $location, $presets;
     global $select_this_record;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
@@ -1203,9 +1203,9 @@ function handle_record($action,$params)
     // Output top navigation
     if ($access_level == 'full')
     {
-        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=new&-table=$table\">New&nbsp;Record</a></div>");
+        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=$table\">New&nbsp;Record</a></div>");
     }
-    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-table=$table\">Show&nbsp;All</a></div>");
+    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table\">Show&nbsp;All</a></div>");
     previous_record_link($table,$record_id);
     next_record_link($table,$record_id);
     if (isset($_GET['-returnurl']))
@@ -1229,9 +1229,9 @@ function handle_record($action,$params)
     $param_list = "-action=$action&-table=$table&-recordid=";
     $param_list .= urlencode($record_id);
     $param_list .= "&-basedir=";
-    $param_list .= urlencode($BaseDir);
+    $param_list .= urlencode($base_dir);
     $param_list .= "&-relpath=";
-    $param_list .= urlencode($RelativePath);
+    $param_list .= urlencode($relative_path);
     if (isset($_GET['-returnurl']))
     {
         $param_list .= "&-returnurl=";
@@ -1242,7 +1242,7 @@ function handle_record($action,$params)
         $param_list .= "&-returnurl=";
         $param_list .= urlencode(get_session_var(array('get_vars','-returnurl')));
     }
-    print("<form method=\"post\" action=\"$DBAdminURL/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
+    print("<form method=\"post\" action=\"$db_admin_url/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
     $last_display_group = '';
 
     // Check that the record exists unless the action is set to 'new'.
@@ -1321,7 +1321,7 @@ function handle_record($action,$params)
                     $temp_table = get_table_for_field($table,$field_name);
                     $temp_pk['table_name'] = $temp_table;
                     $temp_pk['field_name'] = $field_name;
-                    $edit_field_atts_url = "$BaseURL/$RelativePath/?-action=edit&-table=dba_table_fields&-recordid=".encode_record_id($temp_pk);
+                    $edit_field_atts_url = "$base_url/$relative_path/?-action=edit&-table=dba_table_fields&-recordid=".encode_record_id($temp_pk);
                     if (isset($return_url))
                     {
                         $edit_field_atts_url .= "&-returnurl=$return_url";
@@ -1486,7 +1486,7 @@ function handle_record($action,$params)
                 // Generate 'replicate changes' selector if required conditions are met
                 $where_clause = 'table_name=?';
                 $where_values = array('s',$base_table);
-                if (($Location == 'local') &&
+                if (($location == 'local') &&
                     (function_exists('online_db_connect')) &&
                     ($row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''))) &&
                     ($row['replicate_enabled']))
@@ -1531,7 +1531,7 @@ afterDelete method for the associated table class.
 
 function delete_record($record,$record_id)
 {
-    global $CustomPagesPath, $RelativePath, $AltIncludePath, $DBAdminDir;
+    global $custom_pages_path, $relative_path, $alt_include_path, $db_admin_dir;
     $db = admin_db_connect();
     $table = $record->table;
     $base_table = get_base_table($table);
@@ -1541,13 +1541,13 @@ function delete_record($record,$record_id)
     // loaded in all contexts.
     if (!class_exists ($classname,false))
     {
-        if (is_file("$CustomPagesPath/$RelativePath/tables/$table/$table.php"))
+        if (is_file("$custom_pages_path/$relative_path/tables/$table/$table.php"))
         {
-            require("$CustomPagesPath/$RelativePath/tables/$table/$table.php");
+            require("$custom_pages_path/$relative_path/tables/$table/$table.php");
         }
-        elseif (is_file("$AltIncludePath/tables/$base_table/$table.php"))
+        elseif (is_file("$alt_include_path/tables/$base_table/$table.php"))
         {
-            require("$AltIncludePath/tables/$base_table/$table.php");
+            require("$alt_include_path/tables/$base_table/$table.php");
         }
     }
 

@@ -18,11 +18,11 @@ if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER[
 {
     exit("Authentication Failure");
 }
-require("$PrivateScriptsDir/mysql_connect.php");
+require("$private_scripts_dir/mysql_connect.php");
 $add_tags = ((isset($_SERVER['HTTP_USER_AGENT'])) && (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'wget') === false));
 foreach ($dbinfo as $dbid => $info)
 {
-    if ($Location == 'local')
+    if ($location == 'local')
     {
         $dbname = $info[0];
     }

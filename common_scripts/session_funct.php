@@ -17,8 +17,8 @@ if (!function_exists('run_session')) :
 function run_session()
 {
     global $wpdb;
-    global $GlobalSessionVars;
-    global $GlobalSessionID;
+    global $global_session_vars;
+    global $global_session_id;
     if ((!session_id()) && (!headers_sent()))
     {
         session_start();
@@ -28,7 +28,7 @@ function run_session()
         // This should not occur
         exit ("ERROR - Unable to start session");
     }
-    $GlobalSessionID = session_id();
+    $global_session_id = session_id();
 
     $db_wp = wp_db_connect();
     if (!$db_wp)
@@ -58,7 +58,7 @@ function run_session()
     /*
     The following query checks whether the table wp_session_updates is present.
     If it is then the current session variables are all transferred to the array
-    $GlobalSessionVars and the PHP session is closed.
+    $global_session_vars and the PHP session is closed.
     If the table is not present then no action is performed and the PHP session
     left permanently open (not recommended).
     */
@@ -71,7 +71,7 @@ function run_session()
         {
             // Inside the WordPress environment
             $where_clause = 'session_id=?';
-            $where_values = array('s',$GlobalSessionID);
+            $where_values = array('s',$global_session_id);
             $query_result2 = mysqli_select_query($db_wp,'wp_session_updates','*',$where_clause,$where_values,'');
             while ($row2 = mysqli_fetch_assoc($query_result2))
             {
@@ -109,7 +109,7 @@ function run_session()
         {
             // Outside the WordPress environment
             $where_clause = 'session_id=?';
-            $where_values = array('s',$GlobalSessionID);
+            $where_values = array('s',$global_session_id);
             $query_result2 = mysqli_select_query($db_wp,'wp_session_updates','*',$where_clause,$where_values,'');
             while ($row2 = mysqli_fetch_assoc($query_result2))
             {
@@ -144,24 +144,24 @@ function run_session()
             }
         }
         $where_clause = 'session_id=?';
-        $where_values = array('s',$GlobalSessionID);
+        $where_values = array('s',$global_session_id);
         mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
     
-        // Transfer all $_SESSION variables into the $GlobalSessionVars array.
-        $GlobalSessionVars = array();
+        // Transfer all $_SESSION variables into the $global_session_vars array.
+        $global_session_vars = array();
         foreach($_SESSION as $name => $value)
         {
             if (is_array($_SESSION[$name]))
             {
-                $GlobalSessionVars[$name] = array();
+                $global_session_vars[$name] = array();
                 foreach($_SESSION[$name] as $name2 => $value2)
                 {
-                    $GlobalSessionVars[$name][$name2] = $value2;
+                    $global_session_vars[$name][$name2] = $value2;
                 }
             }
             else
             {
-                $GlobalSessionVars[$name] = $value;
+                $global_session_vars[$name] = $value;
             }
         }
     
@@ -181,7 +181,7 @@ function run_session()
 * 4. delete_session_var
 *
 * Each function determines whether actual $_SESSION variables are in force
-* or whether they have been saved to $GlobalSessionVars and the PHP session
+* or whether they have been saved to $global_session_vars and the PHP session
 * closed.
 *
 * Each function takes a parameter '$name' which can be one of:-
@@ -192,7 +192,7 @@ function run_session()
 
 function session_var_is_set($name)
 {
-    global $GlobalSessionVars;
+    global $global_session_vars;
     if (!is_array($name))
     {
         $name = array($name,'');
@@ -202,15 +202,15 @@ function session_var_is_set($name)
     {
         return false;
     }
-    elseif (isset($GlobalSessionVars))
+    elseif (isset($global_session_vars))
     {
         if (empty($name[1]))
         {
-            return isset($GlobalSessionVars[$name[0]]);
+            return isset($global_session_vars[$name[0]]);
         }
         else
         {
-            return isset($GlobalSessionVars[$name[0]][$name[1]]);
+            return isset($global_session_vars[$name[0]][$name[1]]);
         }
     }
     elseif (empty($name[1]))
@@ -227,7 +227,7 @@ function session_var_is_set($name)
 
 function get_session_var($name)
 {
-    global $GlobalSessionVars;
+    global $global_session_vars;
     if (!is_array($name))
     {
         $name = array($name,'');
@@ -237,15 +237,15 @@ function get_session_var($name)
     {
         return false;
     }
-    elseif (isset($GlobalSessionVars))
+    elseif (isset($global_session_vars))
     {
         if (empty($name[1]))
         {
-            return $GlobalSessionVars[$name[0]] ?? false;
+            return $global_session_vars[$name[0]] ?? false;
         }
         else
         {
-            return $GlobalSessionVars[$name[0]][$name[1]] ?? false;
+            return $global_session_vars[$name[0]][$name[1]] ?? false;
         }
     }
     elseif (empty($name[1]))
@@ -262,8 +262,8 @@ function get_session_var($name)
 
 function update_session_var($name,$value)
 {
-    global $GlobalSessionVars;
-    global $GlobalSessionID;
+    global $global_session_vars;
+    global $global_session_id;
     $db_wp = wp_db_connect();
     if (!$db_wp)
     {
@@ -279,7 +279,7 @@ function update_session_var($name,$value)
     {
         return false;
     }
-    elseif (isset($GlobalSessionVars))
+    elseif (isset($global_session_vars))
     {
         $timestamp = time();
         $old_timestamp = $timestamp - 86400;  // 24 hours ago
@@ -288,23 +288,23 @@ function update_session_var($name,$value)
         mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
         if (empty($name[1]))
         {
-            $GlobalSessionVars[$name[0]] = $value;
+            $global_session_vars[$name[0]] = $value;
             $fields = 'session_id,name,value,type,timestamp';
-            $values = array('s',$GlobalSessionID,'s',$name[0],'s',$value,'s','update','i',$timestamp);
+            $values = array('s',$global_session_id,'s',$name[0],'s',$value,'s','update','i',$timestamp);
             $where_clause = 'session_id=? AND name=?';
-            $where_values = array('s',$GlobalSessionID,'s',$name[0]);
+            $where_values = array('s',$global_session_id,'s',$name[0]);
         }
         else
         {
-            if (!isset($GlobalSessionVars[$name[0]]))
+            if (!isset($global_session_vars[$name[0]]))
             {
-                $GlobalSessionVars[$name[0]] = array();
+                $global_session_vars[$name[0]] = array();
             }
-            $GlobalSessionVars[$name[0]][$name[1]] = $value;
+            $global_session_vars[$name[0]][$name[1]] = $value;
             $fields = 'session_id,name,name2,value,type,timestamp';
-            $values = array('s',$GlobalSessionID,'s',$name[0],'s',$name[1],'s',$value,'s','update','i',$timestamp);
+            $values = array('s',$global_session_id,'s',$name[0],'s',$name[1],'s',$value,'s','update','i',$timestamp);
             $where_clause = 'session_id=? AND name=? AND name2=?';
-            $where_values = array('s',$GlobalSessionID,'s',$name[0],'s',$name[1]);
+            $where_values = array('s',$global_session_id,'s',$name[0],'s',$name[1]);
         }
         if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
         {
@@ -331,8 +331,8 @@ function update_session_var($name,$value)
 
 function delete_session_var($name)
 {
-    global $GlobalSessionVars;
-    global $GlobalSessionID;
+    global $global_session_vars;
+    global $global_session_id;
     $db_wp = wp_db_connect();
     if (!$db_wp)
     {
@@ -348,30 +348,30 @@ function delete_session_var($name)
     {
         return false;
     }
-    elseif (isset($GlobalSessionVars))
+    elseif (isset($global_session_vars))
     {
         $timestamp = time();
         if (empty($name[1]))
         {
-            if (isset($GlobalSessionVars[$name[0]]))
+            if (isset($global_session_vars[$name[0]]))
             {
-                unset($GlobalSessionVars[$name[0]]);
+                unset($global_session_vars[$name[0]]);
             }
             $fields = 'session_id,name,type,timestamp';
-            $values = array('s',$GlobalSessionID,'s',$name[0],'s','delete','i',$timestamp);
+            $values = array('s',$global_session_id,'s',$name[0],'s','delete','i',$timestamp);
             $where_clause = 'session_id=? AND name=?';
-            $where_values = array('s',$GlobalSessionID,'s',$name[0]);
+            $where_values = array('s',$global_session_id,'s',$name[0]);
         }
         else
         {
-            if (isset($GlobalSessionVars[$name[0]][$name[1]]))
+            if (isset($global_session_vars[$name[0]][$name[1]]))
             {
-                unset($GlobalSessionVars[$name[0]][$name[1]]);
+                unset($global_session_vars[$name[0]][$name[1]]);
             }
             $fields = 'session_id,name,name2,type,timestamp';
-            $values = array('s',$GlobalSessionID,'s',$name[0],'s',$name[1],'s','delete','i',$timestamp);
+            $values = array('s',$global_session_id,'s',$name[0],'s',$name[1],'s','delete','i',$timestamp);
             $where_clause = 'session_id=? AND name=? AND name2=?';
-            $where_values = array('s',$GlobalSessionID,'s',$name[0],'s',$name[1]);
+            $where_values = array('s',$global_session_id,'s',$name[0],'s',$name[1]);
         }
         if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
         {

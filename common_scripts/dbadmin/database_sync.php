@@ -5,9 +5,9 @@ if (!function_exists('sync_databases')) :
 
 function sync_databases($local_db_name)
 {
-    global $Location, $CustomPagesPath, $RelativePath, $local_site_dir, $local_site_dir2,
-    $Localhost_ID, $DBAdminURL, $db_master_location, $Server_Station_ID,
-    $TableExportDir;
+    global $location, $custom_pages_path, $relative_path, $local_site_dir, $local_site_dir2,
+    $localhost_id, $db_admin_url, $db_master_location, $server_station_id,
+    $table_export_dir;
     if (isset($local_site_dir2))
     {
         // Override the global setting of $local_site_dir
@@ -16,24 +16,24 @@ function sync_databases($local_db_name)
 
     set_time_limit(300);
     print("<h1>Synchronise Databases</h1>\n");
-    print("<h2 style=\"margin-bottom:0.5em\">($local_site_dir/$RelativePath)</h2>\n");
-    $relationships_script_file = "$CustomPagesPath/$RelativePath/relationships.sql";
+    print("<h2 style=\"margin-bottom:0.5em\">($local_site_dir/$relative_path)</h2>\n");
+    $relationships_script_file = "$custom_pages_path/$relative_path/relationships.sql";
     $db = admin_db_connect();
 
-    if ($Location == 'local')
+    if ($location == 'local')
     {
         $sync_direction = 'in';  // Default direction
         $db_sites = itservices_db_connect();
         $where_clause = 'dbname=? AND domname=?';
-        $where_values = array('s',$local_db_name,'s',$Server_Station_ID);
+        $where_values = array('s',$local_db_name,'s',$server_station_id);
         $query_result = mysqli_select_query($db_sites,'dbases','*',$where_clause,$where_values,'');
         if ($row = mysqli_fetch_assoc($query_result))
         {
             switch ($row['mode'])
             {
                 case 'auto':
-                    $db_sub_path = str_replace('dbadmin/','',$RelativePath);
-                    if ($Location == $db_master_location[$db_sub_path])
+                    $db_sub_path = str_replace('dbadmin/','',$relative_path);
+                    if ($location == $db_master_location[$db_sub_path])
                     {
                         $sync_direction = 'out';
                     }
@@ -94,11 +94,11 @@ function sync_databases($local_db_name)
                     $cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
                     if ($_POST['sync_mode'] == 'backup')
                     {
-                        $cmd .= " -b -host=$Localhost_ID";
+                        $cmd .= " -b -host=$localhost_id";
                     }
                     elseif ($_POST['sync_mode'] == 'restore')
                     {
-                        $cmd .= " -r -host=$Localhost_ID";
+                        $cmd .= " -r -host=$localhost_id";
                     }
                     elseif ($_POST['sync_mode'] == 'table_dump')
                     {
@@ -132,7 +132,7 @@ function sync_databases($local_db_name)
                                 $field_added = true;
                             }
                             $order_clause = "$pk_fields ASC";
-                            export_table_to_csv("$TableExportDir/table_$table.csv",$db,$table,'','long','',$order_clause);
+                            export_table_to_csv("$table_export_dir/table_$table.csv",$db,$table,'','long','',$order_clause);
                             print("Table $table exported to CSV");
                         }
                     }

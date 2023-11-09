@@ -28,14 +28,14 @@ parameter (e.g. to gain elevated access).
 
 function db_connect($dbid,$mode='p',$alt_user='')
 {
-    global $DBMode, $Location, $dbinfo;
+    global $db_mode, $location, $dbinfo;
     $main_user = (!empty($alt_user))
         ? $alt_user
         : REAL_DB_USER;
-    switch ($DBMode)
+    switch ($db_mode)
     {
         case 'normal':
-        $connect_params = ($Location == 'local')
+        $connect_params = ($location == 'local')
           ? array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][0] )
           : array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
         break;
@@ -76,7 +76,7 @@ function db_connect($dbid,$mode='p',$alt_user='')
     }
     if ($connect_error)
     {
-        if (($Location == 'local') && (function_exists('print_stack_trace_for_mysqli_error')))
+        if (($location == 'local') && (function_exists('print_stack_trace_for_mysqli_error')))
         {
             print_stack_trace_for_mysqli_error();
         }
@@ -116,11 +116,11 @@ defined in the $dbinfo array for the site.
 
 function db_name($dbid)
 {
-    global $dbinfo, $DBMode, $Location;
-    switch ($DBMode)
+    global $dbinfo, $db_mode, $location;
+    switch ($db_mode)
     {
         case 'normal':
-          if ($Location == 'local')
+          if ($location == 'local')
           {
               return $dbinfo[$dbid][0];
           }
@@ -148,12 +148,12 @@ if (!function_exists('itservices_db_connect'))
 {
     function itservices_db_connect($mode='p')
     {
-        global $Location, $WWWRootDir;
-        if (($Location == 'local') && (function_exists('local_itservices_db_connect')))
+        global $location, $www_root_dir;
+        if (($location == 'local') && (function_exists('local_itservices_db_connect')))
         {
             return local_itservices_db_connect($mode);
         }
-        elseif (($Location == 'local') && (is_dir("$WWWRootDir/Sites/andperry.com/private_scripts")))
+        elseif (($location == 'local') && (is_dir("$www_root_dir/Sites/andperry.com/private_scripts")))
         {
             switch ($mode)
             {
@@ -168,7 +168,7 @@ if (!function_exists('itservices_db_connect'))
                 break;
             }
         }
-        elseif (($Location == 'real') && (function_exists('online_itservices_db_connect')))
+        elseif (($location == 'real') && (function_exists('online_itservices_db_connect')))
         {
             return online_itservices_db_connect($mode);
         }

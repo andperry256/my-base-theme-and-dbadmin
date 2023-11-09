@@ -19,10 +19,10 @@ if (substr($account,0,14) == '_view_account_')
 {
     $account = substr($account,14);
 }
-$params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=go_to_date&-table=$table&account=$account\">Go&nbsp;to&nbsp;Date</a></div>\n";
+$params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=go_to_date&-table=$table&account=$account\">Go&nbsp;to&nbsp;Date</a></div>\n";
 if (get_table_access_level('transactions') != 'read-only')
 {
-    $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$BaseURL/$RelativePath/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
+    $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
 }
 
 $where_clause = 'label=?';

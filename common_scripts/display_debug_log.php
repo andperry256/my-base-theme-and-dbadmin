@@ -22,7 +22,7 @@ if (!isset($local_site_dir))
 {
     exit("Site not specified");
 }
-if (!isset($BaseDir))
+if (!isset($base_dir))
 {
     exit("Site structure not present");
 }
@@ -32,19 +32,19 @@ $debug_file_path = array();
 if (is_file("/Config/localhost.php"))
 {
     // Local server
-    $debug_file_path[0] = "$RootDir/logs/php_error.log";
-    $debug_file_path[1] = "$RootDir/logs/wp_debug.log";
+    $debug_file_path[0] = "$root_dir/logs/php_error.log";
+    $debug_file_path[1] = "$root_dir/logs/wp_debug.log";
 }
 else
 {
     // Online site
-    $debug_file_path[0] = "$RootDir/logs/php_error.log";
-    $debug_file_path[1] = "$RootDir/logs/wp_debug.log";
-    $debug_file_path[2] = "$BaseDir/error_log";
+    $debug_file_path[0] = "$root_dir/logs/php_error.log";
+    $debug_file_path[1] = "$root_dir/logs/wp_debug.log";
+    $debug_file_path[2] = "$base_dir/error_log";
 }
 
 // Clear logs if required
-$clear_time_file_path = "$RootDir/logs/debug_log_clear_time.txt";
+$clear_time_file_path = "$root_dir/logs/debug_log_clear_time.txt";
 if ((isset($_POST['clear'])) || (isset($_GET['clear'])))
 {
     foreach($debug_file_path as $file)
@@ -60,11 +60,11 @@ if ((isset($_POST['clear'])) || (isset($_GET['clear'])))
 }
 
 // Manage debug settings in wp-config.php
-$config = file("$BaseDir/wp-config.php");
+$config = file("$base_dir/wp-config.php");
 $debug = false;
 $debug_log = false;
 $debug_display = false;
-$ofp = fopen("$BaseDir/wp-config.new",'w');
+$ofp = fopen("$base_dir/wp-config.new",'w');
 foreach($config as $line)
 {
     if (substr($line,0,18) == "define('WP_DEBUG',")
@@ -124,19 +124,19 @@ foreach($config as $line)
     }
 }
 fclose($ofp);
-$config1 = file_get_contents("$BaseDir/wp-config.php");
-$config2 = file_get_contents("$BaseDir/wp-config.new");
-$config1a = file("$BaseDir/wp-config.php");
-$config2a = file("$BaseDir/wp-config.new");
+$config1 = file_get_contents("$base_dir/wp-config.php");
+$config2 = file_get_contents("$base_dir/wp-config.new");
+$config1a = file("$base_dir/wp-config.php");
+$config2a = file("$base_dir/wp-config.new");
 if (($config2 != $config1) && (count($config1a) == count($config2a)))
 {
     // Debug status has changed - update wp-config.php.
-    unlink("$BaseDir/wp-config.php");
-    rename("$BaseDir/wp-config.new","$BaseDir/wp-config.php");
+    unlink("$base_dir/wp-config.php");
+    rename("$base_dir/wp-config.new","$base_dir/wp-config.php");
 }
 else
 {
-    unlink("$BaseDir/wp-config.new");
+    unlink("$base_dir/wp-config.new");
 }
 ?>
 <fieldset>

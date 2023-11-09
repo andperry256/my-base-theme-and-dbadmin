@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ "$root_dir" == "" ]
+then
+    echo "Root directory not set"
+    exit
+fi
 if [ -d  "$sub_root_dir/wp-content/themes" ]
 then
     themes_dir="$sub_root_dir/wp-content/themes"
@@ -6,21 +11,23 @@ else
     themes_dir="$root_dir/public_html/wp-content/themes"
 fi
 default_theme="twentytwelve"
-redundant_themes="twentynineteen twentytwenty twentytwentyone twentytwentytwo twentytwentythree"
 
 if [ -d "$themes_dir/$default_theme" ]
 then
-    for theme in $redundant_themes
+    cd $themes_dir
+    for theme in twenty*
     do
-        if [ -d  "$themes_dir/$theme" ]
+        if [ "$theme" != "$default_theme" ]
         then
-            echo "  Removing theme $theme"
-            rm -rf "$themes_dir/$theme"
-        fi
-        if [ -L  "$themes_dir/$theme" ]
-        then
-            echo "  Unlinking theme $theme"
-            rm "$themes_dir/$theme"
+            if [ -d  "$themes_dir/$theme" ]
+            then
+                echo "  Removing theme $theme"
+                rm -rf "$themes_dir/$theme"
+            elif [ -L  "$themes_dir/$theme" ]
+            then
+                echo "  Unlinking theme $theme"
+                rm "$themes_dir/$theme"
+            fi
         fi
     done
 fi

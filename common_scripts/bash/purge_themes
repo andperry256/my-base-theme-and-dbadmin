@@ -13,7 +13,7 @@ fi
 source "$root_dir/public_html/common_scripts/bash/set_default_theme"
 echo "Default theme = $default_theme"
 
-if [ -d "$themes_dir/$default_theme" ]
+if [ -d "$themes_dir" ]
 then
     cd $themes_dir
     for theme in twenty*

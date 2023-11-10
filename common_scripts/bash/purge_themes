@@ -10,7 +10,8 @@ then
 else
     themes_dir="$root_dir/public_html/wp-content/themes"
 fi
-default_theme="twentytwelve"
+source "$root_dir/public_html/common_scripts/bash/set_default_theme"
+echo "Default theme = $default_theme"
 
 if [ -d "$themes_dir/$default_theme" ]
 then

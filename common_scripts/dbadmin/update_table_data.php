@@ -115,12 +115,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     }
     $access_types = "'read-only','edit','auto-edit','full','auto-full'";
     $default_access_type = 'full';
-    $widget_types = '';
+    $widget_type_list = '';
     foreach ($widget_types as $key => $value)
     {
-        $widget_types .= "'$key',";
+        $widget_type_list .= "'$key',";
     }
-    $widget_types = rtrim($widget_types,',');
+    $widget_type_list = rtrim($widget_type_list,',');
     $default_widget_type = 'input-text';
 
     if (mysqli_num_rows(mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE `Tables_in_$dbname`='dba_table_info'")) == 0)
@@ -285,9 +285,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `alt_label` `alt_label` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
     if (!isset($fieldlist['widget_type']))
     {
-        mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `widget_type` ENUM( $widget_types ) NOT NULL DEFAULT '$default_widget_type' AFTER `alt_label`");
+        mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `widget_type` ENUM( $widget_type_list ) NOT NULL DEFAULT '$default_widget_type' AFTER `alt_label`");
     }
-    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `widget_type` `widget_type` ENUM( $widget_types ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_widget_type'");
+    mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `widget_type` `widget_type` ENUM( $widget_type_list ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL DEFAULT '$default_widget_type'");
     if (!isset($fieldlist['description']))
     {
         mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` ADD `description` VARCHAR( 511 ) NULL AFTER `widget_type`");

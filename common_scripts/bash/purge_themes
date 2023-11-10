@@ -4,9 +4,9 @@ then
     echo "Root directory not set"
     exit
 fi
-if [ -d  "$sub_root_dir/wp-content/themes" ]
+if [ -d "$sub_root_dir/public_html/wp-content/themes" ]
 then
-    themes_dir="$sub_root_dir/wp-content/themes"
+    themes_dir="$sub_root_dir/public_html/wp-content/themes"
 else
     themes_dir="$root_dir/public_html/wp-content/themes"
 fi

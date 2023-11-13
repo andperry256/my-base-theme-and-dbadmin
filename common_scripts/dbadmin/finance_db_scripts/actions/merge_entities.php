@@ -23,12 +23,12 @@ else
     {
         $type = $_GET['type'];
     }
-    $type = ucfirst($type);
+    $type_name = ucfirst($type);
     $entity = $entities[$type];
-    $entity = ucfirst($entity);
+    $entity_name = ucfirst($entity);
     $show_form = true;
   
-    print("<h1>Merge $type</h1>\n");
+    print("<h1>Merge $type_name</h1>\n");
     if (isset($_POST['type']))
     {
         if ((empty($_POST['source'])) && (empty($_POST['target'])))
@@ -58,7 +58,7 @@ else
               $where_clause = 'name=?';
               $where_values = array('s',$_POST['source']);
               mysqli_delete_query($db,$type,$where_clause,$where_values);
-              print("<p>$entity <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
+              print("<p>$entity_name <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
               print("<p><a href=\"index.php?-action=merge_entities&type={$_POST['type']}\"><button>Go Back</button></a></p>\n");
               $show_form = false;
         }

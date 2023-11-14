@@ -35,44 +35,44 @@ function db_connect($dbid,$mode='p',$alt_user='')
     switch ($db_mode)
     {
         case 'normal':
-        $connect_params = ($location == 'local')
-          ? array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][0] )
-          : array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
-        break;
+            $connect_params = ($location == 'local')
+              ? array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][0] )
+              : array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
+            break;
         case 'local':
-        $connect_params = array( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, $dbinfo[$dbid][0] );
-        break;
+            $connect_params = array( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, $dbinfo[$dbid][0] );
+            break;
         case 'remote':
-        $connect_params = array( REMOTE_DB_HOST, $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
-        break;
+            $connect_params = array( REMOTE_DB_HOST, $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
+            break;
     }
     $connect_error = false;
     switch ($mode)
     {
         case 'o':
-        // Object orientated style
-        $link = new mysqli( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
-        if ($link->connect_errno)
-        {
-            $connect_error = true;
-        }
-        elseif (!empty($dbinfo[$dbid][2]))
-        {
-            $link->set_charset($dbinfo[$dbid][2]);
-        }
-        break;
+            // Object orientated style
+            $link = new mysqli( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
+            if ($link->connect_errno)
+            {
+                $connect_error = true;
+            }
+            elseif (!empty($dbinfo[$dbid][2]))
+            {
+                $link->set_charset($dbinfo[$dbid][2]);
+            }
+            break;
         case 'p':
-        // Procedural style
-        $link = mysqli_connect( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
-        if (mysqli_connect_errno())
-        {
-            $connect_error = true;
-        }
-        elseif (!empty($dbinfo[$dbid][2]))
-        {
-            mysqli_set_charset($link,$dbinfo[$dbid][2]);
-        }
-        break;
+            // Procedural style
+            $link = mysqli_connect( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
+            if (mysqli_connect_errno())
+            {
+                $connect_error = true;
+            }
+            elseif (!empty($dbinfo[$dbid][2]))
+            {
+                mysqli_set_charset($link,$dbinfo[$dbid][2]);
+            }
+            break;
     }
     if ($connect_error)
     {
@@ -120,21 +120,21 @@ function db_name($dbid)
     switch ($db_mode)
     {
         case 'normal':
-          if ($location == 'local')
-          {
-              return $dbinfo[$dbid][0];
-          }
-          else
-          {
-              return $dbinfo[$dbid][1];
-          }
-          break;
+              if ($location == 'local')
+              {
+                  return $dbinfo[$dbid][0];
+              }
+              else
+              {
+                  return $dbinfo[$dbid][1];
+              }
+              break;
         case 'local':
-          return $dbinfo[$dbid][0];
-          break;
+              return $dbinfo[$dbid][0];
+              break;
         case 'remote':
-          return $dbinfo[$dbid][1];
-          break;
+              return $dbinfo[$dbid][1];
+              break;
     }
 }
 
@@ -158,14 +158,14 @@ if (!function_exists('itservices_db_connect'))
             switch ($mode)
             {
                 case 'o':
-                return new mysqli( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
-                break;
+                    return new mysqli( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
+                    break;
                 case 'p':
-                return mysqli_connect( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
-                break;
+                    return mysqli_connect( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
+                    break;
                 default:
-                return false;
-                break;
+                    return false;
+                    break;
             }
         }
         elseif (($location == 'real') && (function_exists('online_itservices_db_connect')))

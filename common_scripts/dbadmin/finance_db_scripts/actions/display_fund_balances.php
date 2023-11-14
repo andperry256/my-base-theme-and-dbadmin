@@ -66,39 +66,39 @@ if (isset($_POST['submitted']))
     switch ($_POST['balance_date'])
     {
         case 'now':
-          $end_month = accounting_month(date('Y-m-d'));
-          break;
+            $end_month = accounting_month(date('Y-m-d'));
+            break;
     
         case 'last_month':
-          $current_month = accounting_month(date('Y-m-d'));
-          $month_value = (int)substr($current_month,5,2);
-          $year_value = (int)substr($current_month,0,4);
-          $month_value--;
-          if ($month_value == 0)
-          {
-              $month_value = 12;
-              $year_value--;
-          }
-          $end_month = sprintf("%04d-%02d",$year_value,$month_value);
-          break;
+            $current_month = accounting_month(date('Y-m-d'));
+            $month_value = (int)substr($current_month,5,2);
+            $year_value = (int)substr($current_month,0,4);
+            $month_value--;
+            if ($month_value == 0)
+            {
+                $month_value = 12;
+                $year_value--;
+            }
+            $end_month = sprintf("%04d-%02d",$year_value,$month_value);
+            break;
     
         case 'last_year':
-          $year = (int)date('Y') - 1;
-          $month = date('m');
-          $end_month = year_end("$year-$month-01");
-          break;
+            $year = (int)date('Y') - 1;
+            $month = date('m');
+            $end_month = year_end("$year-$month-01");
+            break;
     
         case 'select':
-          if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
-          {
-              // Set end year/month to an actual date.
-              $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
-          }
-          else
-          {
-              $end_month = accounting_month(date('Y-m-d'));
-          }
-          break;
+            if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
+            {
+                // Set end year/month to an actual date.
+                $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
+            }
+            else
+            {
+                $end_month = accounting_month(date('Y-m-d'));
+            }
+            break;
     }
 }
 

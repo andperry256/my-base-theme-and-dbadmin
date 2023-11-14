@@ -155,52 +155,52 @@ if (isset($_POST['submitted']))
     switch ($_POST['date_range'])
     {
         case 'select':
-          if ((is_numeric($_POST['start_year'])) && (is_numeric($_POST['start_month'])))
-          {
-              // Set start year/month to an actual date. Set end date if specified as being the same.
-              $start_month = sprintf("%04d-%02d",$_POST['start_year'],$_POST['start_month']);
-              if (($_POST['end_year'] == 'same') && ($_POST['end_month'] = 'same'))
-              {
-                  $end_month = $start_month;
-              }
-          }
-          if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
-          {
-              // Set end year/month to an actual date.
-              $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
-          }
-          break;
+            if ((is_numeric($_POST['start_year'])) && (is_numeric($_POST['start_month'])))
+            {
+                // Set start year/month to an actual date. Set end date if specified as being the same.
+                $start_month = sprintf("%04d-%02d",$_POST['start_year'],$_POST['start_month']);
+                if (($_POST['end_year'] == 'same') && ($_POST['end_month'] = 'same'))
+                {
+                    $end_month = $start_month;
+                }
+            }
+            if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
+            {
+                // Set end year/month to an actual date.
+                $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
+            }
+            break;
     
         case 'this_month':
-          $start_month = accounting_month(date('Y-m-d'));
-          $end_month = $start_month;
-          break;
+            $start_month = accounting_month(date('Y-m-d'));
+            $end_month = $start_month;
+            break;
     
         case 'last_month':
-          $current_month = accounting_month(date('Y-m-d'));
-          $month_value = (int)substr($current_month,5,2);
-          $year_value = (int)substr($current_month,0,4);
-          $month_value--;
-          if ($month_value == 0)
-          {
-              $month_value = 12;
-              $year_value--;
-          }
-          $start_month = sprintf("%04d-%02d",$year_value,$month_value);
-          $end_month = $start_month;
-          break;
+            $current_month = accounting_month(date('Y-m-d'));
+            $month_value = (int)substr($current_month,5,2);
+            $year_value = (int)substr($current_month,0,4);
+            $month_value--;
+            if ($month_value == 0)
+            {
+                $month_value = 12;
+                $year_value--;
+            }
+            $start_month = sprintf("%04d-%02d",$year_value,$month_value);
+            $end_month = $start_month;
+            break;
     
         case 'this_year':
-          $start_month = year_start(date('Y-m-d'));
-          $end_month = year_end(date('Y-m-d'));
-          break;
+            $start_month = year_start(date('Y-m-d'));
+            $end_month = year_end(date('Y-m-d'));
+            break;
     
         case 'last_year':
-          $year = (int)date('Y') - 1;
-          $month = date('m');
-          $start_month = year_start("$year-$month-01");
-          $end_month = year_end("$year-$month-01");
-          break;
+            $year = (int)date('Y') - 1;
+            $month = date('m');
+            $start_month = year_start("$year-$month-01");
+            $end_month = year_end("$year-$month-01");
+            break;
     }
 }
 if ($start_month > $end_month)

@@ -217,141 +217,141 @@ function display_main_content($mode)
         switch ($action)
         {
             case 'list':
-              if ((is_file("$custom_pages_path/$relative_path/tables/$table/$table.php")) &&
-                  (!class_exists ("tables_$table",false)))
-              {
-                  require("$custom_pages_path/$relative_path/tables/$table/$table.php");
-              }
-              elseif ((is_file("$alt_include_path/tables/$table/$table.php")) &&
-                      (!class_exists ("tables_$table",false)))
-              {
-                  require("$alt_include_path/tables/$table/$table.php");
-              }
-              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_list.php"))
-              {
-                  require("$custom_pages_path/$relative_path/tables/$table/custom_list.php");
-              }
-              elseif (is_file("$alt_include_path/tables/$base_table/custom_list.php"))
-              {
-                  require("$alt_include_path/tables/$base_table/custom_list.php");
-              }
-              else
-              {
-                  $params = array();
-                  $params['mode'] = $mode;
-                  display_table($params);
-              }
-              break;
+                if ((is_file("$custom_pages_path/$relative_path/tables/$table/$table.php")) &&
+                    (!class_exists ("tables_$table",false)))
+                {
+                    require("$custom_pages_path/$relative_path/tables/$table/$table.php");
+                }
+                elseif ((is_file("$alt_include_path/tables/$table/$table.php")) &&
+                        (!class_exists ("tables_$table",false)))
+                {
+                    require("$alt_include_path/tables/$table/$table.php");
+                }
+                if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_list.php"))
+                {
+                    require("$custom_pages_path/$relative_path/tables/$table/custom_list.php");
+                }
+                elseif (is_file("$alt_include_path/tables/$base_table/custom_list.php"))
+                {
+                    require("$alt_include_path/tables/$base_table/custom_list.php");
+                }
+                else
+                {
+                    $params = array();
+                    $params['mode'] = $mode;
+                    display_table($params);
+                }
+                break;
       
             case 'edit':
-              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_edit.php"))
-              {
-                  require("$custom_pages_path/$relative_path/tables/$table/custom_edit.php");
-              }
-              elseif (is_file("$alt_include_path/tables/$base_table/custom_edit.php"))
-              {
-                  require("$alt_include_path/tables/$base_table/custom_edit.php");
-              }
-              else
-              {
-                  $params = array();
-                  handle_record('edit',$params);
-              }
-              break;
+                if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_edit.php"))
+                {
+                    require("$custom_pages_path/$relative_path/tables/$table/custom_edit.php");
+                }
+                elseif (is_file("$alt_include_path/tables/$base_table/custom_edit.php"))
+                {
+                    require("$alt_include_path/tables/$base_table/custom_edit.php");
+                }
+                else
+                {
+                    $params = array();
+                    handle_record('edit',$params);
+                }
+                break;
       
             case 'new':
-              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_new.php"))
-              {
-                  require("$custom_pages_path/$relative_path/tables/$table/custom_new.php");
-              }
-              elseif (is_file("$alt_include_path/tables/$base_table/custom_new.php"))
-              {
-                  require("$alt_include_path/tables/$base_table/custom_new.php");
-              }
-              else
-              {
-                  $params = array();
-                  if (isset($_GET['-presets']))
-                  {
-                      $params['presets'] = urlencode($_GET['-presets']);
-                  }
-                  handle_record('new',$params);
-              }
-              break;
+                if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_new.php"))
+                {
+                    require("$custom_pages_path/$relative_path/tables/$table/custom_new.php");
+                }
+                elseif (is_file("$alt_include_path/tables/$base_table/custom_new.php"))
+                {
+                    require("$alt_include_path/tables/$base_table/custom_new.php");
+                }
+                else
+                {
+                    $params = array();
+                    if (isset($_GET['-presets']))
+                    {
+                        $params['presets'] = urlencode($_GET['-presets']);
+                    }
+                    handle_record('new',$params);
+                }
+                break;
       
             case 'view':
-              if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_view.php"))
-              {
-                  require("$custom_pages_path/$relative_path/tables/$table/custom_view.php");
-              }
-              elseif (is_file("$alt_include_path/tables/$base_table/custom_view.php"))
-              {
-                  require("$alt_include_path/tables/$base_table/custom_view.php");
-              }
-              else
-              {
-                  $params = array();
-                  handle_record('view',$params);
-              }
-              break;
+                if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_view.php"))
+                {
+                    require("$custom_pages_path/$relative_path/tables/$table/custom_view.php");
+                }
+                elseif (is_file("$alt_include_path/tables/$base_table/custom_view.php"))
+                {
+                    require("$alt_include_path/tables/$base_table/custom_view.php");
+                }
+                else
+                {
+                    $params = array();
+                    handle_record('view',$params);
+                }
+                break;
       
             case 'update_table_data1':
-              print("<h1>Update Table Data</h1>\n");
-              print("<p><strong>N.B.</strong>This operation will cause a bulk database update.");
-              print(" Ticking one or both of the options below may cause adverse performace in web mode and may therefore need to be reserved for command line mode.</p>\n");
-              print("<form method=\"post\" action=\"$base_url/$relative_path/?-action=update_table_data2\">\n");
-              print("<p><input type=\"checkbox\" name=\"update_charsets\">&nbsp;&nbsp;Update charsets and collation</p>\n");
-              print("<p><input type=\"checkbox\" name=\"optimise\">&nbsp;&nbsp;Optimise tables</p>\n");
-              print("<input type=\"submit\" value=\"Continue\">\n");
-              print("</form>\n");
-              break;
+                print("<h1>Update Table Data</h1>\n");
+                print("<p><strong>N.B.</strong>This operation will cause a bulk database update.");
+                print(" Ticking one or both of the options below may cause adverse performace in web mode and may therefore need to be reserved for command line mode.</p>\n");
+                print("<form method=\"post\" action=\"$base_url/$relative_path/?-action=update_table_data2\">\n");
+                print("<p><input type=\"checkbox\" name=\"update_charsets\">&nbsp;&nbsp;Update charsets and collation</p>\n");
+                print("<p><input type=\"checkbox\" name=\"optimise\">&nbsp;&nbsp;Optimise tables</p>\n");
+                print("<input type=\"submit\" value=\"Continue\">\n");
+                print("</form>\n");
+                break;
       
             case 'update_table_data2':
-              print("<h1>Update Table Data</h1>\n");
-              $update_charsets = (isset($_POST['update_charsets']));
-              $optimise = (isset($_POST['optimise']));
-              update_table_data($update_charsets,$optimise);
-              break;
+                print("<h1>Update Table Data</h1>\n");
+                $update_charsets = (isset($_POST['update_charsets']));
+                $optimise = (isset($_POST['optimise']));
+                update_table_data($update_charsets,$optimise);
+                break;
       
             case 'renumber_records1':
-              print("<h1>Renumber Records</h1>\n");
-              print("<p>This operation will cause a bulk database update.</p>\n");
-              print("<p><a href=\"$base_url/$relative_path/?-action=renumber_records2\"><button>Continue</button></a></p>\n");
-              break;
+                print("<h1>Renumber Records</h1>\n");
+                print("<p>This operation will cause a bulk database update.</p>\n");
+                print("<p><a href=\"$base_url/$relative_path/?-action=renumber_records2\"><button>Continue</button></a></p>\n");
+                break;
       
             case 'renumber_records2':
-              print("<h1>Renumber Records</h1>\n");
-              $where_clause = 'renumber_enabled=1';
-              $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
-              while ($row = mysqli_fetch_assoc($query_result))
-              {
-                  renumber_records($row['table_name']);
-              }
-              print("<p>Operation completed.</p>\n");
-              break;
+                print("<h1>Renumber Records</h1>\n");
+                $where_clause = 'renumber_enabled=1';
+                $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
+                while ($row = mysqli_fetch_assoc($query_result))
+                {
+                    renumber_records($row['table_name']);
+                }
+                print("<p>Operation completed.</p>\n");
+                break;
       
             case 'dbsync':
-              sync_databases(admin_db_name());
-              break;
+                sync_databases(admin_db_name());
+                break;
       
             case 'search_and_replace':
-              search_and_replace(admin_db_name());
-              break;
+                search_and_replace(admin_db_name());
+                break;
       
             default:
-              if (is_file("$custom_pages_path/$relative_path/actions/$action.php"))
-              {
-                  include("$custom_pages_path/$relative_path/actions/$action.php");
-              }
-              elseif (is_file("$alt_include_path/actions/$action.php"))
-              {
-                  include("$alt_include_path/actions/$action.php");
-              }
-              else
-              {
-                  print("<p>Script for action <em>$action</em> not found.</p>\n");
-              }
-              break;
+                if (is_file("$custom_pages_path/$relative_path/actions/$action.php"))
+                {
+                    include("$custom_pages_path/$relative_path/actions/$action.php");
+                }
+                elseif (is_file("$alt_include_path/actions/$action.php"))
+                {
+                    include("$alt_include_path/actions/$action.php");
+                }
+                else
+                {
+                    print("<p>Script for action <em>$action</em> not found.</p>\n");
+                }
+                break;
         }
     }
 }

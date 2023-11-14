@@ -601,62 +601,62 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                             switch ($field_type)
                             {
                                 case 'date':
-                                $default_widget_type = 'date';
-                                break;
+                                    $default_widget_type = 'date';
+                                    break;
                 
                                 case 'time':
-                                $default_widget_type = 'time';
-                                break;
+                                    $default_widget_type = 'time';
+                                    break;
                 
                                 case 'varchar';
                                 case 'char';
-                                if ($field_size >= 200)
-                                {
-                                    $default_widget_type = 'textarea';
-                                }
-                                else
-                                {
-                                    $default_widget_type = 'input-text';
-                                }
-                                break;
+                                    if ($field_size >= 200)
+                                    {
+                                        $default_widget_type = 'textarea';
+                                    }
+                                    else
+                                    {
+                                        $default_widget_type = 'input-text';
+                                    }
+                                    break;
                 
                                 case 'int':
                                 case 'decimal':
-                                if ($row2['Extra'] == 'auto_increment')
-                                {
-                                    $default_widget_type = 'auto-increment';
-                                }
-                                else
-                                {
-                                    $default_widget_type = 'input-num';
-                                }
-                                if ($required == 1)
-                                {
-                                    $required = 2;
-                                }
-                                break;
+                                    if ($row2['Extra'] == 'auto_increment')
+                                    {
+                                        $default_widget_type = 'auto-increment';
+                                    }
+                                    else
+                                    {
+                                        $default_widget_type = 'input-num';
+                                    }
+                                    if ($required == 1)
+                                    {
+                                        $required = 2;
+                                    }
+                                    break;
                 
                                 case 'tinyint':
-                                $default_widget_type = 'checkbox';
-                                if ($required == 1)
-                                {
-                                    $required = 2;
-                                }
-                                break;
+                                    $default_widget_type = 'checkbox';
+                                    if ($required == 1)
+                                    {
+                                        $required = 2;
+                                    }
+                                    break;
                 
                                 case 'enum':
-                                $enum_select_list = $field_size;
-                                $field_size ='';
-                                $default_widget_type = 'enum';
-                                if ($required == 1)
-                                {
-                                    $required = 2;
-                                }
-                                break;
+                                    $enum_select_list = $field_size;
+                                    $field_size ='';
+                                    $default_widget_type = 'enum';
+                                    if ($required == 1)
+                                    {
+                                        $required = 2;
+                                    }
+                                    break;
                 
                                 default:
-                                $default_widget_type = 'input-text';
-                                break;
+                                    $default_widget_type = 'input-text';
+                                    break;
                             }
             
                             // Run query to select data for the given table & field

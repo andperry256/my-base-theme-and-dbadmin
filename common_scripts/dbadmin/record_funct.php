@@ -147,200 +147,200 @@ function generate_widget($table,$field_name,$field_value)
         switch ($row['widget_type'])
         {
             case 'date':
-            datepicker_widget("field_$field_name",$field_value);
-            break;
+                datepicker_widget("field_$field_name",$field_value);
+                break;
     
             case 'input-text':
             case 'input-text-small':
-            print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\" size=\"");
-            if ($row['widget_type'] == 'input-text-small')
-            {
-                print("8");
-            }
-            elseif ($mode == 'desktop')
-            {
-                print("64");
-            }
-            else
-            {
-                print("30");
-            }
-            print("\"");
-            if ((!empty($row['vocab_table'])) && (!empty($row['vocab_field'])))
-            {
-                print("list=\"list_$field_name\">");
-                print("<datalist id=\"list_$field_name\">\n");
+                print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\" size=\"");
+                if ($row['widget_type'] == 'input-text-small')
+                {
+                    print("8");
+                }
+                elseif ($mode == 'desktop')
+                {
+                    print("64");
+                }
+                else
+                {
+                    print("30");
+                }
+                print("\"");
+                if ((!empty($row['vocab_table'])) && (!empty($row['vocab_field'])))
+                {
+                    print("list=\"list_$field_name\">");
+                    print("<datalist id=\"list_$field_name\">\n");
+                    $vocab_table = $row['vocab_table'];
+                    $vocab_field = $row['vocab_field'];
+                    $add_clause = "ORDER BY $vocab_field ASC";
+                    $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
+                    while ($row2 = mysqli_fetch_assoc($query_result2))
+                    {
+                        print("<option value=\"{$row2[$vocab_field]}\"></option>\n");
+                    }
+                    print("</datalist>");
+                }
+                else
+                {
+                    print(">");
+                }
+                break;
+    
+            case 'input-num':
+                print("<input type=\"text\" name=\"field_$field_name\" size=\"12\" value=\"$field_value\">");
+                break;
+    
+            case 'password':
+                print("<input type=\"password\" name=\"field_$field_name\" value=\"$field_value\">");
+                break;
+    
+            case 'enum':
+                print("<select name=\"field_$field_name\">\n");
+                print("<option value=\"\">Please select ...</option>\n");
+                $query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table where Field='$field_name' AND Type LIKE 'enum(%'");
+                if ($row2 = mysqli_fetch_assoc($query_result2))
+                {
+                        $options = substr($row2['Type'],5);
+                        $options = rtrim($options,')');
+                        $options = str_replace("'",'',$options);
+                        $tok = strtok($options,",");
+                        while ($tok !== false)
+                        {
+                            print("<option value=\"$tok\"");
+                            if ($tok == $field_value)
+                            {
+                                print(" selected");
+                            }
+                            print(">$tok</option>\n");
+                            $tok = strtok(",");
+                        }
+                }
+                print("</select>");
+                break;
+    
+            case 'time':
+                if (empty($row['vocab_table']))
+                {
+                    /*
+                    Generate a simple input widget if no vocabulary is specified. The use
+                    of a proper time picker is for future development. If a vocabulary is
+                    specified then drop down to the next case (for a select widget).
+                    */
+                    print("<input type=\"text\" name=\"field_$field_name\" size=\"8\" value=\"$field_value\">");
+                    break;
+                }
+    
+            case 'select':
+                print("<select name=\"field_$field_name\">\n");
+                print("<option value=\"\">Please select ...</option>\n");
                 $vocab_table = $row['vocab_table'];
                 $vocab_field = $row['vocab_field'];
                 $add_clause = "ORDER BY $vocab_field ASC";
                 $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
                 while ($row2 = mysqli_fetch_assoc($query_result2))
                 {
-                    print("<option value=\"{$row2[$vocab_field]}\"></option>\n");
-                }
-                print("</datalist>");
-            }
-            else
-            {
-                print(">");
-            }
-            break;
-    
-            case 'input-num':
-            print("<input type=\"text\" name=\"field_$field_name\" size=\"12\" value=\"$field_value\">");
-            break;
-    
-            case 'password':
-            print("<input type=\"password\" name=\"field_$field_name\" value=\"$field_value\">");
-            break;
-    
-            case 'enum':
-            print("<select name=\"field_$field_name\">\n");
-            print("<option value=\"\">Please select ...</option>\n");
-            $query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table where Field='$field_name' AND Type LIKE 'enum(%'");
-            if ($row2 = mysqli_fetch_assoc($query_result2))
-            {
-                    $options = substr($row2['Type'],5);
-                    $options = rtrim($options,')');
-                    $options = str_replace("'",'',$options);
-                    $tok = strtok($options,",");
-                    while ($tok !== false)
+                    print("<option value=\"{$row2[$vocab_field]}\"");
+                    if ((($row['widget_type'] == 'time') && (time_compare($row2[$vocab_field],$field_value) == 0)) ||
+                        ($row2[$vocab_field] == $field_value))
                     {
-                        print("<option value=\"$tok\"");
-                        if ($tok == $field_value)
-                        {
-                            print(" selected");
-                        }
-                        print(">$tok</option>\n");
-                        $tok = strtok(",");
+                        print(" selected");
                     }
-            }
-            print("</select>");
-            break;
-    
-            case 'time':
-            if (empty($row['vocab_table']))
-            {
-                /*
-                Generate a simple input widget if no vocabulary is specified. The use
-                of a proper time picker is for future development. If a vocabulary is
-                specified then drop down to the next case (for a select widget).
-                */
-                print("<input type=\"text\" name=\"field_$field_name\" size=\"8\" value=\"$field_value\">");
-                break;
-            }
-    
-            case 'select':
-            print("<select name=\"field_$field_name\">\n");
-            print("<option value=\"\">Please select ...</option>\n");
-            $vocab_table = $row['vocab_table'];
-            $vocab_field = $row['vocab_field'];
-            $add_clause = "ORDER BY $vocab_field ASC";
-            $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
-                print("<option value=\"{$row2[$vocab_field]}\"");
-                if ((($row['widget_type'] == 'time') && (time_compare($row2[$vocab_field],$field_value) == 0)) ||
-                    ($row2[$vocab_field] == $field_value))
-                {
-                    print(" selected");
+                    print(">{$row2[$vocab_field]}</option>\n");
                 }
-                print(">{$row2[$vocab_field]}</option>\n");
-            }
-            print("</select>");
-            break;
+                print("</select>");
+                break;
     
             case 'checklist':
-            $vocab_table = $row['vocab_table'];
-            $vocab_field = $row['vocab_field'];
-            $item_list = array();
-            $tok = strtok($field_value,'^');
-            while ($tok !== false)
-            {
-                if (!empty($tok))
+                $vocab_table = $row['vocab_table'];
+                $vocab_field = $row['vocab_field'];
+                $item_list = array();
+                $tok = strtok($field_value,'^');
+                while ($tok !== false)
                 {
-                    $item_list[$tok] = true;
-                }
-                $tok = strtok('^');
-            }
-            $add_clause = "ORDER BY $vocab_field ASC";
-            $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
-                $item = $row2[$vocab_field];
-                if ($item != '*')
-                {
-                    /*
-                    Dots, spaces and open square brackets are not allowed in $_POST
-                    variable names. Spaces and brackets are converted by the urlencode,
-                    but dots then need to be replaced with the hex code that will
-                    convert back in urldecode.
-                    */
-                    $item_par = urlencode($item);
-                    $item_par = str_replace('.','%2e',$item_par);
-                    print("<input type=\"checkbox\" name=\"item_$field_name"."___$item_par\"");
-                    if (isset($item_list[$item]))
+                    if (!empty($tok))
                     {
-                        print(" checked");
+                        $item_list[$tok] = true;
                     }
-                    print(">&nbsp;$item<br/>\n");
+                    $tok = strtok('^');
                 }
-            }
-            break;
+                $add_clause = "ORDER BY $vocab_field ASC";
+                $query_result2 = mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),$add_clause);
+                while ($row2 = mysqli_fetch_assoc($query_result2))
+                {
+                    $item = $row2[$vocab_field];
+                    if ($item != '*')
+                    {
+                        /*
+                        Dots, spaces and open square brackets are not allowed in $_POST
+                        variable names. Spaces and brackets are converted by the urlencode,
+                        but dots then need to be replaced with the hex code that will
+                        convert back in urldecode.
+                        */
+                        $item_par = urlencode($item);
+                        $item_par = str_replace('.','%2e',$item_par);
+                        print("<input type=\"checkbox\" name=\"item_$field_name"."___$item_par\"");
+                        if (isset($item_list[$item]))
+                        {
+                            print(" checked");
+                        }
+                        print(">&nbsp;$item<br/>\n");
+                    }
+                }
+                break;
     
             case 'textarea':
-            print("<textarea  name=\"field_$field_name\" rows=\"6\" cols=\"64\">$field_value</textarea>\n");
-            break;
+                print("<textarea  name=\"field_$field_name\" rows=\"6\" cols=\"64\">$field_value</textarea>\n");
+                break;
     
             case 'checkbox':
-            print("<input type=\"checkbox\" name=\"field_$field_name\"");
-            if ($field_value)
-            {
-                print(" checked");
-            }
-            print(">");
-            break;
+                print("<input type=\"checkbox\" name=\"field_$field_name\"");
+                if ($field_value)
+                {
+                    print(" checked");
+                }
+                print(">");
+                break;
     
             case 'auto-increment':
-            print("AI [$field_value]");
-            print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
-            break;
+                print("AI [$field_value]");
+                print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
+                break;
     
             case 'static':
             case 'static-date':
-            print("$field_value");
-            print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
-            break;
+                print("$field_value");
+                print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
+                break;
     
             case 'hidden':
-            print("******");
-            print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
-            break;
+                print("******");
+                print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
+                break;
     
             case 'file':
-            if (!empty($field_value))
-            {
-                print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\">");
-                print("<input type=\"hidden\" name=\"existing_$field_name\" value=\"$field_value\">");
-            }
-            print("<br /><input type=\"file\" name=\"file_$field_name\"><br />");
-            if (!empty($row['allowed_filetypes']))
-            {
-                print("<span class=\"small\">Allowed types:-&nbsp;&nbsp;{$row['allowed_filetypes']}</span><br />");
-            }
-            print("<input type=\"checkbox\" name=\"overwrite_$field_name\">&nbsp;Allow overwrite");
-            if ((!empty($field_value)) && ($fileext = pathinfo($field_value,PATHINFO_EXTENSION)) &&
-                (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png')))
-            {
-                // Output thumbnail image in widget
-                $file_path = "$base_dir/{$row['relative_path']}/$field_value";
-                if (is_file($file_path))
+                if (!empty($field_value))
                 {
-                    $file_url = "$base_url/{$row['relative_path']}/$field_value";
-                    print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
+                    print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\">");
+                    print("<input type=\"hidden\" name=\"existing_$field_name\" value=\"$field_value\">");
                 }
-            }
-            break;
+                print("<br /><input type=\"file\" name=\"file_$field_name\"><br />");
+                if (!empty($row['allowed_filetypes']))
+                {
+                    print("<span class=\"small\">Allowed types:-&nbsp;&nbsp;{$row['allowed_filetypes']}</span><br />");
+                }
+                print("<input type=\"checkbox\" name=\"overwrite_$field_name\">&nbsp;Allow overwrite");
+                if ((!empty($field_value)) && ($fileext = pathinfo($field_value,PATHINFO_EXTENSION)) &&
+                    (($fileext == 'gif') || ($fileext == 'jpg') || ($fileext == 'jpeg') || ($fileext == 'png')))
+                {
+                    // Output thumbnail image in widget
+                    $file_path = "$base_dir/{$row['relative_path']}/$field_value";
+                    if (is_file($file_path))
+                    {
+                        $file_url = "$base_url/{$row['relative_path']}/$field_value";
+                        print("<br /><img src=\"$file_url\" class=\"widget-image\" /><br />\n");
+                    }
+                }
+                break;
         }
     }
 }
@@ -598,51 +598,51 @@ function run_relationship_delete_query($query,$remainder)
     switch ($words[0])
     {
         case 'UPDATE':
-        /*
-        This is a 'DELETE/UPDATE' query, which indicates that it is actually an
-        update query but running on the result of a deletion. This is handled as
-        the end of the line - i.e. no further queries will be executed.
-        */
-        mysqli_query_normal($db,$query);
-        return;
-    
+            /*
+            This is a 'DELETE/UPDATE' query, which indicates that it is actually an
+            update query but running on the result of a deletion. This is handled as
+            the end of the line - i.e. no further queries will be executed.
+            */
+            mysqli_query_normal($db,$query);
+            return;
+        
         case 'DELETE':
-        if (!empty($remainder))
-        {
-            if (strtoupper($words[1]) == 'FROM')
+            if (!empty($remainder))
             {
-                $next_query = strtok($remainder,';');
-                $next_remainder = trim(substr($remainder,strlen($next_query)),'; ');
-        
-                // Run a SELECT query on the set of records that are due to be
-                // deleted by the current query.
-                $query_result = mysqli_query_normal($db,preg_replace('/DELETE FROM/i','SELECT * FROM',$query));
-                while ($row = mysqli_fetch_assoc($query_result))
+                if (strtoupper($words[1]) == 'FROM')
                 {
-                    // Substitute variable names of type $name.
-                    $matches = array();
-                    $query2 = $next_query;
-                    while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query2,$matches))
+                    $next_query = strtok($remainder,';');
+                    $next_remainder = trim(substr($remainder,strlen($next_query)),'; ');
+            
+                    // Run a SELECT query on the set of records that are due to be
+                    // deleted by the current query.
+                    $query_result = mysqli_query_normal($db,preg_replace('/DELETE FROM/i','SELECT * FROM',$query));
+                    while ($row = mysqli_fetch_assoc($query_result))
                     {
-                        $leading_char = substr($matches[0],0,1);
-                        $field_name = substr($matches[0],2);
-                        $value = $row[$field_name];
-                        $value = str_replace('$','\\$',$value);
-                        $query2 = str_replace($matches[0],"$leading_char$value",$query2);
+                        // Substitute variable names of type $name.
+                        $matches = array();
+                        $query2 = $next_query;
+                        while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query2,$matches))
+                        {
+                            $leading_char = substr($matches[0],0,1);
+                            $field_name = substr($matches[0],2);
+                            $value = $row[$field_name];
+                            $value = str_replace('$','\\$',$value);
+                            $query2 = str_replace($matches[0],"$leading_char$value",$query2);
+                        }
+            
+                        // Run the next query in line against the individual record from the
+                        // SELECT query (via a recursive function call).
+                        run_relationship_delete_query($query2,$next_remainder);
                     }
-        
-                    // Run the next query in line against the individual record from the
-                    // SELECT query (via a recursive function call).
-                    run_relationship_delete_query($query2,$next_remainder);
                 }
             }
-        }
-        // Run the current query.
-        mysqli_query_normal($db,$query);
-        return;
+            // Run the current query.
+            mysqli_query_normal($db,$query);
+            return;
     
         default:
-        return;
+            return;
     }
 }
 
@@ -1395,80 +1395,80 @@ function handle_record($action,$params)
             {
                 case 'edit':
                 case 'update':
-                if ($access_level != 'read-only')
-                {
-                    if ($mode == 'desktop')
+                    if ($access_level != 'read-only')
                     {
-                        print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
-                        print("<td>");
+                        if ($mode == 'desktop')
+                        {
+                            print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
+                            print("<td>");
+                        }
+                        else
+                        {
+                            print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\"><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></div>\n");
+                            print("<div class=\"edit-field-cell edit-field-value\">");
+                        }
+                        generate_widget($table,$field_name,$value);
+                        if (!empty($description))
+                        {
+                            print("<p class=\"field-description\">$description</p>");
+                        }
+                        if ($mode == 'desktop')
+                        {
+                            print("</td></tr>\n");
+                        }
+                        else
+                        {
+                            print("</div></div>\n");
+                        }
+                        break;
                     }
-                    else
-                    {
-                        print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\"><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></div>\n");
-                        print("<div class=\"edit-field-cell edit-field-value\">");
-                    }
-                    generate_widget($table,$field_name,$value);
-                    if (!empty($description))
-                    {
-                        print("<p class=\"field-description\">$description</p>");
-                    }
-                    if ($mode == 'desktop')
-                    {
-                        print("</td></tr>\n");
-                    }
-                    else
-                    {
-                        print("</div></div>\n");
-                    }
-                    break;
-                }
                 // Drop down to next case if access level is read-only.
         
                 case 'view':
-                if ($mode == 'desktop')
-                {
-                    print("<tr><td>$label</td>\n");
-                    print("<td>{$row[$field_name]}</td></tr>\n");
-                }
-                else
-                {
-                    print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\">$label</div>\n");
-                    print("<div class=\"edit-field-cell edit-field-value\">{$row[$field_name]}</div></div>\n");
-                }
-                break;
+                    if ($mode == 'desktop')
+                    {
+                        print("<tr><td>$label</td>\n");
+                        print("<td>{$row[$field_name]}</td></tr>\n");
+                    }
+                    else
+                    {
+                        print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\">$label</div>\n");
+                        print("<div class=\"edit-field-cell edit-field-value\">{$row[$field_name]}</div></div>\n");
+                    }
+                    break;
         
                 case 'new':
-                if ($access_level == 'full')
-                {
-                    if ($mode == 'desktop')
+                    if ($access_level == 'full')
                     {
-                        print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
-                        print("<td>");
+                        if ($mode == 'desktop')
+                        {
+                            print("<tr><td><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></td>\n");
+                            print("<td>");
+                        }
+                        else
+                        {
+                            print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\"><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></div>\n");
+                            print("<div class=\"edit-field-cell edit-field-value\">");
+                        }
+                        generate_widget($table,$field_name,$value);
+                        if (!empty($description))
+                        {
+                            print("<p class=\"field-description\">$description</p>");
+                        }
+                        if ($mode == 'desktop')
+                        {
+                            print("</td></tr>\n");
+                        }
+                        else
+                        {
+                            print("</div></div>\n");
+                        }
                     }
                     else
                     {
-                        print("<div class=\"edit-field\"><div class=\"edit-field-cell edit-field-name\"><a class=\"$class\" href=\"$edit_field_atts_url\">$label</a></div>\n");
-                        print("<div class=\"edit-field-cell edit-field-value\">");
+                        print("<p>Record insertion not enabled in this context</p>\n");
                     }
-                    generate_widget($table,$field_name,$value);
-                    if (!empty($description))
-                    {
-                        print("<p class=\"field-description\">$description</p>");
-                    }
-                    if ($mode == 'desktop')
-                    {
-                        print("</td></tr>\n");
-                    }
-                    else
-                    {
-                        print("</div></div>\n");
-                    }
-                }
-                else
-                {
-                    print("<p>Record insertion not enabled in this context</p>\n");
-                }
-                break;
+                    break;
             }
         }
         if ($mode == 'desktop')

@@ -531,88 +531,88 @@ function display_table($params)
         switch ($submit_option)
         {
             case 'apply_search':
-            // Apply new search filter
-            update_session_var('search_clause','');
-            if (!empty($_POST['search_string']))
-            {
-                $lc_search_string = strtolower($_POST['search_string']);
-                $search_clause = '';
-                $field_processed = false;
-                $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-                while ($row = mysqli_fetch_assoc($query_result))
+                // Apply new search filter
+                update_session_var('search_clause','');
+                if (!empty($_POST['search_string']))
                 {
-                    $field_name = $row['Field'];
-                    $where_clause = 'table_name=? AND field_name=?';
-                    $where_values = array('s',$base_table,'s',$field_name);
-                    $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-                    if ($row2 = mysqli_fetch_assoc($query_result2))
+                    $lc_search_string = strtolower($_POST['search_string']);
+                    $search_clause = '';
+                    $field_processed = false;
+                    $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
+                    while ($row = mysqli_fetch_assoc($query_result))
                     {
-                        if (($widget_types[$row2['widget_type']]) && (!$row2['exclude_from_search']))
+                        $field_name = $row['Field'];
+                        $where_clause = 'table_name=? AND field_name=?';
+                        $where_values = array('s',$base_table,'s',$field_name);
+                        $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
+                        if ($row2 = mysqli_fetch_assoc($query_result2))
                         {
-                            if ($field_processed)
+                            if (($widget_types[$row2['widget_type']]) && (!$row2['exclude_from_search']))
                             {
-                                $search_clause .= " OR";
+                                if ($field_processed)
+                                {
+                                    $search_clause .= " OR";
+                                }
+                                $field_processed = true;
+                                $search_clause .= " LOWER($field_name) LIKE '%";
+                                $search_clause .= mysqli_real_escape_string($db,$lc_search_string);
+                                $search_clause .= "%'";
+                                update_session_var('search_clause',$search_clause);
                             }
-                            $field_processed = true;
-                            $search_clause .= " LOWER($field_name) LIKE '%";
-                            $search_clause .= mysqli_real_escape_string($db,$lc_search_string);
-                            $search_clause .= "%'";
-                            update_session_var('search_clause',$search_clause);
                         }
                     }
                 }
-            }
-            break;
+                break;
     
             case 'delete':
-            $result = delete_record_set($table);
-            break;
+                $result = delete_record_set($table);
+                break;
     
             case 'select_update';
-            $result = select_update($table,'selection');
-            if ($result === true)
-            {
-                $display_table = false;
-                $form_started = true;
-            }
-            break;
+                $result = select_update($table,'selection');
+                if ($result === true)
+                {
+                    $display_table = false;
+                    $form_started = true;
+                }
+                break;
     
             case 'select_update_all';
-            $result = select_update($table,'all');
-            if ($result === true)
-            {
-                $display_table = false;
-                $form_started = true;
-            }
-            break;
+                $result = select_update($table,'all');
+                if ($result === true)
+                {
+                    $display_table = false;
+                    $form_started = true;
+                }
+                break;
     
             case 'run_update';
-            $result = run_update($table,'selection');
-            break;
+                $result = run_update($table,'selection');
+                break;
     
             case 'run_update_all';
-            if (isset($_POST['confirm_update_all']))
-            {
-                $result = run_update($table,'all');
-            }
-            else
-            {
-                print("<p class=\"highlight-error\">'Update All' confirmation flag was not set - please try again.</p>\n");
-            }
-            break;
+                if (isset($_POST['confirm_update_all']))
+                {
+                    $result = run_update($table,'all');
+                }
+                else
+                {
+                    print("<p class=\"highlight-error\">'Update All' confirmation flag was not set - please try again.</p>\n");
+                }
+                break;
     
             case 'select_copy';
-            $result = select_copy($table);
-            if ($result === true)
-            {
-                $display_table = false;
-                $form_started = true;
-            }
-            break;
+                $result = select_copy($table);
+                if ($result === true)
+                {
+                    $display_table = false;
+                    $form_started = true;
+                }
+                break;
     
             case 'run_copy';
-            $result = run_copy($table);
-            break;
+                $result = run_copy($table);
+                break;
         }
     }
 

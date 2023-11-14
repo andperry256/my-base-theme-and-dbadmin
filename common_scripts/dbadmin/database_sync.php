@@ -57,131 +57,131 @@ function sync_databases($local_db_name)
                 switch ($_POST['sync_mode'])
                 {
                     case ('save-rlshps'):
-                    if ((!isset($_POST['force-save-rlshps'])) && (is_file($relationships_script_file)))
-                    {
-                        $contents = file($relationships_script_file);
-                        if (substr($contents[0],0,12) == '## LOCKED ##')
+                        if ((!isset($_POST['force-save-rlshps'])) && (is_file($relationships_script_file)))
                         {
-                            print("<p>ERROR - Script file is locked (please refresh page to try again).</p>\n");
-                            break;
+                            $contents = file($relationships_script_file);
+                            if (substr($contents[0],0,12) == '## LOCKED ##')
+                            {
+                                print("<p>ERROR - Script file is locked (please refresh page to try again).</p>\n");
+                                break;
+                            }
                         }
-                    }
-                    $ofp = fopen($relationships_script_file,'w');
-                    fprintf($ofp,"## LOCKED ##\n");
-                    $count = 0;
-                    $where_clause = "table_name NOT LIKE '%dba_%'";
-                    $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,array(),'');
-                    while ($row2 = mysqli_fetch_assoc($query_result2))
-                    {
-                        $relationship_name_par = mysqli_real_escape_string($db,$row2['relationship_name']);
-                        $line = "INSERT INTO dba_relationships VALUES ('{$row2['table_name']}','$relationship_name_par',\"{$row2['query']}\");";
-                        $line = str_replace('%','%%',$line);
-                        fprintf($ofp,"$line\n");
-                        $count++;
-                    }
-                    fclose($ofp);
-                    if ($count == 1)
-                    {
-                        print("<p>$count Query saved to relationships.sql.</p>\n");
-                    }
-                    else
-                    {
-                        print("<p>$count Queries saved to relationships.sql.</p>\n");
-                    }
-                    break;
+                        $ofp = fopen($relationships_script_file,'w');
+                        fprintf($ofp,"## LOCKED ##\n");
+                        $count = 0;
+                        $where_clause = "table_name NOT LIKE '%dba_%'";
+                        $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,array(),'');
+                        while ($row2 = mysqli_fetch_assoc($query_result2))
+                        {
+                            $relationship_name_par = mysqli_real_escape_string($db,$row2['relationship_name']);
+                            $line = "INSERT INTO dba_relationships VALUES ('{$row2['table_name']}','$relationship_name_par',\"{$row2['query']}\");";
+                            $line = str_replace('%','%%',$line);
+                            fprintf($ofp,"$line\n");
+                            $count++;
+                        }
+                        fclose($ofp);
+                        if ($count == 1)
+                        {
+                            print("<p>$count Query saved to relationships.sql.</p>\n");
+                        }
+                        else
+                        {
+                            print("<p>$count Queries saved to relationships.sql.</p>\n");
+                        }
+                        break;
         
                     default:
-                    $cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
-                    if ($_POST['sync_mode'] == 'backup')
-                    {
-                        $cmd .= " -b -host=$localhost_id";
-                    }
-                    elseif ($_POST['sync_mode'] == 'restore')
-                    {
-                        $cmd .= " -r -host=$localhost_id";
-                    }
-                    elseif ($_POST['sync_mode'] == 'table_dump')
-                    {
-                        $cmd = '';
-                        if (empty($_POST['table']))
+                        $cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
+                        if ($_POST['sync_mode'] == 'backup')
+                        {
+                            $cmd .= " -b -host=$localhost_id";
+                        }
+                        elseif ($_POST['sync_mode'] == 'restore')
+                        {
+                            $cmd .= " -r -host=$localhost_id";
+                        }
+                        elseif ($_POST['sync_mode'] == 'table_dump')
                         {
                             $cmd = '';
-                            print("<p>ERROR - no table selected (please refresh page to try again).</p>");
-                        }
-                        else
-                        {
-                            $table = str_replace('V#','',$_POST['table']);
-                            $pk_fields = '';
-                            $field_added = false;
-                            $where_clause = 'table_name=? AND is_primary=1';
-                            $where_values = array('s',$table);
-                            $add_clause = 'ORDER BY display_order ASC';
-                            $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-                            if (mysqli_num_rows($query_result) == 0)
+                            if (empty($_POST['table']))
                             {
-                                print("<p>ERROR - table <em>$table</em> not found (please refresh page to try again).</p>\n");
-                                return;
+                                $cmd = '';
+                                print("<p>ERROR - no table selected (please refresh page to try again).</p>");
                             }
-                            while ($row = mysqli_fetch_assoc($query_result))
+                            else
                             {
-                                if ($field_added)
+                                $table = str_replace('V#','',$_POST['table']);
+                                $pk_fields = '';
+                                $field_added = false;
+                                $where_clause = 'table_name=? AND is_primary=1';
+                                $where_values = array('s',$table);
+                                $add_clause = 'ORDER BY display_order ASC';
+                                $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
+                                if (mysqli_num_rows($query_result) == 0)
                                 {
-                                    $pk_fields .= ',';
+                                    print("<p>ERROR - table <em>$table</em> not found (please refresh page to try again).</p>\n");
+                                    return;
                                 }
-                                $pk_fields .= ($row['field_name']);
-                                $field_added = true;
+                                while ($row = mysqli_fetch_assoc($query_result))
+                                {
+                                    if ($field_added)
+                                    {
+                                        $pk_fields .= ',';
+                                    }
+                                    $pk_fields .= ($row['field_name']);
+                                    $field_added = true;
+                                }
+                                $order_clause = "$pk_fields ASC";
+                                export_table_to_csv("$table_export_dir/table_$table.csv",$db,$table,'','long','',$order_clause);
+                                print("Table $table exported to CSV");
                             }
-                            $order_clause = "$pk_fields ASC";
-                            export_table_to_csv("$table_export_dir/table_$table.csv",$db,$table,'','long','',$order_clause);
-                            print("Table $table exported to CSV");
                         }
-                    }
-                    elseif (substr($_POST['sync_mode'],0,6) == 'table_')
-                    {
-                        if (empty($_POST['table']))
+                        elseif (substr($_POST['sync_mode'],0,6) == 'table_')
                         {
-                            $cmd = '';
-                            print("<p>ERROR - no table selected (please refresh page to try again).<p>");
+                            if (empty($_POST['table']))
+                            {
+                                $cmd = '';
+                                print("<p>ERROR - no table selected (please refresh page to try again).<p>");
+                            }
+                            elseif (substr($_POST['table'],0,2) == 'V#')
+                            {
+                                $cmd = '';
+                                print("<p>ERROR - sync operations not valid for views.<p>");
+                            }
+                            elseif (substr($_POST['sync_mode'],6) == $sync_direction)
+                            {
+                                $cmd .= " -st={$_POST['table']}";
+                            }
+                            else
+                            {
+                                $cmd .= " -rst={$_POST['table']}";
+                            }
                         }
-                        elseif (substr($_POST['table'],0,2) == 'V#')
+                        elseif ($_POST['sync_mode'] == $sync_direction)
                         {
-                            $cmd = '';
-                            print("<p>ERROR - sync operations not valid for views.<p>");
-                        }
-                        elseif (substr($_POST['sync_mode'],6) == $sync_direction)
-                        {
-                            $cmd .= " -st={$_POST['table']}";
+                            $cmd .= " -s -force";
                         }
                         else
                         {
-                            $cmd .= " -rst={$_POST['table']}";
+                            $cmd .= " -rs=yes -force";
                         }
-                    }
-                    elseif ($_POST['sync_mode'] == $sync_direction)
-                    {
-                        $cmd .= " -s -force";
-                    }
-                    else
-                    {
-                        $cmd .= " -rs=yes -force";
-                    }
-                    if (isset($_POST['noadd']))
-                    {
-                        $cmd .= " -noadd";
-                    }
-                    print("<p><em>$cmd</em></p>\n");
-                    if (!empty($cmd))
-                    {
-                        $start_time = time();
-                        exec("$cmd > '__temp_.txt'");
-                        $duration = time() - $start_time;
-                        $output = implode(file('__temp_.txt'));
-                        $output = str_replace("\n","<br />\n",$output);
-                        print("$output");
-                        print("Execution time: $duration seconds.<br />\n");
-                        unlink ('__temp_.txt');
-                    }
-                    break;
+                        if (isset($_POST['noadd']))
+                        {
+                            $cmd .= " -noadd";
+                        }
+                        print("<p><em>$cmd</em></p>\n");
+                        if (!empty($cmd))
+                        {
+                            $start_time = time();
+                            exec("$cmd > '__temp_.txt'");
+                            $duration = time() - $start_time;
+                            $output = implode(file('__temp_.txt'));
+                            $output = str_replace("\n","<br />\n",$output);
+                            print("$output");
+                            print("Execution time: $duration seconds.<br />\n");
+                            unlink ('__temp_.txt');
+                        }
+                        break;
                 }
             }
             else

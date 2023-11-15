@@ -75,7 +75,7 @@ function dump_db_table($dbid,$table)
 
 //==============================================================================
 
-function mysql_db_dump($dbid)
+function mysql_db_dump($dbid,$full_backup=false)
 {
     global $dbinfo, $local_site_dir, $location, $mysql_backup_dir;
     $dbname = ($location == 'local')
@@ -95,7 +95,7 @@ function mysql_db_dump($dbid)
     $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
     while ($row = mysqli_fetch_assoc($query_result))
     {
-        if (strpos($nosync_table_list,"^{$row["Tables_in_$dbname"]}^") !== false)
+        if ((!$full_backup) && (strpos($nosync_table_list,"^{$row["Tables_in_$dbname"]}^") !== false))
         {
             $nosync_tables[count($nosync_tables)] = $row["Tables_in_$dbname"];
         }
@@ -108,7 +108,8 @@ function mysql_db_dump($dbid)
     asort($nosync_tables);
 
     // Run main dump
-    $ofp = fopen("$mysql_backup_dir/$dbname/db1.sql",'w');
+    $backup_filename = ($full_backup) ? 'db1s' : 'db1';
+    $ofp = fopen("$mysql_backup_dir/$dbname/$backup_filename.sql",'w');
     foreach ($normal_tables as $table)
     {
         fprintf($ofp,str_replace('%','%%',dump_db_table($dbid,$table)));
@@ -211,7 +212,8 @@ foreach ($dbinfo as $dbid => $info)
         switch ($_GET['action'])
         {
             case 'dump':
-                mysql_db_dump($dbid);
+                $full_backup = (isset($_GET['full']));
+                mysql_db_dump($dbid,$full_backup);
                 exit;
 
             case 'restore':

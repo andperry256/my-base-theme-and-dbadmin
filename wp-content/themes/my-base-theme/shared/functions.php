@@ -445,7 +445,6 @@ function simplify_html_tag($content,$tag)
 
 function simplify_html($content)
 {
-
     global $allowed_tags, $simplified_tags;
     if (!isset($allowed_tags))
     {

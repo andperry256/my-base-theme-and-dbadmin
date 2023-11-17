@@ -77,14 +77,14 @@ function dump_db_table($dbid,$table)
 
 function mysql_db_dump($dbid,$full_backup=false)
 {
-    global $dbinfo, $local_site_dir, $location, $mysql_backup_dir;
+    global $dbinfo, $local_site_dir, $location, $site_mysql_backup_dir;
     $dbname = ($location == 'local')
     ? $dbinfo[$dbid][0]
     : $dbinfo[$dbid][1];
     $db_subpath = $dbinfo[$dbid][3];
-    if (!is_dir("$mysql_backup_dir/$dbname"))
+    if (!is_dir("$site_mysql_backup_dir/$dbname"))
     {
-        mkdir("$mysql_backup_dir/$dbname",0775);
+        mkdir("$site_mysql_backup_dir/$dbname",0775);
     }
     $db = db_connect($dbid);
 
@@ -109,7 +109,7 @@ function mysql_db_dump($dbid,$full_backup=false)
 
     // Run main dump
     $backup_filename = ($full_backup) ? 'db1s' : 'db1';
-    $ofp = fopen("$mysql_backup_dir/$dbname/$backup_filename.sql",'w');
+    $ofp = fopen("$site_mysql_backup_dir/$dbname/$backup_filename.sql",'w');
     foreach ($normal_tables as $table)
     {
         fprintf($ofp,str_replace('%','%%',dump_db_table($dbid,$table)));
@@ -120,7 +120,7 @@ function mysql_db_dump($dbid,$full_backup=false)
     // Dump any noSync tables
     foreach ($nosync_tables as $table)
     {
-        $ofp = fopen("$mysql_backup_dir/$dbname/table_$table.sql",'w');
+        $ofp = fopen("$site_mysql_backup_dir/$dbname/table_$table.sql",'w');
         fprintf($ofp,str_replace('%','%%',dump_db_table($dbid,$table)));
         fclose($ofp);
         print("NoSync table dump created for [$table] on [$dbname]<br />\n");
@@ -131,30 +131,30 @@ function mysql_db_dump($dbid,$full_backup=false)
 
 function mysql_db_restore($dbid,$full_restore=false)
 {
-    global $dbinfo, $local_site_dir, $location, $mysql_backup_dir;
+    global $dbinfo, $local_site_dir, $location, $site_mysql_backup_dir;
     $dbname = ($location == 'local')
         ? $dbinfo[$dbid][0]
         : $dbinfo[$dbid][1];
     $db_subpath = $dbinfo[$dbid][3];
-    if (is_file("$mysql_backup_dir/$dbname/db1.sql"))
+    if (is_file("$site_mysql_backup_dir/$dbname/db1.sql"))
     {
         $db = db_connect($dbid);
 
         // Preform main restore
-        $sql_script = file_get_contents("$mysql_backup_dir/$dbname/db1.sql");
+        $sql_script = file_get_contents("$site_mysql_backup_dir/$dbname/db1.sql");
         mysqli_multi_query($db,$sql_script);
         print("Database restored for [$dbname]<br />\n");
 
         // Restore noSync tables if option selected
         if ($full_restore)
         {
-            $dirlist = scandir("$mysql_backup_dir/$dbname");
+            $dirlist = scandir("$site_mysql_backup_dir/$dbname");
             foreach ($dirlist as $file)
             {
                 if (preg_match('/^table_[A-Za-z0-9_-]*\.sql$/',$file))
                 {
                     $table = substr(pathinfo($file,PATHINFO_FILENAME),6);
-                    $sql_script = file_get_contents("$mysql_backup_dir/$dbname/$file");
+                    $sql_script = file_get_contents("$site_mysql_backup_dir/$dbname/$file");
                     mysqli_multi_query($db,$sql_script);
                     print("NoSync table restored for [$table] on [$dbname]<br />\n");
                 }

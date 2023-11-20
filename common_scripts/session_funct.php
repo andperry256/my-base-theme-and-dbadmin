@@ -241,20 +241,32 @@ function get_session_var($name)
     {
         if (empty($name[1]))
         {
-            return $global_session_vars[$name[0]] ?? false;
+            //return $global_session_vars[$name[0]] ?? false;
+            return ((!isset($global_session_vars[$name[0]])) || ($global_session_vars[$name[0]] === null))
+                ? false
+                : $global_session_vars[$name[0]];
         }
         else
         {
-            return $global_session_vars[$name[0]][$name[1]] ?? false;
+            // return $global_session_vars[$name[0]][$name[1]] ?? false;
+            return ((!isset($global_session_vars[$name[0]][$name[1]])) || ($global_session_vars[$name[0]][$name[1]] === null))
+                ? false
+                : $global_session_vars[$name[0]][$name[1]];
         }
     }
     elseif (empty($name[1]))
     {
-        return $_SESSION[$name[0]] ?? false;
+        // return $_SESSION[$name[0]][$name[1]] ?? false;
+        return ((!isset($_SESSION[$name[0]])) || ($_SESSION[$name[0]] === null))
+            ? false
+            : $_SESSION[$name[0]];
     }
     else
     {
-        return $_SESSION[$name[0]][$name[1]] ?? false;
+        // return $_SESSION[$name[0]][$name[1]] ?? false;
+        return ((!isset($_SESSION[$name[0]][$name[1]])) || ($_SESSION[$name[0]][$name[1]] === null))
+        ? false
+        : $_SESSION[$name[0]][$name[1]];
     }
 }
 

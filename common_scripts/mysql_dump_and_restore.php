@@ -6,6 +6,10 @@ function dump_db_table($dbid,$table)
     global $dbinfo;
     $db = db_connect($dbid);
 
+    if (mysqli_num_rows(mysqli_query_strict($db,"SELECT * FROM $table")) == 0)
+    {
+        return '';
+    }
     // Compile list of field types (numeric/string)
     $field_types = array();
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");

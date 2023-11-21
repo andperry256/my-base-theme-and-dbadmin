@@ -88,7 +88,7 @@ function mysql_db_dump($dbid,$full_backup=false)
     $db_subpath = $dbinfo[$dbid][3];
     if (!is_dir("$site_mysql_backup_dir/$dbname"))
     {
-        mkdir("$site_mysql_backup_dir/$dbname",0775);
+            mkdir("$site_mysql_backup_dir/$dbname",0775);
     }
     $db = db_connect($dbid);
 
@@ -119,15 +119,18 @@ function mysql_db_dump($dbid,$full_backup=false)
         fprintf($ofp,str_replace('%','%%',dump_db_table($dbid,$table)));
     }
     fclose($ofp);
-    print("Main database dump created for [$dbname]<br />\n");
+    print("Main database dump created for [$dbname]\n");
 
     // Dump any noSync tables
-    foreach ($nosync_tables as $table)
+    if ((!isset($_GET['excl-nosync'])) && (!isset($_GET['full'])))
     {
-        $ofp = fopen("$site_mysql_backup_dir/$dbname/table_$table.sql",'w');
-        fprintf($ofp,str_replace('%','%%',dump_db_table($dbid,$table)));
-        fclose($ofp);
-        print("NoSync table dump created for [$table] on [$dbname]<br />\n");
+        foreach ($nosync_tables as $table)
+        {
+            $ofp = fopen("$site_mysql_backup_dir/$dbname/table_$table.sql",'w');
+            fprintf($ofp,str_replace('%','%%',dump_db_table($dbid,$table)));
+            fclose($ofp);
+            print("NoSync table dump created for [$table] on [$dbname]\n");
+        }
     }
 }
 
@@ -147,7 +150,7 @@ function mysql_db_restore($dbid,$full_restore=false)
         // Preform main restore
         $sql_script = file_get_contents("$site_mysql_backup_dir/$dbname/db1.sql");
         mysqli_multi_query($db,$sql_script);
-        print("Database restored for [$dbname]<br />\n");
+        print("Database restored for [$dbname]\n");
 
         // Restore noSync tables if option selected
         if ($full_restore)
@@ -160,14 +163,14 @@ function mysql_db_restore($dbid,$full_restore=false)
                     $table = substr(pathinfo($file,PATHINFO_FILENAME),6);
                     $sql_script = file_get_contents("$site_mysql_backup_dir/$dbname/$file");
                     mysqli_multi_query($db,$sql_script);
-                    print("NoSync table restored for [$table] on [$dbname]<br />\n");
+                    print("NoSync table restored for [$table] on [$dbname]\n");
                 }
             }
         }
     }
     else
     {
-        print("Unable to locate db1.sql script for [$dbname]<br />\n");
+        print("Unable to locate db1.sql script for [$dbname]\n");
     }
 }
 

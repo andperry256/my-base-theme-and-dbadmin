@@ -6,10 +6,6 @@ function dump_db_table($dbid,$table)
     global $dbinfo;
     $db = db_connect($dbid);
 
-    if (mysqli_num_rows(mysqli_query_strict($db,"SELECT * FROM $table")) == 0)
-    {
-        return '';
-    }
     // Compile list of field types (numeric/string)
     $field_types = array();
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
@@ -29,6 +25,12 @@ function dump_db_table($dbid,$table)
         $create_statement = preg_replace('/COLLATE=[A-Za-z0-9_]*/',"COLLATE=$charset".'_general_ci',$create_statement);
     }
     $sql_script .= "$create_statement;\n"; 
+    if (mysqli_num_rows(mysqli_query_strict($db,"SELECT * FROM $table")) == 0)
+    {
+        // Table is empty
+        return $sql_script;
+    }
+
     $sql_script .= "--\n-- Dumping data for table `$table`\n--\n";
     $sql_script .= "LOCK TABLES `$table` WRITE;\n";
     $sql_script .= "/*!40000 ALTER TABLE `$table` DISABLE KEYS */;\n";

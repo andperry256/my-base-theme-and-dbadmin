@@ -250,7 +250,7 @@ function get_session_var($name)
     }
     elseif (empty($name[1]))
     {
-        return $_SESSION[$name[0]][$name[1]] ?? false;
+        return $_SESSION[$name[0]] ?? false;
     }
     else
     {

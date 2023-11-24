@@ -1,10 +1,6 @@
 <?php
 //==============================================================================
 
-if (!isset($argc))
-{
-    exit("Script allowed in command line mode only\n");
-}
 if (isset($argv[1]))
 {
     $local_site_dir = $argv[1];

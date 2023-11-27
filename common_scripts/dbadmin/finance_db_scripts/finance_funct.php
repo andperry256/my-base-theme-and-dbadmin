@@ -569,6 +569,24 @@ function record_scheduled_transaction($account,$seq_no)
 
 //==============================================================================
 /*
+Function record_new_scheduled_transactions
+*/
+//==============================================================================
+
+function record_new_scheduled_transactions()
+{
+    $db = admin_db_connect();
+    $where_clause = 'date<=?';
+    $where_values = array('s',date('Y-m-d'));
+    $query_result = mysqli_select_query($db,'_view_scheduled_transactions','*',$where_clause,$where_values,'');
+    while ($row = mysqli_fetch_assoc($query_result))
+    {
+        record_scheduled_transaction($row['account'],$row['seq_no']);
+    }
+}
+
+//==============================================================================
+/*
 Function select_excluded_accounts
 
 This function generates the clause to be inserted into a MySQL query in order

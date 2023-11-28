@@ -546,7 +546,7 @@ function record_scheduled_transaction($account,$seq_no)
         mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         $set_fields = 'acct_month';
         $set_values = array('s',$acct_month);
-        $where_clause = 'account=? AND transact_seq_no=?"';
+        $where_clause = 'account=? AND transact_seq_no=?';
         $where_values = array('s',$account,'i',$seq_no);
         mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
     

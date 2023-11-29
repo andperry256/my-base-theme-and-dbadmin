@@ -587,6 +587,30 @@ function record_new_scheduled_transactions()
 
 //==============================================================================
 /*
+Function delete_uncleared_cheques
+*/
+//==============================================================================
+
+function delete_uncleared_cheques()
+{
+    $db = admin_db_connect();
+    $cutoff_date = AddDays(date('Y-m-d'),-190);  // 6 months + small allowance
+    $where_clause = 'reconciled=0 AND chq_no IS NOT NULL and chq_no>0 AND date<=?';
+    $where_values = array('s',$cutoff_date);
+    $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+    while ($row = mysqli_fetch_assoc($query_result))
+    {   
+        $fields = 'account,chq_no,date,payee,amount';
+        $values = array ('s',$row['account'],'i',$row['chq_no'],'s',$row['date'],'s',$row['payee'],'d',$row['debit_amount']);
+        mysqli_insert_query($db,'expired_cheques',$fields,$values);
+        $where_clause = 'account=? AND chq_no=?';
+        $where_values = array('s',$row['account'],'i',$row['chq_no']);
+        mysqli_delete_query($db,'transactions',$where_clause,$where_values);
+    }
+}
+
+//==============================================================================
+/*
 Function select_excluded_accounts
 
 This function generates the clause to be inserted into a MySQL query in order

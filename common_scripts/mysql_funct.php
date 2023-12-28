@@ -135,7 +135,9 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
         {
             // Online server
             $ofp = fopen($error_logfile,'a');
-            fprintf($ofp,"[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n");
+            $message = "[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n";
+            $message = str_replace('%','%%',$message);
+            fprintf($ofp,$message);
             fprintf($ofp,'  '.$e->getMessage()."\n");
             fclose($ofp);
             print_stack_trace_for_mysqli_error($display_error_online);

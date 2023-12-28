@@ -1,8 +1,10 @@
 <?php
 //==============================================================================
-
-// Arithmetic functions to avoid problems with decimal fractions not converting
-// to exact binary fractions.
+/*
+  Arithmetic functions to avoid problems with decimal fractions not converting
+  to exact binary fractions.
+*/
+//==============================================================================
 
 function add_money($value1,$value2)
 {
@@ -19,6 +21,14 @@ function multiply_money($value1,$value2)
     return round((round($value1,2) * round($value2,2)),2);
 }
 
+//==============================================================================
+/*
+  Function update_account_balances
+
+  This function is called when a transaction is saved, and will cause all 
+  balances (main, reconciled & quoted) to be updated on the given account from
+  the given date onwards.
+*/
 //==============================================================================
 
 function update_account_balances($account,$start_date)
@@ -118,6 +128,13 @@ function update_account_balances($account,$start_date)
 }
 
 //==============================================================================
+/*
+  Function next_seq_no
+
+  This function returns the next sequence number for a new trasnaction on a 
+  given account.
+*/
+//==============================================================================
 
 function next_seq_no($account)
 {
@@ -138,6 +155,13 @@ function next_seq_no($account)
 }
 
 //==============================================================================
+/*
+  Function next_split_no
+
+  This function returns the next available sequence number for a new split on a
+  given transaction.
+*/
+//==============================================================================
 
 function next_split_no($account,$transact_seq_no)
 {
@@ -157,6 +181,14 @@ function next_split_no($account,$transact_seq_no)
     return $split_no;
 }
 
+//==============================================================================
+/*
+  Function unlink_transaction
+
+  The function breaks the link between two transactions on separate accounts.
+  The sequence number of the source transaction is supplied. The target
+  transaction is deleted if unreconciled and updated if reconciled.
+*/
 //==============================================================================
 
 function unlink_transaction($account,$seq_no)
@@ -186,6 +218,13 @@ function unlink_transaction($account,$seq_no)
     }
 }
 
+//==============================================================================
+/*
+  Function rationalise_transaction
+
+  This function is called when saving a transaction and makes various
+  consistency checks and updates on the record.
+*/
 //==============================================================================
 
 function rationalise_transaction($account,$seq_no)
@@ -367,6 +406,13 @@ function rationalise_transaction($account,$seq_no)
 }
 
 //==============================================================================
+/*
+  Function accounting_month
+
+  This function returns the accounting month (yyyy-mm) associated with a given
+  date.
+*/
+//==============================================================================
 
 function accounting_month($date)
 {
@@ -386,6 +432,13 @@ function accounting_month($date)
 }
 
 //==============================================================================
+/*
+  Function year_start
+
+  This function returns the start date of the accounting year associcated with a
+  given date.
+*/
+//==============================================================================
 
 function year_start($date)
 {
@@ -399,6 +452,13 @@ function year_start($date)
     return sprintf("%04d-%02d",$year,YEAR_START_MONTH);
 }
 
+//==============================================================================
+/*
+  Function year_end
+
+  This function returns the end date of the accounting year associcated with a
+  given date.
+*/
 //==============================================================================
 
 function year_end($date)
@@ -422,6 +482,13 @@ function year_end($date)
     }
 }
 
+//==============================================================================
+/*
+  Function copy_transaction
+
+  This function creates a copy of a given transaction. The copy is made within
+  the same account to a new given date. Any splits or transfers are replicated.
+*/
 //==============================================================================
 
 function copy_transaction($account,$seq_no,$new_date)
@@ -485,6 +552,13 @@ function copy_transaction($account,$seq_no,$new_date)
     }
 }
 
+//==============================================================================
+/*
+  Function record_scheduled_transaction
+
+  This function records a given scheduled in the associated account and updates
+  the schedule date to the next due date.
+*/
 //==============================================================================
 
 function record_scheduled_transaction($account,$seq_no)
@@ -569,7 +643,10 @@ function record_scheduled_transaction($account,$seq_no)
 
 //==============================================================================
 /*
-Function record_new_scheduled_transactions
+  Function record_new_scheduled_transactions
+
+  This function is called by the finance cron script and records any scheduled
+  transactions that are due.
 */
 //==============================================================================
 
@@ -587,7 +664,42 @@ function record_new_scheduled_transactions()
 
 //==============================================================================
 /*
-Function delete_uncleared_cheques
+  Function find_matching_transaction
+
+  This function is called by the reconciliation procedure to find a transaction
+  that is most likely to match the one currently being reconciled. It will only
+  provide a result if there is a unique match with one record.
+*/
+//==============================================================================
+
+function find_matching_transaction($account,$date,$amount)
+{
+    $db = admin_db_connect();
+    $start_date = AddDays($date,-4);
+    $end_date = AddDays($date,1);
+    $credit_amount = ($amount > 0) ? $amount : 0;
+    $debit_amount = ($amount < 0) ? -$amount : 0;
+    $where_clause = 'account=? AND date>=? AND date<=? AND credit_amount=? AND debit_amount=? and reconciled=0';
+    $where_values = array('s',$account,'s',$start_date,'s',$end_date,'d',$credit_amount,'d',$debit_amount);
+    $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+    if ((mysqli_num_rows($query_result) == 1) && ($row = mysqli_fetch_assoc($query_result)))
+    {
+        // Unique match found
+        return ($row['seq_no']);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+//==============================================================================
+/*
+  Function delete_uncleared_cheques
+
+  This function is called by the finance cron script and deletes any uncleared
+  cheques that have gone out of date. These are added into the expired_cheques
+  table for future reference.
 */
 //==============================================================================
 
@@ -611,12 +723,12 @@ function delete_uncleared_cheques()
 
 //==============================================================================
 /*
-Function select_excluded_accounts
+  Function select_excluded_accounts
 
-This function generates the clause to be inserted into a MySQL query in order
-to exclude those accounts that are above the current user access level. The
-parameter $field_name indicates the field containing the account name in the
-query which is to be applied.
+  This function generates the clause to be inserted into a MySQL query in order
+  to exclude those accounts that are above the current user access level. The
+  parameter $field_name indicates the field containing the account name in the
+  query which is to be applied.
 */
 //==============================================================================
 
@@ -645,12 +757,12 @@ function select_excluded_accounts($field_name)
 
 //==============================================================================
 /*
-Function select_excluded_funds
+  Function select_excluded_funds
 
-This function generates the clause to be inserted into a MySQL query in order
-to exclude those funds that are above the current user access level. The
-parameter $field_name indicates the field containing the fund name in the
-query which is to be applied.
+  This function generates the clause to be inserted into a MySQL query in order
+  to exclude those funds that are above the current user access level. The
+  parameter $field_name indicates the field containing the fund name in the
+  query which is to be applied.
 */
 //==============================================================================
 
@@ -677,6 +789,10 @@ function select_excluded_funds($field_name)
     return $result;
 }
 
+//==============================================================================
+/*
+  Function initialise_archive_table_data
+*/
 //==============================================================================
 
 function initialise_archive_table_data($db)
@@ -755,6 +871,13 @@ function initialise_archive_table_data($db)
     }
 }
 
+//==============================================================================
+/*
+  Function output_archive_table_links
+
+  This function is called by the database home page script to generate links to
+  all archive transaction/split tables.
+*/
 //==============================================================================
 
 function output_archive_table_links($db)

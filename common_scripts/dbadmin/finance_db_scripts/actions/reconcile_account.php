@@ -1,3 +1,10 @@
+<script>
+    function selectTransaction(account,dropdown)
+    {
+        var option_value = dropdown.options[dropdown.selectedIndex].value;
+        location.href = './?-action=reconcile_account&-account=' + account +'&selection=' + encodeURIComponent(option_value);
+    }
+</script>
 <?php
 //==============================================================================
 
@@ -35,7 +42,7 @@ print("<table cellpadding=\"10\">\n");
 
 // Build select list for bank transactions
 print("<tr><td>Bank Transaction:</td><td>\n");
-print("<select name=\"bank_transaction\">\n");
+print("<select name=\"bank_transaction\" onchange=\"selectTransaction('$account',this)\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
 
 $dirlist = scandir($bank_import_dir);
@@ -55,13 +62,23 @@ foreach ($csvlist as $key => $value)
     if ($key == '#')
     {
         // Single (continuous) CSV file
-        print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
+        print("<option value=\"IMPORT\"");
+        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT"))
+        {
+            print(" selected");
+        }
+        print(">Re-Import CSV</option>\n");
     }
     else
     {
         // Separate (dated) CSV files
         $date = substr($key,1);
-        print("<option value=\"IMPORT-$date\">Re-Import CSV [$date]</option>\n");
+        print("<option value=\"IMPORT-$date\"");
+        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT-$date"))
+        {
+            print(" selected");
+        }
+        print(">Re-Import CSV [$date]</option>\n");
     }
     if (++$count >= 4)
     {
@@ -96,7 +113,13 @@ while ($row = mysqli_fetch_assoc($query_result))
     {
         $text .= ' | '.$row['balance'];
     }
-    print("<option value=\"{$row['rec_id']}[{$row['amount']}]_[{$row['balance']}]\">$text</option>\n");
+    $value = "{$row['rec_id']}^{$row['date']}^{$row['amount']}^{$row['balance']}";
+    print("<option value=\"$value\"");
+    if ((isset($_GET['selection'])) && ($_GET['selection'] == $value))
+    {
+        print(" selected");
+    }
+    print(">$text</option>\n");
 }
 print("</select>\n");
 print("<br /><span class=\"small\">(N.B. To re-import CSV file, select this option on BOTH lists)</span></td></tr>\n");
@@ -139,7 +162,18 @@ while ($row = mysqli_fetch_assoc($query_result))
         $text .= "* Zero *";
         $amount = 0;
     }
-    print("<option value=\"{$row['seq_no']}[$amount]\">$text</option>\n");
+    print("<option value=\"{$row['seq_no']}[$amount]\"");
+    if (isset($_GET['selection']))
+    {
+        $rec_id = strtok($_GET['selection'],'^');
+        $date = strtok('^');
+        $amount = strtok('^');
+        if ((!empty($date)) && (!empty($amount)) && (find_matching_transaction($account,$date,$amount) == $row['seq_no']))
+        {
+            print(" selected");
+        }
+    }
+    print(">$text</option>\n");
 }
 print("</select>\n");
 print("</td></tr>\n");

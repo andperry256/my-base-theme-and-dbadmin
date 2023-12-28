@@ -13,10 +13,10 @@ require("$custom_pages_path/$relative_path/db_funct.php");
 require("finance_funct.php");
 $db = finance_db_connect();
 
-$bank_rec_id = strtok($bank_transaction,'[');
-$bank_amount = strtok(']');
-$dummy_str = strtok('[');
-$bank_balance = strtok(']');
+$bank_rec_id = strtok($bank_transaction,'^');
+$bank_date = strtok('^');
+$bank_amount = (float)strtok('^');
+$bank_balance = strtok('^');
 $user_message = '';
 if ($bank_amount >= 0)
 {

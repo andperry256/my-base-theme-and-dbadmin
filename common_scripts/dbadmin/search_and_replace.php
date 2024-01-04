@@ -12,15 +12,15 @@ function search_and_replace($local_db_name)
     $db = admin_db_connect();
     if ($location == 'local')
     {
-        $db_sites = itservices_db_connect();
+        $db_its = itservices_db_connect();
         $where_clause = 'dbname=? AND domname=?';
         $where_values = array('s',$local_db_name,'s',$server_station_id);
-        $query_result = mysqli_select_query($db,'dbases','*',$where_clause,$where_values,'');
+        $query_result = mysqli_select_query($db_its,'dbases','*',$where_clause,$where_values,'');
         if ($row = mysqli_fetch_assoc($query_result))
         {
             $where_clause = 'site_path=? AND sub_path=?';
             $where_values = array('s',$row['site_path'],'s',$row['sub_path']);
-            if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'db_sets','*',$where_clause,$where_values,'')))
+            if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db_its,'db_sets','*',$where_clause,$where_values,'')))
             {
                 $user = $row2['username'];
             }

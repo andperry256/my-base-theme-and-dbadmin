@@ -668,7 +668,9 @@ function record_new_scheduled_transactions()
 
   This function is called by the reconciliation procedure to find a transaction
   that is most likely to match the one currently being reconciled. It will only
-  provide a result if there is a unique match with one record.
+  provide a proper result if there is a unique match with one record.  It will
+  return zero for no match found or a negated count if multiple matches are
+  found.
 */
 //==============================================================================
 
@@ -682,14 +684,16 @@ function find_matching_transaction($account,$date,$amount)
     $where_clause = 'account=? AND date>=? AND date<=? AND credit_amount=? AND debit_amount=? and reconciled=0';
     $where_values = array('s',$account,'s',$start_date,'s',$end_date,'d',$credit_amount,'d',$debit_amount);
     $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-    if ((mysqli_num_rows($query_result) == 1) && ($row = mysqli_fetch_assoc($query_result)))
+    $count = mysqli_num_rows($query_result);
+    if (($count == 1) && ($row = mysqli_fetch_assoc($query_result)))
     {
         // Unique match found
         return ($row['seq_no']);
     }
     else
     {
-        return false;
+        // Return zero or a negated match count.
+        return -$count;
     }
 }
 

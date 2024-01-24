@@ -134,6 +134,7 @@ print("<option value=\"NEW\">Create New Transaction</option>\n");
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
 $query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,array(),$add_clause);
+$match_count = 0;
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $date = $row['date'];
@@ -168,14 +169,24 @@ while ($row = mysqli_fetch_assoc($query_result))
         $rec_id = strtok($_GET['selection'],'^');
         $date = strtok('^');
         $amount = strtok('^');
-        if ((!empty($date)) && (!empty($amount)) && (find_matching_transaction($account,$date,$amount) == $row['seq_no']))
+        $match = find_matching_transaction($account,$date,$amount);
+        if ((!empty($date)) && (!empty($amount)) && ($match == $row['seq_no']))
         {
             print(" selected");
+            $match_count = 1;
+        }
+        else
+        {
+            $match_count = -$match;
         }
     }
     print(">$text</option>\n");
 }
 print("</select>\n");
+if ($match_count >= 2)
+{
+    print("<br />N.B. There are <strong>$match_count</strong> potentially matching transactions.\n");
+}
 print("</td></tr>\n");
 
 print("<tr><td>Auto-adjust:<br />&nbsp;</td><td><input type=\"checkbox\" name=\"auto_adjust\"><br />(Tick to automatically adjust the register value to match the bank transaction)</td></tr>\n");

@@ -28,6 +28,16 @@ else
 {
     $account_name = '';  // This should not occur
 }
+
+if (isset($_GET['selection']))
+{
+    // Save details of selected bank transaction
+    $selected_rec_id = strtok($_GET['selection'],'^');
+    $selected_date = strtok('^');
+    $selected_amount = strtok('^');
+    $match = find_matching_transaction($account,$selected_date,$selected_amount);
+}
+
 print("<h1>Reconcile Account ($account_name)</h1>\n");
 print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
 print("<div style=\"clear:both\"></div>\n");
@@ -130,7 +140,13 @@ print("<select name=\"account_transaction\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
 print("<option value=\"NONE\">Discard Bank Transaction</option>\n");
-print("<option value=\"NEW\">Create New Transaction</option>\n");
+print("<option value=\"NEW\"");
+if ((isset($_GET['selection'])) && ($match == 0))
+{
+    // No match on selected transation
+    print(" selected");
+}
+print(">Create New Transaction</option>\n");
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
 $query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,array(),$add_clause);
@@ -166,17 +182,15 @@ while ($row = mysqli_fetch_assoc($query_result))
     print("<option value=\"{$row['seq_no']}[$amount]\"");
     if (isset($_GET['selection']))
     {
-        $rec_id = strtok($_GET['selection'],'^');
-        $date = strtok('^');
-        $amount = strtok('^');
-        $match = find_matching_transaction($account,$date,$amount);
-        if ((!empty($date)) && (!empty($amount)) && ($match == $row['seq_no']))
+        if ((!empty($selected_date)) && (!empty($selected_amount)) && ($match == $row['seq_no']))
         {
+            // Unique match
             print(" selected");
             $match_count = 1;
         }
         else
         {
+            // Multiple match or no match
             $match_count = -$match;
         }
     }

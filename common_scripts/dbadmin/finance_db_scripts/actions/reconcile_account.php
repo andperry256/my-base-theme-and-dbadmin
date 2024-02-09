@@ -188,6 +188,10 @@ while ($row = mysqli_fetch_assoc($query_result))
             print(" selected");
             $match_count = 1;
         }
+        elseif (substr($_GET['selection'],0,6) == 'IMPORT' )
+        {
+            $match_count = 0;
+        }
         else
         {
             // Multiple match or no match

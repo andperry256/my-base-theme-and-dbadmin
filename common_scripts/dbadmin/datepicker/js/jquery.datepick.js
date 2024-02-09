@@ -1,4 +1,4 @@
-﻿/*! http://keith-wood.name/datepick.html
+/*! http://keith-wood.name/datepick.html
 	Date picker for jQuery v5.1.1.
 	Written by Keith Wood (wood.keith{at}optusnet.com.au) February 2010.
 	Licensed under the MIT (http://keith-wood.name/licence.html) licence. 

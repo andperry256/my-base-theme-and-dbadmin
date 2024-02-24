@@ -41,10 +41,19 @@ foreach ($dirs as $dir)
             break;
         }
     }
-    $key = password_hash($key,PASSWORD_DEFAULT);
-    $key = md5($key);
-    $key = substr($key,0,32);
-    $links_path = "links-$key";
+    if ($storage_dir == 'storage-000000')
+    {
+        // Local server
+        $links_path = 'links-000000';
+    }
+    else
+    {
+        // Online site
+        $key = password_hash($key,PASSWORD_DEFAULT);
+        $key = md5($key);
+        $key = substr($key,0,32);
+        $links_path = "links-$key";
+    }
     $content = file_get_contents("$dir_path/paths.php");
     $content = preg_replace('/links-[0-9a-f]+/',"$links_path",$content);
     file_put_contents("$dir_path/paths.php",$content);

@@ -112,6 +112,49 @@ class tables_transactions
         }
         return true;
     }
+
+    function sched_freq__validate($record, $value)
+    {
+        if (($value == '#') && ((!empty($record->FieldVal('date_of_change'))) || ($record->FieldVal('new_amount') != 0)))
+        {
+            return report_error("Attempt to set date of change and/or new amount on non-scheduled transaction.");
+        }
+    }
+
+    function date_of_change__validate($record, $value)
+    {
+        if (!empty($value))
+        {
+            $new_amount = $record->FieldVal('new_amount');
+            if ($record->FieldVal('sched_freq') == '#')
+            {
+                return report_error("Attempt to set date of change on a non-scheduled transaction.");
+            }
+            elseif ((empty($new_amount)) || ($new_amount == 0))
+            {
+                return report_error("Attempt to set date of change with no new amount.");
+            }
+        }
+    }
+
+    function new_amount__validate($record, $value)
+    {
+        if ((!empty($value)) && ($value != 0))
+        {
+            if ((!is_numeric($value)) || ($value > MAX_TRANSACTION_VALUE) || ($value < -MAX_TRANSACTION_VALUE))
+            {
+                return report_error("Invalid new amount.");
+            }
+            elseif ($record->FieldVal('sched_freq') == '#')
+            {
+                return report_error("Attempt to set new amount on a non-scheduled transaction.");
+            }
+            elseif (empty($record->FieldVal('date_of_change')))
+            {
+                return report_error("Attempt to set new amount with no date of change.");
+            }
+        }
+    }
   
     function beforeDelete($record)
     {
@@ -234,8 +277,8 @@ class tables_transactions
             return report_error("Attempt to set both source and target accounts.");
         }
         elseif ((!empty($old_target_account)) && (!empty($old_target_seq_no)) &&
-            (($target_account != $old_target_account) || ($target_seq_no != $old_target_seq_no)) &&
-          ((!empty($target_account)) || (!empty($target_seq_no))))
+                (($target_account != $old_target_account) || ($target_seq_no != $old_target_seq_no)) &&
+                ((!empty($target_account)) || (!empty($target_seq_no))))
         {
             return report_error("Attempt to modify transfer link - please break then re-create.");
         }

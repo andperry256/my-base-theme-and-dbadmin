@@ -514,6 +514,7 @@ function copy_transaction($account,$seq_no,$new_date)
         mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_transactions");
         mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_transactions LIKE transactions");
         mysqli_query_normal($db,"INSERT INTO temp_transactions SELECT * FROM transactions WHERE account='$account' AND seq_no=$seq_no");
+        mysqli_query_normal($db,"UPDATE temp_transactions SET date_of_change=NULL,new_amount=0.00");
         mysqli_query_normal($db,"DROP TABLE IF EXISTS temp_splits");
         mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_splits LIKE splits");
         mysqli_query_normal($db,"INSERT INTO temp_splits SELECT * FROM splits WHERE account='$account' AND transact_seq_no=$seq_no");
@@ -571,10 +572,52 @@ function record_scheduled_transaction($account,$seq_no)
     if ($row = mysqli_fetch_assoc($query_result))
     {
         $date = $row['date'];
+        $credit_amount = $row['credit_amount'];
+        $debit_amount = $row['debit_amount'];
         $acct_month = $row['acct_month'];
         $sched_freq = $row['sched_freq'];
         $sched_count = $row['sched_count'];
         $last_day = $row['last_day'];
+        $date_of_change = $row['date_of_change'];
+        $new_amount = $row['new_amount'];
+
+        // Apply change of amount if due
+        if ((!empty($date_of_change)) && ($date >= $date_of_change) && ($new_amount != 0))
+        {
+            // Determine whether to apply the change to the credit or debit amount
+            // according to the existing transaction.
+            if ($credit_amount > 0)
+            {
+                if ($new_amount > 0)
+                {
+                    $credit_amount = $new_amount;
+                    $debit_amount = 0.00;
+                }
+                else
+                {
+                    $debit_amount = -$new_amount;
+                    $credit_amount = 0;
+                }
+            }
+            elseif ($debit_amount > 0)
+            {
+                if ($new_amount > 0.00)
+                {
+                    $debit_amount = $new_amount;
+                    $credit_amount = 0.00;
+                }
+                else
+                {
+                    $credit_amount = -$new_amount;
+                    $debit_amount = 0.00;
+                }
+            }
+            $set_fields = 'credit_amount,debit_amount,date_of_change,new_amount';
+            $set_values = array('d',$credit_amount,'d',$debit_amount,'n',NULL,'d',0);
+            $where_clause = 'account=? AND seq_no=?';
+            $where_values = array('s',$account,'i',$seq_no);
+            mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
+        }
     
         // Copy scheduled transaction to new transaction and remove schedule from
         // the latter

@@ -309,7 +309,20 @@ function generate_widget($table,$field_name,$field_value)
             case 'static':
             case 'static-date':
                 print("$field_value");
-                print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
+                if (strpos($field_value,'<a href') === false)
+                {
+                    print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
+                }
+                else
+                {
+                    /*
+                    Do not put the actual field value here because the presence of hyperlinks can cause
+                    issues with the displayed output. Hyperlinks should in any case only be used in fields
+                    that are auto-generated on record save, thus removing the need for values to be
+                    carried over from the current screen.
+                    */
+                    print("<input type=\"hidden\" name=\"field_$field_name\" value=\"\">");
+                }
                 break;
     
             case 'hidden':

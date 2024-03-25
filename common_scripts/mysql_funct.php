@@ -32,6 +32,10 @@ if (!defined('NOINSERT'))
 {
     define('NOINSERT',2);
 }
+if (!function_exists('readable_markup'))
+{
+    include(__DIR__.'/misc_funct.php');
+}
 global $root_dir,$error_logfile, $home_remote_ip_addr, $display_error_online;
 $error_logfile = "$root_dir/logs/php_error.log";
 $display_error_online = ((isset($home_remote_ip_addr)) && (isset($_SERVER['REMOTE_ADDR'])) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr));
@@ -111,7 +115,7 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
     global $argc, $error_logfile, $display_error_online;
     if ($debug)
     {
-        exit ("$query\n");
+        exit (readable_markup("$query\n"));
     }
     $eol = (isset($argc)) ? "\n" : "<br />\n";
     $error_id = substr(md5(date('YmdHis')),0,8);

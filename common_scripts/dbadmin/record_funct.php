@@ -1203,7 +1203,6 @@ function handle_record($action,$params)
             if (!empty(get_session_var('save_info')))
             {
                 print("<p>".get_session_var('save_info')."</p>\n");
-                delete_session_var('save_info');
             }
         }
         else
@@ -1211,7 +1210,11 @@ function handle_record($action,$params)
             print("<p class=\"highlight-error\">".get_session_var('error_message')."</p>\n");
             delete_session_var('error_message');
         }
-    }
+        if (!empty(get_session_var('save_info')))
+        {
+            delete_session_var('save_info');
+        }
+}
 
     // Output top navigation
     if ($access_level == 'full')

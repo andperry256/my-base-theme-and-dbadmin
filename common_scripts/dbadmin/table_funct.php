@@ -1365,7 +1365,7 @@ function run_update($table,$option)
                         }
                         else
                         {
-                            $field_value = $_POST["field_$field_name"];
+                            $field_value = stripslashes($_POST["field_$field_name"]);
                         }
                     }
                     else
@@ -1398,6 +1398,10 @@ function run_update($table,$option)
     else
     {
         print("<p class=\"highlight-success\">$alert_message</p>\n");
+    }
+    if (!empty(get_session_var('save_info')))
+    {
+        delete_session_var('save_info');
     }
     return true;
 }
@@ -1642,7 +1646,7 @@ function run_copy($table)
                         }
                         else
                         {
-                            $field_value = $_POST["field_$field_name"];
+                            $field_value = stripslashes($_POST["field_$field_name"]);
                         }
                     }
                     else
@@ -1675,6 +1679,10 @@ function run_copy($table)
     else
     {
         print("<p class=\"highlight-success\">$alert_message</p>\n");
+    }
+    if (!empty(get_session_var('save_info')))
+    {
+        delete_session_var('save_info');
     }
     return true;
 }

@@ -28,9 +28,13 @@ sn - String/Null (set to null if empty).
 //==============================================================================
 */
 
+if (!defined('NOUPDATE'))
+{
+    define('NOUPDATE',2);
+}
 if (!defined('NOINSERT'))
 {
-    define('NOINSERT',2);
+    define('NOINSERT',3);
 }
 if (!function_exists('readable_markup'))
 {
@@ -421,6 +425,35 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
 
 //==============================================================================
 /*
+Function mysqli_conditional_update_query
+
+This function performs a similar operation to mysqli_update_query, except that
+it performs an additional check to determine whether a record with matching
+primary keys already exists. It takes the same parameters as mysqli_update_query.
+
+The function returns one of the following:-
+* true/false from running the update query.
+* NOUPDATE if a matching record was found and no update made.
+
+The calling software must check the returned result against true/false/NOUPDATE
+using the '===' operator.
+*/
+//==============================================================================
+
+function mysqli_conditional_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict=false,$debug=false)
+{
+    if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) == 0)
+    {
+        return NOUPDATE;
+    }
+    else
+    {
+        return mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict,$debug);
+    }
+}
+
+//==============================================================================
+/*
 Function mysqli_insert_query
 
 This function is called to run an INSERT query.
@@ -494,75 +527,13 @@ using the '===' operator.
 
 function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_clause,$where_values,$strict=false,$debug=false)
 {
-    // Check INSERT query
-    $field_count =  ($fields == '*')
-        ? mysqli_num_rows(mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
-        : substr_count($fields,',') + 1;
-    $values_count = count($values);
-    if ($values_count != $field_count*2)
-    {
-        raise_query_validation_error("INSERT INTO $table ...",$field_count,$fields,$values);
-    }
-  
-    // Build SELECT query
-    $where_clause_count = substr_count($where_clause,'?');
-    $where_values_count = count($where_values);
-    $select_query = "SELECT * FROM $table WHERE $where_clause";
-    if ($where_values_count != $where_clause_count*2)
-    {
-        raise_query_validation_error("$select_query ...",$where_clause_count,'',$where_values);
-    }
-    else
-    {
-        $pos = 0;
-        for ($i=0; $i<$where_values_count; $i+=2)
-        {
-            if ($where_values[$i] == 's')
-            {
-                $param = (!empty($where_values[$i+1]))
-                    ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
-                    : "''";
-            }
-            else
-            {
-                $param = $where_values[$i+1];
-            }
-            $pos = strpos($select_query,'?',$pos);
-            $select_query = substr($select_query,0,$pos).$param.substr($select_query,$pos+1);
-            $pos += strlen($param) + 1;
-        }
-    }
-  
-    if (mysqli_num_rows(mysqli_query($db,$select_query)) > 0)
+    if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) > 0)
     {
         return NOINSERT;
     }
     else
     {
-        $values_list = '';
-        for ($i=0; $i<$values_count; $i+=2)
-        {
-            if (($values[$i] == 'n') || 
-                (($values[$i] == 'sn') && (empty($values[$i+1]))))
-            {
-                $param = 'NULL';
-            }
-            elseif (($values[$i] == 's') || ($values[$i] == 'sn'))
-            {
-                $param = (!empty($values[$i+1]))
-                    ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
-                    : "''";
-            }
-            else
-            {
-                $param = $values[$i+1];
-            }
-            $values_list .= $param.',';
-        }
-        $values_list = rtrim($values_list,',');
-        return ($fields == '*')
-          ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug)
-          : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug);
+        return mysqli_insert_query($db,$table,$fields,$values,$strict,$debug);
     }
 }
 

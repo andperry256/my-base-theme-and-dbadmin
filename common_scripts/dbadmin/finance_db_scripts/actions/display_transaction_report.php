@@ -1,12 +1,13 @@
 <?php
 //==============================================================================
 
-global $finance_report_dir;
 global $location;
+global $base_url;
 $db = admin_db_connect();
-$csv_file = 'report_'.date('Ymd').'_'.date('His').'.csv';
-$ofp2 = fopen("$finance_report_dir/$csv_file", "w");
-fprintf($ofp2,"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance\n");
+delete_session_var('csv_report');
+clear_session_update_records('csv_report');
+update_session_var(array('csv_report','000001'),"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance");
+$csv_line = 2;
 print("<h1>Transaction Report</h1>\n");
 $account_exclusions = select_excluded_accounts('account');
 $fund_exclusions = select_excluded_funds('fund');
@@ -336,9 +337,10 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     mysqli_query_normal($db,"ALTER TABLE report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
   
     // Create link to CSV report.
-    print("<p><a href=\"$base_url/admin_data/finances/$csv_file\" target=\"_blank\">CSV Report</a> (opens in new window)</p>\n");
-  
+    print("<p><a href=\"$base_url/common_scripts/dbadmin/finance_db_scripts/display_csv_report.php\" target=\"_blank\">CSV Report</a> (opens in new window)</p>\n");
+    
     // Print report
+    $row_no = 0;
     $running_total = 0;
     $running_balance = 0;
     $last_accounting_month = '';
@@ -360,7 +362,6 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
         $add_clause = 'ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC';
         $query_result = mysqli_select_query($db,'report','*','',array(),$add_clause);
         $row_count = mysqli_num_rows($query_result);
-        $row_no = 0;
         while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))
         {
             if ($row_count == 0)
@@ -581,9 +582,8 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
         
                 print("</td></tr>\n");
         
-                // Add line to CSV file
-                $tempstr= str_replace('%','%%',$row['memo']);
-                fprintf($ofp2,"{$row['date']},\"$account_description\",\"{$row['payee']}\",\"{$row['fund']}\",\"{$row['category']}\",\"$tempstr\",".sprintf("%1.2f",$amount).",".sprintf("%1.2f",$running_balance)."\n");
+                // Add line to CSV report
+                update_session_var(array('csv_report',sprintf("%06d",$csv_line++)),"{$row['date']},\"$account_description\",\"{$row['payee']}\",\"{$row['fund']}\",\"{$row['category']}\",\"{$row['memo']}\",".sprintf("%1.2f",$amount).",".sprintf("%1.2f",$running_balance));
                 $row_no++;
             }
         }

@@ -203,7 +203,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 print("</select>\n");
 if ($match_count >= 2)
 {
-    print("<br />N.B. There are <strong>$match_count</strong> potentially matching transactions.\n");
+    print("<br /><span style=\"font-weight:bold;color:orange\">WARNING</span> - There are <strong>$match_count</strong> potentially matching transactions.\n");
 }
 print("</td></tr>\n");
 

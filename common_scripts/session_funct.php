@@ -296,7 +296,7 @@ function update_session_var($name,$value)
         }
         else
         {
-            if (!isset($global_session_vars[$name[0]]))
+            if ((!isset($global_session_vars[$name[0]])) || (!is_array($global_session_vars[$name[0]])))
             {
                 $global_session_vars[$name[0]] = array();
             }
@@ -388,6 +388,40 @@ function delete_session_var($name)
     {
         unset($_SESSION[$name[0]][$name[1]]);
     }
+}
+
+//================================================================================
+
+function clear_session_update_records($name)
+{
+    global $global_session_vars;
+    global $global_session_id;
+    $db_wp = wp_db_connect();
+    if (!$db_wp)
+    {
+        // This should not occur
+        exit("ERROR - Unable to connect to the WP database.");
+    }
+    if (!is_array($name))
+    {
+        $name = array($name,null);
+    }
+
+    if (count($name) != 2)
+    {
+        return false;
+    }
+    if ($name[1] === null)
+    {
+        $where_clause = 'session_id=? AND name=?';
+        $where_values = array('s',$global_session_id,'s',$name[0]);
+    }
+    else
+    {
+        $where_clause = 'session_id=? AND name=? AND name2=?';
+        $where_values = array('s',$global_session_id,'s',$name[0],'s',$name[1]);
+    }
+    mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
 }
 
 //================================================================================

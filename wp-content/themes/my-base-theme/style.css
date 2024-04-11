@@ -57,11 +57,13 @@ Nicolas Gallagher and Jonathan Neal http://necolas.github.io/normalize.css/
 /*--------------------------------------------------------------
 # Normalize
 --------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 html {
     color: #444;
-    font-family: verdana, sans-serif;
+    font-family: 'Roboto', sans-serif;
     -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust:         100%;
+    -ms-text-size-adjust: 100%;
     font-size: 16px;
 }
 
@@ -669,10 +671,12 @@ a:active {
 
 .main-navigation ul ul :hover > a,
 .main-navigation ul ul .focus > a {
+    color: inherit;
 }
 
 .main-navigation ul ul a:hover,
 .main-navigation ul ul a.focus {
+    color: inherit;
 }
 
 .main-navigation ul li:hover > ul,
@@ -689,6 +693,7 @@ a:active {
 .main-navigation .current-menu-item > a,
 .main-navigation .current_page_ancestor > a,
 .main-navigation .current-menu-ancestor > a {
+    color: inherit;
 }
 
 /* Small menu. */

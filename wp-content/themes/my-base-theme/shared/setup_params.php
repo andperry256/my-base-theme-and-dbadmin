@@ -3,6 +3,7 @@
 
 global $my_base_theme_mode;
 global $site_path_defs_path;
+global $main_font;
 global $meta_description;
 global $meta_robots_noindex;
 global $meta_robots_nofollow;
@@ -62,7 +63,7 @@ if (!is_file($site_path_defs_path))
     require("$custom_pages_path/select_menu.php");
     $page_uri = get_page_uri(get_the_ID());
 
-    // Create stylesheet links for the main site font
+    // Create stylesheet links for the main site font.
     $google_fonts = array (
         'Lato' => 'https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap',
         'Montserrat' => 'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
@@ -70,14 +71,17 @@ if (!is_file($site_path_defs_path))
         'Open Sans' => 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap',
         'Roboto' => 'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap',
     );
-    if ((!isset($main_font)) || (isset($google_fonts[$main_font])))
+    if ((!isset($main_font)) || (!isset($google_fonts[$main_font])))
     {
+        // Valid main font not defined in site theme. Assign 'Roboto' by default.
+
         $main_font = 'Roboto';
     }
     $lc_main_font = strtolower($main_font);
     $lc_main_font = str_replace(' ','_',$lc_main_font);
     if (isset($_GET['reloadfonts']))
     {
+        // Regenerate CSS files for all available fonts.
         foreach ($google_fonts as $font => $link)
         {
             $lc_font = strtolower($font);
@@ -89,13 +93,14 @@ if (!is_file($site_path_defs_path))
     }
     elseif (!is_file("$base_theme_dir/font_$lc_main_font.css"))
     {
+        // Regenerate CSS file for assigned main font.
         $ofp = fopen("$base_theme_dir/font_$lc_main_font.css",'w');
         fprintf($ofp,"html, p, li, td {\nfont-family: '$main_font', sans-serif;\n}\n");
         fclose($ofp);
     }
     if (!is_file("$base_theme_dir/font_$lc_main_font.css"))
     {
-        // This should not occur
+        // This should not occur unless folder permissions prevent creation of CSS file.
         print("<style>\nhtml, p, li, td {\nfont-family: '$main_font', sans-serif;\n</style>");
     }
     print("\n");

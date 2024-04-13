@@ -74,7 +74,6 @@ if (!is_file($site_path_defs_path))
     if ((!isset($main_font)) || (!isset($google_fonts[$main_font])))
     {
         // Valid main font not defined in site theme. Assign 'Roboto' by default.
-
         $main_font = 'Roboto';
     }
     $lc_main_font = strtolower($main_font);
@@ -103,7 +102,6 @@ if (!is_file($site_path_defs_path))
         // This should not occur unless folder permissions prevent creation of CSS file.
         print("<style>\nhtml, p, li, td {\nfont-family: '$main_font', sans-serif;\n</style>");
     }
-    print("\n");
     print("<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n");
     print("<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n");
     print("<link rel='stylesheet' id='$lc_main_font-font-css1'  href='{$google_fonts[$main_font]}' type='text/css' media='all' />\n");

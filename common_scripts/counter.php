@@ -152,7 +152,7 @@ if ($counter_enabled)
         $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date'");
         $today_count = mysqli_num_rows($query_result);
         print("<style>\n");
-        print("td { font-size:12px; line-height:12px; font-family: Verdana, Arial, Helvetica, sans-serif; }");
+        print("td { font-size:12px; line-height:12px; font-family: Verdana, Arial, Helvetica, Roboto, sans-serif; }");
         print("</style>\n");
         print("<table cellpadding=5>\n");
         print("<tr><td>Count:</td><td>$counter_val</td></tr>\n");

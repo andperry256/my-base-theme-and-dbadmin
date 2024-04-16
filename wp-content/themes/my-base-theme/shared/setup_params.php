@@ -1,10 +1,10 @@
 <?php
 //================================================================================
 
+global $base_theme_dir;
+global $base_theme_url;
 global $my_base_theme_mode;
 global $site_path_defs_path;
-global $main_font;
-global $header_font;
 global $meta_description;
 global $meta_robots_noindex;
 global $meta_robots_nofollow;
@@ -63,102 +63,12 @@ if (!is_file($site_path_defs_path))
     $custom_categories_url = "$custom_scripts_url/categories";
     require("$custom_pages_path/select_menu.php");
     $page_uri = get_page_uri(get_the_ID());
-
-    // Set up variables for main and header fonts.
-    $google_fonts = array (
-        'Lato' => 'https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap',
-        'Montserrat' => 'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
-        'Noto Sans' => 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
-        'Open Sans' => 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap',
-        'Roboto' => 'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap',
-    );
-    if ((!isset($main_font)) || (!isset($google_fonts[$main_font])))
-    {
-        // Valid main font not defined in site theme. Assign 'Noto Sans' by default.
-        $main_font = 'Noto Sans';
-    }
-    $lc_main_font = strtolower($main_font);
-    $lc_main_font = str_replace(' ','_',$lc_main_font);
-    if ((!isset($header_font)) || (!isset($google_fonts[$header_font])))
-    {
-        // Valid header font not defined in site theme. Assign 'Roboto' by default.
-        $header_font = 'Roboto';
-    }
-    $lc_header_font = strtolower($header_font);
-    $lc_header_font = str_replace(' ','_',$lc_header_font);
-
-    if (isset($_GET['reloadfonts']))
-    {
-        // Regenerate CSS files for all available fonts.
-        foreach ($google_fonts as $font => $link)
-        {
-            $lc_font = strtolower($font);
-            $lc_font = str_replace(' ','_',$lc_font);
-            $ofp = fopen("$base_theme_dir/main_font_$lc_font.css",'w');
-            fprintf($ofp,"html, p, li, td {\nfont-family: '$font', sans-serif;\n}\n");
-            fclose($ofp);
-            $ofp = fopen("$base_theme_dir/header_font_$lc_font.css",'w');
-            fprintf($ofp,"h1, h2, h3, h4, h5, h6 {\nfont-family: '$font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-    }
-    else
-    {
-        if (!is_file("$base_theme_dir/main_font_$lc_main_font.css"))
-        {
-            // Regenerate CSS file for assigned main font.
-            $ofp = fopen("$base_theme_dir/main_font_$lc_main_font.css",'w');
-            fprintf($ofp,"html, p, li, td {\nfont-family: '$main_font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-        if (!is_file("$base_theme_dir/header_font_$lc_header_font.css"))
-        {
-            // Regenerate CSS file for assigned header font.
-            $ofp = fopen("$base_theme_dir/header_font_$lc_header_font.css",'w');
-            fprintf($ofp,"h1, h2, h3, h4, h5, h6 {\nfont-family: '$header_font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-    }
-
-    // Create links to Google fonts.
-    print("<link rel='preconnect' href='https://fonts.googleapis.com'>\n");
-    print("<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>\n");
-    print("<link rel='stylesheet' id='$lc_main_font-font-css1'  href='{$google_fonts[$main_font]}' type='text/css' media='all' />\n");
-    if ($lc_header_font != $lc_main_font)
-    {
-        print("<link rel='stylesheet' id='$lc_header_font-font-css1'  href='{$google_fonts[$header_font]}' type='text/css' media='all' />\n");
-    }
-
-    if (is_file("$base_theme_dir/main_font_$lc_main_font.css"))
-    {
-        // Create link to CSS for main font.
-        print("<link rel='stylesheet' id='$lc_main_font-font-css2'  href='$base_theme_url/main_font_$lc_main_font.css?v=$link_version' media='all' />\n");
-    }
-    else
-    {
-        // This should not occur unless folder permissions prevent creation of CSS file.
-        print("<style>\nhtml, p, li, td {\nfont-family: '$main_font', sans-serif;\n</style>\n");
-    }
-
-    if ($lc_header_font != $lc_main_font)
-    {
-        if (is_file("$base_theme_dir/header_font_$lc_main_font.css"))
-        {
-            // Create link to CSS for header font.
-            print("<link rel='stylesheet' id='$lc_header_font-font-css2'  href='$base_theme_url/header_font_$lc_header_font.css?v=$link_version' media='all' />\n");
-        }
-        else
-        {
-            // This should not occur unless folder permissions prevent creation of CSS file.
-            print("<style>\nh1, h2, h3, h4, h5, h6 {\nfont-family: '$header_font', sans-serif;\n</style>\n");
-        }
-    }
-
     if (is_file("$custom_scripts_path/functions.php"))
     {
         include("$custom_scripts_path/functions.php");
     }
     set_default_header_image_paths();
+    output_font_stylesheet_links();
 
     if (is_file("$custom_scripts_path/footer.php"))
     {

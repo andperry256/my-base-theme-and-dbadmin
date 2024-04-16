@@ -62,7 +62,7 @@ if (!$user_authenticated):
 ?>
   <style>
     p,td {
-      font-family: Verdana, Arial, Helvetica, sans-serif;
+      font-family: Verdana, Arial, Helvetica, Roboto, sans-serif;
       font-size: 12pt;
     }
   </style>

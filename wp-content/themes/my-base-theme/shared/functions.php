@@ -252,6 +252,10 @@ function output_font_stylesheet_links()
     global $link_version;
     global $main_font;
     global $header_font;
+    $main_elements = 'html, body, div, p, li, td, select, input, textarea';
+    $default_main_font = 'Noto Sans';
+    $header_elements = 'h1, h2, h3, h4, h5, h6';
+    $default_header_font = 'Roboto';
 
     // List of available fonts.
     $google_fonts = array (
@@ -265,15 +269,13 @@ function output_font_stylesheet_links()
     // Set up variables for main and header fonts.
     if ((!isset($main_font)) || (!isset($google_fonts[$main_font])))
     {
-        // Valid main font not defined in site theme. Assign 'Noto Sans' by default.
-        $main_font = 'Noto Sans';
+        $main_font = $default_main_font;
     }
     $lc_main_font = strtolower($main_font);
     $lc_main_font = str_replace(' ','_',$lc_main_font);
     if ((!isset($header_font)) || (!isset($google_fonts[$header_font])))
     {
-        // Valid header font not defined in site theme. Assign 'Roboto' by default.
-        $header_font = 'Roboto';
+        $header_font = $default_header_font;
     }
     $lc_header_font = strtolower($header_font);
     $lc_header_font = str_replace(' ','_',$lc_header_font);
@@ -286,10 +288,10 @@ function output_font_stylesheet_links()
             $lc_font = strtolower($font);
             $lc_font = str_replace(' ','_',$lc_font);
             $ofp = fopen("$base_theme_dir/main_font_$lc_font.css",'w');
-            fprintf($ofp,"html, p, li, td {\nfont-family: '$font', sans-serif;\n}\n");
+            fprintf($ofp,"$main_elements {\nfont-family: '$font', sans-serif;\n}\n");
             fclose($ofp);
             $ofp = fopen("$base_theme_dir/header_font_$lc_font.css",'w');
-            fprintf($ofp,"h1, h2, h3, h4, h5, h6 {\nfont-family: '$font', sans-serif;\n}\n");
+            fprintf($ofp,"$header_elements {\nfont-family: '$font', sans-serif;\n}\n");
             fclose($ofp);
         }
     }
@@ -299,14 +301,14 @@ function output_font_stylesheet_links()
         {
             // Regenerate CSS file for assigned main font.
             $ofp = fopen("$base_theme_dir/main_font_$lc_main_font.css",'w');
-            fprintf($ofp,"html, p, li, td {\nfont-family: '$main_font', sans-serif;\n}\n");
+            fprintf($ofp,"$main_elements {\nfont-family: '$main_font', sans-serif;\n}\n");
             fclose($ofp);
         }
         if (!is_file("$base_theme_dir/header_font_$lc_header_font.css"))
         {
             // Regenerate CSS file for assigned header font.
             $ofp = fopen("$base_theme_dir/header_font_$lc_header_font.css",'w');
-            fprintf($ofp,"h1, h2, h3, h4, h5, h6 {\nfont-family: '$header_font', sans-serif;\n}\n");
+            fprintf($ofp,"$header_elements {\nfont-family: '$header_font', sans-serif;\n}\n");
             fclose($ofp);
         }
     }
@@ -329,7 +331,7 @@ function output_font_stylesheet_links()
     else
     {
         // This should not occur unless folder permissions prevent creation of CSS file.
-        print("<style>\nhtml, p, li, td {\nfont-family: '$main_font', sans-serif;\n</style>\n");
+        print("<style>\n$main_elements {\nfont-family: '$main_font', sans-serif;\n</style>\n");
     }
 
     // Create link to CSS for header font.
@@ -342,7 +344,7 @@ function output_font_stylesheet_links()
         else
         {
             // This should not occur unless folder permissions prevent creation of CSS file.
-            print("<style>\nh1, h2, h3, h4, h5, h6 {\nfont-family: '$header_font', sans-serif;\n</style>\n");
+            print("<style>\n$header_elements {\nfont-family: '$header_font', sans-serif;\n</style>\n");
         }
     }
 }

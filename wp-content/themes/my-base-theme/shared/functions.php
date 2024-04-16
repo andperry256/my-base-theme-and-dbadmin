@@ -234,6 +234,121 @@ function output_meta_data()
 
 //================================================================================
 /*
+* Function output_font_stylesheet_links
+*
+* This function is used to generate the stylesheet links for the main and header
+* fonts assigned within the given theme. It relies on access to Google Fonts.
+*
+* It generates the necessary CSS files in the root directory of the Base Theme if
+* not already present. To force regeneration of all such files, load any page on
+* the site with the parameter 'reloadfonts' appended to the URL.
+*/
+//================================================================================
+
+function output_font_stylesheet_links()
+{
+    global $base_theme_dir;
+    global $base_theme_url;
+    global $link_version;
+    global $main_font;
+    global $header_font;
+
+    // List of available fonts.
+    $google_fonts = array (
+        'Lato' => 'https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap',
+        'Montserrat' => 'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
+        'Noto Sans' => 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
+        'Open Sans' => 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap',
+        'Roboto' => 'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap',
+    );
+
+    // Set up variables for main and header fonts.
+    if ((!isset($main_font)) || (!isset($google_fonts[$main_font])))
+    {
+        // Valid main font not defined in site theme. Assign 'Noto Sans' by default.
+        $main_font = 'Noto Sans';
+    }
+    $lc_main_font = strtolower($main_font);
+    $lc_main_font = str_replace(' ','_',$lc_main_font);
+    if ((!isset($header_font)) || (!isset($google_fonts[$header_font])))
+    {
+        // Valid header font not defined in site theme. Assign 'Roboto' by default.
+        $header_font = 'Roboto';
+    }
+    $lc_header_font = strtolower($header_font);
+    $lc_header_font = str_replace(' ','_',$lc_header_font);
+
+    if (isset($_GET['reloadfonts']))
+    {
+        // Regenerate CSS files for all available fonts.
+        foreach ($google_fonts as $font => $link)
+        {
+            $lc_font = strtolower($font);
+            $lc_font = str_replace(' ','_',$lc_font);
+            $ofp = fopen("$base_theme_dir/main_font_$lc_font.css",'w');
+            fprintf($ofp,"html, p, li, td {\nfont-family: '$font', sans-serif;\n}\n");
+            fclose($ofp);
+            $ofp = fopen("$base_theme_dir/header_font_$lc_font.css",'w');
+            fprintf($ofp,"h1, h2, h3, h4, h5, h6 {\nfont-family: '$font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+    }
+    else
+    {
+        if (!is_file("$base_theme_dir/main_font_$lc_main_font.css"))
+        {
+            // Regenerate CSS file for assigned main font.
+            $ofp = fopen("$base_theme_dir/main_font_$lc_main_font.css",'w');
+            fprintf($ofp,"html, p, li, td {\nfont-family: '$main_font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+        if (!is_file("$base_theme_dir/header_font_$lc_header_font.css"))
+        {
+            // Regenerate CSS file for assigned header font.
+            $ofp = fopen("$base_theme_dir/header_font_$lc_header_font.css",'w');
+            fprintf($ofp,"h1, h2, h3, h4, h5, h6 {\nfont-family: '$header_font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+    }
+
+    // Create links to Google fonts.
+    print("\n");
+    print("<link rel='preconnect' href='https://fonts.googleapis.com'>\n");
+    print("<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>\n");
+    print("<link rel='stylesheet' id='main-font-css1'  href='{$google_fonts[$main_font]}' type='text/css' media='all' />\n");
+    if ($header_font != $main_font)
+    {
+        print("<link rel='stylesheet' id='header-font-css1'  href='{$google_fonts[$header_font]}' type='text/css' media='all' />\n");
+    }
+
+    // Create link to CSS for main font.
+    if (is_file("$base_theme_dir/main_font_$lc_main_font.css"))
+    {
+        print("<link rel='stylesheet' id='main-font-css2'  href='$base_theme_url/main_font_$lc_main_font.css?v=$link_version' media='all' />\n");
+    }
+    else
+    {
+        // This should not occur unless folder permissions prevent creation of CSS file.
+        print("<style>\nhtml, p, li, td {\nfont-family: '$main_font', sans-serif;\n</style>\n");
+    }
+
+    // Create link to CSS for header font.
+    if ($header_font != $main_font)
+    {
+        if (is_file("$base_theme_dir/header_font_$lc_header_font.css"))
+        {
+            print("<link rel='stylesheet' id='header-font-css2'  href='$base_theme_url/header_font_$lc_header_font.css?v=$link_version' media='all' />\n");
+        }
+        else
+        {
+            // This should not occur unless folder permissions prevent creation of CSS file.
+            print("<style>\nh1, h2, h3, h4, h5, h6 {\nfont-family: '$header_font', sans-serif;\n</style>\n");
+        }
+    }
+}
+
+//================================================================================
+/*
 * Function output_stylesheet_link
 *
 * This function is used to output a stylesheet link in the HTML header when
@@ -436,7 +551,7 @@ function simplify_html($content)
         generated HTML code. This is the default version but can be overridden by 
         declaring a custom version outside the function call.
         */
-        $allowed_tags = array('<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<i>','<u>');
+        $allowed_tags = array('<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<strong>','<i>','<em>','<u>');
     }
     if (!isset($simplified_tags))
     {
@@ -466,6 +581,8 @@ function simplify_html($content)
     {
         $content = simplify_html_tag($content,$tag);
     }
+    $content = str_replace('<li><p>','<li>',$content);
+    $content = str_replace('</p></li>','</li>',$content);
 
     return $content;
 }

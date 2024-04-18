@@ -205,7 +205,7 @@ button,
 html input[type="button"],
 input[type="reset"],
 input[type="submit"] {
-    -webkit-appearance: button;
+    /* -webkit-appearance: button; (DEPRECATED) */
     cursor: pointer;
 }
 

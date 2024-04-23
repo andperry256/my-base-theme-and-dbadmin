@@ -199,8 +199,13 @@ if (isset($_POST['submitted']))
         case 'last_year':
             $year = (int)date('Y') - 1;
             $month = date('m');
-            $start_month = year_start("$year-$month-01");
-            $end_month = year_end("$year-$month-01");
+            $day = date('d');
+            if ("$month-$day" == "02-29")
+            {
+                $day = '28';
+            }
+            $start_month = year_start("$year-$month-$day");
+            $end_month = year_end("$year-$month-$day");
             break;
     }
 }

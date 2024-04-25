@@ -1228,7 +1228,7 @@ function run_update($table,$option)
                 $record_offset = substr($key,7);
                 if (is_numeric($record_offset))
                 {
-                    $add_clause = get_session_var('sort_clause'). "LIMIT $record_offset,1";
+                    $add_clause = get_session_var('sort_clause'). " LIMIT $record_offset,1";
                     if (!empty(get_session_var('search_clause')))
                     {
                         $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";

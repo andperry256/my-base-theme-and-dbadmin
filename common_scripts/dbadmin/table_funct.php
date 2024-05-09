@@ -1741,7 +1741,7 @@ function renumber_records($table)
                 $set_fields = "{$row['seq_no_field']}";
                 $set_values = array('i',$temp_rec_id);
                 $where_clause = "{$row['sort_1_field']}=? AND {$row['seq_no_field']}=?";
-                $where_values = array('i',$row2[$row['sort_1_field']],'i',$row2[$row['seq_no_field']]);
+                $where_values = array('s',$row2[$row['sort_1_field']],'i',$row2[$row['seq_no_field']]);
                 mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
             }
             else

@@ -562,7 +562,7 @@ function copy_transaction($account,$seq_no,$new_date)
 */
 //==============================================================================
 
-function record_scheduled_transaction($account,$seq_no)
+function record_scheduled_transaction($account,$seq_no,$verbose=false)
 {
     global $db_admin_url, $local_site_dir, $finance_db_id;
     $db = admin_db_connect();
@@ -666,6 +666,21 @@ function record_scheduled_transaction($account,$seq_no)
         $where_clause = 'account=? AND transact_seq_no=?';
         $where_values = array('s',$account,'i',$seq_no);
         mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
+
+        if ($verbose)
+        {
+            // Output details to screen
+            $message = "Recorded scheduled transaction - {$row['date']} | $account | {$row['payee']} | ";
+            if ($debit_amount > 0)
+            {
+                $message .= sprintf("D %01.2f", $debit_amount);
+            }
+            else
+            {
+                $message .= sprintf("C %01.2f", $credit_amount);
+            }
+            print("$message<br />\n");
+        }
     
         // Send e-mail alert if required
         if (!empty($row['email_alert_id']))
@@ -693,7 +708,7 @@ function record_scheduled_transaction($account,$seq_no)
 */
 //==============================================================================
 
-function record_new_scheduled_transactions()
+function record_new_scheduled_transactions($verbose=false)
 {
     $db = admin_db_connect();
     $where_clause = 'date<=?';
@@ -701,7 +716,7 @@ function record_new_scheduled_transactions()
     $query_result = mysqli_select_query($db,'_view_scheduled_transactions','*',$where_clause,$where_values,'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
-        record_scheduled_transaction($row['account'],$row['seq_no']);
+        record_scheduled_transaction($row['account'],$row['seq_no'],$verbose);
     }
 }
 
@@ -881,7 +896,7 @@ function initialise_archive_table_data($db)
                 }
                 $splits_table = str_replace('transactions','splits',$table);
                 $fields = 'table_name,relationship_name,query';
-                $values = array('s',$table,'s','Splits','s',"SELECT * FROM $splits_table WHERE transact_seq_no=$seq_no");
+                $values = array('s',$table,'s','Splits','s','SELECT * FROM $splits_table WHERE transact_seq_no=$seq_no');
                 mysqli_insert_query($db,'dba_relationships',$fields,$values);
             }
             elseif (substr($table,9,5) == 'split')

@@ -207,11 +207,12 @@ function query_field_type($db,$table,$field_name)
     }
     if ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SHOW COLUMNS FROM $table WHERE Field='$field_name'")))
     {
-        if (preg_match('/int/',($row['Type'])))
+        $type_word = strtok($row['Type'],'(');
+        if (preg_match('/int/',($type_word)))
         {
             return 'i';
         }
-        elseif (preg_match('/dec/',($row['Type'])))
+        elseif (preg_match('/dec/',($type_word)))
         {
             return 'd';
         }

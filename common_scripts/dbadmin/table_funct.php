@@ -194,7 +194,7 @@ function generate_grid_styles($table)
         $base_table = get_table_for_field($table,$field_name);
     
         // Extract and save the grid co-ordinates for the given field.
-        $where_clause = 'table_name=? AND field_name? AND list_mobile=1';
+        $where_clause = 'table_name=? AND field_name=? AND list_mobile=1';
         $where_values = array('s',$base_table,'s',$field_name);
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
         if ($row2 = mysqli_fetch_assoc($query_result2))

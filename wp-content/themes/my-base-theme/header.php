@@ -30,7 +30,7 @@
 <?php
 wp_head();
 $themes_dir = get_theme_root();
-require("$themes_dir/my-base-theme/shared/setup_params.php");
+require("$themes_dir/my-base-theme/setup_params.php");
 output_meta_data();
 ?>
 </head>

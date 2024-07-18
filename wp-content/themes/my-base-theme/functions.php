@@ -185,7 +185,7 @@ require get_template_directory() . '/inc/jetpack.php';
 /*
  * Load additonal functions file.
  */
-require get_template_directory() . '/shared/functions.php';
+require get_template_directory() . '/shared_functions.php';
 
 //================================================================================
 endif;

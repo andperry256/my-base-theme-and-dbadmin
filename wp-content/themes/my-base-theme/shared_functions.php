@@ -1,7 +1,7 @@
 <?php
 //================================================================================
 /*
- * My Base Theme - Additional Functions
+ * My Base Theme - Shared Functions
  *
  * Includes functions that may need to be accessed:-
  * 1. By scripts running outside the WordPress environment.

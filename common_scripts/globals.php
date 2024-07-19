@@ -8,6 +8,7 @@ a number of key variables as global.
 
 global $base_dir;
 global $base_url;
+global $cache_dir;
 global $custom_pages_path;
 global $custom_pages_url;
 global $custom_scripts_path;

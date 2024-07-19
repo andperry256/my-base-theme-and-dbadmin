@@ -638,6 +638,109 @@ function simplify_html($content)
 }
 
 //================================================================================
+/*
+* Function recache_page
+*
+* This function is for use in conjuction with the 'WP Super Cache' plugin. It is
+* called to clear any cache files for a given page and then activate the page to
+* cause the cache to be regenerated (provided the page is configured to be cached).
+* A path to the page is provided as a parameter and this can be one of the
+* following:
+*
+* 1. The WordPress page name (slug).
+* 2. A full URI sub-path specifying the hierarchy of the page with its ancestors.
+*/
+//================================================================================
+
+function recache_page($page_path)
+{
+    global $cache_dir;
+    global $base_url;
+    if ((!isset($cache_dir)) || (!defined('WP_DBID')))
+    {
+        // Return with no action/error.
+        return;
+    }
+    $db = db_connect(WP_DBID);
+    if (strpos($page_path,'/') === false)
+    {
+        // Parameter is a page slug - build full sub-path by looping through page hierarchy.
+        $uri_subpath = '';
+        $where_clause = 'post_name=?';
+        $where_values = array('s',$page_path);
+        while($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'')))
+        {
+            $uri_subpath = "{$row['post_name']}/$uri_subpath";
+            if ($row['post_parent'] == 0)
+            {
+                break;
+            }
+            else
+            {
+                $where_clause = 'ID=?';
+                $where_values = array('i',$row['post_parent']);
+            }
+        }
+        if (substr($uri_subpath,0,5) == 'home/')
+        {
+            $uri_subpath = substr($uri_subpath,5);
+        }
+        $uri_subpath = trim($uri_subpath,'/');
+    }
+    else
+    {
+        // Parameter is a full URI sub-path.
+        $uri_subpath = $page_path;
+    }
+
+    // Determine path for subdirectory containing cache for given page.
+    $pos = strpos($base_url,'//');
+    $cache_subdir = "$cache_dir/supercache/".substr($base_url,$pos+2)."/$uri_subpath";
+    $cache_subdir = rtrim($cache_subdir,'/');
+
+    // Delete cache files for page.
+    $dirlist = scandir($cache_subdir);
+    foreach ($dirlist as $file)
+    {
+        if (is_file("$cache_subdir/$file"))
+        {
+            unlink("$cache_subdir/$file");
+        }
+    }
+
+    // Activate page to regenerate cache.
+    $dummy = file_get_contents("$base_url/$uri_subpath");
+}
+
+//================================================================================
+/*
+* Function recache_all_pages
+* 
+* This function is called to execute the recache_page function on all published
+* pages within the site.
+*/
+//================================================================================
+
+function recache_all_pages()
+{
+    global $argc;
+    if (defined('WP_DBID'))
+    {
+        $eol = (isset($argc)) ? "\n" : "<br />\n";
+        $db = db_connect(WP_DBID);
+        $where_clause = "post_type='page' AND post_status='publish'";
+        $where_values = array();
+        $add_clause = "ORDER BY post_name ASC";
+        $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
+        while ($row = mysqli_fetch_assoc($query_result))
+        {
+            print("Re-caching page [{$row['post_name']}]$eol");
+            recache_page($row['post_name']);
+        }
+    }
+}
+
+//================================================================================
 }
 //================================================================================
 ?>

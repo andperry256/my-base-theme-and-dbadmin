@@ -647,12 +647,15 @@ function simplify_html($content)
 * A path to the page is provided as a parameter and this can be one of the
 * following:
 *
-* 1. The WordPress page name (slug).
+* 1. The WordPress page name (slug). This option works for both posts and pages.
 * 2. A full URI sub-path specifying the hierarchy of the page with its ancestors.
+*
+* An optional parameter specifies a run count, allowing for the re-cache to be run
+* more than once (generally twice) in special situations.
 */
 //================================================================================
 
-function recache_page($page_path)
+function recache_page($page_path,$run_count=1)
 {
     global $cache_dir;
     global $base_url;
@@ -698,18 +701,21 @@ function recache_page($page_path)
     $cache_subdir = "$cache_dir/supercache/".substr($base_url,$pos+2)."/$uri_subpath";
     $cache_subdir = rtrim($cache_subdir,'/');
 
-    // Delete cache files for page.
-    $dirlist = scandir($cache_subdir);
-    foreach ($dirlist as $file)
+    for ($i=1; $i<=$run_count; $i++)
     {
-        if (is_file("$cache_subdir/$file"))
+        // Delete cache files for page.
+        $dirlist = scandir($cache_subdir);
+        foreach ($dirlist as $file)
         {
-            unlink("$cache_subdir/$file");
+            if (is_file("$cache_subdir/$file"))
+            {
+                unlink("$cache_subdir/$file");
+            }
         }
+    
+        // Activate page to regenerate cache.
+        $dummy = file_get_contents("$base_url/$uri_subpath");
     }
-
-    // Activate page to regenerate cache.
-    $dummy = file_get_contents("$base_url/$uri_subpath");
 }
 
 //================================================================================
@@ -717,24 +723,24 @@ function recache_page($page_path)
 * Function recache_all_pages
 * 
 * This function is called to execute the recache_page function on all published
-* pages within the site.
+* pages/posts within the site.
 */
 //================================================================================
 
-function recache_all_pages()
+function recache_all_pages($type='page')
 {
     global $argc;
     if (defined('WP_DBID'))
     {
         $eol = (isset($argc)) ? "\n" : "<br />\n";
         $db = db_connect(WP_DBID);
-        $where_clause = "post_type='page' AND post_status='publish'";
+        $where_clause = "post_type='$type' AND post_status='publish'";
         $where_values = array();
         $add_clause = "ORDER BY post_name ASC";
         $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
         {
-            print("Re-caching page [{$row['post_name']}]$eol");
+            print("Re-caching $type [{$row['post_name']}]$eol");
             recache_page($row['post_name']);
         }
     }

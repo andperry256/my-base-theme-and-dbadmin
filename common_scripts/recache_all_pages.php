@@ -16,7 +16,8 @@ if ($tok3 != 'public_html')
 }
 require("$root_dir/public_html/path_defs.php");
 require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
-recache_all_pages();
+recache_all_pages('page');
+recache_all_pages('post');
 
 //==============================================================================
 ?>

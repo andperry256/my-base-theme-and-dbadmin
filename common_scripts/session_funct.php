@@ -168,6 +168,15 @@ function run_session()
         // Close the session.
         session_write_close();
     }
+
+    /*
+      Run the 'post_run_session' function if present. It should be in the
+      functions.php script for the associated child theme.
+    */
+    if (function_exists('post_run_session'))
+    {
+        post_run_session();
+    }
 }
 
 //================================================================================

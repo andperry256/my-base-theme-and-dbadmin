@@ -559,8 +559,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
             if ($table == get_base_table($table,$db))
             {
                 if ((is_dir("$custom_pages_path/$relative_path/tables/$table")) ||
-                (is_dir("$alt_include_path/tables/$table")) ||
-                (substr($table,0,4) == 'dba_'))
+                    (is_dir("$alt_include_path/tables/$table")) ||
+                    (substr($table,0,4) == 'dba_'))
                 {
                     $fields = 'table_name';
                     $values = array('s',$table);

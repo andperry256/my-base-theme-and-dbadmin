@@ -30,15 +30,8 @@ if (($location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
     but with no active logout (i.e. where $_SESSION[SV_USER] is set but empty).
     Automatically log on as the default user.
     */
-    if (!isset($default_local_user))
-    {
-        $default_local_user = 'local';
-    }
-    update_session_var(SV_USER,$default_local_user);
-    if (defined('SV_ACCESS_LEVEL'))
-    {
-        update_session_var(SV_ACCESS_LEVEL,9);
-    }
+    update_session_var(SV_USER,DEFAULT_LOCAL_USER);
+    update_session_var(SV_ACCESS_LEVEL,SUPER_ACCESS_LEVEL);
 }
 
 if ((session_var_is_set(SV_USER)) && (!empty(get_session_var(SV_USER))))

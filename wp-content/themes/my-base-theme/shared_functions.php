@@ -747,6 +747,119 @@ function recache_all_pages($type='page')
 }
 
 //================================================================================
+/*
+Functions for handling user login status
+
+When these functions are to be used, the following constants must be pre-defined:
+
+SV_USER              - Session variable name for the username.
+SV_ACCESS_LEVEL      - Session variable name for the user access level.
+DEFAULT_ACCESS_LEVEL - Default access level when there is no logged in user.
+USER_LOGIN_TIMEOUT   - Idle timeout for a login session (in seconds).
+LOGIN_COOKIE_ID      - Variable name for the login cookie. Used to distinguish sites
+                       on the local server. Typically set to 'login_id' on a live
+                       site.
+LOGIN_COOKIE_PATH    - Server path for the login cookie. Used to distinguish sites
+                       on the local server. Should always be set to '/' on a live
+                       site.
+
+The function 'user_access_level' needs to be created as a site-specific function.
+
+The function 'put_user_additions' can optionally be created to perform any
+site-specific functions required when updating a user.
+*/
+//================================================================================
+
+function get_user()
+{
+    if (session_var_is_set(SV_USER))
+    {
+        // User logged in
+        return get_session_var(SV_USER);
+    }
+    else
+    {
+        // No user logged in
+        return '';
+    }
+}
+
+//================================================================================
+
+function put_user($username)
+{
+    if (empty($username))
+    {
+        // Perform operations for user logout
+        update_session_var(SV_USER,'');
+        update_session_var(SV_ACCESS_LEVEL,DEFAULT_ACCESS_LEVEL);
+        setcookie(LOGIN_COOKIE_ID,'',time()-3600,LOGIN_COOKIE_PATH);
+    }
+    else
+    {
+        // Perform operations for user login
+        update_session_var(SV_USER,$username);
+        update_session_var(SV_ACCESS_LEVEL,user_access_level($username));
+    }
+    // Perform any additional site-specific operations
+    if (function_exists('put_user_additions'))
+    {
+        put_user_additions($username);
+    }
+}
+
+//================================================================================
+
+function get_access_level()
+{
+    if (session_var_is_set(SV_ACCESS_LEVEL))
+    {
+        return get_session_var(SV_ACCESS_LEVEL);
+    }
+    else
+    {
+        return DEFAULT_ACCESS_LEVEL;
+    }
+}
+
+//================================================================================
+
+function check_login_status($db)
+{
+    $username = get_session_var(SV_USER);
+    $access_level = get_session_var(SV_ACCESS_LEVEL);
+    $current_time = time();
+    $purge_time = $current_time-USER_LOGIN_TIMEOUT-3600;
+    $expiry_time = $current_time+USER_LOGIN_TIMEOUT;
+    $date_and_time = date('Y-m-d H:i:s',$current_time);
+    mysqli_query($db,"DELETE FROM login_sessions WHERE update_time<$purge_time");
+    if (isset($_COOKIE[LOGIN_COOKIE_ID]))
+    {
+        $login_id = $_COOKIE[LOGIN_COOKIE_ID];
+        if ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM login_sessions WHERE id='$login_id'")))
+        {
+            if ($username === false)
+            {
+                // Session has timed out so refresh user details from cookie
+                put_user($db,$row['username']);
+            }
+            // Update login cookie and DB record
+            setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
+            mysqli_query($db,"UPDATE login_sessions SET update_time=$current_time,date_and_time=$'$date_and_time' WHERE id='$login_id'");
+        }
+    }
+    elseif ((!empty($username)) && (!empty($access_level)))
+    {
+        // New login - create cookie and associated login session record
+        $login_id = md5($username.date('YmdHis'));
+        $query = "INSERT INTO login_sessions (id,username,access_level,update_time,date_and_time)";
+        $query .= " VALUES ('$login_id','$username','$access_level',$current_time,'$date_and_time')";
+        mysqli_query($db,$query);
+        setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
+    }
+}
+
+//================================================================================
 }
 //================================================================================
 ?>

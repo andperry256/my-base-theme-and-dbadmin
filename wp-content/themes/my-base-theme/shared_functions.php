@@ -701,15 +701,19 @@ function recache_page($page_path,$run_count=1)
     $cache_subdir = "$cache_dir/supercache/".substr($base_url,$pos+2)."/$uri_subpath";
     $cache_subdir = rtrim($cache_subdir,'/');
 
+    // Run operation for prescribed number of times.
     for ($i=1; $i<=$run_count; $i++)
     {
         // Delete cache files for page.
-        $dirlist = scandir($cache_subdir);
-        foreach ($dirlist as $file)
+        if (is_dir($cache_subdir))
         {
-            if (is_file("$cache_subdir/$file"))
+            $dirlist = scandir($cache_subdir);
+            foreach ($dirlist as $file)
             {
-                unlink("$cache_subdir/$file");
+                if (is_file("$cache_subdir/$file"))
+                {
+                    unlink("$cache_subdir/$file");
+                }
             }
         }
     
@@ -743,6 +747,43 @@ function recache_all_pages($type='page')
             print("Re-caching $type [{$row['post_name']}]$eol");
             recache_page($row['post_name']);
         }
+    }
+}
+
+//================================================================================
+/*
+* Function create_cache_reload_link
+*
+* This function needs to be included in the theme header.php script. It will cause
+* the page to be immediately redirected a script which recaches and reloads the
+* page, on the condition that a 'recache indicator' has been supplied as a URL
+* parameter.
+*/
+//================================================================================
+
+function create_cache_reload_link()
+{
+    global $base_url;
+    $recache_indicator = (defined('RECACHE_INDICATOR')) ? RECACHE_INDICATOR : 'recache';
+    if (isset($_GET[$recache_indicator]))
+    {
+        $uri_path = $_SERVER['REQUEST_URI'];
+        $pos1 = strpos($uri_path,"?$recache_indicator");
+        $pos2 = strpos($uri_path,"&$recache_indicator");
+        if ($pos1 !== false)
+        {
+            $uri_path = substr($uri_path,0,$pos1);
+        }
+        elseif ($pos2 !== false)
+        {
+            $uri_path = substr($uri_path,0,$pos2);
+        }
+        $uri_path = trim($uri_path,'/');
+        if (empty($uri_path))
+        {
+            $uri_path = 'home';
+        }
+        print("<meta http-equiv=\"refresh\" content=\"0;URL='$base_url/common_scripts/load_recached_page.php?uripath=$uri_path'\" />\n");
     }
 }
 

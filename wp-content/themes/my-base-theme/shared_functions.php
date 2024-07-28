@@ -744,6 +744,7 @@ function recache_all_pages($type='page')
         $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
         {
+            set_time_limit(30);
             print("Re-caching $type [{$row['post_name']}]$eol");
             recache_page($row['post_name']);
         }

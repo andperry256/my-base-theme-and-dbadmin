@@ -36,9 +36,8 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 {
     global $custom_pages_path, $relative_path, $alt_include_path;
     global $widget_types;
-    global $argc;
     global $dbinfo, $location;
-    if (isset($argc))
+    if (empty($_SERVER['REMOTE_ADDR']))
     {
         $mode = 'command';
         $eol = "\n";

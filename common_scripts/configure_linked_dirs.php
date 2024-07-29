@@ -15,7 +15,7 @@ if (!isset($base_dir))
 }
 require_once("$base_dir/keycode.php");
 
-if (isset($argc))
+if (empty($_SERVER['REMOTE_ADDR']))
 {
     $mode = 'command';
     $eol = "\n";

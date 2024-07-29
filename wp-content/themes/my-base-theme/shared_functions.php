@@ -733,10 +733,9 @@ function recache_page($page_path,$run_count=1)
 
 function recache_all_pages($type='page')
 {
-    global $argc;
     if (defined('WP_DBID'))
     {
-        $eol = (isset($argc)) ? "\n" : "<br />\n";
+        $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
         $db = db_connect(WP_DBID);
         $where_clause = "post_type='$type' AND post_status='publish'";
         $where_values = array();

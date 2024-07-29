@@ -22,9 +22,9 @@ if ($tok1 == 'home')
     require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
     recache_all_pages('page');
     recache_all_pages('post');
-    if (function_exists('additional_recache_operations'))
+    if (function_exists('recache_additional_pages'))
     {
-        additional_recache_operations();
+        recache_additional_pages();
     }
 }
 else

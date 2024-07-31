@@ -12,6 +12,10 @@ originator script within the $_SESSION['post_vars'] array.
 //==============================================================================
 
 error_reporting(E_ALL & ~E_DEPRECATED);
+if ((!session_id()) && (!headers_sent()))
+{
+    session_start();
+}
 
 // Interpret the URL parameters
 if (isset($_GET['-action']))

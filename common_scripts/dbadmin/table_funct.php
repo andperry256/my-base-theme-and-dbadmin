@@ -873,13 +873,25 @@ function display_table($params)
         $record_id = encode_record_id($primary_key);
         foreach ($fields as $f => $ord)
         {
-            if ($mode == 'desktop')
+            /* */
+            $where_clause = 'table_name=? AND field_name=?';
+            $where_values = array('s',$base_table,'s',$f);
+            if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) && 
+                ($row2['widget_type'] == 'checkbox'))
             {
-                print("<td class=\"$style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></td>");
+                $value = ($row[$f]) ? '[*]' : '';
             }
             else
             {
-                print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">{$row[$f]}</a></div> <!-- .table-listing-cell -->");
+                $value = $row[$f];
+            }
+            if ($mode == 'desktop')
+            {
+                print("<td class=\"$style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></td>");
+            }
+            else
+            {
+                print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></div> <!-- .table-listing-cell -->");
             }
         }
         print("\n");

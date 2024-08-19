@@ -879,7 +879,7 @@ function display_table($params)
             if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) && 
                 ($row2['widget_type'] == 'checkbox'))
             {
-                $value = ($row[$f]) ? '[*]' : '';
+                $value = ($row[$f]) ? '[X]' : '';
             }
             else
             {

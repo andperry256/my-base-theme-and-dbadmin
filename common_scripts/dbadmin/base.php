@@ -359,6 +359,7 @@ function display_main_content($mode)
 //==============================================================================
 
 $db = admin_db_connect();
+update_session_var(array('dbauth',admin_db_name()),1);
 
 // Temporary code
 mysqli_query_normal($db,"DROP TABLE dba_master_location");

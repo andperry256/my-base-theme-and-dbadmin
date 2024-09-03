@@ -15,7 +15,6 @@ Function encode_record_id
 function encode_record_id($fields)
 {
     $result = '';
-    ksort($fields);
     foreach($fields as $name => $value)
     {
         $result .= urlencode($name).'='.urlencode($value).'/';

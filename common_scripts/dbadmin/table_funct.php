@@ -703,6 +703,7 @@ function display_table($params)
         print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=$table\">New&nbsp;Record</a></div>\n");
     }
     print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table&-showall\">Show&nbsp;All</a></div>\n");
+    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/display_table.php?dbname=".admin_db_name()."&table=$table\" target=\"_blank\">Print</a></div>\n");
     if (isset($params['additional_links']))
     {
         print($params['additional_links']);

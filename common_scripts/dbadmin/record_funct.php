@@ -12,9 +12,12 @@ value is found.
 */
 //==============================================================================
 
-function get_table_info_field($table,$field_name)
+function get_table_info_field($table,$field_name,$db=false)
 {
-    $db = admin_db_connect();
+    if ($db === false)
+    {
+        $db = admin_db_connect();
+    }
     $count = 0;
     $where_clause = 'table_name=?';
     $where_values = array('s',$table);
@@ -33,9 +36,8 @@ function get_table_info_field($table,$field_name)
     return '';
 }
 
-function get_table_fields_field($table,$field_name,$field)
+function get_table_fields_field($table,$field_name,$field,$db)
 {
-    $db = admin_db_connect();
     $count = 0;
     $where_clause = 'table_name=?';
     $where_values = array('s',$table);
@@ -66,13 +68,16 @@ alternate label if available, otherwise the standard label.
 */
 //==============================================================================
 
-function field_label($table,$field)
+function field_label($table,$field,$db=false)
 {
-    $db = admin_db_connect();
-    $label = get_table_fields_field($table,$field,'alt_label');
+    if ($db === false)
+    {
+        $db = admin_db_connect();
+    }
+    $label = get_table_fields_field($table,$field,'alt_label',$db);
     if (empty($label))
     {
-        $label = get_table_fields_field($table,$field,'field_name');
+        $label = get_table_fields_field($table,$field,'field_name',$db);
         $label = str_replace('-',' ',$label);
         $label = str_replace('_',' ',$label);
         $label = ucwords($label);

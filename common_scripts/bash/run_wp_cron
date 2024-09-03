@@ -21,11 +21,11 @@ fi
 $cmd
 if [ -e "$sitepath/maintenance/wp_cron_additions" ]
 then
-    # Run any site specific BASH script commands
+    # Run any site specific operations (BASH)
     $sitepath/maintenance/wp_cron_additions.php
 fi
 if [ -e "$sitepath/maintenance/wp_cron_additions.php" ]
 then
-    # Run any site specific PHP functions
+    # Run any site specific operations (PHP)
     $phpcmd "$sitepath/maintenance/wp_cron_additions.php"
 fi

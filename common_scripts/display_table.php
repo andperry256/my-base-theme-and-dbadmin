@@ -108,7 +108,7 @@ foreach ($display_fields as $order => $field)
 print("</tr>\n");
 
 $add_clause = "ORDER BY $pklist";
-$query_result = mysqli_select_query($db,$base_table,'*','',array(),$add_clause);
+$query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     print("<tr>");
@@ -116,8 +116,8 @@ while ($row = mysqli_fetch_assoc($query_result))
     {
         if (strpos($excluded_fields,"^$field^") === false)
         {
-            $where_clause = 'field_name=?';
-            $where_values = array('s',$field);
+            $where_clause = 'table_name=? AND field_name=?';
+            $where_values = array('s',$base_table,'s',$field);
             if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) && 
                 ($row2['widget_type'] == 'checkbox'))
             {

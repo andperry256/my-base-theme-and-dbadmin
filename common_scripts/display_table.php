@@ -46,7 +46,7 @@ require("$base_dir/non_wp_header.php");
 <?php
 //==============================================================================
 
-// Connect to database
+// Connect to database.
 foreach ($dbinfo as $id => $data)
 {
     if ((($location == 'local') && ($data[0] == $dbname)) ||
@@ -63,7 +63,7 @@ if (empty($db))
 
 print("<h2>Table [$table]</h2>\n");
 
-// Build lists of primary keys and fields to display
+// Build lists of primary keys and fields to display.
 $base_table = get_base_table($table,$db);
 $display_fields = array();
 $pklist = '';
@@ -85,8 +85,6 @@ while ($row = mysqli_fetch_assoc($query_result))
     }
 }
 $excluded_fields = (isset($_GET['excluded'])) ? $_GET['excluded'] : '^';
-
-// Output the table
 $pklist = rtrim($pklist,',');
 if (empty($pklist))
 {
@@ -94,6 +92,11 @@ if (empty($pklist))
 }
 
 print("<table>\n");
+
+/*
+Output the table header line. Each field name is output as a link to reload the
+page with that particular field excluded.
+*/
 print("<tr>");
 foreach ($display_fields as $order => $field)
 {
@@ -107,7 +110,12 @@ foreach ($display_fields as $order => $field)
 }
 print("</tr>\n");
 
-$add_clause = "ORDER BY $pklist";
+/*
+Main loop to output the table records. The primary keys are only used to order
+the records in the case of a base table. When a view is being processed, it is
+assumed that the definition of the view itself will dictate the order.
+*/
+$add_clause = ($table == $base_table) ? "ORDER BY $pklist" : '';
 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {

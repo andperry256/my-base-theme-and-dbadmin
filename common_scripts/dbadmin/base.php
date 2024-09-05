@@ -142,7 +142,7 @@ function display_mobile_close_sidebar_button()
 
 function display_main_content($mode)
 {
-    global $custom_pages_path,$custom_pages_url,$base_url,$relative_path, $alt_include_path;
+    global $custom_pages_path,$custom_pages_url,$base_url,$relative_path, $relative_sub_path, $alt_include_path;
     $db = admin_db_connect();
   
     // Process the URL parameters
@@ -175,10 +175,19 @@ function display_main_content($mode)
     {
         $record_id = $_GET['-recordid'];
     }
-  
-    if ((!isset($action)) || ((isset($action)) && ($action == 'home')))
+    
+    if ((!isset($action)) || ($action == 'home') || ($action == 'main'))
     {
-        // No action specified so open the default page
+        // Reset table filtering if going to the main page.
+        update_session_var("$relative_sub_path-filtered-table",$table);
+        update_session_var("$relative_sub_path-sort-level",0);
+        update_session_var("$relative_sub_path-sort-clause",'');
+        update_session_var("$relative_sub_path-search-clause",'');
+    }
+
+    if ((!isset($action)) || ($action == 'home'))
+    {
+        // No action specified so open the default page.
         if (is_file("$custom_pages_path/$relative_path/actions/home.php"))
         {
             include("$custom_pages_path/$relative_path/actions/home.php");
@@ -205,7 +214,7 @@ function display_main_content($mode)
             output_page_header();
         }
     
-        // Process the given action
+        // Process the given action.
         if (isset($table))
         {
             check_new_action($action,$table);

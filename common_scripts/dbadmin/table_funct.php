@@ -364,6 +364,17 @@ function generate_grid_styles($table)
 
 //==============================================================================
 /*
+Function combined_add_clause
+*/
+//==============================================================================
+
+function combined_add_clause($search_clause,$add_clause)
+{
+    return (!empty($search_clause)) ? "WHERE $search_clause $add_clause" : $add_clause;
+}
+
+//==============================================================================
+/*
 Function display_table
 */
 //==============================================================================
@@ -566,11 +577,7 @@ function display_table($params)
     }
 
     // Calculate pagination parameters
-    $add_clause = $sort_clause;
-    if (!empty($search_clause))
-    {
-        $add_clause = "WHERE $search_clause $add_clause";
-    }
+    $add_clause = combined_add_clause($search_clause,$sort_clause);
     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
     $table_size = mysqli_num_rows($query_result);
     $page_count = ceil($table_size / $list_size);
@@ -731,11 +738,7 @@ function display_table($params)
 
     // Process table records
     $record_offset = $start_offset;
-    $add_clause = "$sort_clause LIMIT $start_offset,$list_size";
-    if (!empty($search_clause))
-    {
-        $add_clause = "WHERE $search_clause $add_clause";
-    }
+    $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $start_offset,$list_size");
     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
     $row_no = 0;
     while ($row = mysqli_fetch_assoc($query_result))
@@ -944,11 +947,7 @@ function delete_record_set($table)
             // Build up array of deletions indexed by record ID.
             if (is_numeric($record_offset))
             {
-                $add_clause = "$sort_clause LIMIT $record_offset,1";
-                if (!empty($search_clause))
-                {
-                    $add_clause = "WHERE $search_clause $add_clause";
-                }
+                $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $record_offset,1");
                 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                 if ($row = mysqli_fetch_assoc($query_result))
                 {
@@ -1174,11 +1173,7 @@ function run_update($table,$option)
                 $record_offset = substr($key,7);
                 if (is_numeric($record_offset))
                 {
-                    $add_clause = "$sort_clause LIMIT $record_offset,1";
-                    if (!empty($search_clause))
-                    {
-                        $add_clause = "WHERE $search_clause $add_clause";
-                    }
+                    $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $record_offset,1");
                     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                     if ($row = mysqli_fetch_assoc($query_result))
                     {
@@ -1199,11 +1194,7 @@ function run_update($table,$option)
     }
     elseif ($option == 'all')
     {
-        $add_clause = $sort_clause;
-        if (!empty($search_clause))
-        {
-            $add_clause = "WHERE $search_clause $add_clause";
-        }
+        $add_clause = combined_add_clause($search_clause,$sort_clause);
         $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
         $record_count = mysqli_num_rows($query_result);
         for ($record_offset=0; $record_offset<$record_count; $record_offset++)
@@ -1495,11 +1486,7 @@ function run_copy($table)
             $record_offset = substr($key,7);
             if (is_numeric($record_offset))
             {
-                $add_clause = "$sort_clause LIMIT $record_offset,1";
-                if (!empty($search_clause))
-                {
-                    $add_clause = "WHERE $search_clause $add_clause";
-                }
+                $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $record_offset,1");
                 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                 if ($row = mysqli_fetch_assoc($query_result))
                 {

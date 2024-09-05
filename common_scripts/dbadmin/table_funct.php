@@ -133,19 +133,15 @@ Function page_link_url
 */
 //==============================================================================
 
-function page_link_url($page_no,$relationships='')
+function page_link_url($page_no,$where_par='')
 {
     global $base_url, $relative_path;
-    global $page_url_table,$page_url_list_size,$page_url_search_string;
+    global $page_url_table,$page_url_list_size;
     $page_offset = $page_url_list_size * ($page_no - 1);
     $url = "$base_url/$relative_path/?-table=$page_url_table&-startoffset=$page_offset&-listsize=$page_url_list_size";
-    if ($relationships == 'show')
+    if (!empty($where_par))
     {
-        $url .= "&-showrelationships";
-    }
-    elseif ($relationships == 'hide')
-    {
-        $url .= "&-hiderelationships";
+        $url .= "&-where=".urlencode($where_par);
     }
     return $url;
 }
@@ -385,6 +381,7 @@ function display_table($params)
     global $widget_types;
     global $db_admin_dir;
     global $display_table;
+    global $page_url_table, $page_url_list_size;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     print("<style>\n".file_get_contents("$db_admin_dir/page_link_styles.css")."</style>\n");
@@ -455,36 +452,52 @@ function display_table($params)
     {
         $start_offset = 0;
     }
-    if (isset($_GET['-showrelationships']))
-    {
-        update_session_var('show_relationships',true);
-    }
-    elseif (isset($_GET['-hiderelationships']))
-    {
-        update_session_var('show_relationships',false);
-    }
 
-    // Initialise table filtering if not set
-    if (get_session_var("$relative_sub_path-filtered-table") != $table)
+    if (!empty($_GET['-where']))
     {
-        update_session_var("$relative_sub_path-filtered-table",$table);
-        update_session_var("$relative_sub_path-sort-level",0);
-        update_session_var("$relative_sub_path-sort-clause",'');
-        update_session_var("$relative_sub_path-search-clause",'');
+        $where_par = stripslashes($_GET['-where']);
     }
-
-    // Retrieve table filter data
-    $sort_level = get_session_var("$relative_sub_path-sort-level");
-    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
-    $field_sort_level = array();
-    $field_sort_order = array();
-    for ($i=1; $i<=$sort_level; $i++)
+    elseif (!empty($_POST['-where']))
     {
-        $field = get_session_var("$relative_sub_path-sort-field-$i");
-        $field_sort_level[$field] = $i;
-        $field_sort_order[$field] = get_session_var("$relative_sub_path-sort-order-$i");
+        $where_par = stripslashes($_POST['-where']);
     }
-    $search_clause = get_session_var("$relative_sub_path-search-clause");
+    else
+    {
+        $where_par = '';
+    }
+    if (empty($where_par))
+    {
+        // Initialise table filtering if not set
+        if (get_session_var("$relative_sub_path-filtered-table") != $table)
+        {
+            update_session_var("$relative_sub_path-filtered-table",$table);
+            update_session_var("$relative_sub_path-sort-level",0);
+            update_session_var("$relative_sub_path-sort-clause",'');
+            update_session_var("$relative_sub_path-search-clause",'');
+            update_session_var("$relative_sub_path-show-relationships",false);
+        }
+    
+        // Retrieve table filter data
+        $sort_level = get_session_var("$relative_sub_path-sort-level");
+        $sort_clause = get_session_var("$relative_sub_path-sort-clause");
+        $field_sort_level = array();
+        $field_sort_order = array();
+        for ($i=1; $i<=$sort_level; $i++)
+        {
+            $field = get_session_var("$relative_sub_path-sort-field-$i");
+            $field_sort_level[$field] = $i;
+            $field_sort_order[$field] = get_session_var("$relative_sub_path-sort-order-$i");
+        }
+        $search_clause = get_session_var("$relative_sub_path-search-clause");
+        $show_relationships = get_session_var("$relative_sub_path-show-relationships");
+    }
+    else
+    {
+        // Do not interact with session variables when $_GET['-where'] is set. 
+        $sort_clause = '';
+        $search_clause = $where_par;
+        $show_relationships = false;
+    }
 
     $display_table = true;
     $form_started = false;
@@ -584,10 +597,9 @@ function display_table($params)
     $current_page = floor($start_offset / $list_size +1);
 
     // Generate the page links
-    global $page_url_table,$page_url_list_size;
     $page_url_table = $table;
     $page_url_list_size = $list_size;
-    $page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url');
+    $page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url',$where_par);
 
     // Determine the access level for the table
     $access_level = get_table_access_level($table);
@@ -596,15 +608,17 @@ function display_table($params)
     if (!$form_started)
     {
         /*
-        The target URL of the post is to the same script for the same table. A
-        post is only performed for update, copy and delete requests, or to apply a
-        search, for all of which the next stage is performed by a second iteration
-        of the current script.
+        The target URL of the post is to the same script for the same table. A post
+        is only performed for update, copy and delete requests, for all of which the
+        next stage is performed by a second iteration of the current script.
         */
-        print("<form method=\"post\" action=\"$base_url/common_scripts/dbadmin/apply_table_search.php?sub_path=$relative_sub_path\">\n");
-        print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
-        print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></div>\n");
-        print("</form><br />\n");
+        if (empty($where_par))
+        {
+            print("<form method=\"post\" action=\"$base_url/common_scripts/dbadmin/apply_table_search.php?sub_path=$relative_sub_path\">\n");
+            print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
+            print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></div>\n");
+            print("</form><br />\n");
+        }
         print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
     }
 
@@ -620,17 +634,11 @@ function display_table($params)
     $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
     $where_values = array('s',$base_table);
     $query_result = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
-    if (mysqli_num_rows($query_result) > 0)
+    if ((empty($where_par)) && (mysqli_num_rows($query_result) > 0))
     {
         // One or more select relationships are defined for the given table
-        if (get_session_var('show_relationships'))
-        {
-            print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".page_link_url($current_page,'hide')."\">Hide Relationships</a></div>\n");
-        }
-        else
-        {
-            print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"".page_link_url($current_page,'show')."\">Show Relationships</a></div>\n");
-        }
+        $option = ($show_relationships) ? 'Hide' : 'Show';
+        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/show_hide_relationships.php?sub_path=$relative_sub_path&option=$option\">$option Relationships</a></div>\n");
     }
     print("</p>\n");
     if ($access_level == 'full')
@@ -698,7 +706,9 @@ function display_table($params)
     foreach ($fields as $f => $ord)
     {
         // Output the field name with a sort link
-        $sort_link = "$base_url/common_scripts/dbadmin/apply_table_sort.php?sub_path=$relative_sub_path&field=$f";
+        $sort_link = (empty($where_par))
+            ? "$base_url/common_scripts/dbadmin/apply_table_sort.php?sub_path=$relative_sub_path&field=$f"
+            : '#';
         if ($mode == 'desktop')
         {
             print("<td class=\"table-listing-header\"><a href=\"$sort_link\">");
@@ -835,7 +845,7 @@ function display_table($params)
             // Mobile mode - </div> is output below (after relationships)
         }
     
-        if (get_session_var('show_relationships'))
+        if ($show_relationships)
         {
             if ($mode == 'desktop')
             {
@@ -919,6 +929,7 @@ function display_table($params)
     {
         print("</div> <!-- display:none -->\n");
     }
+    print("<input type=\"hidden\" name=\"-where\" value=\"$where_par\"/>");
     print("<input type=\"hidden\" name=\"submitted\" id=\"submitted\"/>");
     print("</form>\n");
 }

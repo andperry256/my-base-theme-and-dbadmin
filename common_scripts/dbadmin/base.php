@@ -183,6 +183,7 @@ function display_main_content($mode)
         update_session_var("$relative_sub_path-sort-level",0);
         update_session_var("$relative_sub_path-sort-clause",'');
         update_session_var("$relative_sub_path-search-clause",'');
+        update_session_var("$relative_sub_path-show-relationships",false);
     }
 
     if ((!isset($action)) || ($action == 'home'))
@@ -368,7 +369,6 @@ function display_main_content($mode)
 //==============================================================================
 
 $db = admin_db_connect();
-update_session_var(array('',admin_db_name()),1);
 
 // Temporary code
 mysqli_query_normal($db,"DROP TABLE dba_master_location");

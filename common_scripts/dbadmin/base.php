@@ -359,7 +359,7 @@ function display_main_content($mode)
 //==============================================================================
 
 $db = admin_db_connect();
-update_session_var(array('dbauth',admin_db_name()),1);
+update_session_var(array('',admin_db_name()),1);
 
 // Temporary code
 mysqli_query_normal($db,"DROP TABLE dba_master_location");
@@ -373,6 +373,7 @@ if ((!isset($support_mobile)) || (!($support_mobile)))
     print("<div class=\"no-mobile-support\"><strong>N.B. </strong>This page is not optimised for mobile viewing. For a better user experience please use a computer or tablet.</div>\n");
 }
 $db_sub_path = str_replace('dbadmin/','',$relative_path);
+update_session_var("dbauth-$db_sub_path",1);
 if (($db_master_location[$db_sub_path] != $location) &&
     ((!isset($override_db_sync_warning[$db_sub_path])) || (!$override_db_sync_warning[$db_sub_path])))
 {

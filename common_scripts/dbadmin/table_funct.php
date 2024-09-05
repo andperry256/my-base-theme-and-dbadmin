@@ -136,22 +136,9 @@ Function page_link_url
 function page_link_url($page_no,$relationships='')
 {
     global $base_url, $relative_path;
-    global $page_url_table,$page_url_list_size,$page_url_search_string,$page_url_sort_field,$page_url_sort_order;
+    global $page_url_table,$page_url_list_size,$page_url_search_string;
     $page_offset = $page_url_list_size * ($page_no - 1);
     $url = "$base_url/$relative_path/?-table=$page_url_table&-startoffset=$page_offset&-listsize=$page_url_list_size";
-    if (!empty($page_url_search_string))
-    {
-        $search_par = urlencode($page_url_search_string);
-        $url .= "&-search=$search_par";
-    }
-    if (!empty($page_url_sort_field))
-    {
-        $url .= "&-sortfield=$page_url_sort_field";
-    }
-    if (!empty($page_url_sort_order))
-    {
-        $url .= "&-sortorder=$page_url_sort_order";
-    }
     if ($relationships == 'show')
     {
         $url .= "&-showrelationships";
@@ -383,8 +370,7 @@ Function display_table
 
 function display_table($params)
 {
-    global $base_url, $relative_path, $location;
-    global $search_clause;
+    global $base_url, $relative_path, $relative_sub_path, $location;
     global $widget_types;
     global $db_admin_dir;
     global $display_table;
@@ -467,52 +453,27 @@ function display_table($params)
         update_session_var('show_relationships',false);
     }
 
-    /*
-    Set up the display filters (for search and sort) apart from the creation of
-    a new search filter, which is done later on when processing a post with a
-    search string.
-    Also if the '-where' URL parameter is set, which happens if the page is
-    invoked via a relationship link, the search filter is used for the associated
-    WHERE clause,
-    */
-    $lc_search_string = '';
-    $sort_field = '';
-    $sort_order = '';
-    if (isset($_GET['-where']))
+    // Initialise table filtering if not set
+    if (get_session_var("$relative_sub_path-filtered-table") != $table)
     {
-        $where_clause = stripslashes($_GET['-where']);
-        update_session_var('search_clause',$where_clause);
-    }
-    if (!session_var_is_set('filtered_table'))
-    {
-        update_session_var('filtered_table','');
+        update_session_var("$relative_sub_path-filtered-table",$table);
+        update_session_var("$relative_sub_path-sort-level",0);
+        update_session_var("$relative_sub_path-sort-clause",'');
+        update_session_var("$relative_sub_path-search-clause",'');
     }
 
-    // Initialise the search filter if not set
-    if (!session_var_is_set('search_clause'))
+    // Retrieve table filter data
+    $sort_level = get_session_var("$relative_sub_path-sort-level");
+    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
+    $field_sort_level = array();
+    $field_sort_order = array();
+    for ($i=1; $i<=$sort_level; $i++)
     {
-        update_session_var('search_clause','');
+        $field = get_session_var("$relative_sub_path-sort-field-$i");
+        $field_sort_level[$field] = $i;
+        $field_sort_order[$field] = get_session_var("$relative_sub_path-sort-order-$i");
     }
-
-    if ((isset($_GET['-sortfield'])) && (isset($_GET['-sortorder'])))
-    {
-        // Apply a sort filter
-        $sort_field = $_GET['-sortfield'];
-        $sort_order = $_GET['-sortorder'];
-        update_session_var('sort_clause',"ORDER BY $sort_field ".strtoupper($sort_order));
-    }
-    elseif (!session_var_is_set('sort_clause'))
-    {
-        update_session_var('sort_clause','');
-    }
-    else
-    {
-        // Leave the existing sort filter in place.
-        $tempstr = str_replace('ORDER BY ','',get_session_var('sort_clause'));
-        $sort_field = strtok($tempstr,' ');
-        $sort_order = strtolower(strtok(' '));
-    }
-    update_session_var('filtered_table',$table);
+    $search_clause = get_session_var("$relative_sub_path-search-clause");
 
     $display_table = true;
     $form_started = false;
@@ -530,40 +491,6 @@ function display_table($params)
     
         switch ($submit_option)
         {
-            case 'apply_search':
-                // Apply new search filter
-                update_session_var('search_clause','');
-                if (!empty($_POST['search_string']))
-                {
-                    $lc_search_string = strtolower($_POST['search_string']);
-                    $search_clause = '';
-                    $field_processed = false;
-                    $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-                    while ($row = mysqli_fetch_assoc($query_result))
-                    {
-                        $field_name = $row['Field'];
-                        $where_clause = 'table_name=? AND field_name=?';
-                        $where_values = array('s',$base_table,'s',$field_name);
-                        $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-                        if ($row2 = mysqli_fetch_assoc($query_result2))
-                        {
-                            if (($widget_types[$row2['widget_type']]) && (!$row2['exclude_from_search']))
-                            {
-                                if ($field_processed)
-                                {
-                                    $search_clause .= " OR";
-                                }
-                                $field_processed = true;
-                                $search_clause .= " LOWER($field_name) LIKE '%";
-                                $search_clause .= mysqli_real_escape_string($db,$lc_search_string);
-                                $search_clause .= "%'";
-                                update_session_var('search_clause',$search_clause);
-                            }
-                        }
-                    }
-                }
-                break;
-    
             case 'delete':
                 $result = delete_record_set($table);
                 break;
@@ -639,10 +566,10 @@ function display_table($params)
     }
 
     // Calculate pagination parameters
-    $add_clause = get_session_var('sort_clause');
-    if (!empty(get_session_var('search_clause')))
+    $add_clause = $sort_clause;
+    if (!empty($search_clause))
     {
-        $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+        $add_clause = "WHERE $search_clause $add_clause";
     }
     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
     $table_size = mysqli_num_rows($query_result);
@@ -650,17 +577,15 @@ function display_table($params)
     $current_page = floor($start_offset / $list_size +1);
 
     // Generate the page links
-    global $page_url_table,$page_url_list_size,$page_url_search_string,$page_url_sort_field,$page_url_sort_order;
+    global $page_url_table,$page_url_list_size;
     $page_url_table = $table;
     $page_url_list_size = $list_size;
-    $page_url_search_string = $lc_search_string;
-    $page_url_sort_field = $sort_field;
-    $page_url_sort_order = $sort_order;
     $page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url');
 
     // Determine the access level for the table
     $access_level = get_table_access_level($table);
 
+    print("<h2>Table $table</h2>");
     if (!$form_started)
     {
         /*
@@ -669,6 +594,10 @@ function display_table($params)
         search, for all of which the next stage is performed by a second iteration
         of the current script.
         */
+        print("<form method=\"post\" action=\"$base_url/common_scripts/dbadmin/apply_table_search.php?sub_path=$relative_sub_path\">\n");
+        print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
+        print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></div>\n");
+        print("</form><br />\n");
         print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
     }
 
@@ -677,7 +606,6 @@ function display_table($params)
     print("<input type=\"hidden\" name=\"listsize\" value=\"$list_size\"/>\n");
 
     // Output top navigation
-    print("<h2>Table $table</h2>");
     print("<p class=\"small\">Found $table_size records");
     print("&nbsp;&nbsp;&nbsp;Showing&nbsp;<input class=\"small\" name=\"listsize2\" value=$list_size size=4>&nbsp;results&nbsp;per&nbsp;page");
     print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Apply\" onClick=\"submitForm(this.form)\"/></p>");
@@ -703,13 +631,11 @@ function display_table($params)
         print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=$table\">New&nbsp;Record</a></div>\n");
     }
     print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table&-showall\">Show&nbsp;All</a></div>\n");
-    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/display_table.php?dbname=".admin_db_name()."&table=$table\" target=\"_blank\">Print</a></div>\n");
+    print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/display_table.php?sub_path=$relative_sub_path&table=$table\" target=\"_blank\">Print</a></div>\n");
     if (isset($params['additional_links']))
     {
         print($params['additional_links']);
     }
-    print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
-    print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></div>\n");
     print("<div style=\"clear:both\">&nbsp;</div>\n");
     // End of top navigation
 
@@ -765,32 +691,33 @@ function display_table($params)
     foreach ($fields as $f => $ord)
     {
         // Output the field name with a sort link
-        if ($sort_field == $f)
+        $sort_link = "$base_url/common_scripts/dbadmin/apply_table_sort.php?sub_path=$relative_sub_path&field=$f";
+        if ($mode == 'desktop')
         {
-            // There is already a sort order in force on the given field.
-            if (strtolower($sort_order) == 'asc')
-            {
-                $new_sort_order = 'desc';
-            }
-            else
-            {
-                $new_sort_order = 'asc';
-            }
+            print("<td class=\"table-listing-header\"><a href=\"$sort_link\">");
         }
         else
         {
-            // Applying sort for first time to new field.
-            $new_sort_order = 'asc';
+            print("<div class=\"table-listing-cell field-$f table-listing-header\"><a href=\"$sort_link\">");
+        }
+        print(field_label($table,$f));
+        if (isset($field_sort_level[$f]))
+        {
+            // Output details of sort
+            print("<br /><span style=\"font-size:0.8em\">");
+            if ($sort_level > 1)
+            {
+                print("[{$field_sort_level[$f]}]");
+            }
+            print("[".strtolower($field_sort_order[$f])."]</span>");
         }
         if ($mode == 'desktop')
         {
-            print("<td class=\"table-listing-header\"><a href=\"./?-table=$table&-reorder&-sortfield=$f&-sortorder=$new_sort_order\">");
-            print(field_label($table,$f)."</a></td>");
+            print("</a></td>");
         }
         else
         {
-            print("<div class=\"table-listing-cell field-$f table-listing-header\"><a href=\"./?-table=$table&-reorder&-sortfield=$f&-sortorder=$new_sort_order\">");
-            print(field_label($table,$f)."</a></div <!-- .table-listing-cell -->");
+            print("</a></div <!-- .table-listing-cell -->");
         }
     }
     if ($mode == 'desktop')
@@ -804,10 +731,10 @@ function display_table($params)
 
     // Process table records
     $record_offset = $start_offset;
-    $add_clause = get_session_var('sort_clause')." LIMIT $start_offset,$list_size";
-    if (!empty(get_session_var('search_clause')))
+    $add_clause = "$sort_clause LIMIT $start_offset,$list_size";
+    if (!empty($search_clause))
     {
-        $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+        $add_clause = "WHERE $search_clause $add_clause";
     }
     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
     $row_no = 0;
@@ -1001,10 +928,13 @@ Function delete_record_set
 
 function delete_record_set($table)
 {
+    global $relative_sub_path;
     $db = admin_db_connect();
     $base_table = get_base_table($table);
     $primary_keys = array();
     $deletions = array();
+    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
+    $search_clause = get_session_var("$relative_sub_path-search-clause");
     foreach ($_POST as $key => $value)
     {
         if (substr($key,0,7) == 'select_')
@@ -1014,10 +944,10 @@ function delete_record_set($table)
             // Build up array of deletions indexed by record ID.
             if (is_numeric($record_offset))
             {
-                $add_clause = get_session_var('sort_clause')." LIMIT $record_offset,1";
-                if (!empty(get_session_var('search_clause')))
+                $add_clause = "$sort_clause LIMIT $record_offset,1";
+                if (!empty($search_clause))
                 {
-                    $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+                    $add_clause = "WHERE $search_clause $add_clause";
                 }
                 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                 if ($row = mysqli_fetch_assoc($query_result))
@@ -1224,12 +1154,15 @@ Function run_update
 
 function run_update($table,$option)
 {
+    global $relative_sub_path;
     global $location;
     $post_copy = array_deslash($_POST);
     $db = admin_db_connect();
     $base_table = get_base_table($table);
     $primary_keys = array();
     $updates = array();
+    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
+    $search_clause = get_session_var("$relative_sub_path-search-clause");
 
     // Build up array of updates indexed by record ID.
     if ($option == 'selection')
@@ -1241,10 +1174,10 @@ function run_update($table,$option)
                 $record_offset = substr($key,7);
                 if (is_numeric($record_offset))
                 {
-                    $add_clause = get_session_var('sort_clause'). " LIMIT $record_offset,1";
-                    if (!empty(get_session_var('search_clause')))
+                    $add_clause = "$sort_clause LIMIT $record_offset,1";
+                    if (!empty($search_clause))
                     {
-                        $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+                        $add_clause = "WHERE $search_clause $add_clause";
                     }
                     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                     if ($row = mysqli_fetch_assoc($query_result))
@@ -1266,23 +1199,22 @@ function run_update($table,$option)
     }
     elseif ($option == 'all')
     {
-        $add_clause = get_session_var('sort_clause');
-        if (!empty(get_session_var('search_clause')))
+        $add_clause = $sort_clause;
+        if (!empty($search_clause))
         {
-            $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+            $add_clause = "WHERE $search_clause $add_clause";
         }
         $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
         $record_count = mysqli_num_rows($query_result);
         for ($record_offset=0; $record_offset<$record_count; $record_offset++)
         {
-            $add_clause = get_session_var('search_clause').' '.get_session_var('sort_clause')." LIMIT $record_offset,1";
-            $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
-            if ($row = mysqli_fetch_assoc($query_result))
+            $add_clause2 = "$add_clause LIMIT $record_offset,1";
+            if ($row = mysqli_fetch_assoc(mysqli_select_query($db,$table,'*','',array(),$add_clause2)))
             {
                 $where_clause = 'table_name=? AND is_primary=1';
                 $where_values = array('s',$base_table);
-                $add_clause = 'ORDER by display_order ASC';
-                $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
+                $add_clause2 = 'ORDER by display_order ASC';
+                $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause2);
                 while ($row2 = mysqli_fetch_assoc($query_result2))
                 {
                     $field_name = $row2['field_name'];
@@ -1545,12 +1477,15 @@ Function run_copy
 
 function run_copy($table)
 {
+    global $relative_sub_path;
     global $location;
     $post_copy = array_deslash($_POST);
     $db = admin_db_connect();
     $base_table = get_base_table($table);
     $primary_keys = array();
     $updates = array();
+    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
+    $search_clause = get_session_var("$relative_sub_path-search-clause");
 
     // Build up array of updates indexed by record ID.
     foreach ($post_copy as $key => $value)
@@ -1560,10 +1495,10 @@ function run_copy($table)
             $record_offset = substr($key,7);
             if (is_numeric($record_offset))
             {
-                $add_clause = get_session_var('sort_clause')." LIMIT $record_offset,1";
-                if (!empty(get_session_var('search_clause')))
+                $add_clause = "$sort_clause LIMIT $record_offset,1";
+                if (!empty($search_clause))
                 {
-                    $add_clause = "WHERE ".get_session_var('search_clause')." $add_clause";
+                    $add_clause = "WHERE $search_clause $add_clause";
                 }
                 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                 if ($row = mysqli_fetch_assoc($query_result))

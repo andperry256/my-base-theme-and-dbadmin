@@ -9,11 +9,11 @@ if (is_file('/Config/linux_pathdefs.php'))
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 require("$base_dir/common_scripts/dbadmin/table_funct.php");
 require("$base_dir/common_scripts/dbadmin/record_funct.php");
-if (empty($_GET['dbname']))
+if (empty($_GET['sub_path']))
 {
-    exit("Database not specified");
+    exit("Sub-path not specified");
 }
-$dbname = $_GET['dbname'];
+$sub_path = $_GET['sub_path'];
 if (empty($_GET['table']))
 {
     exit("Table not specified");
@@ -21,7 +21,7 @@ if (empty($_GET['table']))
 $table = $_GET['table'];
 require("$base_dir/common_scripts/session_funct.php");
 run_session();
-if (empty(get_session_var(array('dbauth',$dbname))))
+if (empty(get_session_var("dbauth-$sub_path")))
 {
     exit("Authentication failure");
 }
@@ -30,6 +30,16 @@ if (!is_file("$base_dir/non_wp_header.php"))
     exit("Non-WP header file not found");
 }
 require("$base_dir/non_wp_header.php");
+if (get_session_var("$sub_path-filtered-table") == $table)
+{
+    $sort_clause = get_session_var("$sub_path-sort-clause");
+    $search_clause = get_session_var("$sub_path-search-clause");
+}
+else
+{
+    $sort_clause = '';
+    $search_clause = '';
+}
 
 //==============================================================================
 ?>
@@ -47,49 +57,25 @@ require("$base_dir/non_wp_header.php");
 //==============================================================================
 
 // Connect to database.
-foreach ($dbinfo as $id => $data)
-{
-    if ((($location == 'local') && ($data[0] == $dbname)) ||
-        (($location == 'real') && ($data[1] == $dbname)))
-    {
-        $db = db_connect($id);
-        break;
-    }
-}
-if (empty($db))
-{
-    exit("Unable to connect to database");
-}
+require("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path/db_funct.php");
+$db = admin_db_connect();
 
 print("<h2>Table [$table]</h2>\n");
 
 // Build lists of primary keys and fields to display.
 $base_table = get_base_table($table,$db);
 $display_fields = array();
-$pklist = '';
 $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 while ($row = mysqli_fetch_assoc($query_result))
 {
-    $where_clause = 'table_name=? AND field_name=?';
+    $where_clause = 'table_name=? AND field_name=? AND list_desktop=1';
     $where_values = array('s',$base_table,'s',$row['Field']);
     if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'')))
     {
-        if ($row2['is_primary'])
-        {
-            $pklist .= "{$row2['field_name']} ASC,";
-        }
-        if ($row2['list_desktop'] ==  1)
-        {
-            $display_fields[$row2['display_order']] = $row2['field_name'];
-        }
+        $display_fields[$row2['display_order']] = $row2['field_name'];
     }
 }
 $excluded_fields = (isset($_GET['excluded'])) ? $_GET['excluded'] : '^';
-$pklist = rtrim($pklist,',');
-if (empty($pklist))
-{
-    exit("Table has no primary key(s)");
-}
 
 print("<table>\n");
 
@@ -105,18 +91,16 @@ foreach ($display_fields as $order => $field)
         $label = field_label($base_table,$field,$db);
         $excluded_fields_par=(urlencode("$excluded_fields$field^"));
         print("<td class=\"table-header\">");
-        print("<a href=\"./display_table.php?dbname=$dbname&table=$table&excluded=$excluded_fields_par\">$label</a></td>");
+        print("<a href=\"./display_table.php?sub_path=$sub_path&table=$table&excluded=$excluded_fields_par\">$label</a></td>");
     }
 }
 print("</tr>\n");
 
 /*
 Main loop to output the table records. The primary keys are only used to order
-the records in the case of a base table. When a view is being processed, it is
-assumed that the definition of the view itself will dictate the order.
+the records in the case of a base table.
 */
-$add_clause = ($table == $base_table) ? "ORDER BY $pklist" : '';
-$query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
+$query_result = mysqli_select_query($db,$table,'*',$search_clause,array(),$sort_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     print("<tr>");

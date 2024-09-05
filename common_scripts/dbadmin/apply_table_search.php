@@ -25,6 +25,7 @@ require("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path/db_funct.php");
 $db = admin_db_connect();
 $base_table = get_base_table($table,$db);
 
+// Build search clause
 update_session_var("$sub_path-search-clause",'');
 if (!empty($_POST['search_string']))
 {
@@ -42,6 +43,7 @@ if (!empty($_POST['search_string']))
         {
             if (($widget_types[$row2['widget_type']]) && (!$row2['exclude_from_search']))
             {
+                // Add field to search clause
                 if ($field_processed)
                 {
                     $search_clause .= " OR";
@@ -50,11 +52,11 @@ if (!empty($_POST['search_string']))
                 $search_clause .= " LOWER($field_name) LIKE '%";
                 $search_clause .= mysqli_real_escape_string($db,$lc_search_string);
                 $search_clause .= "%'";
-                update_session_var("$sub_path-search-clause",$search_clause);
             }
         }
     }
 }
+update_session_var("$sub_path-search-clause",$search_clause);
 header ("Location: $base_url/dbadmin/$sub_path?-table=$table");
 exit;
 

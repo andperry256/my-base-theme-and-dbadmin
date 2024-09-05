@@ -115,30 +115,6 @@ function check_new_action($action,$table)
     }
     update_session_var('dba_action',$action);
     update_session_var('dba_table',$table);
-
-    if (empty($table))
-    {
-        // No table is being displayed - force filters to be cleared on next table display.
-        update_session_var('filtered_table','');
-    }
-
-    if ((isset($_GET['-showall'])) || ($table != get_session_var('filtered_table')))
-    {
-        // Clear all filters
-        if (!isset($_GET['-where']))
-        {
-            update_session_var('search_clause','');
-        }
-        update_session_var('sort_clause','');
-        update_session_var('show_relationships',false);
-    
-        // Do not allow an outstanding action to proceed, in case another window has
-        // altered the filters for the current session.
-        if (isset($_POST['submitted']))
-        {
-            unset($_POST['submitted']);
-        }
-    }
 }
 
 //==============================================================================
@@ -152,7 +128,7 @@ necessary other information for generating the required URL.
 */
 //==============================================================================
 
-function page_links($page_count,$current_page,$page_range,$current_page_link_style,$other_page_link_style,$url_function)
+function page_links($page_count,$current_page,$page_range,$current_page_link_style,$other_page_link_style,$url_function,$opt_par='')
 {
     if (!function_exists($url_function))
     {
@@ -180,7 +156,8 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
     
         if ($current_page != 1)
         {
-            $result .= " <a class=\"$other_page_link_style\" href=\"".$url_function($current_page-1)."\">Prev</a>";
+            $link = (!empty($opt_par)) ? $url_function($current_page-1,$opt_par) : $url_function($current_page-1);
+            $result .= " <a class=\"$other_page_link_style\" href=\"$link\">Prev</a>";
         }
         if ($current_page == 1)
         {
@@ -190,7 +167,8 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
         {
             $class = $other_page_link_style;
         }
-        $result .= " <a class=\"$class\" href=\"".$url_function(1)."\">1</a>";
+        $link = (!empty($opt_par)) ? $url_function(1,$opt_par) : $url_function(1);
+        $result .= " <a class=\"$class\" href=\"$link\">1</a>";
         if ($current_page != 1)
         {
             if ($first_linked_page > 2)
@@ -208,7 +186,8 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
             {
                 $class = $other_page_link_style;
             }
-            $result .= " <a class=\"$class\" href=\"".$url_function($page)."\">$page</a>";
+            $link = (!empty($opt_par)) ? $url_function($page,$opt_par) : $url_function($page);
+            $result .= " <a class=\"$class\" href=\"$link\">$page</a>";
         }
         if ($last_linked_page < $page_count-1)
         {
@@ -222,10 +201,12 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
         {
             $class = $other_page_link_style;
         }
-        $result .= " <a class=\"$class\" href=\"".$url_function($page_count)."\">$page_count</a>";
+        $link = (!empty($opt_par)) ? $url_function($page_count,$opt_par) : $url_function($page_count);
+        $result .= " <a class=\"$class\" href=\"$link\">$page_count</a>";
         if ($current_page != $page_count)
         {
-            $result .= " <a class=\"$other_page_link_style\" href=\"".$url_function($current_page+1)."\">Next</a>";
+            $link = (!empty($opt_par)) ? $url_function($current_page+1,$opt_par) : $url_function($current_page+1);
+            $result .= " <a class=\"$other_page_link_style\" href=\"$link\">Next</a>";
         }
     }
     return $result;

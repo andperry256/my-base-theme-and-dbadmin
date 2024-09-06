@@ -21,7 +21,14 @@ if (empty($table))
 {
     exit("Table not specified");
 }
-require("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path/db_funct.php");
+if (is_dir("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path"))
+{
+    include("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path/db_funct.php");
+}
+else
+{
+    include("$base_dir/wp-custom-scripts/pages/$sub_path/db_funct.php");
+}
 $db = admin_db_connect();
 $base_table = get_base_table($table,$db);
 

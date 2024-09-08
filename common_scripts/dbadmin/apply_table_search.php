@@ -16,24 +16,29 @@ if (empty($_GET['sub_path']))
     exit("Sub-path not specified");
 }
 $sub_path = $_GET['sub_path'];
-$table = get_session_var("$sub_path-filtered-table");
-if (empty($table))
+if (empty($_GET['table']))
 {
     exit("Table not specified");
 }
+$table = $_GET['table'];
 if (is_dir("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path"))
 {
     include("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path/db_funct.php");
 }
-else
+elseif (is_dir("$base_dir/wp-custom-scripts/pages$sub_path"))
 {
     include("$base_dir/wp-custom-scripts/pages/$sub_path/db_funct.php");
+}
+else
+{
+    exit("Unable to load DB functions script.");
 }
 $db = admin_db_connect();
 $base_table = get_base_table($table,$db);
 
 // Build search clause
-update_session_var("$sub_path-search-clause",'');
+$search_clause = '';
+update_session_var("$sub_path-$table-search-clause",'');
 if (!empty($_POST['search_string']))
 {
     $lc_search_string = strtolower($_POST['search_string']);
@@ -63,7 +68,8 @@ if (!empty($_POST['search_string']))
         }
     }
 }
-update_session_var("$sub_path-search-clause",$search_clause);
+update_session_var("$sub_path-$table-search-string",$_POST['search_string']);
+update_session_var("$sub_path-$table-search-clause",$search_clause);
 header ("Location: $base_url/dbadmin/$sub_path?-table=$table");
 exit;
 

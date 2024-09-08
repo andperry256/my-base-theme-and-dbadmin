@@ -176,16 +176,6 @@ function display_main_content($mode)
         $record_id = $_GET['-recordid'];
     }
     
-    if ((!isset($action)) || ($action == 'home') || ($action == 'main'))
-    {
-        // Reset table filtering if going to the main page.
-        update_session_var("$relative_sub_path-filtered-table",$table);
-        update_session_var("$relative_sub_path-sort-level",0);
-        update_session_var("$relative_sub_path-sort-clause",'');
-        update_session_var("$relative_sub_path-search-clause",'');
-        update_session_var("$relative_sub_path-show-relationships",false);
-    }
-
     if ((!isset($action)) || ($action == 'home'))
     {
         // No action specified so open the default page.

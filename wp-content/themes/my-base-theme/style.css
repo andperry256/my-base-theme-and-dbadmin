@@ -476,6 +476,21 @@ table {
     width: 100%;
 }
 
+.search-string {
+    height: 1.0em;
+    clear: both;
+    font-size: 0.8em;
+    color: #888;
+}
+
+.clear-filter-button {
+    background-color: #ffc;
+}
+
+.small-text {
+    font-size: 0.8em !important;
+}
+
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/

@@ -20,23 +20,12 @@ if (empty($_GET['table']))
 {
     exit("Table not specified");
 }
-$option = $_GET['option'];
-if (empty($_GET['option']))
-{
-    exit("Option not specified");
-}
 
-// Carry our action to show/hide relationships.
-if ($option == 'Show')
-{
-    update_session_var("$sub_path-$table-show-relationships",true);
-}
-elseif ($option == 'Hide')
-{
-    update_session_var("$sub_path-$table-show-relationships",false);
-}
-
-update_session_var("$sub_path-$table-sort-clause",$sort_clause);
+// Carry our action.
+update_session_var("$sub_path-$table-where-par",'');
+update_session_var("$sub_path-$table-search_clause",'');
+update_session_var("$sub_path-$table-sort-level",0);
+update_session_var("$sub_path-$table-sort-clause",'');
 header ("Location: $base_url/dbadmin/$sub_path?-table=$table");
 exit;
 

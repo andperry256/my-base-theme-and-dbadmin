@@ -133,16 +133,12 @@ Function page_link_url
 */
 //==============================================================================
 
-function page_link_url($page_no,$where_par='')
+function page_link_url($page_no)
 {
     global $base_url, $relative_path;
     global $page_url_table,$page_url_list_size;
     $page_offset = $page_url_list_size * ($page_no - 1);
     $url = "$base_url/$relative_path/?-table=$page_url_table&-startoffset=$page_offset&-listsize=$page_url_list_size";
-    if (!empty($where_par))
-    {
-        $url .= "&-where=".urlencode($where_par);
-    }
     return $url;
 }
 
@@ -364,9 +360,20 @@ Function combined_add_clause
 */
 //==============================================================================
 
-function combined_add_clause($search_clause,$add_clause)
+function combined_add_clause($where_par,$search_clause,$add_clause)
 {
-    return (!empty($search_clause)) ? "WHERE $search_clause $add_clause" : $add_clause;
+    if ((!empty($where_par)) && (!empty($search_clause)))
+    {
+        return "WHERE ($where_par) AND ($search_clause) $add_clause";
+    }
+    elseif ((empty($where_par)) && (empty($search_clause)))
+    {
+        return "$add_clause";
+    }
+    else
+    {
+        return "WHERE $where_par$search_clause $add_clause";
+    }
 }
 
 //==============================================================================
@@ -453,6 +460,12 @@ function display_table($params)
         $start_offset = 0;
     }
 
+    /*
+        Set the 'where' parameter. This is a selection filter that is initiated
+        via a URL parameter, and is separate from the filter that is initiated
+        via the search box. Once set, it has to be cleared by clicking on the 
+        'Clear Filters' button that subsequently appears.
+    */
     if (!empty($_GET['-where']))
     {
         $where_par = stripslashes($_GET['-where']);
@@ -461,43 +474,42 @@ function display_table($params)
     {
         $where_par = stripslashes($_POST['-where']);
     }
+    elseif (!empty(get_session_var("$relative_sub_path-$table-where-par")))
+    {
+        $where_par = get_session_var("$relative_sub_path-$table-where-par");
+    }
     else
     {
         $where_par = '';
     }
-    if (empty($where_par))
-    {
-        // Initialise table filtering if not set
-        if (get_session_var("$relative_sub_path-filtered-table") != $table)
-        {
-            update_session_var("$relative_sub_path-filtered-table",$table);
-            update_session_var("$relative_sub_path-sort-level",0);
-            update_session_var("$relative_sub_path-sort-clause",'');
-            update_session_var("$relative_sub_path-search-clause",'');
-            update_session_var("$relative_sub_path-show-relationships",false);
-        }
+    update_session_var("$relative_sub_path-$table-where-par",$where_par);
     
-        // Retrieve table filter data
-        $sort_level = get_session_var("$relative_sub_path-sort-level");
-        $sort_clause = get_session_var("$relative_sub_path-sort-clause");
-        $field_sort_level = array();
-        $field_sort_order = array();
-        for ($i=1; $i<=$sort_level; $i++)
-        {
-            $field = get_session_var("$relative_sub_path-sort-field-$i");
-            $field_sort_level[$field] = $i;
-            $field_sort_order[$field] = get_session_var("$relative_sub_path-sort-order-$i");
-        }
-        $search_clause = get_session_var("$relative_sub_path-search-clause");
-        $show_relationships = get_session_var("$relative_sub_path-show-relationships");
-    }
-    else
+    // Initialise table filtering if not set
+    if (get_session_var("$relative_sub_path-$table-is-filtered") === false)
     {
-        // Do not interact with session variables when $_GET['-where'] is set. 
-        $sort_clause = '';
-        $search_clause = $where_par;
-        $show_relationships = false;
+        update_session_var("$relative_sub_path-$table-is-filtered",true);
+        update_session_var("$relative_sub_path-$table-sort-level",0);
+        update_session_var("$relative_sub_path-$table-sort-clause",'');
+        update_session_var("$relative_sub_path-$table-where-par",'');
+        update_session_var("$relative_sub_path-$table-search-string",'');
+        update_session_var("$relative_sub_path-$table-search-clause",'');
+        update_session_var("$relative_sub_path-$table-show-relationships",false);
     }
+
+    // Retrieve table filter data
+    $sort_level = get_session_var("$relative_sub_path-$table-sort-level");
+    $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
+    $field_sort_level = array();
+    $field_sort_order = array();
+    for ($i=1; $i<=$sort_level; $i++)
+    {
+        $field = get_session_var("$relative_sub_path-$table-sort-field-$i");
+        $field_sort_level[$field] = $i;
+        $field_sort_order[$field] = get_session_var("$relative_sub_path-$table-sort-order-$i");
+    }
+    $search_string = get_session_var("$relative_sub_path-$table-search-string");
+    $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
+    $show_relationships = get_session_var("$relative_sub_path-$table-show-relationships");
 
     $display_table = true;
     $form_started = false;
@@ -590,7 +602,7 @@ function display_table($params)
     }
 
     // Calculate pagination parameters
-    $add_clause = combined_add_clause($search_clause,$sort_clause);
+    $add_clause = combined_add_clause($where_par,$search_clause,'');
     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
     $table_size = mysqli_num_rows($query_result);
     $page_count = ceil($table_size / $list_size);
@@ -599,7 +611,7 @@ function display_table($params)
     // Generate the page links
     $page_url_table = $table;
     $page_url_list_size = $list_size;
-    $page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url',$where_par);
+    $page_links = page_links($page_count,$current_page,4,'current-page-link','other-page-link','page_link_url');
 
     // Determine the access level for the table
     $access_level = get_table_access_level($table);
@@ -612,11 +624,16 @@ function display_table($params)
         is only performed for update, copy and delete requests, for all of which the
         next stage is performed by a second iteration of the current script.
         */
-        if (empty($where_par))
+        print("<form method=\"post\" action=\"$base_url/common_scripts/dbadmin/apply_table_search.php?sub_path=$relative_sub_path&table=$table\">\n");
+        print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
+        print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/>");
+        print("</div>\n");
+        if (!empty($search_string))
         {
-            print("<form method=\"post\" action=\"$base_url/common_scripts/dbadmin/apply_table_search.php?sub_path=$relative_sub_path\">\n");
-            print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
-            print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/></div>\n");
+            print("<div class=\"search-string\">[$search_string]</div>\n</form>\n");
+        }
+        else
+        {
             print("</form><br />\n");
         }
         print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
@@ -634,11 +651,15 @@ function display_table($params)
     $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
     $where_values = array('s',$base_table);
     $query_result = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
-    if ((empty($where_par)) && (mysqli_num_rows($query_result) > 0))
+    if (!empty($where_par))
+    {
+        print("<div class=\"top-navigation-item clear-filter-button\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/clear_where_filter.php?sub_path=$relative_sub_path&table=$table&option=$option\">Clear Filters</a></div>\n");
+    }
+    if (mysqli_num_rows($query_result) > 0)
     {
         // One or more select relationships are defined for the given table
         $option = ($show_relationships) ? 'Hide' : 'Show';
-        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/show_hide_relationships.php?sub_path=$relative_sub_path&option=$option\">$option Relationships</a></div>\n");
+        print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/show_hide_relationships.php?sub_path=$relative_sub_path&table=$table&option=$option\">$option Relationships</a></div>\n");
     }
     print("</p>\n");
     if ($access_level == 'full')
@@ -706,9 +727,7 @@ function display_table($params)
     foreach ($fields as $f => $ord)
     {
         // Output the field name with a sort link
-        $sort_link = (empty($where_par))
-            ? "$base_url/common_scripts/dbadmin/apply_table_sort.php?sub_path=$relative_sub_path&field=$f"
-            : '#';
+        $sort_link = "$base_url/common_scripts/dbadmin/apply_table_sort.php?sub_path=$relative_sub_path&table=$table&field=$f";
         if ($mode == 'desktop')
         {
             print("<td class=\"table-listing-header\"><a href=\"$sort_link\">");
@@ -721,7 +740,7 @@ function display_table($params)
         if (isset($field_sort_level[$f]))
         {
             // Output details of sort
-            print("<br /><span style=\"font-size:0.8em\">");
+            print("<br /><span class=\"small-text\">");
             if ($sort_level > 1)
             {
                 print("[{$field_sort_level[$f]}]");
@@ -748,7 +767,7 @@ function display_table($params)
 
     // Process table records
     $record_offset = $start_offset;
-    $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $start_offset,$list_size");
+    $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $start_offset,$list_size");
     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
     $row_no = 0;
     while ($row = mysqli_fetch_assoc($query_result))
@@ -850,11 +869,11 @@ function display_table($params)
             if ($mode == 'desktop')
             {
                 $colspan = count($fields) + 1;
-                print("<tr><td class=\"$style\" style=\"font-size:0.8em\" colspan=\"$colspan\">");
+                print("<tr><td class=\"$style small-text\" colspan=\"$colspan\">");
             }
             else
             {
-                print("<div class=\"table-listing-cell relationships $style\" style=\"font-size:0.8em\">");
+                print("<div class=\"table-listing-cell relationships $style small-text\">");
             }
             $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
             $where_values = array('s',$base_table);
@@ -947,8 +966,9 @@ function delete_record_set($table)
     $base_table = get_base_table($table);
     $primary_keys = array();
     $deletions = array();
-    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
-    $search_clause = get_session_var("$relative_sub_path-search-clause");
+    $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
+    $where_par = get_session_var("$relative_sub_path-$table-where-par");
+    $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
     foreach ($_POST as $key => $value)
     {
         if (substr($key,0,7) == 'select_')
@@ -958,7 +978,7 @@ function delete_record_set($table)
             // Build up array of deletions indexed by record ID.
             if (is_numeric($record_offset))
             {
-                $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $record_offset,1");
+                $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $record_offset,1");
                 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                 if ($row = mysqli_fetch_assoc($query_result))
                 {
@@ -1171,8 +1191,9 @@ function run_update($table,$option)
     $base_table = get_base_table($table);
     $primary_keys = array();
     $updates = array();
-    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
-    $search_clause = get_session_var("$relative_sub_path-search-clause");
+    $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
+    $where_par = get_session_var("$relative_sub_path-$table-where-par");
+    $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
 
     // Build up array of updates indexed by record ID.
     if ($option == 'selection')
@@ -1184,7 +1205,7 @@ function run_update($table,$option)
                 $record_offset = substr($key,7);
                 if (is_numeric($record_offset))
                 {
-                    $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $record_offset,1");
+                    $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $record_offset,1");
                     $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                     if ($row = mysqli_fetch_assoc($query_result))
                     {
@@ -1205,7 +1226,7 @@ function run_update($table,$option)
     }
     elseif ($option == 'all')
     {
-        $add_clause = combined_add_clause($search_clause,$sort_clause);
+        $add_clause = combined_add_clause($where_par,$search_clause,$sort_clause);
         $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
         $record_count = mysqli_num_rows($query_result);
         for ($record_offset=0; $record_offset<$record_count; $record_offset++)
@@ -1486,8 +1507,9 @@ function run_copy($table)
     $base_table = get_base_table($table);
     $primary_keys = array();
     $updates = array();
-    $sort_clause = get_session_var("$relative_sub_path-sort-clause");
-    $search_clause = get_session_var("$relative_sub_path-search-clause");
+    $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
+    $where_par = get_session_var("$relative_sub_path-$table-where-par");
+    $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
 
     // Build up array of updates indexed by record ID.
     foreach ($post_copy as $key => $value)
@@ -1497,7 +1519,7 @@ function run_copy($table)
             $record_offset = substr($key,7);
             if (is_numeric($record_offset))
             {
-                $add_clause = combined_add_clause($search_clause,"$sort_clause LIMIT $record_offset,1");
+                $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $record_offset,1");
                 $query_result = mysqli_select_query($db,$table,'*','',array(),$add_clause);
                 if ($row = mysqli_fetch_assoc($query_result))
                 {

@@ -22,10 +22,8 @@ if (empty($_GET['table']))
 }
 
 // Carry our action.
-update_session_var("$sub_path-$table-where-par",'');
-update_session_var("$sub_path-$table-search_clause",'');
-update_session_var("$sub_path-$table-sort-level",0);
-update_session_var("$sub_path-$table-sort-clause",'');
+update_session_var("$sub_path-$table-is-filtered",false);
+
 header ("Location: $base_url/dbadmin/$sub_path?-table=$table");
 exit;
 

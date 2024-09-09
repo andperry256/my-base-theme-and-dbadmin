@@ -410,6 +410,11 @@ function display_table($params)
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
     if ($row = mysqli_fetch_assoc($query_result))
     {
+        /*
+        Set the display list size. This is normally taken from the associated table info record
+        (default 100), but can be overwritten by a URL parameter. The value is constrained to
+        be within the range 30-800.
+        */
         if (isset($_GET['-listsize']))
         {
             $list_size = $_GET['-listsize'];
@@ -436,15 +441,14 @@ function display_table($params)
         print("<p>Table record for <em>$base_table</em> not found.</p>\n");
         return;
     }
-    if (((isset($_POST['listsize2'])) &&
+
+    /*
+    Set the table start offset for the given page.
+    Force this to 0 if the list size has changed.
+    */
+    if ((isset($_POST['listsize2'])) &&
         (($_POST['listsize2']) != ($_POST['listsize'])))
-        || (isset($_GET['-reorder'])))
     {
-        /*
-        Force the start offset to 0 under any of the following conditions:-
-        1. A new list size has been requested.
-        2. The listing is being re-ordered by a given field.
-        */
         $start_offset = 0;
     }
     elseif (isset($_GET['-startoffset']))
@@ -461,18 +465,14 @@ function display_table($params)
     }
 
     /*
-        Set the 'where' parameter. This is a selection filter that is initiated
-        via a URL parameter, and is separate from the filter that is initiated
-        via the search box. Once set, it has to be cleared by clicking on the 
-        'Clear Filters' button that subsequently appears.
+    Set the 'where' parameter. This is a selection filter that is initiated
+    via a URL parameter and subsequently maintained in a session variable.
+    It is separate from the filter that is initiated via the search box.
+    Once set, it has to be cleared by clicking on the 'Clear Filters' button.
     */
     if (!empty($_GET['-where']))
     {
         $where_par = stripslashes($_GET['-where']);
-    }
-    elseif (!empty($_POST['-where']))
-    {
-        $where_par = stripslashes($_POST['-where']);
     }
     elseif (!empty(get_session_var("$relative_sub_path-$table-where-par")))
     {
@@ -490,7 +490,6 @@ function display_table($params)
         update_session_var("$relative_sub_path-$table-is-filtered",true);
         update_session_var("$relative_sub_path-$table-sort-level",0);
         update_session_var("$relative_sub_path-$table-sort-clause",'');
-        update_session_var("$relative_sub_path-$table-where-par",'');
         update_session_var("$relative_sub_path-$table-search-string",'');
         update_session_var("$relative_sub_path-$table-search-clause",'');
         update_session_var("$relative_sub_path-$table-show-relationships",false);
@@ -949,7 +948,6 @@ function display_table($params)
     {
         print("</div> <!-- display:none -->\n");
     }
-    print("<input type=\"hidden\" name=\"-where\" value=\"$where_par\"/>");
     print("<input type=\"hidden\" name=\"submitted\" id=\"submitted\"/>");
     print("</form>\n");
 }

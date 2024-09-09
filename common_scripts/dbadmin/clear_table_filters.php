@@ -21,8 +21,14 @@ if (empty($_GET['table']))
     exit("Table not specified");
 }
 
-// Carry our action.
+/*
+Clear the filters. Setting the 'is filtered' flag to false will cause other
+filters to be cleared on reloading the table. The 'where' parameter must
+however be cleared here, due to the way it is handled in the display_table
+function.
+*/
 update_session_var("$sub_path-$table-is-filtered",false);
+update_session_var("$sub_path-$table-where-par",'');
 
 header ("Location: $base_url/dbadmin/$sub_path?-table=$table");
 exit;

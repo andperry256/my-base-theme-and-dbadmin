@@ -341,7 +341,7 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
     {
         if ($where_values[$i] == 's')
         {
-            $param = (!empty($where_values[$i+1]))
+            $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
                 ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                 : "''";
         }
@@ -409,7 +409,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
         }
         elseif (($all_values[$i] == 's') || ($all_values[$i] == 'sn'))
         {
-            $param = ($all_values[$i+1] != '')
+            $param = ((is_string($all_values[$i+1])) && ($all_values[$i+1] != ''))
                 ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
                 : "''";
         }
@@ -492,7 +492,7 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
         }
         elseif (($values[$i] == 's') || ($values[$i] == 'sn'))
         {
-            $param = (!empty($values[$i+1]))
+            $param = ((is_string($values[$i+1])) && (!empty($values[$i+1])))
                 ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
                 : "''";
         }
@@ -575,7 +575,7 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
     {
         if ($where_values[$i] == 's')
         {
-            $param = (!empty($where_values[$i+1]))
+            $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
                 ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                 : "''";
         }
@@ -626,7 +626,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
         {
             if ($where_values[$i] == 's')
             {
-                $param = (!empty($where_values[$i+1]))
+                $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
                     ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                     : "''";
             }

@@ -25,7 +25,7 @@ if (is_dir("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path"))
 {
     include("$base_dir/wp-custom-scripts/pages/dbadmin/$sub_path/db_funct.php");
 }
-elseif (is_dir("$base_dir/wp-custom-scripts/pages$sub_path"))
+elseif (is_dir("$base_dir/wp-custom-scripts/pages/$sub_path"))
 {
     include("$base_dir/wp-custom-scripts/pages/$sub_path/db_funct.php");
 }

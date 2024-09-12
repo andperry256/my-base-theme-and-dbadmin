@@ -47,7 +47,7 @@ if ($field_sort_level == 0)
 {
     // Add field as next level sort.
     $sort_level++;
-    update_session_var("$sub_path-$table-sort-level",$sort_level);
+    update_session_var("$sub_path-$table-sort-level",(string)$sort_level);
     $sort_field[$sort_level] = $field;
     update_session_var("$sub_path-$table-sort-field-$sort_level",$field);
     $sort_order[$sort_level] = 'ASC';
@@ -63,7 +63,7 @@ else
     {
         // Remove sorting for this field. Any lower level sorting will be affected.
         $sort_level = $field_sort_level-1;
-        update_session_var("$sub_path-$table-sort-level",$sort_level);
+        update_session_var("$sub_path-$table-sort-level",(string)$sort_level);
     }
 }
 

@@ -29,11 +29,11 @@ if (empty($_GET['option']))
 // Carry our action to show/hide relationships.
 if ($option == 'Show')
 {
-    update_session_var("$sub_path-$table-show-relationships",true);
+    update_session_var("$sub_path-$table-show-relationships",'*');
 }
 elseif ($option == 'Hide')
 {
-    update_session_var("$sub_path-$table-show-relationships",false);
+    update_session_var("$sub_path-$table-show-relationships",'');
 }
 
 update_session_var("$sub_path-$table-sort-clause",$sort_clause);

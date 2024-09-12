@@ -485,18 +485,18 @@ function display_table($params)
     update_session_var("$relative_sub_path-$table-where-par",$where_par);
     
     // Initialise table filtering if not set
-    if (!get_session_var("$relative_sub_path-$table-is-filtered"))
+    if (empty(get_session_var("$relative_sub_path-$table-is-filtered")))
     {
-        update_session_var("$relative_sub_path-$table-is-filtered",true);
-        update_session_var("$relative_sub_path-$table-sort-level",0);
+        update_session_var("$relative_sub_path-$table-is-filtered",'*');
+        update_session_var("$relative_sub_path-$table-sort-level",'0');
         update_session_var("$relative_sub_path-$table-sort-clause",'');
         update_session_var("$relative_sub_path-$table-search-string",'');
         update_session_var("$relative_sub_path-$table-search-clause",'');
-        update_session_var("$relative_sub_path-$table-show-relationships",false);
+        update_session_var("$relative_sub_path-$table-show-relationships",'');
     }
 
     // Retrieve table filter data
-    $sort_level = get_session_var("$relative_sub_path-$table-sort-level");
+    $sort_level = (int)get_session_var("$relative_sub_path-$table-sort-level");
     $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
     $field_sort_level = array();
     $field_sort_order = array();
@@ -509,7 +509,7 @@ function display_table($params)
     $where_par = get_session_var("$relative_sub_path-$table-where-par");
     $search_string = get_session_var("$relative_sub_path-$table-search-string");
     $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
-    $show_relationships = get_session_var("$relative_sub_path-$table-show-relationships");
+    $show_relationships = !empty(get_session_var("$relative_sub_path-$table-show-relationships"));
 
     $display_table = true;
     $form_started = false;

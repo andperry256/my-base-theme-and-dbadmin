@@ -882,7 +882,7 @@ function check_login_status($db)
             if ($username === false)
             {
                 // Session has timed out so refresh user details from cookie
-                put_user($db,$row['username']);
+                put_user($row['username']);
             }
             // Update login cookie and DB record
             setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);

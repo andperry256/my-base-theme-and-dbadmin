@@ -16,6 +16,7 @@ global $custom_scripts_url;
 global $db_admin_dir;
 global $db_admin_url;
 global $db_mode;
+global $home_ip_addr;
 global $location;
 global $maintenance_dir;
 global $private_scripts_dir;

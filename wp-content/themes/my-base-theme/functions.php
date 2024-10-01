@@ -477,6 +477,68 @@ function pagination_links($page_count)
     }
 }
 
+//==============================================================================
+
+function output_post_archive_item($post_id)
+{
+    global $base_url;
+    global $selected_category;
+    $db_main1 = db_connect(WP_DBID);
+    $query_result = mysqli_query($db_main1,"SELECT * FROM wp_posts WHERE ID=$post_id");
+    if ($row = mysqli_fetch_assoc($query_result))
+    {
+        print("<tr>\n");
+        if ((isset($_GET['postname'])) && ($_GET['postname'] == $row['post_name']))
+        {
+            // The particular post has been selected for display
+            print("<td class=\"post-archive-table-cell\" colspan=\"3\">\n");
+            print("<a name=\"{$row['post_name']}\"><h1><span style=\"font-size:0.9em\">{$row['post_title']}</span></h1></a>\n");
+            $query_result2 = mysqli_query($db_main1,"SELECT * FROM wp_users WHERE ID={$row['post_author']}");
+            if ($row2 = mysqli_fetch_assoc($query_result2))
+            {
+                $date = str_replace(' ','&nbsp;',title_date(substr($row['post_date'],0,10)));
+                $post_url = "$base_url/{$row['post_name']}";
+                $author_url = "$base_url/author/{$row2['user_nicename']}";
+                print("<p>Posted on <a href=\"$post_url\">$date</a> by <a href=\"$author_url\">${row2['display_name']}</a></p>");
+            }
+            print("{$row['post_content']}\n");
+            print("<p>[<a href=\"./#{$row['post_name']}\">Close</a>]</p>\n");
+            print("</td>\n");
+            $post = get_page_by_path($row['post_name'],OBJECT,'post');
+            $post_categories = wp_get_post_categories($post->ID);
+            $hierarchy = get_category_parents($post_categories[0], false, '/', true);
+            if (is_string($hierarchy))
+            {
+                $selected_category = strtok($hierarchy,'/');
+            }
+        }
+        else
+        {
+            // Create links for the post and the associated categories
+            print("<td class=\"post-archive-table-cell\"><a name=\"{$row['post_name']}\"><a href=\"./?postname={$row['post_name']}#{$row['post_name']}\">{$row['post_title']}</a></a></td>\n");
+            $date = str_replace(' ','&nbsp;',title_date(substr($row['post_date'],0,10)));
+            print("<td class=\"post-archive-table-cell post-archive-date_column\">$date</td>\n");
+            print("<td class=\"post-archive-table-cell post-archive-category-column\">");
+            $post_categories = wp_get_post_categories($row['ID']);
+            $count = 0;
+            foreach($post_categories as $id)
+            {
+                if ($count > 0)
+                {
+                    print("<br/>");
+                }
+                $cat = get_category($id);
+                $slug = $cat->slug;
+                $name = str_replace(' ','&nbsp;',$cat->name);
+                print("<a href=\"$base_url/category/$slug\">$name</a>");
+                $count++;
+            }
+            print("</td>\n");
+        }
+        print("</tr>\n");
+    }
+}
+
 //================================================================================
 
 /*

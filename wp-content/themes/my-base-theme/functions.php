@@ -379,7 +379,7 @@ function navigation_links($option,$taxonomy='category')
             print("<td class=blog-nav-col2></td>");
         }
         print("<td class=blog-nav-col3>");
-        if ($taxonomy = 'category')
+        if ($taxonomy == 'category')
         {
             $cat_name_list = '';
             $categories = get_the_category();
@@ -444,6 +444,36 @@ function navigation_links($option,$taxonomy='category')
             print("<div class=right-arrow><img src=\"$theme_url/blog_nav_forward_greyed.svg\" class=\"blog-nav-button\"></div>");
         }
         print("</div>");
+    }
+}
+
+//==============================================================================
+
+function pagination_links($page_count)
+{
+    if (function_exists('wp_paginate'))
+    {
+        if ($page_count == 0)
+        {
+            wp_paginate();
+        }
+        else
+        {
+            $pos = strpos($_SERVER['REQUEST_URI'],'/page/');
+            if ($pos === false)
+            {
+                $page_no = 1;
+            }
+            else
+            {
+                $page_no = strtok(substr($_SERVER['REQUEST_URI'],$pos+6),'/?');
+            }
+            wp_paginate("page=$page_no&pages=$page_count");
+        }
+    }
+    else
+    {
+        navigation_links('multi','');
     }
 }
 
@@ -714,6 +744,61 @@ function custom_posts_load_widget()
     register_widget( 'custom_posts_widget' );
 }
 add_action( 'widgets_init', 'custom_posts_load_widget' );
+
+//==============================================================================
+/*
+BLOG HOME LINK WIDGET
+
+Functions to create a widget providing a simple link to the blog home page.
+*/
+
+//==============================================================================
+
+class blog_home_widget extends WP_Widget
+{
+    function __construct()
+    {
+        parent::__construct(
+          'blog_home_widget',
+          __('Blog Home Link', 'blog_home_widget_domain'),
+          array( 'description' => __( 'Blog home link', 'blog_home_widget_domain' ), )
+        );
+    }
+  
+    public function widget( $args, $instance )
+    {
+        global $base_url;
+        echo $args['before_widget'];
+        echo "<a href=\"$base_url/blog\"><button>Blog Home</button></a>";
+        echo $args['after_widget'];
+    }
+  
+    public function form( $instance )
+    {
+        if ( isset( $instance[ 'title' ] ) )
+        {
+            $title = $instance[ 'title' ];
+        }
+        else
+        {
+            $title = __( 'New title', 'blog_home_widget_domain' );
+        }
+        // Functionality goes here
+    }
+  
+    public function update( $new_instance, $old_instance )
+    {
+        $instance = array();
+        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+        return $instance;
+    }
+}
+
+function blog_home_load_widget()
+{
+    register_widget( 'blog_home_widget' );
+}
+add_action( 'widgets_init', 'blog_home_load_widget' );
 
 //================================================================================
 endif;

@@ -16,9 +16,6 @@ ul, ol, li > ul, li > ol {
     margin-left: 0;
 }
 
-p {
-}
-
 table {
     width: auto;
 }
@@ -137,7 +134,6 @@ p.sidebar-item {
 /* ============ Styles for table listing screen ============ */
 
 .top-navigation-item {
-    display: inline-block;
     float: left;
     height: 2.0em;
     margin: 0.1em;
@@ -195,8 +191,6 @@ table.table-record a {
 table.table-record a.required,
 div.edit-field-cell a.required {
     color: #c00;
-}
-table.table-record a.not-required {
 }
 table.table-record  td {
     border: solid 1px #ccc;

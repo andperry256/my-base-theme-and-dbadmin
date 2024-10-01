@@ -60,7 +60,8 @@ get_header();
 
 <?php
 
-// *** Edit out the sidebar inclusion ***
-//get_sidebar();
-
+if ((isset($page_config['hide_sidebar'])) && ($page_config['hide_sidebar'] === false))
+{
+    get_sidebar();
+}
 get_footer();

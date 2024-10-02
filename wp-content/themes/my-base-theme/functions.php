@@ -483,8 +483,8 @@ function output_post_archive_item($post_id)
 {
     global $base_url;
     global $selected_category;
-    $db_main1 = db_connect(WP_DBID);
-    $query_result = mysqli_query($db_main1,"SELECT * FROM wp_posts WHERE ID=$post_id");
+    $db = db_connect(WP_DBID);
+    $query_result = mysqli_query($db,"SELECT * FROM wp_posts WHERE ID=$post_id");
     if ($row = mysqli_fetch_assoc($query_result))
     {
         print("<tr>\n");
@@ -493,7 +493,7 @@ function output_post_archive_item($post_id)
             // The particular post has been selected for display
             print("<td class=\"post-archive-table-cell\" colspan=\"3\">\n");
             print("<a name=\"{$row['post_name']}\"><h1><span style=\"font-size:0.9em\">{$row['post_title']}</span></h1></a>\n");
-            $query_result2 = mysqli_query($db_main1,"SELECT * FROM wp_users WHERE ID={$row['post_author']}");
+            $query_result2 = mysqli_query($db,"SELECT * FROM wp_users WHERE ID={$row['post_author']}");
             if ($row2 = mysqli_fetch_assoc($query_result2))
             {
                 $date = str_replace(' ','&nbsp;',title_date(substr($row['post_date'],0,10)));

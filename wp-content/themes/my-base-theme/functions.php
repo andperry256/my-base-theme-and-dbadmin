@@ -203,6 +203,20 @@ function output_header_links()
 
 //==============================================================================
 
+function authenticate_post($slug,$use_overriding_access_level=false)
+{
+    if (function_exists('custom_authenticate_post'))
+    {
+        return custom_authenticate_post($slug,$use_overriding_access_level);
+    }
+    else
+    {
+        return true;
+    }
+}
+
+//==============================================================================
+
 function display_post_summary($header_level,$image_max_width,$image_max_height)
 {
     global $wpdb;

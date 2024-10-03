@@ -49,7 +49,7 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                     echo "Synchronising content for post {$row1['post_name']}\n";
                     $fields = ('post_content');
                     $values = array ('s',$row1['post_content']);
-                    // mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                    mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                 }
             }    
         }

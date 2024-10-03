@@ -90,6 +90,14 @@ if (!is_file($site_path_defs_path))
     {
         define('SV_ACCESS_LEVEL', 'access_level');
     }
+    if (!defined('DEFAULT_ACCESS_LEVEL'))
+    {
+        define('DEFAULT_ACCESS_LEVEL', 0);
+    }
+    if (!defined('SUPER_ACCESS_LEVEL'))
+    {
+        define('SUPER_ACCESS_LEVEL', 99);
+    }
 
     //================================================================================
 

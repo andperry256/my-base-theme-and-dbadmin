@@ -555,6 +555,20 @@ function output_post_archive_item($post_id)
 
 //================================================================================
 
+function get_category_access_level($id)
+{
+    if (function_exists('custom_get_category_access_level'))
+    {
+        return custom_get_category_access_level($id);
+    }
+    else
+    {
+        return DEFAULT_ACCESS_LEVEL;
+    }
+}
+
+//================================================================================
+
 /*
  * Implement the Custom Header feature.
  */

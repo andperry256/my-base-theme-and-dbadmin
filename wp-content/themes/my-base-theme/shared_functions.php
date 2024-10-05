@@ -947,21 +947,28 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
             }
             if ($category_match)
             {
-                if (($option == 'timestamp') && ($row1['post_date'] != $row2['post_date']))
+                if ($row3 = mysqli_fetch_assoc(mysqli_query($db2,"SELECT * FROM wp_post_meta WHERE post_id={$row1['post_name']} AND meta_key='inhibit_sync'")))
                 {
-                    // Synchronise post timestamp.
-                    echo "Synchronising timestamp for post {$row1['post_name']}\n";
-                    $fields = ('post_date,post_date_gmt');
-                    $values = array ('s',$row1['post_date'],'s',$row1['post_date_gmt']);
-                    mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                    $inhibit_sync = $row3['meta_value'];
                 }
-                elseif (($option == 'content') && ($row1['post_content'] != $row2['post_content']))
+                if (empty($inhibit_sync))
                 {
-                    // Synchronise post content.
-                    echo "Synchronising content for post {$row1['post_name']}\n";
-                    $fields = ('post_content');
-                    $values = array ('s',$row1['post_content']);
-                    mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                    if (($option == 'timestamp') && ($row1['post_date'] != $row2['post_date']))
+                    {
+                        // Synchronise post timestamp.
+                        echo "Synchronising timestamp for post {$row1['post_name']}\n";
+                        $fields = ('post_date,post_date_gmt');
+                        $values = array ('s',$row1['post_date'],'s',$row1['post_date_gmt']);
+                        mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                    }
+                    elseif (($option == 'content') && ($row1['post_content'] != $row2['post_content']))
+                    {
+                        // Synchronise post content.
+                        echo "Synchronising content for post {$row1['post_name']}\n";
+                        $fields = ('post_content');
+                        $values = array ('s',$row1['post_content']);
+                        mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                    }
                 }
             }    
         }

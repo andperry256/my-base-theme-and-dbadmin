@@ -217,6 +217,31 @@ function authenticate_post($slug,$use_overriding_access_level=false)
 
 //==============================================================================
 
+function display_category_summary($category_name,$category_info,$image_max_width,$image_max_height)
+{
+    global $base_url;
+    $category_url = "$base_url/category/{$category_info[0]}";
+    print("<div class=\"post-list-item\">\n");
+    print("<div class=\"post-image-holder\">");
+    if (!empty($category_info[1]))
+    {
+        $image_info = wp_get_attachment_image_src($category_info[1],array($image_max_width,$image_max_height));
+        $image_url = (function_exists('url_to_static'))
+            ? url_to_static($image_info[0])
+            : $image_info[0];
+        print("<a href=\"$category_url\"><img src=\"$image_url?v=$link_version\"/></a>\n");
+    }
+    print("</div>\n");
+    print("<div class=\"post-text-holder\">");
+    print("<p><a href=\"$category_url\">$category_name</a><br /></p>");
+    print("<p>{$category_info[2]}</p>");
+    print("</div>\n");
+    print("</div>\n");
+    print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
+}
+
+//==============================================================================
+
 function display_post_summary($header_level,$image_max_width,$image_max_height)
 {
     global $wpdb;
@@ -226,15 +251,15 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_date = substr($row->post_date,0,10);
     $post_date = date("d F Y", strtotime($post_date));
-    print("<tr>\n");
-    print("<td class=\"post-list-cell post-list-col1-cell\">");
+    print("<div class=\"post-list-item\">\n");
+    print("<div class=\"post-image-holder\">");
     $featured_image = get_the_post_thumbnail();
     if (!empty($featured_image))
     {
         print("<div>$featured_image</div>\n");
     }
-    print("</td>\n");
-    print("<td class=\"post-list-cell post-list-col2-cell\">");
+    print("</div>\n");
+    print("<div class=\"post-text-holder\">");
     echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
     print("<p>[Posted on: $post_date]</p>\n");
     the_content();
@@ -244,8 +269,8 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
         $slug = $post->post_name;
         print("<a href=\"$base_url/post-to-social?slug=$slug\" target=\"_blank\">Post to Social</a>");
     }
-    print("</td>\n");
-    print("</tr>\n");
+    print("</div>\n");
+    print("</div>\n");
 }
 
 //==============================================================================
@@ -373,92 +398,43 @@ function navigation_links($option,$taxonomy='category')
         }
     }
 
-    /*
-    Options for creating the navigation links with a grid or a table are currently
-    defined. This is a temporary measure while CSS issues are resolved. To switch
-    option, please alter the true/false directive in the next line.
-    */
-    if (true)
+    print("<table class=blog-nav-table><tr>");
+    if (!empty($nav_info[0][1]))
     {
-        // Using table
-        print("<table class=blog-nav-table><tr>");
-        if (!empty($nav_info[0][1]))
-        {
-            print("<td class=blog-nav-col1><a href=\"{$nav_info[0][1]}\"><img align=\"absmiddle\" src=\"$theme_url/blog_nav_backward.svg\" class=\"blog-nav-button\"></a></td>");
-            print("<td class=blog-nav-col2><a class=blog-nav-link href=\"{$nav_info[0][1]}\">{$nav_info[0][2]}</a></td>");
-        }
-        else
-        {
-            print("<td class=blog-nav-col1><img align=\"absmiddle\" src=\"$theme_url/blog_nav_backward_greyed.svg\" class=\"blog-nav-button\"></td>");
-            print("<td class=blog-nav-col2></td>");
-        }
-        print("<td class=blog-nav-col3>");
-        if ($taxonomy == 'category')
-        {
-            $cat_name_list = '';
-            $categories = get_the_category();
-            foreach ($categories as $category)
-            {
-                $cat_name_list .= "<a href=\"$base_url/category/{$category->slug}\" class=\"cat-nav-link\">{$category->name}</a> |";
-                $cat_list_array[$category->name] = true;
-            }
-            $cat_name_list = rtrim($cat_name_list,'| ');
-            print("$cat_name_list");
-        }
-        print("</td>");
-        if (!empty($nav_info[1][1]))
-        {
-            print("<td class=blog-nav-col2><a class=blog-nav-link href=\"{$nav_info[1][1]}\">{$nav_info[1][2]}</a></td>");
-            print("<td class=blog-nav-col1><a href=\"{$nav_info[1][1]}\"><img align=\"absmiddle\" src=\"$theme_url/blog_nav_forward.svg\" class=\"blog-nav-button\"></a></td>");
-        }    
-        else
-        {
-            print("<td class=blog-nav-col2></td>");
-            print("<td class=blog-nav-col1><img align=\"absmiddle\" src=\"$theme_url/blog_nav_forward_greyed.svg\" class=\"blog-nav-button\"></td>");
-        }
-        print("</tr>\n");
-        print("</table>\n");
+        print("<td class=blog-nav-col1><a href=\"{$nav_info[0][1]}\"><img align=\"absmiddle\" src=\"$theme_url/blog_nav_backward.svg\" class=\"blog-nav-button\"></a></td>");
+        print("<td class=blog-nav-col2><a class=blog-nav-link href=\"{$nav_info[0][1]}\">{$nav_info[0][2]}</a></td>");
     }
     else
     {
-        // Using Grid
-        print("<div class=\"blog-navigation\">");
-        if (!empty($nav_info[0][1]))
-        {
-            print("<div class=left-arrow><a href=\"{$nav_info[0][1]}\"><img src=\"$theme_url/blog_nav_backward.svg\" class=\"blog-nav-button\"></a></div>");
-            print("<div class=prev-link><a class=blog-nav-link href=\"{$nav_info[0][1]}\">{$nav_info[0][2]}</a></div>");
-        }
-        else
-        {
-            print("<div class=left-arrow><img src=\"$theme_url/blog_nav_backward_greyed.svg\" class=\"blog-nav-button\"></div>");
-            print("<div class=prev-link></div>");
-        }
-        print("<div class=nav-type>");
-        if ($taxonomy = 'category')
-        {
-            $cat_name_list = '';
-            $categories = get_the_category();
-            foreach ($categories as $category)
-            {
-                $cat_name_list .= $category->name.' | ';
-                $cat_list_array[$category->name] = true;
-            }
-            $cat_name_list = rtrim($cat_name_list,'| ');
-            print("<div style=\"display:block\">$cat_name_list</div>");
-        }
-        print("</div>");
-        if (!empty($nav_info[1][1]))
-        {
-            print("<div class=next-link><a class=blog-nav-link href=\"{$nav_info[1][1]}\">{$nav_info[1][2]}</a></div>");
-            print("<div class=right-arrow><a href=\"{$nav_info[1][1]}\"><img src=\"$theme_url/blog_nav_forward.svg\" class=\"blog-nav-button\"></a></div>");
-        }    
-        else
-        {
-            print("<div class=next-link></div>");
-            print("<div class=right-arrow><img src=\"$theme_url/blog_nav_forward_greyed.svg\" class=\"blog-nav-button\"></div>");
-        }
-        print("</div>");
+        print("<td class=blog-nav-col1><img align=\"absmiddle\" src=\"$theme_url/blog_nav_backward_greyed.svg\" class=\"blog-nav-button\"></td>");
+        print("<td class=blog-nav-col2></td>");
     }
+    print("<td class=blog-nav-col3>");
+    if ($taxonomy == 'category')
+    {
+        $cat_name_list = '';
+        $categories = get_the_category();
+        foreach ($categories as $category)
+        {
+            $cat_name_list .= "<a href=\"$base_url/category/{$category->slug}\" class=\"cat-nav-link\">{$category->name}</a> |";
+            $cat_list_array[$category->name] = true;
+        }
+        $cat_name_list = rtrim($cat_name_list,'| ');
+        print("$cat_name_list");
+    }
+    print("</td>");
+    if (!empty($nav_info[1][1]))
+    {
+        print("<td class=blog-nav-col2><a class=blog-nav-link href=\"{$nav_info[1][1]}\">{$nav_info[1][2]}</a></td>");
+        print("<td class=blog-nav-col1><a href=\"{$nav_info[1][1]}\"><img align=\"absmiddle\" src=\"$theme_url/blog_nav_forward.svg\" class=\"blog-nav-button\"></a></td>");
+    }    
+    else
+    {
+        print("<td class=blog-nav-col2></td>");
+        print("<td class=blog-nav-col1><img align=\"absmiddle\" src=\"$theme_url/blog_nav_forward_greyed.svg\" class=\"blog-nav-button\"></td>");
+    }
+    print("</tr>\n");
+    print("</table>\n");
 }
 
 //==============================================================================

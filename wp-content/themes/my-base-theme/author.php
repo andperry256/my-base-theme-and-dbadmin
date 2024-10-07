@@ -23,8 +23,7 @@ get_header();
         if ($row = mysqli_fetch_assoc($query_result))
         {
             print("<h1>Author: {$row['display_name']}</h1>\n");
-            $sub_url = "author/{$row['user_nicename']}";
-
+            
             // Determine the user access level
             if (session_var_is_set(SV_ACCESS_LEVEL))
             {
@@ -34,62 +33,37 @@ get_header();
             {
                 $user_access_level = DEFAULT_ACCESS_LEVEL;
             }
+            
 
+            navigation_links('multi','author',$row['user_nicename']);
             // Set up the parameters for the main loop query
             $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
             $args = array ( 'author' => $author,
                             'paged' => $paged,
-                            'posts_per_page' => POSTS_PER_ARCHIVE_PAGE,
+                            'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_STANDARD,
                             'meta_key' => 'access_level',
                             'meta_value' => $user_access_level,
                             'meta_compare' => '<=',
                         );
 
-            // Handle the sort order for the posts
-            if (isset($_GET['orderby']))
-            {
-                update_session_var('orderby',$_GET['orderby']);
-            }
-            elseif (!session_var_is_set('orderby'))
-            {
-                update_session_var('orderby','date');
-            }
-            if (get_session_var('orderby') == 'title')
-            {
-                print("<a href=\"$base_url/$sub_url\?orderby=date\">Sort by Date</a><br />&nbsp;\n");
-                $args['orderby'] = 'name';
-                $args['order'] = 'ASC';
-            }
-            else
-            {
-                print("<a href=\"$base_url/$sub_url\?orderby=title\">Sort by Title</a><br />&nbsp;\n");
-                $args['orderby'] = 'date';
-                $args['order'] = 'DESC';
-            }
-
-            // Calculate the page count
-            $local_query = new WP_Query($args);
-            $post_count = $local_query->found_posts;
-            $page_count = ceil($post_count/POSTS_PER_ARCHIVE_PAGE);
-
             // Run the WordPress loop
+            $local_query = new WP_Query($args);
             if ( $local_query->have_posts() )
             {
-                pagination_links($page_count);
-                print("<table>\n");
                 while ( $local_query->have_posts() )
                 {
                     $local_query->the_post();
-                    output_post_archive_item($post->ID);
+                    display_post_summary(2,200,200);
+                    print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
                 }
-                print("</table>\n");
-                pagination_links($page_count);
+                navigation_links('multi','author',$row['user_nicename']);
             }
             else
             {
                 get_template_part( 'template-parts/content', 'none' );
             }
             wp_reset_postdata();
+            update_session_var('uri_fragment_used',true);
         }
 
         //==============================================================================

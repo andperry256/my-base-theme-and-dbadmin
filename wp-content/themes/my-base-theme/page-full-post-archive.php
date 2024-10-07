@@ -31,7 +31,7 @@ get_header();
         // Set up the parameters for the main loop query
         $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
         $args = array ( 'paged' => $paged,
-                        'posts_per_page' => POSTS_PER_ARCHIVE_PAGE,
+                        'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_LONG,
                         'meta_key' => 'access_level',
                         'meta_value' => $user_access_level,
                         'meta_compare' => '<=',
@@ -62,7 +62,7 @@ get_header();
         // Calculate the page count
         $local_query = new WP_Query($args);
         $post_count = $local_query->found_posts;
-        $page_count = ceil($post_count/POSTS_PER_ARCHIVE_PAGE);
+        $page_count = ceil($post_count/POSTS_PER_ARCHIVE_PAGE_LONG);
 
         // Run the WordPress loop
         if ( $local_query->have_posts() )

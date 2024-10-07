@@ -36,15 +36,14 @@ get_header();
         else
         {
             navigation_links('multi');
-            print("<table class=\"post-list-table\">\n");
             print("<header class=\"page-header\">\n");
             $page_no = (get_query_var('paged')) ? get_query_var('paged') : 1;
             $blog_home_description = get_term_meta($own_id,'blog_home_description',true);
             if (($page_no == 1) && (!empty($blog_home_description)))
             {
                 // Output relevant section of blog home page
-                print("<tr>\n");
-                print("<td class=\"post-list-cell post-list-col1-cell\">");
+                print("<div class=\"post-list-item\">\n");
+                print("<div class=\"post-image-holder\">");
                 if (!empty($image_id))
                 {
                     $image_info = wp_get_attachment_image_src($image_id,array(480,320));
@@ -56,15 +55,15 @@ get_header();
                     {
                         $image_url = $image_info[0];
                     }
-                    print("<br /><img src=\"$image_url\"/>\n");
+                    print("<img src=\"$image_url\"/>\n");
                 }
-                print("</td>\n");
-                print("<td class=\"post-list-cell post-list-col2-cell\">");
+                print("</div>\n");
+                print("<div class=\"post-text-holder\">");
                 the_archive_title( '<h1 class="page-title">', '</h1>' );
                 print("$blog_home_description");
-                print("</td>\n");
-                print("</tr>\n");
-                print("<tr><td class=\"post-list-spacer-cell\" colspan=\"2\"> </td></tr>\n");
+                print("</div>\n");
+                print("</div>\n");
+                print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
             }
             else
             {
@@ -106,10 +105,9 @@ get_header();
             {
                 while ( $local_query->have_posts() )
                 {
-                    print("<tr><td class=\"post-list-spacer-cell\" colspan=\"2\"></td></tr>\n");
                     $local_query->the_post();
                     display_post_summary(2,200,200);
-                    print("<tr><td class=\"post-list-spacer-cell\" colspan=\"2\"> </td></tr>\n");
+                    print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
                 }
                 navigation_links('multi');
             }
@@ -118,7 +116,6 @@ get_header();
                 get_template_part( 'template-parts/content', 'none' );
             }
             wp_reset_postdata();
-            print("</table>\n");
             update_session_var('uri_fragment_used',true);
         }
         ?>

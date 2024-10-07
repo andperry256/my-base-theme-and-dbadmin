@@ -98,6 +98,14 @@ if (!is_file($site_path_defs_path))
     {
         define('SUPER_ACCESS_LEVEL', 99);
     }
+    if (!defined('POSTS_PER_ARCHIVE_PAGE_STANDARD'))
+    {
+        define('POSTS_PER_ARCHIVE_PAGE_STANDARD', 10);
+    }
+    if (!defined('POSTS_PER_ARCHIVE_PAGE_LONG'))
+    {
+        define('POSTS_PER_ARCHIVE_PAGE_LONG', 50);
+    }
 
     //================================================================================
 

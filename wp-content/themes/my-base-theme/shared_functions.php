@@ -976,6 +976,18 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
 }
 
 //================================================================================
+
+function copyright_notice($owner,$start_year)
+{
+    $start_year = strval($start_year);
+    $this_year = date('Y');
+    $date = ($start_year == $this_year)
+        ? $this_year
+        : sprintf("%04d-%02d",$start_year,strval((int)$this_year % 100));
+    return "Copyright &copy; $date $owner, all rights reserved.";
+}
+
+//================================================================================
 }
 //================================================================================
 ?>

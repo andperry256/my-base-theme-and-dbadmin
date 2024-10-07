@@ -352,17 +352,18 @@ function adjust_featured_image_size($image_spec,$max_width=200,$max_height=200)
 
 //==============================================================================
 
-function navigation_links($option,$taxonomy='category')
+function navigation_links($option,$filter='category',$filtered_name='')
 {
     global $base_url;
     global $theme_url;
+    global $wpdb;
     if ($option == 'single')
     {
         $args = array (
             'prev_text' => '%title',
             'next_text' => '%title',
             'in_same_term' => true,
-            'taxonomy' => $taxonomy,
+            'taxonomy' => 'category',
         );
         $navigation = get_the_post_navigation($args);
     }
@@ -410,17 +411,26 @@ function navigation_links($option,$taxonomy='category')
         print("<td class=blog-nav-col2></td>");
     }
     print("<td class=blog-nav-col3>");
-    if ($taxonomy == 'category')
+    switch ($filter)
     {
-        $cat_name_list = '';
-        $categories = get_the_category();
-        foreach ($categories as $category)
-        {
-            $cat_name_list .= "<a href=\"$base_url/category/{$category->slug}\" class=\"cat-nav-link\">{$category->name}</a> |";
-            $cat_list_array[$category->name] = true;
-        }
-        $cat_name_list = rtrim($cat_name_list,'| ');
-        print("$cat_name_list");
+        case 'category':
+            $cat_name_list = '';
+            $categories = get_the_category();
+            foreach ($categories as $category)
+            {
+                $cat_name_list .= "<a href=\"$base_url/category/{$category->slug}\" class=\"cat-nav-link\">{$category->name}</a> |";
+                $cat_list_array[$category->name] = true;
+            }
+            $cat_name_list = rtrim($cat_name_list,'| ');
+            print("$cat_name_list");
+            break;
+        
+        case 'author':
+            $row = $wpdb->get_row("SELECT * FROM wp_users WHERE user_nicename='$filtered_name'");
+            $display_name = $row->display_name;
+            print("<a href=\"$base_url/author/$filtered_name\" class=\"cat-nav-link\">$display_name</a>");
+            break;
+
     }
     print("</td>");
     if (!empty($nav_info[1][1]))

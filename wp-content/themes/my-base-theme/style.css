@@ -577,10 +577,7 @@ textarea {
 }
 
 /*--------------------------------------------------------------
-# Navigation
---------------------------------------------------------------*/
-/*--------------------------------------------------------------
-## Links
+# Navigation - Links
 --------------------------------------------------------------*/
 a:link {
     color: steelblue;
@@ -606,7 +603,7 @@ a:active {
 }
 
 /*--------------------------------------------------------------
-## Menus
+# Navigation - Menus
 --------------------------------------------------------------*/
 .main-navigation {
     clear: both;
@@ -681,16 +678,6 @@ a:active {
     border-radius: 0px;
 }
 
-/*
-.main-navigation ul ul :hover > a,
-.main-navigation ul ul .focus > a {
-}
-
-.main-navigation ul ul a:hover,
-.main-navigation ul ul a.focus {
-}
-*/
-
 .main-navigation ul li:hover > ul,
 .main-navigation ul li.focus > ul {
     left: auto;
@@ -700,14 +687,6 @@ a:active {
 .main-navigation ul ul li.focus > ul {
     left: 100%;
 }
-
-/*
-.main-navigation .current_page_item > a,
-.main-navigation .current-menu-item > a,
-.main-navigation .current_page_ancestor > a,
-.main-navigation .current-menu-ancestor > a {
-}
-*/
 
 /* Small menu. */
 .menu-toggle,
@@ -848,10 +827,7 @@ a:active {
 }
 
 /*--------------------------------------------------------------
-# Content
---------------------------------------------------------------*/
-/*--------------------------------------------------------------
-## Posts and pages
+# Content - Posts and pages
 --------------------------------------------------------------*/
 .sticky {
     display: block;
@@ -883,7 +859,7 @@ a:active {
 }
 
 /*--------------------------------------------------------------
-## Comments
+# Content - Comments
 --------------------------------------------------------------*/
 .comment-content a {
     word-wrap: break-word;
@@ -927,7 +903,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-## Captions
+# Media - Captions
 --------------------------------------------------------------*/
 .wp-caption {
     margin-bottom: 1.5em;
@@ -949,7 +925,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-## Galleries
+# Media - Galleries
 --------------------------------------------------------------*/
 .gallery {
     margin-bottom: 1.5em;
@@ -999,7 +975,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-## Main Content Area
+# Main Content Area
 --------------------------------------------------------------*/
 
 #content-with-sidebar, #content-no-sidebar {
@@ -1060,7 +1036,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-## Sidebar
+# Sidebar
 --------------------------------------------------------------*/
 
 .sidebar-category-link {
@@ -1095,7 +1071,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-## Blog Navigation Links
+# Blog Navigation Links
 --------------------------------------------------------------*/
 
 blog-nav-table {
@@ -1135,7 +1111,7 @@ a.cat-nav-link:hover {
 }
 
 /*--------------------------------------------------------------
-## Blog Listing
+# Blog Listing
 --------------------------------------------------------------*/
 
 .category-icon-link {
@@ -1170,8 +1146,10 @@ a.cat-nav-link:hover {
         grid-template-columns: 1fr;
     }
     .post-image-holder {
-        background-color: #f4f4f4;
         border-bottom: solid 1px #ccc;
+    }
+    #primary {
+        overflow: hidden;
     }
 }
 @media screen and (min-width: 45.01em) {
@@ -1180,11 +1158,16 @@ a.cat-nav-link:hover {
         grid-template-columns: 25% 1fr;
     }
     .post-image-holder {
-        background-color: #f4f4f4;
         border-right: solid 1px #ccc;
     }
 }
-.post-image-holder, .post-text-holder {
+.post-image-holder {
+    background-color: #f4f4f4;
+    padding: 0.5em;
+}
+
+.post-text-holder {
+    overflow: hidden;
     padding: 0.5em;
 }
 .post-list-spacer {

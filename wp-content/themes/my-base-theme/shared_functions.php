@@ -917,6 +917,10 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
 {
     $db1 = db_connect($source_dbid,'p',$source_user);
     $db2 = db_connect($target_dbid,'p',$target_user);
+    $meta_fields = array('pinterest_title',
+                         'pinterest_description',
+                         'facebook_text',
+                         'twitter_text');
     $where_clause = "post_type='post' AND post_status='publish'";
     $where_values = array();
     $query_result = mysqli_select_query($db1,'wp_posts','*',$where_clause,$where_values,'');
@@ -924,6 +928,7 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
     // Loop through posts in source database.
     while ($row1 = mysqli_fetch_assoc($query_result))
     {
+        $post_name = $row1['post_name'];
         $where_clause = "post_name=? AND post_status='publish'";
         $where_values = array('s',$row1['post_name']);
         if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_posts','*',$where_clause,$where_values,'')))
@@ -947,27 +952,52 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
             }
             if ($category_match)
             {
-                if ($row3 = mysqli_fetch_assoc(mysqli_query($db2,"SELECT * FROM wp_post_meta WHERE post_id={$row1['post_name']} AND meta_key='inhibit_sync'")))
+                $where_clause = "post_id=? AND meta_key='inhibit_sync'";
+                $where_values = array('post_id',$row2['ID']);
+                if ($row3 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values,'')));
                 {
-                    $inhibit_sync = $row3['meta_value'];
+                    $inhibit_sync = ($row3['meta_value']) ?? false;
                 }
                 if (empty($inhibit_sync))
                 {
                     if (($option == 'timestamp') && ($row1['post_date'] != $row2['post_date']))
                     {
                         // Synchronise post timestamp.
-                        echo "Synchronising timestamp for post {$row1['post_name']}\n";
+                        echo "Synchronising timestamp for post $post_name\n";
+                        $where_clause = "post_name=?";
+                        $where_values = array('s',$post_name);
                         $fields = ('post_date,post_date_gmt');
                         $values = array ('s',$row1['post_date'],'s',$row1['post_date_gmt']);
                         mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                     }
-                    elseif (($option == 'content') && ($row1['post_content'] != $row2['post_content']))
+                    elseif ($option == 'content')
                     {
-                        // Synchronise post content.
-                        echo "Synchronising content for post {$row1['post_name']}\n";
-                        $fields = ('post_content');
-                        $values = array ('s',$row1['post_content']);
-                        mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                        if ($row1['post_content'] != $row2['post_content'])
+                        {
+                            // Synchronise post content.
+                            echo "Synchronising content for post $post_name\n";
+                            $where_clause = "post_name=?";
+                            $where_values = array('s',$post_name);
+                            $fields = ('post_content');
+                            $values = array ('s',$row1['post_content']);
+                            mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
+                        }
+                        // Synchronise any meta values.
+                        foreach ($meta_fields as $field)
+                        {
+                            $where_clause = 'post_id=? AND meta_key=?';
+                            $where_values_1 = array('',$row1['ID'],'s',$field);
+                            $where_values_2 = array('',$row2['ID'],'s',$field);
+                            if (($row3 = mysqli_fetch_assoc(mysqli_select_query($db1,'wp_postmeta','*',$where_clause,$where_values_1,''))) &&
+                                ($row4 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values_2,''))) &&
+                                ($row3['meta_value'] != $row4['meta_value']))
+                            {
+                                echo "Synchronising meta value for post $post_name => $field\n";
+                                $fields = 'meta_value';
+                                $values = array('s',$row3['meta_value']);
+                                mysqli_update_query($db2,'wp_postmeta',$fields,$values,$where_clause,$where_values_2);
+                            }
+                        }
                     }
                 }
             }    

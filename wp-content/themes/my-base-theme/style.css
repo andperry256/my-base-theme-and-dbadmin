@@ -1071,7 +1071,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-# Blog Navigation Links
+# Blog Pages - Navigation
 --------------------------------------------------------------*/
 
 blog-nav-table {
@@ -1111,7 +1111,7 @@ a.cat-nav-link:hover {
 }
 
 /*--------------------------------------------------------------
-# Blog Listing
+# Blog Pages - Content
 --------------------------------------------------------------*/
 
 .category-icon-link {
@@ -1181,4 +1181,8 @@ a.cat-nav-link:hover {
 .post-archive-table-cell {
     border: solid 1px #ccc;
     padding: 0.2em;
+}
+
+.blog-footnote {
+    font-size: 0.85em;
 }

@@ -247,6 +247,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     global $wpdb;
     global $base_url;
     global $home_ip_addr;
+    global $show_author_in_post_summary;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_date = substr($row->post_date,0,10);
@@ -261,7 +262,16 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     print("</div>\n");
     print("<div class=\"post-text-holder\">");
     echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
-    print("<p>[Posted on: $post_date]</p>\n");
+    print("<p>[Posted on: $post_date");
+    if (!empty($show_author_in_post_summary))
+    {
+        $author = $row->post_author;
+        if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author"))
+        {
+            print(" by {$row2->display_name}");
+        }
+    }
+    print("]</p>\n");
     the_content();
     if ($_SERVER['REMOTE_ADDR'] == $home_ip_addr)
     {
@@ -550,6 +560,48 @@ function get_category_access_level($id)
     else
     {
         return DEFAULT_ACCESS_LEVEL;
+    }
+}
+
+//================================================================================
+/*
+Function check_uncategorised_post
+
+This function needs to be invoked via an action hook on 'save_post'. This hook
+must be activated in the child theme functions.php script. Caution needs to be
+exercised if there are  multiple actions on 'save_post', as this function itself
+will generate a premature exit if the post is uncategorised. In this situation,
+it would be best to have a single function on 'save_post', which itself calls this
+function at the end.
+*/
+//================================================================================
+
+function check_uncategorised_post()
+{
+    $post = get_post();
+    if ($post->post_type == 'post')
+    {
+        $uncategorised = true;
+        $categories = get_the_category($post->ID);
+        foreach ($categories as $key => $dummy)
+        {
+            $slug = $categories[$key]->slug;
+            if (($slug == 'uncategorised') || ($slug == 'uncategorized'))
+            {
+                $uncategorised = true;
+                break;
+            }
+            else
+            {
+                $uncategorised = false;
+            }
+        }
+        if ($uncategorised)
+        {
+            print("<p><strong>Warning:</strong> You have saved this post with the 'uncategorised' category.</p>\n");            
+            print("<p><a href=# onclick=\"window.history.back()\"><button style=\"font-size:$size;\">Back</button></a></p>\n");
+            exit;
+        }
     }
 }
 

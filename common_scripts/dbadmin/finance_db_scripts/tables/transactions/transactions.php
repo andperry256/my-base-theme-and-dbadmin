@@ -17,7 +17,7 @@ class tables_transactions
   
     function date__validate($record, $value)
     {
-        if (!DateIsValid($value))
+        if (!date_is_valid($value))
         {
             return report_error("Invalid date.");
         }

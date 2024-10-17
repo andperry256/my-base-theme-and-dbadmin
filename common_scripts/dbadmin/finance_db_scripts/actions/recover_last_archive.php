@@ -41,7 +41,7 @@ else
         if (mysqli_num_rows(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'')) > 20)
         {
             // Full year found
-            $archive_end_date = AddDays($year_start,-1);
+            $archive_end_date = add_days($year_start,-1);
             break;
         }
     }

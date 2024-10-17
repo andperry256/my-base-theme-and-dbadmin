@@ -10,11 +10,11 @@ $standalone_counter (optional) - Indicates that the counter is being
                                 displayed on the "web site index" page
                                 rather than its native website.
 $multilingual_dates (optional) - Indicates that a multi-lingual version of
-                                the 'ShortMonthName' function is in use.
+                                the 'short_month_name' function is in use.
 */
 //==============================================================================
 
-if (!function_exists('DayName'))
+if (!function_exists('day_name'))
 {
     require("$base_dir/common_scripts/date_funct.php");
 }
@@ -156,7 +156,7 @@ if ($counter_enabled)
         print("</style>\n");
         print("<table cellpadding=5>\n");
         print("<tr><td>Count:</td><td>$counter_val</td></tr>\n");
-        print(sprintf("<tr><td>Since:</td><td>%02d %s $start_year</td></tr>\n",$start_day, ShortMonthName($start_month,'en')));
+        print(sprintf("<tr><td>Since:</td><td>%02d %s $start_year</td></tr>\n",$start_day, short_month_name($start_month,'en')));
         print(sprintf("<tr><td>Daily:</td><td>%01.1f</td></tr>\n",$counter_val/$days_counting));
         print("<tr><td>Today:</td><td>$today_count</td></tr>\n");
         print("</table>\n");
@@ -174,11 +174,11 @@ if ($counter_enabled)
             print(sprintf("<span class=\"counter\">&nbsp;%05d&nbsp;</span>",$counter_val));
             if ((isset($multilingual_dates)) && ($multilingual_dates))
             {
-                print(sprintf("<br />since %02d %s $start_year",$start_day, MonthName($start_month,'en')));
+                print(sprintf("<br />since %02d %s $start_year",$start_day, month_name($start_month,'en')));
             }
             else
             {
-                print(sprintf("<br />since %02d %s $start_year",$start_day, MonthName($start_month)));
+                print(sprintf("<br />since %02d %s $start_year",$start_day, month_name($start_month)));
             }
         }
         if (isset($_GET['showcount']))

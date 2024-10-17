@@ -84,8 +84,8 @@ function update_account_balances($account,$start_date)
     {
         while (true)
         {
-            $date = PreviousDate($date);
-            if (IsWorkingDay($date))
+            $date = previous_date($date);
+            if (is_working_day($date))
             {
                 break;
             }
@@ -645,15 +645,15 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
         $multiplier = (int)(ltrim($sched_freq,'MWD'));
         if ($type == 'M')
         {
-            $date = AddMonths($date,$multiplier,$last_day);
+            $date = add_months($date,$multiplier,$last_day);
         }
         elseif ($type == 'W')
         {
-            $date = AddWeeks($date,$multiplier);
+            $date = add_weeks($date,$multiplier);
         }
         elseif ($type == 'D')
         {
-            $date = AddDays($date,$multiplier);
+            $date = add_days($date,$multiplier);
         }
         $acct_month = accounting_month($date);
         $set_fields = 'date,acct_month';
@@ -735,8 +735,8 @@ function record_new_scheduled_transactions($verbose=false)
 function find_matching_transaction($account,$date,$amount)
 {
     $db = admin_db_connect();
-    $start_date = AddDays($date,-4);
-    $end_date = AddDays($date,1);
+    $start_date = add_days($date,-4);
+    $end_date = add_days($date,1);
     $credit_amount = ($amount > 0) ? $amount : 0;
     $debit_amount = ($amount < 0) ? -$amount : 0;
     $where_clause = 'account=? AND date>=? AND date<=? AND credit_amount=? AND debit_amount=? and reconciled=0';
@@ -768,7 +768,7 @@ function find_matching_transaction($account,$date,$amount)
 function delete_uncleared_cheques()
 {
     $db = admin_db_connect();
-    $cutoff_date = AddDays(date('Y-m-d'),-190);  // 6 months + small allowance
+    $cutoff_date = add_days(date('Y-m-d'),-190);  // 6 months + small allowance
     $where_clause = 'reconciled=0 AND chq_no IS NOT NULL and chq_no>0 AND date<=?';
     $where_values = array('s',$cutoff_date);
     $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');

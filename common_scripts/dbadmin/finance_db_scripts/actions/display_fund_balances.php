@@ -105,7 +105,7 @@ if (isset($_POST['submitted']))
 if ((isset($_POST['submitted'])) && (!$error))
 {
     $currency=$_POST['currency'];
-    $end_date = MonthName((int)substr($end_month,5,2)).' '.substr($end_month,0,4);
+    $end_date = month_name((int)substr($end_month,5,2)).' '.substr($end_month,0,4);
     print("<h1>Fund Balances");
     if (!isset($off_screen))
     {

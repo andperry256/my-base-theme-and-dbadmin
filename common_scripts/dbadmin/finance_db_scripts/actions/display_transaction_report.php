@@ -466,7 +466,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                             break;
                         }
                     }
-                    $month_description = MonthName((int)substr($accounting_month,5,2)).' '.substr($accounting_month,0,4);
+                    $month_description = month_name((int)substr($accounting_month,5,2)).' '.substr($accounting_month,0,4);
                     print("<h2>$month_description</h2>\n");
           
                     // New table header

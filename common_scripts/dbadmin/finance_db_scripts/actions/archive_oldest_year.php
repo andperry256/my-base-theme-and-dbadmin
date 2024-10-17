@@ -7,7 +7,7 @@ print("<h1>Archive Oldest Year</h1>\n");
 if (isset($_POST['new_start_date']))
 {
     $new_start_date = $_POST['new_start_date'];
-    $archive_end_date = AddDays($new_start_date,-1);
+    $archive_end_date = add_days($new_start_date,-1);
     $balances = array();
     $error = false;
     $query_result = mysqli_select_query($db,'accounts','*','',array(),'');
@@ -242,7 +242,7 @@ else
         {
             // Full year found
             $new_start_date = $next_year_start;
-            $archive_end_date = AddDays($new_start_date,-1);
+            $archive_end_date = add_days($new_start_date,-1);
             break;
         }
     }

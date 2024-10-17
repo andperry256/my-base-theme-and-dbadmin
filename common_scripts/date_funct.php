@@ -17,9 +17,9 @@ elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php")))
 
 //==============================================================================
 
-if (!function_exists('DayName'))
+if (!function_exists('day_name'))
 {
-    function DayName($day)
+    function day_name($day)
     {
         $name = array("Sunday","Monday","Tuesday","Wednesday",
                       "Thursday","Friday","Saturday");
@@ -29,9 +29,9 @@ if (!function_exists('DayName'))
 
 //==============================================================================
 
-if (!function_exists('ShortDayName'))
+if (!function_exists('short_day_name'))
 {
-    function ShortDayName($day)
+    function short_day_name($day)
     {
         $name = array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
         return $name[$day];
@@ -40,9 +40,9 @@ if (!function_exists('ShortDayName'))
 
 //==============================================================================
 
-if (!function_exists('DayNumber'))
+if (!function_exists('day_number'))
 {
-    function DayNumber($day)
+    function day_number($day)
     {
         $day = strtolower($day);
         $short_name = array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
@@ -66,9 +66,9 @@ if (!function_exists('DayNumber'))
 
 //==============================================================================
 
-if (!function_exists('MonthName'))
+if (!function_exists('month_name'))
 {
-    function MonthName($month)
+    function month_name($month)
     {
         $name = array("","January","February","March","April",
                       "May","June","July","August","September",
@@ -79,9 +79,9 @@ if (!function_exists('MonthName'))
 
 //==============================================================================
 
-if (!function_exists('ShortMonthName'))
+if (!function_exists('short_month_name'))
 {
-    function ShortMonthName($month)
+    function short_month_name($month)
     {
         $name = array("","Jan","Feb","Mar","Apr","May","Jun",
                       "Jul","Aug","Sep","Oct","Nov","Dec");
@@ -91,9 +91,9 @@ if (!function_exists('ShortMonthName'))
 
 //==============================================================================
 
-if (!function_exists('MonthNumber'))
+if (!function_exists('month_number'))
 {
-    function MonthNumber($month)
+    function month_number($month)
     {
         $month = strtolower($month);
         $short_name = array("jan" => 1, "feb" => 2, "mar" => 3,
@@ -121,9 +121,9 @@ if (!function_exists('MonthNumber'))
 
 //==============================================================================
 
-if (!function_exists('NonLeapYearDays'))
+if (!function_exists('non_leap_year_days'))
 {
-    function NonLeapYearDays($month)
+    function non_leap_year_days($month)
     {
         $days = array(0,31,28,31,30,31,30,31,31,30,31,30,31);
         return $days[$month];
@@ -132,9 +132,9 @@ if (!function_exists('NonLeapYearDays'))
 
 //==============================================================================
 
-if (!function_exists('LeapYearDays'))
+if (!function_exists('leap_year_days'))
 {
-    function LeapYearDays($month)
+    function leap_year_days($month)
     {
         $days = array(0,31,29,31,30,31,30,31,31,30,31,30,31);
         return $days[$month];
@@ -143,9 +143,9 @@ if (!function_exists('LeapYearDays'))
 
 //==============================================================================
 
-if (!function_exists('IsLeapYear'))
+if (!function_exists('is_leap_year'))
 {
-    function IsLeapYear($year,$calendar=CAL_GREGORIAN)
+    function is_leap_year($year,$calendar=CAL_GREGORIAN)
     {
         if (($calendar == CAL_GREGORIAN) && (($year % 100) == 0) && (($year % 400) != 0))
         {
@@ -164,10 +164,9 @@ if (!function_exists('IsLeapYear'))
 
 //==============================================================================
 
-if (!function_exists('DaysInMonth'))
+if (!function_exists('days_in_month'))
 {
-  
-    function DaysInMonth($month,$year,$calendar=CAL_GREGORIAN)
+    function days_in_month($month,$year,$calendar=CAL_GREGORIAN)
     {
         return cal_days_in_month($calendar, $month, $year);
     }
@@ -181,9 +180,9 @@ day of week.
 */
 //==============================================================================
 
-if (!function_exists('GregorianDoW'))
+if (!function_exists('gregorian_dow'))
 {
-    function GregorianDoW($day,$month,$year)
+    function gregorian_dow($day,$month,$year)
     {
         $leap_year_month_adjust   = array(0,6,2,3,6,1,4,6,2,5,0,3,5);
         $non_leap_year_month_adjust = array(0,0,3,3,6,1,4,6,2,5,0,3,5);
@@ -195,7 +194,7 @@ if (!function_exists('GregorianDoW'))
         }
         $result = floor((($year % 100) * 5) / 4);
         $result += $day;
-        $result += (IsLeapYear($year))
+        $result += (is_leap_year($year))
              ? $leap_year_month_adjust[$month]
              : $non_leap_year_month_adjust[$month];
         $result += $gregorian_century_adjust[floor(($year % 400) / 100)];
@@ -206,9 +205,9 @@ if (!function_exists('GregorianDoW'))
 
 //==============================================================================
 
-if (!function_exists('DateToDoW'))
+if (!function_exists('date_to_dow'))
 {
-    function DateToDoW($date)
+    function date_to_dow($date)
     {
         return date('w',strtotime($date));
     }
@@ -216,9 +215,9 @@ if (!function_exists('DateToDoW'))
 
 //==============================================================================
 
-if (!function_exists('DMYToDoW'))
+if (!function_exists('dmy_to_dow'))
 {
-    function DMYToDoW($day,$month,$year)
+    function dmy_to_dow($day,$month,$year)
     {
         $date = sprintf("%04d-%02d-%02d",$year,$month,$day);
         return date('w',strtotime($date));
@@ -227,9 +226,9 @@ if (!function_exists('DMYToDoW'))
 
 //==============================================================================
 
-if (!function_exists('JulianDoW'))
+if (!function_exists('julian_dow'))
 {
-    function JulianDoW($day,$month,$year)
+    function julian_dow($day,$month,$year)
     {
         $julian_day = juliantojd($month,$day,$year);
         return jddayofweek($julian_day);
@@ -238,9 +237,9 @@ if (!function_exists('JulianDoW'))
 
 //==============================================================================
 
-if (!function_exists('DateIsValid'))
+if (!function_exists('date_is_valid'))
 {
-    function DateIsValid($date)
+    function date_is_valid($date)
     {
         return ((preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/",$date)) &&
                 (checkdate((int)(substr($date,5,2)),(int)(substr($date,8,2)),(int)(substr($date,0,4)))));
@@ -249,11 +248,11 @@ if (!function_exists('DateIsValid'))
 
 //==============================================================================
 
-if (!function_exists('StartWeekOfMonth'))
+if (!function_exists('start_week_of_month'))
 {
-    function StartWeekOfMonth($month,$year)
+    function start_week_of_month($month,$year)
     {
-        $start_do_w = DMYToDoW(1,$month,$year);
+        $start_do_w = dmy_to_dow(1,$month,$year);
         if ($start_do_w == 0)
         {
             // Month starts on a Sunday
@@ -274,13 +273,13 @@ if (!function_exists('StartWeekOfMonth'))
                 $so_wyear = $year;
                 $so_wmonth = $month - 1;
             }
-            if (IsLeapYear($so_wyear))
+            if (is_leap_year($so_wyear))
             {
-                $so_wday = LeapYearDays($so_wmonth) + 1 - $start_do_w;
+                $so_wday = leap_year_days($so_wmonth) + 1 - $start_do_w;
             }
             else
             {
-                $so_wday = NonLeapYearDays($so_wmonth) + 1 - $start_do_w;
+                $so_wday = non_leap_year_days($so_wmonth) + 1 - $start_do_w;
             }
         }
         return sprintf("%04d-%02d-%02d",$so_wyear,$so_wmonth,$so_wday);
@@ -289,14 +288,14 @@ if (!function_exists('StartWeekOfMonth'))
 
 //==============================================================================
 
-if (!function_exists('EndWeekOfMonth'))
+if (!function_exists('end_week_of_month'))
 {
-    function EndWeekOfMonth($month,$year)
+    function end_week_of_month($month,$year)
     {
-        $last_day = (IsLeapYear($year))
-            ? LeapYearDays($month)
-            : NonLeapYearDays($month);
-        $end_do_w = DMYToDoW($last_day,$month,$year);
+        $last_day = (is_leap_year($year))
+            ? leap_year_days($month)
+            : non_leap_year_days($month);
+        $end_do_w = dmy_to_dow($last_day,$month,$year);
         $so_wday = $last_day - $end_do_w;
         return sprintf("%04d-%02d-%02d",$year,$month,$so_wday);
     }
@@ -304,9 +303,9 @@ if (!function_exists('EndWeekOfMonth'))
 
 //==============================================================================
 
-if (!function_exists('PreviousDate'))
+if (!function_exists('previous_date'))
 {
-    function PreviousDate($date)
+    function previous_date($date)
     {
         return date('Y-m-d', strtotime("$date - 1 day"));
     }
@@ -314,9 +313,9 @@ if (!function_exists('PreviousDate'))
 
 //==============================================================================
 
-if (!function_exists('NextDate'))
+if (!function_exists('next_date'))
 {
-    function NextDate($date)
+    function next_date($date)
     {
         return date('Y-m-d', strtotime("$date + 1 day"));
     }
@@ -324,9 +323,9 @@ if (!function_exists('NextDate'))
 
 //==============================================================================
 
-if (!function_exists('AddDays'))
+if (!function_exists('add_days'))
 {
-    function AddDays($date,$days)
+    function add_days($date,$days)
     {
         $abs_int = abs($days);
          return ($days >= 0)
@@ -337,9 +336,9 @@ if (!function_exists('AddDays'))
 
 //==============================================================================
 
-if (!function_exists('AddWeeks'))
+if (!function_exists('add_weeks'))
 {
-    function AddWeeks($date,$weeks)
+    function add_weeks($date,$weeks)
     {
         $abs_int = abs($weeks);
          return ($weeks >= 0)
@@ -350,7 +349,7 @@ if (!function_exists('AddWeeks'))
 
 //==============================================================================
 /*
-Function AddMonths
+Function add_months
 
 This function adds a given number of months (positive or negative) to a date.
 The new date will have the same day of the month as the original date unless:-
@@ -363,9 +362,9 @@ The new date will have the same day of the month as the original date unless:-
 */
 //==============================================================================
 
-if (!function_exists('AddMonths'))
+if (!function_exists('add_months'))
 {
-    function AddMonths($date,$months,$last_day=false)
+    function add_months($date,$months,$last_day=false)
     {
         $year = (int)substr($date,0,4);
         $month = (int)substr($date,5,2);
@@ -374,7 +373,7 @@ if (!function_exists('AddMonths'))
         $year_interval = floor(($projected_month - 1) / 12);
         $new_year = $year + $year_interval;
         $new_month = $projected_month - ($year_interval * 12);
-        $days_in_month = DaysInMonth($new_month,$new_year);
+        $days_in_month = days_in_month($new_month,$new_year);
         if (($day > $days_in_month) || ($last_day))
         {
             $day = $days_in_month;
@@ -385,9 +384,9 @@ if (!function_exists('AddMonths'))
 
 //==============================================================================
 
-if (!function_exists('DateDifference'))
+if (!function_exists('date_difference'))
 {
-    function DateDifference ($start_date, $end_date)
+    function date_difference ($start_date, $end_date)
     {
     
         $start_date_obj = date_create($start_date);
@@ -399,9 +398,9 @@ if (!function_exists('DateDifference'))
 
 //==============================================================================
 
-if (!function_exists('DateOfEaster'))
+if (!function_exists('date_of_easter'))
 {
-    function DateOfEaster($year)
+    function date_of_easter($year)
     {
         $paschal_full_moon_month = array(0,4,4,3,4,3,4,4,3,4,4,3,4,4,3,4,3,4,4,3);
         $paschal_full_moon_day = array(0,14,3,23,11,31,18,8,28,16,5,25,13,2,22,10,30,17,7,27);
@@ -415,7 +414,7 @@ if (!function_exists('DateOfEaster'))
             $golden_number = ($year % 19) + 1;
             $day = $paschal_full_moon_day[$golden_number];
             $month = $paschal_full_moon_month[$golden_number];
-            $dayofweek = DMYToDoW($day, $month, $year);
+            $dayofweek = dmy_to_dow($day, $month, $year);
             $day += (7 - $dayofweek);
             if ($day > 31)
             {
@@ -429,19 +428,19 @@ if (!function_exists('DateOfEaster'))
 
 //==============================================================================
 
-if (!function_exists('IsWorkingDay'))
+if (!function_exists('is_working_day'))
 {
-    function IsWorkingDay($date)
+    function is_working_day($date)
     {
         $year = (int)substr($date,0,4);
         $month = (int)substr($date,5,2);
         $day = (int)substr($date,8,2);
-        $dow = DMYToDoW($day,$month,$year);
+        $dow = dmy_to_dow($day,$month,$year);
     
         // Check for weekends and bank holidays
-        $easter_sunday = DateOfEaster($year);
-        $good_friday = AddDays($easter_sunday,-2);
-        $easter_monday = NextDate($easter_sunday);
+        $easter_sunday = date_of_easter($year);
+        $good_friday = add_days($easter_sunday,-2);
+        $easter_monday = next_date($easter_sunday);
         if (($dow == 6) ||  // Saturday
             ($dow == 0) ||  // Sunday
             (($month == 1) && ($day == 1)) ||  // New Year's Day
@@ -467,14 +466,14 @@ if (!function_exists('IsWorkingDay'))
 
 //==============================================================================
 
-if (!function_exists('IsBST'))
+if (!function_exists('is_bst'))
 {
-    function IsBST($date)
+    function is_bst($date)
     {
         $year = (int)substr($date,0,4);
-        $march_end_dow = DMYToDoW(31,3,$year);
+        $march_end_dow = dmy_to_dow(31,3,$year);
         $bst_start = sprintf("$year-03-%02d",31-$march_end_dow);
-        $october_end_dow = DMYToDoW(31,10,$year);
+        $october_end_dow = dmy_to_dow(31,10,$year);
         $bst_end = sprintf("$year-10-%02d",31-$october_end_dow);
         return (($date >= $bst_start) && ($date < $bst_end));
     }
@@ -485,14 +484,14 @@ if (!function_exists('IsBST'))
 // A term is defined as starting on 1 January, Easter Sunday or 1 September.
 //==============================================================================
 
-if (!function_exists('StartOfTerm'))
+if (!function_exists('start_of_term'))
 {
-    function StartOfTerm()
+    function start_of_term()
     {
         // Determine the start of the current school term.
         $today = TODAY_DATE;
         $this_year = date('Y');
-        $easter = DateOfEaster($this_year);
+        $easter = date_of_easter($this_year);
         if ($today >= "$this_year-09-01")
         {
             return ("$this_year-09-01");
@@ -510,12 +509,12 @@ if (!function_exists('StartOfTerm'))
 
 //==============================================================================
 
-if (!function_exists('EndOfLastTerm'))
+if (!function_exists('end_of_last_term'))
 {
-    function EndOfLastTerm()
+    function end_of_last_term()
     {
         // Determine the end of the previous school term.
-        $start_of_term = StartOfTerm();
+        $start_of_term = start_of_term();
         $year = (int)substr($start_of_term,0,4);
         $month = (int)substr($start_of_term,5,2);
         $day = (int)substr($start_of_term,8,2);
@@ -528,7 +527,7 @@ if (!function_exists('EndOfLastTerm'))
                 $year--;
                 $month = 12;
             }
-            $day = DaysInMonth($month,$year);
+            $day = days_in_month($month,$year);
         }
         $date = sprintf("%04d-%02d-%02d",$year,$month,$day);
         return $date;
@@ -537,14 +536,14 @@ if (!function_exists('EndOfLastTerm'))
 
 //==============================================================================
 
-if (!function_exists('EndOfThisTerm'))
+if (!function_exists('end_of_this_term'))
 {
-    function EndOfThisTerm()
+    function end_of_this_term()
     {
         // Determine the end of the current school term.
         $today = TODAY_DATE;
         $this_year = date('Y');
-        $easter = DateOfEaster($this_year);
+        $easter = date_of_easter($this_year);
         if ($today >= "$this_year-09-01")
         {
             return ("$this_year-12-31");
@@ -571,16 +570,16 @@ if (!function_exists('EndOfThisTerm'))
 
 //==============================================================================
 
-if (!function_exists('EndOfNextTerm'))
+if (!function_exists('end_of_next_term'))
 {
-    function EndOfNextTerm()
+    function end_of_next_term()
     {
         // Determine the end of the current school term.
         $today = TODAY_DATE;
         $this_year = date('Y');
         $next_year = $this_year+1;
-        $easter = DateOfEaster($this_year);
-        $next_easter = DateOfEaster($this_year+1);
+        $easter = date_of_easter($this_year);
+        $next_easter = date_of_easter($this_year+1);
     
         if ($today >= "$this_year-09-01")
         {
@@ -622,9 +621,9 @@ if (!function_exists('short_date'))
         $month = (int)substr($date,5,2);
         $year = (int)substr($date,0,4);
         $day += $day_offset;
-        if ($day > DaysInMonth($month,$year))
+        if ($day > days_in_month($month,$year))
         {
-            $day -= DaysInMonth($month,$year);
+            $day -= days_in_month($month,$year);
             if ($month == 12)
             {
                 $month = 1;
@@ -635,7 +634,7 @@ if (!function_exists('short_date'))
                 $month++;
             }
         }
-        return sprintf("%02d %s %04d",$day,ShortMonthName($month),$year);
+        return sprintf("%02d %s %04d",$day,short_month_name($month),$year);
     }
 }
 
@@ -655,9 +654,9 @@ if (!function_exists('title_date'))
         $month = (int)substr($date,5,2);
         $year = (int)substr($date,0,4);
         $day += $day_offset;
-        if ($day > DaysInMonth($month,$year))
+        if ($day > days_in_month($month,$year))
         {
-            $day -= DaysInMonth($month,$year);
+            $day -= days_in_month($month,$year);
             if ($month == 12)
             {
                 $month = 1;
@@ -668,8 +667,8 @@ if (!function_exists('title_date'))
                 $month++;
             }
         }
-        $dow = DMYToDoW($day,$month,$year);
-        return sprintf("%s %02d %s %04d",ShortDayName($dow),$day,ShortMonthName($month),$year);
+        $dow = dmy_to_dow($day,$month,$year);
+        return sprintf("%s %02d %s %04d",short_day_name($dow),$day,short_month_name($month),$year);
     }
 }
 
@@ -689,9 +688,9 @@ if (!function_exists('long_title_date'))
         $month = (int)substr($date,5,2);
         $year = (int)substr($date,0,4);
         $day += $day_offset;
-        if ($day > DaysInMonth($month,$year))
+        if ($day > days_in_month($month,$year))
         {
-            $day -= DaysInMonth($month,$year);
+            $day -= days_in_month($month,$year);
             if ($month == 12)
             {
                 $month = 1;
@@ -702,16 +701,16 @@ if (!function_exists('long_title_date'))
                 $month++;
             }
         }
-        $dow = DMYToDoW($day,$month,$year);
-        return sprintf("%s %02d %s %04d",DayName($dow),$day,MonthName($month),$year);
+        $dow = dmy_to_dow($day,$month,$year);
+        return sprintf("%s %02d %s %04d",day_name($dow),$day,month_name($month),$year);
     }
 }
 
 //==============================================================================
 
-if (!function_exists('ChurchCalendar'))
+if (!function_exists('church_calendar'))
 {
-    function ChurchCalendar ($day,$month,$year)
+    function church_calendar ($day,$month,$year)
     {
         $epiphany_sundays = array (
           "1st Sunday after Epiphany",
@@ -775,7 +774,7 @@ if (!function_exists('ChurchCalendar'))
           "4th Sunday in Advent"
         );
     
-        if (DMYToDoW($day,$month,$year) != 0)
+        if (dmy_to_dow($day,$month,$year) != 0)
         {
             // Abort if date is not a Sunday
             return "Error";
@@ -783,8 +782,8 @@ if (!function_exists('ChurchCalendar'))
         $date = sprintf("%04d-%02d-%02d",$year,$month,$day);
     
         // Calculate the dates of Septuagesima and Advent Sunday
-        $date_of_septuagesima = AddDays(DateOfEaster($year),-63);
-        $dow_of_christmas = DMYToDoW(25,12,$year);
+        $date_of_septuagesima = add_days(date_of_easter($year),-63);
+        $dow_of_christmas = dmy_to_dow(25,12,$year);
         if ($dow_of_christmas == 0)
         {
             $days_in_advent = 28;
@@ -793,7 +792,7 @@ if (!function_exists('ChurchCalendar'))
         {
             $days_in_advent = $dow_of_christmas + 21;
         }
-        $date_of_advent_sunday = AddDays("$year-12-25",-$days_in_advent);
+        $date_of_advent_sunday = add_days("$year-12-25",-$days_in_advent);
     
         if ($date < $date_of_septuagesima)
         {
@@ -812,14 +811,14 @@ if (!function_exists('ChurchCalendar'))
             }
             else
             {
-                $days_after_epiphany = DateDifference("$year-01-06",$date);
+                $days_after_epiphany = date_difference("$year-01-06",$date);
                 return $epiphany_sundays[($days_after_epiphany - 1) / 7];
             }
         }
         elseif ($date < $date_of_advent_sunday)
         {
             // Dictated by the date of Easter
-            $days_after_septuagesima = DateDifference($date_of_septuagesima,$date);
+            $days_after_septuagesima = date_difference($date_of_septuagesima,$date);
             return $moveable_sundays[$days_after_septuagesima / 7];
         }
         else
@@ -827,7 +826,7 @@ if (!function_exists('ChurchCalendar'))
             // Advent & Christmas
             if ($date < "$year-12-25")
             {
-                $days_into_advent = DateDifference($date_of_advent_sunday,$date);
+                $days_into_advent = date_difference($date_of_advent_sunday,$date);
                 return $advent_sundays[$days_into_advent / 7];
             }
             elseif ($date == "$year-12-25")

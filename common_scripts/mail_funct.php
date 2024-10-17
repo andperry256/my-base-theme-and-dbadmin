@@ -512,7 +512,7 @@ require_once("$base_dir/common_scripts/date_funct.php");
 function email_previous_day_mail_log($station_id,$from_addr)
 {
     global $mail_log_dir;
-    $yesterday_date = PreviousDate(TODAY_DATE);
+    $yesterday_date = previous_date(TODAY_DATE);
     $log_file = "$mail_log_dir/mail-"."$yesterday_date.log";
     if (is_file($log_file))
     {

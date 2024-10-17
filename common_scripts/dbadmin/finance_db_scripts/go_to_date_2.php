@@ -22,7 +22,7 @@ else
 
 if (isset($_POST['submitted']))
 {
-    if (!DateIsValid($_POST['date_selection']))
+    if (!date_is_valid($_POST['date_selection']))
     {
         print("<p>Invalid Date</p>\n");
         print("<p><a href=\"{$_GET['-returnurl']}\">Try again</a></p>\n");

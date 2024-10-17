@@ -578,6 +578,7 @@ function at the end.
 
 function check_uncategorised_post()
 {
+    global $base_url;
     $post = get_post();
     if ($post->post_type == 'post')
     {
@@ -599,7 +600,7 @@ function check_uncategorised_post()
         if ($uncategorised)
         {
             print("<p><strong>Warning:</strong> You have saved this post with the 'uncategorised' category.</p>\n");            
-            print("<p><a href=# onclick=\"window.history.back()\"><button style=\"font-size:$size;\">Back</button></a></p>\n");
+            print("<p><a href=\"$base_url/wp-admin/edit.php\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
             exit;
         }
     }

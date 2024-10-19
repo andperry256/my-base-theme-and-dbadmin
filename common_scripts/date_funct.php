@@ -30,7 +30,7 @@ if (!function_exists('day_name'))
     {
         $name = array('en' => array("Sunday","Monday","Tuesday","Wednesday",
                                     "Thursday","Friday","Saturday"));
-        return isset($name[$language][$day]) ? $name[$language][$day] : '';
+        return $name[$language][$day] ?? '';
     }
 }
 
@@ -41,7 +41,7 @@ if (!function_exists('short_day_name'))
     function short_day_name($day,$language='en')
     {
         $name = array('en' => array("Sun","Mon","Tue","Wed","Thu","Fri","Sat"));
-        return isset($name[$language][$day]) ? $name[$language][$day] : '';
+        return $name[$language][$day] ?? '';
     }
 }
 
@@ -80,7 +80,7 @@ if (!function_exists('month_name'))
         $name = array('en' => array("","January","February","March","April",
                                     "May","June","July","August","September",
                                     "October","November","December"));
-        return isset($name[$language][$month]) ? $name[$language][$month] : '';
+        return $name[$language][$month] ?? '';
     }
 }
 
@@ -92,7 +92,7 @@ if (!function_exists('short_month_name'))
     {
         $name = array('en' =>array("","Jan","Feb","Mar","Apr","May","Jun",
                                    "Jul","Aug","Sep","Oct","Nov","Dec"));
-        return isset($name[$language][$month]) ? $name[$language][$month] : '';
+        return $name[$language][$month] ?? '';
     }
 }
 

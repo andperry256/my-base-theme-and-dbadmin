@@ -195,8 +195,8 @@ if (!function_exists('gregorian_dow'))
         $result = floor((($year % 100) * 5) / 4);
         $result += $day;
         $result += (is_leap_year($year))
-             ? $leap_year_month_adjust[$month]
-             : $non_leap_year_month_adjust[$month];
+            ? $leap_year_month_adjust[$month]
+            : $non_leap_year_month_adjust[$month];
         $result += $gregorian_century_adjust[floor(($year % 400) / 100)];
         $result %= 7;
         return $result;
@@ -243,6 +243,160 @@ if (!function_exists('date_is_valid'))
     {
         return ((preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/",$date)) &&
                 (checkdate((int)(substr($date,5,2)),(int)(substr($date,8,2)),(int)(substr($date,0,4)))));
+    }
+}
+
+//==============================================================================
+
+if (!function_exists('is_working_day'))
+{
+    function is_working_day($date)
+    {
+        $year = (int)substr($date,0,4);
+        $month = (int)substr($date,5,2);
+        $day = (int)substr($date,8,2);
+        $dow = dmy_to_dow($day,$month,$year);
+    
+        // Check for weekends and bank holidays
+        $easter_sunday = date_of_easter($year);
+        $good_friday = add_days($easter_sunday,-2);
+        $easter_monday = next_date($easter_sunday);
+        if (($dow == 6) ||  // Saturday
+            ($dow == 0) ||  // Sunday
+            (($month == 1) && ($day == 1)) ||  // New Year's Day
+            (($month == 1) && ($dow == 1) && ($day <= 3)) ||  // New Year in lieu
+            ($date == $good_friday) ||  // Good Friday
+            ($date == $easter_monday) ||  // Easter Monday
+            (($month == 5) && ($dow == 1) && ($day <= 7)) ||  // May Day BH
+            (($month == 5) && ($dow == 1) && ($day >= 25)) ||  // Late May BH
+            (($month == 8) && ($dow == 1) && ($day >= 25)) ||  // August BH
+            (($month == 12) && ($day == 25)) ||  // Christmas Day
+            (($month == 12) && ($day == 26)) ||  // Boxing Day
+            (($month == 12) && ($dow <= 2) && ($day >= 27) && ($day <= 28))  // Christmas in lieu
+           )
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+}
+
+//==============================================================================
+
+if (!function_exists('is_bst'))
+{
+    function is_bst($date)
+    {
+        $year = (int)substr($date,0,4);
+        $march_end_dow = dmy_to_dow(31,3,$year);
+        $bst_start = sprintf("$year-03-%02d",31-$march_end_dow);
+        $october_end_dow = dmy_to_dow(31,10,$year);
+        $bst_end = sprintf("$year-10-%02d",31-$october_end_dow);
+        return (($date >= $bst_start) && ($date < $bst_end));
+    }
+}
+
+//==============================================================================
+
+if (!function_exists('short_date'))
+{
+    function short_date($date,$day_offset=0)
+    {
+        if (empty($date))
+        {
+            return '';
+        }
+
+        // Format date string from MySQL
+        $day = (int)substr($date,8,2);
+        $month = (int)substr($date,5,2);
+        $year = (int)substr($date,0,4);
+        $day += $day_offset;
+        if ($day > days_in_month($month,$year))
+        {
+            $day -= days_in_month($month,$year);
+            if ($month == 12)
+            {
+                $month = 1;
+                $year++;
+            }
+            else
+            {
+                $month++;
+            }
+        }
+        return sprintf("%02d %s %04d",$day,short_month_name($month),$year);
+    }
+}
+
+//==============================================================================
+
+if (!function_exists('title_date'))
+{
+    function title_date($date,$day_offset=0)
+    {
+        if (empty($date))
+        {
+            return '';
+        }
+
+        // Format date string from MySQL
+        $day = (int)substr($date,8,2);
+        $month = (int)substr($date,5,2);
+        $year = (int)substr($date,0,4);
+        $day += $day_offset;
+        if ($day > days_in_month($month,$year))
+        {
+            $day -= days_in_month($month,$year);
+            if ($month == 12)
+            {
+                $month = 1;
+                $year++;
+            }
+            else
+            {
+                $month++;
+            }
+        }
+        $dow = dmy_to_dow($day,$month,$year);
+        return sprintf("%s %02d %s %04d",short_day_name($dow),$day,short_month_name($month),$year);
+    }
+}
+
+//==============================================================================
+
+if (!function_exists('long_title_date'))
+{
+    function long_title_date($date,$day_offset=0)
+    {
+        if (empty($date))
+        {
+            return '';
+        }
+
+        // Format date string from MySQL
+        $day = (int)substr($date,8,2);
+        $month = (int)substr($date,5,2);
+        $year = (int)substr($date,0,4);
+        $day += $day_offset;
+        if ($day > days_in_month($month,$year))
+        {
+            $day -= days_in_month($month,$year);
+            if ($month == 12)
+            {
+                $month = 1;
+                $year++;
+            }
+            else
+            {
+                $month++;
+            }
+        }
+        $dow = dmy_to_dow($day,$month,$year);
+        return sprintf("%s %02d %s %04d",day_name($dow),$day,month_name($month),$year);
     }
 }
 
@@ -352,7 +506,7 @@ if (!function_exists('add_weeks'))
 Function add_months
 
 This function adds a given number of months (positive or negative) to a date.
-The new date will have the same day of the month as the original date unless:-
+The new date will have the same day of the month as the original date unless:
 1. The given day does not exist in the new month, in which case it is set to the
    last day of the month. So for example 31 March plus one month will give
    30 April.
@@ -428,54 +582,136 @@ if (!function_exists('date_of_easter'))
 
 //==============================================================================
 
-if (!function_exists('is_working_day'))
+if (!function_exists('church_calendar'))
 {
-    function is_working_day($date)
+    function church_calendar ($day,$month,$year)
     {
-        $year = (int)substr($date,0,4);
-        $month = (int)substr($date,5,2);
-        $day = (int)substr($date,8,2);
-        $dow = dmy_to_dow($day,$month,$year);
+        $epiphany_sundays = array (
+          "1st Sunday after Epiphany",
+          "2nd Sunday after Epiphany",
+          "3rd Sunday after Epiphany",
+          "4th Sunday after Epiphany",
+          "5th Sunday after Epiphany",
+          "6th Sunday after Epiphany"
+        );
+        $moveable_sundays = array (
+          "Septuagesima",
+          "Sexagesima",
+          "Quinquagesima",
+          "1st Sunday in Lent",
+          "2nd Sunday in Lent",
+          "3rd Sunday in Lent",
+          "4th Sunday in Lent",
+          "5th Sunday in Lent",
+          "Palm Sunday",
+          "Easter Sunday",
+          "1st Sunday after Easter",
+          "2nd Sunday after Easter",
+          "3rd Sunday after Easter",
+          "4th Sunday after Easter",
+          "5th Sunday after Easter",
+          "Sunday after Ascension",
+          "Whit Sunday",
+          "Trinity Sunday",
+          "1st Sunday after Trinity",
+          "2nd Sunday after Trinity",
+          "3rd Sunday after Trinity",
+          "4th Sunday after Trinity",
+          "5th Sunday after Trinity",
+          "6th Sunday after Trinity",
+          "7th Sunday after Trinity",
+          "8th Sunday after Trinity",
+          "9th Sunday after Trinity",
+          "10th Sunday after Trinity",
+          "11th Sunday after Trinity",
+          "12th Sunday after Trinity",
+          "13th Sunday after Trinity",
+          "14th Sunday after Trinity",
+          "15th Sunday after Trinity",
+          "16th Sunday after Trinity",
+          "17th Sunday after Trinity",
+          "18th Sunday after Trinity",
+          "19th Sunday after Trinity",
+          "20th Sunday after Trinity",
+          "21st Sunday after Trinity",
+          "22nd Sunday after Trinity",
+          "23rd Sunday after Trinity",
+          "24th Sunday after Trinity",
+          "25th Sunday after Trinity",
+          "26th Sunday after Trinity",
+          "27th Sunday after Trinity"
+        );
+        $advent_sundays = array (
+          "Advent Sunday",
+          "2nd Sunday in Advent",
+          "3rd Sunday in Advent",
+          "4th Sunday in Advent"
+        );
     
-        // Check for weekends and bank holidays
-        $easter_sunday = date_of_easter($year);
-        $good_friday = add_days($easter_sunday,-2);
-        $easter_monday = next_date($easter_sunday);
-        if (($dow == 6) ||  // Saturday
-            ($dow == 0) ||  // Sunday
-            (($month == 1) && ($day == 1)) ||  // New Year's Day
-            (($month == 1) && ($dow == 1) && ($day <= 3)) ||  // New Year in lieu
-            ($date == $good_friday) ||  // Good Friday
-            ($date == $easter_monday) ||  // Easter Monday
-            (($month == 5) && ($dow == 1) && ($day <= 7)) ||  // May Day BH
-            (($month == 5) && ($dow == 1) && ($day >= 25)) ||  // Late May BH
-            (($month == 8) && ($dow == 1) && ($day >= 25)) ||  // August BH
-            (($month == 12) && ($day == 25)) ||  // Christmas Day
-            (($month == 12) && ($day == 26)) ||  // Boxing Day
-            (($month == 12) && ($dow <= 2) && ($day >= 27) && ($day <= 28))  // Christmas in lieu
-           )
+        if (dmy_to_dow($day,$month,$year) != 0)
         {
-            return false;
+            // Abort if date is not a Sunday
+            return "Error";
+        }
+        $date = sprintf("%04d-%02d-%02d",$year,$month,$day);
+    
+        // Calculate the dates of Septuagesima and Advent Sunday
+        $date_of_septuagesima = add_days(date_of_easter($year),-63);
+        $dow_of_christmas = dmy_to_dow(25,12,$year);
+        if ($dow_of_christmas == 0)
+        {
+            $days_in_advent = 28;
         }
         else
         {
-            return true;
+            $days_in_advent = $dow_of_christmas + 21;
         }
-    }
-}
-
-//==============================================================================
-
-if (!function_exists('is_bst'))
-{
-    function is_bst($date)
-    {
-        $year = (int)substr($date,0,4);
-        $march_end_dow = dmy_to_dow(31,3,$year);
-        $bst_start = sprintf("$year-03-%02d",31-$march_end_dow);
-        $october_end_dow = dmy_to_dow(31,10,$year);
-        $bst_end = sprintf("$year-10-%02d",31-$october_end_dow);
-        return (($date >= $bst_start) && ($date < $bst_end));
+        $date_of_advent_sunday = add_days("$year-12-25",-$days_in_advent);
+    
+        if ($date < $date_of_septuagesima)
+        {
+            // Prior to Septuagesima
+            if ($date == "$year-01-01")
+            {
+                return "Sunday after Christmas";
+            }
+            elseif ($date < "$year-01-06")
+            {
+                return "2nd Sunday after Christmas";
+            }
+            elseif ($date == "$year-01-06")
+            {
+                return "Epiphany";
+            }
+            else
+            {
+                $days_after_epiphany = date_difference("$year-01-06",$date);
+                return $epiphany_sundays[($days_after_epiphany - 1) / 7];
+            }
+        }
+        elseif ($date < $date_of_advent_sunday)
+        {
+            // Dictated by the date of Easter
+            $days_after_septuagesima = date_difference($date_of_septuagesima,$date);
+            return $moveable_sundays[$days_after_septuagesima / 7];
+        }
+        else
+        {
+            // Advent & Christmas
+            if ($date < "$year-12-25")
+            {
+                $days_into_advent = date_difference($date_of_advent_sunday,$date);
+                return $advent_sundays[$days_into_advent / 7];
+            }
+            elseif ($date == "$year-12-25")
+            {
+                return "Christmas Day";
+            }
+            else
+            {
+                return "Sunday after Christmas";
+            }
+        }
     }
 }
 
@@ -601,242 +837,6 @@ if (!function_exists('end_of_next_term'))
         else
         {
             return ("$this_year-08-31");
-        }
-    }
-}
-
-//==============================================================================
-
-if (!function_exists('short_date'))
-{
-    function short_date($date,$day_offset=0)
-    {
-        if (empty($date))
-        {
-            return '';
-        }
-
-        // Format date string from MySQL
-        $day = (int)substr($date,8,2);
-        $month = (int)substr($date,5,2);
-        $year = (int)substr($date,0,4);
-        $day += $day_offset;
-        if ($day > days_in_month($month,$year))
-        {
-            $day -= days_in_month($month,$year);
-            if ($month == 12)
-            {
-                $month = 1;
-                $year++;
-            }
-            else
-            {
-                $month++;
-            }
-        }
-        return sprintf("%02d %s %04d",$day,short_month_name($month),$year);
-    }
-}
-
-//==============================================================================
-
-if (!function_exists('title_date'))
-{
-    function title_date($date,$day_offset=0)
-    {
-        if (empty($date))
-        {
-            return '';
-        }
-
-        // Format date string from MySQL
-        $day = (int)substr($date,8,2);
-        $month = (int)substr($date,5,2);
-        $year = (int)substr($date,0,4);
-        $day += $day_offset;
-        if ($day > days_in_month($month,$year))
-        {
-            $day -= days_in_month($month,$year);
-            if ($month == 12)
-            {
-                $month = 1;
-                $year++;
-            }
-            else
-            {
-                $month++;
-            }
-        }
-        $dow = dmy_to_dow($day,$month,$year);
-        return sprintf("%s %02d %s %04d",short_day_name($dow),$day,short_month_name($month),$year);
-    }
-}
-
-//==============================================================================
-
-if (!function_exists('long_title_date'))
-{
-    function long_title_date($date,$day_offset=0)
-    {
-        if (empty($date))
-        {
-            return '';
-        }
-
-        // Format date string from MySQL
-        $day = (int)substr($date,8,2);
-        $month = (int)substr($date,5,2);
-        $year = (int)substr($date,0,4);
-        $day += $day_offset;
-        if ($day > days_in_month($month,$year))
-        {
-            $day -= days_in_month($month,$year);
-            if ($month == 12)
-            {
-                $month = 1;
-                $year++;
-            }
-            else
-            {
-                $month++;
-            }
-        }
-        $dow = dmy_to_dow($day,$month,$year);
-        return sprintf("%s %02d %s %04d",day_name($dow),$day,month_name($month),$year);
-    }
-}
-
-//==============================================================================
-
-if (!function_exists('church_calendar'))
-{
-    function church_calendar ($day,$month,$year)
-    {
-        $epiphany_sundays = array (
-          "1st Sunday after Epiphany",
-          "2nd Sunday after Epiphany",
-          "3rd Sunday after Epiphany",
-          "4th Sunday after Epiphany",
-          "5th Sunday after Epiphany",
-          "6th Sunday after Epiphany"
-        );
-        $moveable_sundays = array (
-          "Septuagesima",
-          "Sexagesima",
-          "Quinquagesima",
-          "1st Sunday in Lent",
-          "2nd Sunday in Lent",
-          "3rd Sunday in Lent",
-          "4th Sunday in Lent",
-          "5th Sunday in Lent",
-          "Palm Sunday",
-          "Easter Sunday",
-          "1st Sunday after Easter",
-          "2nd Sunday after Easter",
-          "3rd Sunday after Easter",
-          "4th Sunday after Easter",
-          "5th Sunday after Easter",
-          "Sunday after Ascension",
-          "Whit Sunday",
-          "Trinity Sunday",
-          "1st Sunday after Trinity",
-          "2nd Sunday after Trinity",
-          "3rd Sunday after Trinity",
-          "4th Sunday after Trinity",
-          "5th Sunday after Trinity",
-          "6th Sunday after Trinity",
-          "7th Sunday after Trinity",
-          "8th Sunday after Trinity",
-          "9th Sunday after Trinity",
-          "10th Sunday after Trinity",
-          "11th Sunday after Trinity",
-          "12th Sunday after Trinity",
-          "13th Sunday after Trinity",
-          "14th Sunday after Trinity",
-          "15th Sunday after Trinity",
-          "16th Sunday after Trinity",
-          "17th Sunday after Trinity",
-          "18th Sunday after Trinity",
-          "19th Sunday after Trinity",
-          "20th Sunday after Trinity",
-          "21st Sunday after Trinity",
-          "22nd Sunday after Trinity",
-          "23rd Sunday after Trinity",
-          "24th Sunday after Trinity",
-          "25th Sunday after Trinity",
-          "26th Sunday after Trinity",
-          "27th Sunday after Trinity"
-        );
-        $advent_sundays = array (
-          "Advent Sunday",
-          "2nd Sunday in Advent",
-          "3rd Sunday in Advent",
-          "4th Sunday in Advent"
-        );
-    
-        if (dmy_to_dow($day,$month,$year) != 0)
-        {
-            // Abort if date is not a Sunday
-            return "Error";
-        }
-        $date = sprintf("%04d-%02d-%02d",$year,$month,$day);
-    
-        // Calculate the dates of Septuagesima and Advent Sunday
-        $date_of_septuagesima = add_days(date_of_easter($year),-63);
-        $dow_of_christmas = dmy_to_dow(25,12,$year);
-        if ($dow_of_christmas == 0)
-        {
-            $days_in_advent = 28;
-        }
-        else
-        {
-            $days_in_advent = $dow_of_christmas + 21;
-        }
-        $date_of_advent_sunday = add_days("$year-12-25",-$days_in_advent);
-    
-        if ($date < $date_of_septuagesima)
-        {
-            // Prior to Septuagesisma
-            if ($date == "$year-01-01")
-            {
-                return "Sunday after Christmas";
-            }
-            elseif ($date < "$year-01-06")
-            {
-                return "2nd Sunday after Christmas";
-            }
-            elseif ($date == "$year-01-06")
-            {
-                return "Epiphany";
-            }
-            else
-            {
-                $days_after_epiphany = date_difference("$year-01-06",$date);
-                return $epiphany_sundays[($days_after_epiphany - 1) / 7];
-            }
-        }
-        elseif ($date < $date_of_advent_sunday)
-        {
-            // Dictated by the date of Easter
-            $days_after_septuagesima = date_difference($date_of_septuagesima,$date);
-            return $moveable_sundays[$days_after_septuagesima / 7];
-        }
-        else
-        {
-            // Advent & Christmas
-            if ($date < "$year-12-25")
-            {
-                $days_into_advent = date_difference($date_of_advent_sunday,$date);
-                return $advent_sundays[$days_into_advent / 7];
-            }
-            elseif ($date == "$year-12-25")
-            {
-                return "Christmas Day";
-            }
-            else
-            {
-                return "Sunday after Christmas";
-            }
         }
     }
 }

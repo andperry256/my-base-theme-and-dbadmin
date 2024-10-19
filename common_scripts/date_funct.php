@@ -16,14 +16,21 @@ elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php")))
 }
 
 //==============================================================================
+/*
+The following six functions make use of day and month names. The internal data
+is structured to handle a multi-lingual environment, but the versions here use
+only English. Where more languages are required, each function needs to be
+re-defined in an alt_date_funct.php script for the given site.
+*/
+//==============================================================================
 
 if (!function_exists('day_name'))
 {
-    function day_name($day)
+    function day_name($day,$language='en')
     {
-        $name = array("Sunday","Monday","Tuesday","Wednesday",
-                      "Thursday","Friday","Saturday");
-        return $name[$day];
+        $name = array('en' => array("Sunday","Monday","Tuesday","Wednesday",
+                                    "Thursday","Friday","Saturday"));
+        return isset($name[$language][$day]) ? $name[$language][$day] : '';
     }
 }
 
@@ -31,10 +38,10 @@ if (!function_exists('day_name'))
 
 if (!function_exists('short_day_name'))
 {
-    function short_day_name($day)
+    function short_day_name($day,$language='en')
     {
-        $name = array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
-        return $name[$day];
+        $name = array('en' => array("Sun","Mon","Tue","Wed","Thu","Fri","Sat"));
+        return isset($name[$language][$day]) ? $name[$language][$day] : '';
     }
 }
 
@@ -42,20 +49,20 @@ if (!function_exists('short_day_name'))
 
 if (!function_exists('day_number'))
 {
-    function day_number($day)
+    function day_number($day,$language='en')
     {
         $day = strtolower($day);
-        $short_name = array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
-                           "thu" => 4, "fri" => 5, "sat" => 6);
-        $long_name = array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
-                          "thursday" => 4, "friday" => 5, "saturday" => 6);
-        if (isset($short_name[$day]))
+        $short_name = array('en' => array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
+                                          "thu" => 4, "fri" => 5, "sat" => 6));
+        $long_name = array('en' => array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
+                                         "thursday" => 4, "friday" => 5, "saturday" => 6));
+        if (isset($short_name[$language][$day]))
         {
-            return $short_name[$day];
+            return $short_name[$language][$day];
         }
-        elseif (isset($long_name[$day]))
+        elseif (isset($long_name[$language][$day]))
         {
-            return $long_name[$day];
+            return $long_name[$language][$day];
         }
         else
         {
@@ -68,12 +75,12 @@ if (!function_exists('day_number'))
 
 if (!function_exists('month_name'))
 {
-    function month_name($month)
+    function month_name($month,$language='en')
     {
-        $name = array("","January","February","March","April",
-                      "May","June","July","August","September",
-                      "October","November","December");
-        return $name[$month];
+        $name = array('en' => array("","January","February","March","April",
+                                    "May","June","July","August","September",
+                                    "October","November","December"));
+        return isset($name[$language][$month]) ? $name[$language][$month] : '';
     }
 }
 
@@ -81,11 +88,11 @@ if (!function_exists('month_name'))
 
 if (!function_exists('short_month_name'))
 {
-    function short_month_name($month)
+    function short_month_name($month,$language='en')
     {
-        $name = array("","Jan","Feb","Mar","Apr","May","Jun",
-                      "Jul","Aug","Sep","Oct","Nov","Dec");
-        return $name[$month];
+        $name = array('en' =>array("","Jan","Feb","Mar","Apr","May","Jun",
+                                   "Jul","Aug","Sep","Oct","Nov","Dec"));
+        return isset($name[$language][$month]) ? $name[$language][$month] : '';
     }
 }
 
@@ -93,24 +100,24 @@ if (!function_exists('short_month_name'))
 
 if (!function_exists('month_number'))
 {
-    function month_number($month)
+    function month_number($month,$language='en')
     {
         $month = strtolower($month);
-        $short_name = array("jan" => 1, "feb" => 2, "mar" => 3,
-                           "apr" => 4, "may" => 5, "jun" => 6,
-                           "jul" => 7, "aug" => 8, "sep" => 9,
-                           "oct" => 10, "nov" => 11, "dec" => 12);
-        $long_name = array("january" => 1, "february" => 2, "march" => 3,
-                          "april" => 4, "may" => 5, "june" => 6,
-                          "july" => 7, "august" => 8, "september" => 9,
-                          "october" => 10, "november" => 11, "december" => 12);
-        if (isset($short_name[$month]))
+        $short_name = array('en' => array("jan" => 1, "feb" => 2, "mar" => 3,
+                                          "apr" => 4, "may" => 5, "jun" => 6,
+                                          "jul" => 7, "aug" => 8, "sep" => 9,
+                                          "oct" => 10, "nov" => 11, "dec" => 12));
+        $long_name = array('en' => array("january" => 1, "february" => 2, "march" => 3,
+                                         "april" => 4, "may" => 5, "june" => 6,
+                                         "july" => 7, "august" => 8, "september" => 9,
+                                         "october" => 10, "november" => 11, "december" => 12));
+        if (isset($short_name[$language][$month]))
         {
-            return $short_name[$month];
+            return $short_name[$language][$month];
         }
-        elseif (isset($long_name[$month]))
+        elseif (isset($long_name[$language][$month]))
         {
-            return $long_name[$month];
+            return $long_name[$language][$month];
         }
         else
         {
@@ -586,7 +593,7 @@ if (!function_exists('church_calendar'))
 {
     function church_calendar ($day,$month,$year)
     {
-        $epiphany_sundays = array (
+        $epiphany_sundays = array(
           "1st Sunday after Epiphany",
           "2nd Sunday after Epiphany",
           "3rd Sunday after Epiphany",
@@ -594,7 +601,7 @@ if (!function_exists('church_calendar'))
           "5th Sunday after Epiphany",
           "6th Sunday after Epiphany"
         );
-        $moveable_sundays = array (
+        $moveable_sundays = array(
           "Septuagesima",
           "Sexagesima",
           "Quinquagesima",
@@ -641,7 +648,7 @@ if (!function_exists('church_calendar'))
           "26th Sunday after Trinity",
           "27th Sunday after Trinity"
         );
-        $advent_sundays = array (
+        $advent_sundays = array(
           "Advent Sunday",
           "2nd Sunday in Advent",
           "3rd Sunday in Advent",

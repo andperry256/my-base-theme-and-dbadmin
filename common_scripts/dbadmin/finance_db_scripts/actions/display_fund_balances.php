@@ -325,7 +325,7 @@ if (!isset($off_screen))
     print("<option value=\"now\" selected>Now</option>\n");
     for ($month = 1; $month <= 12; $month++)
     {
-        $month_name = monthName($month);
+        $month_name = month_name($month);
         print("<option value=\"$month\">$month_name</option>\n");
     }
     print("</select></td>\n");

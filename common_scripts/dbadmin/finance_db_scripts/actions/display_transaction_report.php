@@ -612,7 +612,7 @@ print("<td><select name=\"start_month\">\n");
 print("<option value=\"all\" selected>All Dates</option>\n");
 for ($month = 1; $month <= 12; $month++)
 {
-    $month_name = monthName($month);
+    $month_name = month_name($month);
     print("<option value=\"$month\">$month_name</option>\n");
 }
 print("</select></td>\n");
@@ -630,7 +630,7 @@ print("<option value=\"same\" selected>Same as Start</option>\n");
 print("<option value=\"all\">All Dates</option>\n");
 for ($month = 1; $month <= 12; $month++)
 {
-    $month_name = monthName($month);
+    $month_name = month_name($month);
     print("<option value=\"$month\">$month_name</option>\n");
 }
 print("</select></td>\n");

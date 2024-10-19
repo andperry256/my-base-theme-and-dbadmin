@@ -133,7 +133,7 @@ if (!function_exists('non_leap_year_days'))
     function non_leap_year_days($month)
     {
         $days = array(0,31,28,31,30,31,30,31,31,30,31,30,31);
-        return $days[$month];
+        return $days[$month] ?? 0;
     }
 }
 
@@ -144,7 +144,7 @@ if (!function_exists('leap_year_days'))
     function leap_year_days($month)
     {
         $days = array(0,31,29,31,30,31,30,31,31,30,31,30,31);
-        return $days[$month];
+        return $days[$month] ?? 0;
     }
 }
 
@@ -382,37 +382,37 @@ if (!function_exists('start_week_of_month'))
 {
     function start_week_of_month($month,$year)
     {
-        $start_do_w = dmy_to_dow(1,$month,$year);
-        if ($start_do_w == 0)
+        $start_dow = dmy_to_dow(1,$month,$year);
+        if ($start_dow == 0)
         {
             // Month starts on a Sunday
-            $so_wyear = $year;
-            $so_wmonth = $month;
-            $so_wday = 1;
+            $sow_year = $year;
+            $sow_month = $month;
+            $sow_day = 1;
         }
         else
         {
             // Start of week is in previous month
             if ($month==1)
             {
-                $so_wyear = $year - 1;
-                $so_wmonth = 12;
+                $sow_year = $year - 1;
+                $sow_month = 12;
             }
             else
             {
-                $so_wyear = $year;
-                $so_wmonth = $month - 1;
+                $sow_year = $year;
+                $sow_month = $month - 1;
             }
-            if (is_leap_year($so_wyear))
+            if (is_leap_year($sow_year))
             {
-                $so_wday = leap_year_days($so_wmonth) + 1 - $start_do_w;
+                $sow_day = leap_year_days($sow_month) + 1 - $start_dow;
             }
             else
             {
-                $so_wday = non_leap_year_days($so_wmonth) + 1 - $start_do_w;
+                $sow_day = non_leap_year_days($sow_month) + 1 - $start_dow;
             }
         }
-        return sprintf("%04d-%02d-%02d",$so_wyear,$so_wmonth,$so_wday);
+        return sprintf("%04d-%02d-%02d",$sow_year,$sow_month,$sow_day);
     }
 }
 
@@ -425,9 +425,9 @@ if (!function_exists('end_week_of_month'))
         $last_day = (is_leap_year($year))
             ? leap_year_days($month)
             : non_leap_year_days($month);
-        $end_do_w = dmy_to_dow($last_day,$month,$year);
-        $so_wday = $last_day - $end_do_w;
-        return sprintf("%04d-%02d-%02d",$year,$month,$so_wday);
+        $end_dow = dmy_to_dow($last_day,$month,$year);
+        $sow_day = $last_day - $end_dow;
+        return sprintf("%04d-%02d-%02d",$year,$month,$sow_day);
     }
 }
 

@@ -17,9 +17,9 @@ elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php")))
 
 //==============================================================================
 /*
-The following six functions make use of day and month names. The internal data
-is structured to handle a multi-lingual environment, but the versions here use
-only English. Where more languages are required, each function needs to be
+The following six functions make use of day and month names. The data arrays
+are structured to handle a multilingual environment, though the versions here
+use only English. Where more languages are required, each function needs to be
 re-defined in an alt_date_funct.php script for the given site.
 */
 //==============================================================================
@@ -176,37 +176,6 @@ if (!function_exists('days_in_month'))
     function days_in_month($month,$year,$calendar=CAL_GREGORIAN)
     {
         return cal_days_in_month($calendar, $month, $year);
-    }
-}
-
-//==============================================================================
-/*
-The following function 'GegorianDow' is deprecated, but will not be deleted from
-the library as the code provides insight into an algorithm for calculating the
-day of week.
-*/
-//==============================================================================
-
-if (!function_exists('gregorian_dow'))
-{
-    function gregorian_dow($day,$month,$year)
-    {
-        $leap_year_month_adjust   = array(0,6,2,3,6,1,4,6,2,5,0,3,5);
-        $non_leap_year_month_adjust = array(0,0,3,3,6,1,4,6,2,5,0,3,5);
-        $gregorian_century_adjust = array(6,4,2,0);
-    
-        if (!checkdate((int)$month,(int)$day,(int)$year))
-        {
-            return -1;
-        }
-        $result = floor((($year % 100) * 5) / 4);
-        $result += $day;
-        $result += (is_leap_year($year))
-            ? $leap_year_month_adjust[$month]
-            : $non_leap_year_month_adjust[$month];
-        $result += $gregorian_century_adjust[floor(($year % 400) / 100)];
-        $result %= 7;
-        return $result;
     }
 }
 
@@ -489,9 +458,9 @@ if (!function_exists('add_days'))
     function add_days($date,$days)
     {
         $abs_int = abs($days);
-         return ($days >= 0)
-            ? date('Y-m-d', strtotime("$date + $abs_int days"))
-            : date('Y-m-d', strtotime("$date - $abs_int days"));
+        return ($days >= 0)
+           ? date('Y-m-d', strtotime("$date + $abs_int days"))
+           : date('Y-m-d', strtotime("$date - $abs_int days"));
     }
 }
 
@@ -502,9 +471,9 @@ if (!function_exists('add_weeks'))
     function add_weeks($date,$weeks)
     {
         $abs_int = abs($weeks);
-         return ($weeks >= 0)
-            ? date('Y-m-d', strtotime("$date + $abs_int weeks"))
-            : date('Y-m-d', strtotime("$date - $abs_int weeks"));
+        return ($weeks >= 0)
+           ? date('Y-m-d', strtotime("$date + $abs_int weeks"))
+           : date('Y-m-d', strtotime("$date - $abs_int weeks"));
     }
 }
 
@@ -845,6 +814,37 @@ if (!function_exists('end_of_next_term'))
         {
             return ("$this_year-08-31");
         }
+    }
+}
+
+//==============================================================================
+/*
+The following function 'gregorian_dow' is deprecated, but will not be deleted
+from the library as the code provides insight into an algorithm for calculating
+the day of week.
+*/
+//==============================================================================
+
+if (!function_exists('gregorian_dow'))
+{
+    function gregorian_dow($day,$month,$year)
+    {
+        $leap_year_month_adjust   = array(0,6,2,3,6,1,4,6,2,5,0,3,5);
+        $non_leap_year_month_adjust = array(0,0,3,3,6,1,4,6,2,5,0,3,5);
+        $gregorian_century_adjust = array(6,4,2,0);
+    
+        if (!checkdate((int)$month,(int)$day,(int)$year))
+        {
+            return -1;
+        }
+        $result = floor((($year % 100) * 5) / 4);
+        $result += $day;
+        $result += (is_leap_year($year))
+            ? $leap_year_month_adjust[$month]
+            : $non_leap_year_month_adjust[$month];
+        $result += $gregorian_century_adjust[floor(($year % 400) / 100)];
+        $result %= 7;
+        return $result;
     }
 }
 

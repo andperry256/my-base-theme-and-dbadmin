@@ -9,8 +9,6 @@ $display_counter (optional) - Indicates that the counter is to be displayed
 $standalone_counter (optional) - Indicates that the counter is being
                                 displayed on the "web site index" page
                                 rather than its native website.
-$multilingual_dates (optional) - Indicates that a multi-lingual version of
-                                the 'short_month_name' function is in use.
 */
 //==============================================================================
 
@@ -146,14 +144,11 @@ if ($counter_enabled)
     $daily_average = sprintf("%01.1f",$counter_val/$days_counting);
     mysqli_query($db,"UPDATE counter_info SET value='$daily_average' WHERE id='$end_year"."_daily'");
 
-    if ((isset($standalone_counter)) && ($standalone_counter))
+    if (!empty($standalone_counter))
     {
         // Generate 'standalone counter' display (i.e. not on native web page).
         $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date'");
         $today_count = mysqli_num_rows($query_result);
-        print("<style>\n");
-        print("td { font-size:12px; line-height:12px; font-family: Verdana, Arial, Helvetica, Roboto, sans-serif; }");
-        print("</style>\n");
         print("<table cellpadding=5>\n");
         print("<tr><td>Count:</td><td>$counter_val</td></tr>\n");
         print(sprintf("<tr><td>Since:</td><td>%02d %s $start_year</td></tr>\n",$start_day, short_month_name($start_month,'en')));
@@ -172,14 +167,7 @@ if ($counter_enabled)
                 $counter_val = $own_counter;
             }
             print(sprintf("<span class=\"counter\">&nbsp;%05d&nbsp;</span>",$counter_val));
-            if ((isset($multilingual_dates)) && ($multilingual_dates))
-            {
-                print(sprintf("<br />since %02d %s $start_year",$start_day, month_name($start_month,'en')));
-            }
-            else
-            {
-                print(sprintf("<br />since %02d %s $start_year",$start_day, month_name($start_month)));
-            }
+            print(sprintf("<br />since %02d %s $start_year",$start_day, month_name($start_month)));
         }
         if (isset($_GET['showcount']))
         {

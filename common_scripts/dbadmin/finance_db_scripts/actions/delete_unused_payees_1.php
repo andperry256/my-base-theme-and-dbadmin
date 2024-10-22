@@ -19,7 +19,7 @@ while ($row = mysqli_fetch_assoc($query_result))
       $where_clause = 'name=?';
       $where_values = array('s',$payee);
       mysqli_update_query($db,'payees',$set_fields,$set_values,$where_clause,$where_values);
-      if (($count == 0) && ($row['locked'] == 0))
+      if (($count == 0) && (empty($row['default_fund'])) && (empty($row['default_cat'])) && (substr($row['name'],0,2) != '**'))
       {
           print("<li>{$row['name']}</li>\n");
       }

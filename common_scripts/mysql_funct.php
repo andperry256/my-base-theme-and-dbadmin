@@ -114,12 +114,20 @@ On an online server, errors are output to a log file rather than the screen.
 */
 //==============================================================================
 
-function run_mysqli_query($db,$query,$strict=false,$debug=false)
+function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
 {
     global $error_logfile, $display_error_online;
     if ($debug)
     {
-        exit (readable_markup("$query\n"));
+        if ($continue)
+        {
+            print(readable_markup("$query\n"));
+            return;
+        }
+        else
+        {
+            exit (readable_markup("$query\n"));
+        }
     }
     $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
     $error_id = substr(md5(date('YmdHis')),0,8);
@@ -177,16 +185,16 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false)
 
 //==============================================================================
 
-function mysqli_query_normal($db,$query,$debug=false)
+function mysqli_query_normal($db,$query,$debug=false,$continue=false)
 {
-    return run_mysqli_query($db,$query,false,$debug);
+    return run_mysqli_query($db,$query,false,$debug,$continue);
 }
 
 //==============================================================================
 
-function mysqli_query_strict($db,$query,$debug=false)
+function mysqli_query_strict($db,$query,$debug=false,$continue=false)
 {
-    return run_mysqli_query($db,$query,true,$debug);
+    return run_mysqli_query($db,$query,true,$debug,$continue);
 }
 
 //==============================================================================
@@ -319,7 +327,7 @@ The query result (data or false) is returned.
 */
 //==============================================================================
 
-function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add_clause,$strict=true,$debug=false)
+function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add_clause,$strict=true,$debug=false,$continue=false)
 {
     $query = "SELECT $fields FROM $table";
     $where_clause_count = substr_count($where_clause,'?');
@@ -353,7 +361,7 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
         $query = substr($query,0,$pos).$param.substr($query,$pos+1);
         $pos += strlen($param) + 1;
     }
-    return run_mysqli_query($db,$query,$strict,$debug);
+    return run_mysqli_query($db,$query,$strict,$debug,$continue);
 }
 
 //==============================================================================
@@ -378,7 +386,7 @@ The query result (true/false) is returned.
 */
 //==============================================================================
 
-function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict=false,$debug=false)
+function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict=false,$debug=false,$continue=false)
 {
     $query = "UPDATE $table SET ";
     $tok = strtok($set_fields,',');
@@ -421,7 +429,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
         $query = substr($query,0,$pos).$param.substr($query,$pos+1);
         $pos += strlen($param) + 1;
     }
-    return run_mysqli_query($db,$query,$strict,$debug);
+    return run_mysqli_query($db,$query,$strict,$debug,$continue);
 }
 
 //==============================================================================
@@ -441,7 +449,7 @@ using the '===' operator.
 */
 //==============================================================================
 
-function mysqli_conditional_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict=false,$debug=false)
+function mysqli_conditional_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict=false,$debug=false,$continue=false)
 {
     if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) == 0)
     {
@@ -449,7 +457,7 @@ function mysqli_conditional_update_query($db,$table,$set_fields,$set_values,$whe
     }
     else
     {
-        return mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict,$debug);
+        return mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict,$debug,$continue);
     }
 }
 
@@ -472,7 +480,7 @@ The query result (true/false) is returned.
 */
 //==============================================================================
 
-function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=false)
+function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=false,$continue=false)
 {
     $field_count =  ($fields == '*')
         ? mysqli_num_rows(mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
@@ -504,8 +512,8 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
     }
     $values_list = rtrim($values_list,',');
     return ($fields == '*')
-        ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug)
-        : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug);
+        ? run_mysqli_query($db,"INSERT INTO $table VALUES ($values_list)",$strict,$debug,$continue)
+        : run_mysqli_query($db,"INSERT INTO $table ($fields) VALUES ($values_list)",$strict,$debug,$continue);
 }
 
 //==============================================================================
@@ -526,7 +534,7 @@ using the '===' operator.
 */
 //==============================================================================
 
-function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_clause,$where_values,$strict=false,$debug=false)
+function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_clause,$where_values,$strict=false,$debug=false,$continue=false)
 {
     if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) > 0)
     {
@@ -534,7 +542,7 @@ function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_claus
     }
     else
     {
-        return mysqli_insert_query($db,$table,$fields,$values,$strict,$debug);
+        return mysqli_insert_query($db,$table,$fields,$values,$strict,$debug,$continue);
     }
 }
 
@@ -557,7 +565,7 @@ The query result (true/false) is returned.
 */
 //==============================================================================
 
-function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=false,$debug=false)
+function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=false,$debug=false,$continue=false)
 {
     $query = "DELETE FROM $table";
     $where_clause_count = substr_count($where_clause,'?');
@@ -587,7 +595,7 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
         $query = substr($query,0,$pos).$param.substr($query,$pos+1);
         $pos += strlen($param) + 1;
     }
-    return run_mysqli_query($db,$query,$strict,$debug);
+    return run_mysqli_query($db,$query,$strict,$debug,$continue);
 }
 
 //==============================================================================
@@ -611,7 +619,7 @@ The query result (true/false or data) is returned.
 */
 //==============================================================================
 
-function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=false)
+function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=false,$continue=false)
 {
     $where_clause_count = substr_count($query,'?');
     $where_values_count = count($where_values);
@@ -639,7 +647,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
             $pos += strlen($param) + 1;
         }
     }
-    return run_mysqli_query($db,$query,$strict,$debug);
+    return run_mysqli_query($db,$query,$strict,$debug,$continue);
 }
 
 //==============================================================================

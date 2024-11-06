@@ -214,8 +214,7 @@ class tables_transactions
     
         $where_clause = 'account=? AND seq_no=?';
         $where_values = array('s',$account,'i',$seq_no);
-        $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
+        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'')))
         {
             $old_target_account = $row['target_account'];
             $old_target_seq_no = $row['target_seq_no'];
@@ -225,22 +224,12 @@ class tables_transactions
             $old_target_account = '';
             $old_target_seq_no = '';
         }
-    
-        if   ($table == '_ctab_new_transaction')
+        $target_seq_no = $record->FieldVal('target_seq_no');
+        $source_account = $record->FieldVal('source_account');
+        $source_seq_no = $record->FieldVal('source_seq_no');
+        if ((empty($target_account)) && (!empty($target_seq_no)))
         {
-            $target_seq_no = '';
-            $source_account = '';
-            $source_seq_no = '';
-        }
-        else
-        {
-            $target_seq_no = $record->FieldVal('target_seq_no');
-            $source_account = $record->FieldVal('source_account');
-            $source_seq_no = $record->FieldVal('source_seq_no');
-            if ((empty($target_account)) && (!empty($target_seq_no)))
-            {
-                return report_error("Target sequence number set without an account.");
-            }
+            return report_error("Target sequence number set without an account.");
         }
     
         // Check for various error conditions
@@ -314,12 +303,12 @@ class tables_transactions
         $memo = $record->FieldVal('memo');
         $acct_month = $record->FieldVal('acct_month');
         $change_acct_month = $record->FieldVal('change_acct_month');
-        $target_account = $record->FieldVal('target_account');
         $sched_freq = $record->FieldVal('sched_freq');
         $sched_count = $record->FieldVal('sched_count');
         $record_sched = $record->FieldVal('record_sched');
         $save_defaults = $record->FieldVal('save_defaults');
         $seq_no = $record->FieldVal('seq_no');
+        $target_account = $record->FieldVal('target_account');
         $target_seq_no = $record->FieldVal('target_seq_no');
         $source_account = $record->FieldVal('source_account');
         $source_seq_no = $record->FieldVal('source_seq_no');
@@ -518,47 +507,19 @@ class tables_transactions
             $acct_month = accounting_month($date);
         }
     
-        if ($table == '_ctab_new_transaction')
+        // Re-update record with any modified fields
+        $set_fields = 'seq_no,acct_month,currency,credit_amount,debit_amount,auto_total,fund,category,save_defaults';
+        $set_values = array('i',$seq_no,'s',$acct_month,'s',$account_currency,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'i',0);
+        $where_clause = 'account=? AND seq_no=?';
+        $where_values = array('s',$account,'i',$seq_no);
+        mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
+        if ($sched_freq != '#')
         {
-            // Save record in main table
-            if (empty($credit_amount))
-            {
-                $credit_amount = 0;
-            }
-            if (empty($debit_amount))
-            {
-                $debit_amount = 0;
-            }
-            if (empty($sched_count))
-            {
-                $sched_count = 0;
-            }
-            $fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,target_account,sched_freq,sched_count,save_defaults';
-            $values = array('s',$account,'i',$seq_no,'s',$date,'s',$account_currency,'s',$payee,'d',$credit_amount,'d',$debit_amount,'s',$fund,'s',$category,'s',$memo,'s',$acct_month,'s',$target_account,'s',$sched_freq,'i',$sched_count,'i',$save_defaults);
-            if (!empty($chq_no))
-            {
-                $fields .= ',chq_no,';
-                $values[count($values)] = 'i';
-                $values[count($values)] = $chq_no;
-            }
-            mysqli_insert_query($db,'transactions',$fields,$values);
-        }
-        else
-        {
-            // Re-update record
-            $set_fields = 'seq_no,acct_month,currency,credit_amount,debit_amount,auto_total,fund,category,save_defaults';
-            $set_values = array('i',$seq_no,'s',$acct_month,'s',$account_currency,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'i',0);
+            $set_fields = 'reconciled_balance,full_balance';
+            $set_values = array('d','0.00','d','0.00');
             $where_clause = 'account=? AND seq_no=?';
             $where_values = array('s',$account,'i',$seq_no);
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
-            if ($sched_freq != '#')
-            {
-                $set_fields = 'reconciled_balance,full_balance';
-                $set_values = array('d','0.00','d','0.00');
-                $where_clause = 'account=? AND seq_no=?';
-                $where_values = array('s',$account,'i',$seq_no);
-                mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
-            }
         }
     
         // Handle auto-reconciliation if record has been created via the reconcile screen
@@ -620,8 +581,7 @@ class tables_transactions
         if ($sched_freq == '#')
         {
             // Normal transaction
-            if ((($table == '_ctab_new_transaction') && (!empty($target_account))) ||
-              (($table == "_view_account_$account") && (!empty($target_account)) && (empty($target_seq_no))))
+            if (($table == "_view_account_$account") && (!empty($target_account)) && (empty($target_seq_no)))
             {
                 // Create transfer
                 $target_seq_no = next_seq_no($target_account);

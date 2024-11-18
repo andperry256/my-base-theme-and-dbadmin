@@ -906,7 +906,7 @@ function log_user_out($db)
     {
         $login_id = $_COOKIE[LOGIN_COOKIE_ID];
         mysqli_query($db,"DELETE FROM login_sessions WHERE id='$login_id'");
-        $expiry_time = $current_time - 3600;
+        $expiry_time = time() - 3600;
         setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
     }
 }

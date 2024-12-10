@@ -46,6 +46,12 @@ if ($row = mysqli_fetch_assoc($query_result))
     {
         // Display summary & splits screen
     
+        $save_info = get_session_var('save_info');
+        if (!empty($save_info))
+        {
+            print($save_info);
+            delete_session_var('save_info');
+        }
         $sched_freq = $row['sched_freq'];
         if ($sched_freq == '#')
         {

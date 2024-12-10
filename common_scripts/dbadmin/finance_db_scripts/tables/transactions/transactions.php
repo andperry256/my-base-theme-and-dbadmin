@@ -315,7 +315,12 @@ class tables_transactions
         $bank_import_id = $record->FieldVal('bank_import_id');
         $copy_to_date = $record->FieldVal('copy_to_date');
         $delete_record = $record->FieldVal('delete_record');
-    
+
+        if ($date > date('Y-m-d'))
+        {
+            update_session_var('save_info','<span class="highlight-warning">WARNING</span> - Record saved with a future date.');
+        }
+
         $where_clause = 'account=? AND seq_no=?';
         $where_values = array('s',$account,'i',$seq_no);
         $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');

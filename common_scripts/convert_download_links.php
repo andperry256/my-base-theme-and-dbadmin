@@ -6,7 +6,7 @@ function convert_download_links($content)
     global $base_url, $files_subdomain_url, $download_links_url;
     $subdir = '';
     $content_lines = explode("\n",$content);
-  
+
     foreach ($content_lines as $index => $line)
     {
         // Check for a subdirectory directive
@@ -22,7 +22,7 @@ function convert_download_links($content)
                 $line = substr($line,0,$pos0).substr($line,$pos2+1);
             }
         }
-    
+
         // Check for a link directive to download
         $pos0 = $pos1 = strpos($line,'[DL=');
         if ($pos1 !== false)
@@ -39,10 +39,11 @@ function convert_download_links($content)
                 $pos2 += 1;
                 $path = urlencode("$subdir/$filename");
                 $description = trim(substr($line,$pos2,$pos3-$pos2));
+                $version = date('Ymd');
                 $line = substr($line,0,$pos0)."<a href=\"$files_subdomain_url/download.php?path=$path\">$description</a>".substr($line,$pos3+5);
             }
         }
-    
+
         // Check for a link directive to open in own tab/page
         $pos0 = $pos1 = strpos($line,'[LO=');
         if ($pos1 !== false)
@@ -59,10 +60,10 @@ function convert_download_links($content)
                 $pos2 += 1;
                 $path = "$subdir/$filename";
                 $description = trim(substr($line,$pos2,$pos3-$pos2));
-                $line = substr($line,0,$pos0)."<a href=\"$download_links_url/$path\">$description</a>".substr($line,$pos3+5);
+                $line = substr($line,0,$pos0)."<a href=\"$download_links_url/$path?v=$version\">$description</a>".substr($line,$pos3+5);
             }
         }
-    
+
         // Check for a link directive to open in new tab/page
         $pos0 = $pos1 = strpos($line,'[LN=');
         if ($pos1 !== false)
@@ -79,10 +80,10 @@ function convert_download_links($content)
                 $pos2 += 1;
                 $path = "$subdir/$filename";
                 $description = trim(substr($line,$pos2,$pos3-$pos2));
-                $line = substr($line,0,$pos0)."<a href=\"$download_links_url/$path\" target=\"_blank\">$description</a>".substr($line,$pos3+5);
+                $line = substr($line,0,$pos0)."<a href=\"$download_links_url/$path?v=$version\" target=\"_blank\">$description</a>".substr($line,$pos3+5);
             }
         }
-    
+
         // Update the line
         $content_lines[$index] = $line;
     }

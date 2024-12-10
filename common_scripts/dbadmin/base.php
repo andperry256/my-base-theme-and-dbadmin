@@ -43,7 +43,7 @@ function display_sidebar_content()
 {
     global $custom_pages_path,$custom_pages_url,$base_url,$relative_path;
     $db = admin_db_connect();
-  
+
     if (is_file("$custom_pages_path/$relative_path/page_logo.php"))
     {
         include("$custom_pages_path/$relative_path/page_logo.php");
@@ -72,7 +72,7 @@ function display_sidebar_content()
             $action_name = $row['action_name'];
             $table_name = $row['table_name'];
             $link = $row['link'];
-      
+
             if (!empty($link))
             {
                 // Sidebar item is a custom link
@@ -144,7 +144,7 @@ function display_main_content($mode)
 {
     global $custom_pages_path,$custom_pages_url,$base_url,$relative_path, $relative_sub_path, $alt_include_path;
     $db = admin_db_connect();
-  
+
     // Process the URL parameters
     if (isset($_GET['-action']))
     {
@@ -175,7 +175,7 @@ function display_main_content($mode)
     {
         $record_id = $_GET['-recordid'];
     }
-    
+
     if ((!isset($action)) || ($action == 'home'))
     {
         // No action specified so open the default page.
@@ -204,7 +204,7 @@ function display_main_content($mode)
         {
             output_page_header();
         }
-    
+
         // Process the given action.
         if (isset($table))
         {
@@ -242,7 +242,7 @@ function display_main_content($mode)
                     display_table($params);
                 }
                 break;
-      
+
             case 'edit':
                 if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_edit.php"))
                 {
@@ -258,7 +258,7 @@ function display_main_content($mode)
                     handle_record('edit',$params);
                 }
                 break;
-      
+
             case 'new':
                 if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_new.php"))
                 {
@@ -278,7 +278,7 @@ function display_main_content($mode)
                     handle_record('new',$params);
                 }
                 break;
-      
+
             case 'view':
                 if (is_file("$custom_pages_path/$relative_path/tables/$table/custom_view.php"))
                 {
@@ -294,7 +294,7 @@ function display_main_content($mode)
                     handle_record('view',$params);
                 }
                 break;
-      
+
             case 'update_table_data1':
                 print("<h1>Update Table Data</h1>\n");
                 print("<p><strong>N.B.</strong>This operation will cause a bulk database update.");
@@ -305,20 +305,20 @@ function display_main_content($mode)
                 print("<input type=\"submit\" value=\"Continue\">\n");
                 print("</form>\n");
                 break;
-      
+
             case 'update_table_data2':
                 print("<h1>Update Table Data</h1>\n");
                 $update_charsets = (isset($_POST['update_charsets']));
                 $optimise = (isset($_POST['optimise']));
                 update_table_data($update_charsets,$optimise);
                 break;
-      
+
             case 'renumber_records1':
                 print("<h1>Renumber Records</h1>\n");
                 print("<p>This operation will cause a bulk database update.</p>\n");
                 print("<p><a href=\"$base_url/$relative_path/?-action=renumber_records2\"><button>Continue</button></a></p>\n");
                 break;
-      
+
             case 'renumber_records2':
                 print("<h1>Renumber Records</h1>\n");
                 $where_clause = 'renumber_enabled=1';
@@ -329,15 +329,15 @@ function display_main_content($mode)
                 }
                 print("<p>Operation completed.</p>\n");
                 break;
-      
+
             case 'dbsync':
                 sync_databases(admin_db_name());
                 break;
-      
+
             case 'search_and_replace':
                 search_and_replace(admin_db_name());
                 break;
-      
+
             default:
                 if (is_file("$custom_pages_path/$relative_path/actions/$action.php"))
                 {
@@ -372,7 +372,7 @@ if ((!isset($support_mobile)) || (!($support_mobile)))
     print("<div class=\"no-mobile-support\"><strong>N.B. </strong>This page is not optimised for mobile viewing. For a better user experience please use a computer or tablet.</div>\n");
 }
 $db_sub_path = str_replace('dbadmin/','',$relative_path);
-update_session_var("dbauth-$db_sub_path",1);
+update_session_var("dbauth-$db_sub_path","1");
 if (($db_master_location[$db_sub_path] != $location) &&
     ((!isset($override_db_sync_warning[$db_sub_path])) || (!$override_db_sync_warning[$db_sub_path])))
 {
@@ -427,7 +427,7 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
         print("<p><a href=\"$sidebar_url\"><button>Shortcuts</button></a></p>\n");
     }
     print("</div> <!--#dbadmin-mobile-sidebar-->\n");
-  
+
     // Desktop sidebar (hidden in mobile mode)
     print("<div id=\"dbadmin-desktop-sidebar\">\n");
     display_sidebar_content();

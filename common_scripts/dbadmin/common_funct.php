@@ -93,15 +93,16 @@ Function check_new_action
 
 function check_new_action($action,$table)
 {
-    if (!session_var_is_set('dba_action'))
+    global $relative_path;
+    if (!session_var_is_set(array('dba_action',$relative_path)))
     {
-        update_session_var('dba_action','');
+        update_session_var(array('dba_action',$relative_path),'');
     }
-    if (!session_var_is_set('dba_table'))
+    if (!session_var_is_set(array('dba_table',$relative_path)))
     {
-        update_session_var('dba_table','');
+        update_session_var(array('dba_table',$relative_path),'');
     }
-    if (($action != get_session_var('dba_action')) || ($table != get_session_var('dba_table')))
+    if (($action != get_session_var(array('dba_action',$relative_path))) || ($table != get_session_var('dba_table')))
     {
         // Action and/or table has changed - clear temporary session variables
         if (session_var_is_set('get_vars'))
@@ -113,8 +114,8 @@ function check_new_action($action,$table)
             delete_session_var('post_vars');
         }
     }
-    update_session_var('dba_action',$action);
-    update_session_var('dba_table',$table);
+    update_session_var(array('dba_action',$relative_path),$action);
+    update_session_var(array('dba_table',$relative_path),$table);
 }
 
 //==============================================================================
@@ -153,7 +154,7 @@ function page_links($page_count,$current_page,$page_range,$current_page_link_sty
         {
             $last_linked_page = $page_count - 1;
         }
-    
+
         if ($current_page != 1)
         {
             $link = (!empty($opt_par)) ? $url_function($current_page-1,$opt_par) : $url_function($current_page-1);

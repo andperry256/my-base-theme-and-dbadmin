@@ -80,7 +80,7 @@ $relative_path = $_GET['-relpath'];  // Required because value is getting corrup
 if (($action == 'edit') && (isset($_POST['save_as_new'])))
 {
     $action = 'new';
-    update_session_var('dba_action',$action);
+    update_session_var(array('dba_action',$relative_path),$action);
     $record_id = '';
 }
 run_session();
@@ -165,7 +165,7 @@ while ($row = mysqli_fetch_assoc($query_result))
         {
             $record->SetField($field_name,$post_copy["field_$field_name"],query_field_type($db,$table,$field_name));
         }
-    
+
         if ($row2['is_primary'])
         {
             if (($action == 'new') && ($row2['widget_type'] == 'auto-increment'))

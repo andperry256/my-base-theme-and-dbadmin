@@ -811,7 +811,11 @@ site-specific functions required when updating a user.
 */
 //================================================================================
 
-function get_user()
+/*
+Please note that get__user is so named because 'get_user' now clashes with a
+built-in function introduced in WordPress 6.7.
+*/
+function get__user()
 {
     if (session_var_is_set(SV_USER))
     {

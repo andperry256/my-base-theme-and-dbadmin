@@ -84,7 +84,7 @@ function run_session()
                     }
                     else
                     {
-                        if (!isset($_SESSION[$row2['name']]))
+                        if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']])))
                         {
                             $_SESSION[$row2['name']] = array();
                         }
@@ -122,7 +122,7 @@ function run_session()
                     }
                     else
                     {
-                        if (!isset($_SESSION[$row2['name']]))
+                        if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']])))
                         {
                             $_SESSION[$row2['name']] = array();
                         }
@@ -146,7 +146,7 @@ function run_session()
         $where_clause = 'session_id=?';
         $where_values = array('s',$global_session_id);
         mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
-    
+
         // Transfer all $_SESSION variables into the $global_session_vars array.
         $global_session_vars = array();
         foreach($_SESSION as $name => $value)
@@ -164,7 +164,7 @@ function run_session()
                 $global_session_vars[$name] = $value;
             }
         }
-    
+
         // Close the session.
         session_write_close();
     }
@@ -271,6 +271,7 @@ function get_session_var($name)
 
 function update_session_var($name,$value)
 {
+    $value = strval($value);
     global $global_session_vars;
     global $global_session_id;
     $db_wp = wp_db_connect();

@@ -56,6 +56,10 @@ function display_sidebar_content()
     {
         print("<a href=\"$base_url/$relative_path\"><img src=\"$custom_pages_url/$relative_path/page_logo.jpg\" /></a>\n");
     }
+    if (is_file("$custom_pages_path/$relative_path/key_actions.php"))
+    {
+        include("$custom_pages_path/$relative_path/key_actions.php");
+    }
     print("<p class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=main\">Main Page</a>");
     if (is_file("$custom_pages_path/$relative_path/custom_sidebar.php"))
     {
@@ -63,6 +67,12 @@ function display_sidebar_content()
     }
     else
     {
+        $action_filter = '';
+        if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']])))
+        {
+            update_session_var(array('dba_key_action',$relative_path),$_GET['-action']);
+        }
+        $latest_action = get_session_var(array('dba_key_action',$relative_path));
         print("<table class=\"sidebar-table\">");
         $add_clause = 'ORDER BY display_order ASC';
         $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',array(),$add_clause);
@@ -72,39 +82,56 @@ function display_sidebar_content()
             $action_name = $row['action_name'];
             $table_name = $row['table_name'];
             $link = $row['link'];
-
-            if (!empty($link))
+            if($label == '@@')
             {
-                // Sidebar item is a custom link
-                print("<tr><td class=\"sidebar-item\"><a href=\"$custom_pages_url/$relative_path/$link\"");
-                if ($row['new_window'])
-                {
-                      print(" target=\"_blank\"");
-                }
-                print(">$label</a></td></tr>\n");
+                // End of action specific section
+                $action_filter = '';
             }
-            elseif ((!empty($action_name)) || (!empty($table_name)))
+            elseif (substr($label,0,1) == '@')
             {
-                // Sidebar item is an action and/or table reference
-                print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?");
-                if (!empty($action_name))
+                // Start of action specific section
+                $action_filter = substr($label,1);
+            }
+            elseif ((empty($action_filter)) || ($action_filter == $latest_action))
+            {
+                // Item can be displayed
+                if (!empty($link))
                 {
-                    print("-action=$action_name");
+                    // Sidebar item is a custom link
+                    print("<tr><td class=\"sidebar-item\"><a href=\"$custom_pages_url/$relative_path/$link\"");
+                    if ($row['new_window'])
+                    {
+                          print(" target=\"_blank\"");
+                    }
+                    print(">$label</a></td></tr>\n");
                 }
-                if (!empty($table_name))
+                elseif ((!empty($action_name)) || (!empty($table_name)))
                 {
+                    // Sidebar item is an action and/or table reference
+                    print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?");
                     if (!empty($action_name))
                     {
-                        print("&");
+                        print("-action=$action_name");
                     }
-                    print("-table=$table_name");
+                    if (!empty($table_name))
+                    {
+                        if (!empty($action_name))
+                        {
+                            print("&");
+                        }
+                        print("-table=$table_name");
+                    }
+                    print("\">$label</a></td></tr>\n");
                 }
-                print("\">$label</a></td></tr>\n");
+                else
+                {
+                    // Sidebar is a label only (i.e. no link)
+                    print("<tr><td class=\"sidebar-item\">$label</td></tr>\n");
+                }
             }
             else
             {
-                // Sidebar is a label only (i.e. no link)
-                print("<tr><td class=\"sidebar-item\">$label</td></tr>\n");
+                // Action filter in force and not matching current/latest action
             }
         }
         print("</table>");

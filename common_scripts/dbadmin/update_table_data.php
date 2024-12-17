@@ -359,9 +359,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `display_order` `display_order` INT( 11 ) NOT NULL DEFAULT '9999'");
     if (!isset($fieldlist['label']))
     {
-        mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `label` VARCHAR( 31 ) NOT NULL AFTER `display_order`");
+        mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `label` VARCHAR( 63 ) NOT NULL AFTER `display_order`");
     }
-    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `label` `label` VARCHAR( 31 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `label` `label` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
     if (!isset($fieldlist['action_name']))
     {
         mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `action_name` VARCHAR( 63 ) NULL AFTER `label`");
@@ -495,7 +495,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                 print(" table");
             }
             print(" $ltag$table$rtag ...$eol");
-    
+
             try { mysqli_query($db,"SHOW COLUMNS FROM $table"); }
             catch (Exception $e)
             {
@@ -541,7 +541,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                         print("--Unable to update storage engine for table $table$eol");
                     }
                 }
-        
+
                 // Optimise the table if required
                 if ($optimise)
                 {
@@ -551,7 +551,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                     }
                 }
             }
-    
+
             $table = $row[$table_field];
             mysqli_query_normal($db,"UPDATE dba_table_info SET orphan=0 WHERE table_name='$table'");
             mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=0 WHERE table_name='$table'");
@@ -567,7 +567,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                     $where_values = array('s',$table);
                     mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,$where_values);
                     $last_display_order = 0;
-        
+
                     // Loop through the table fields
                     $field_list = array();
                     if ($query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
@@ -602,11 +602,11 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                 case 'date':
                                     $default_widget_type = 'date';
                                     break;
-                
+
                                 case 'time':
                                     $default_widget_type = 'time';
                                     break;
-                
+
                                 case 'varchar';
                                 case 'char';
                                     if ($field_size >= 200)
@@ -618,7 +618,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                         $default_widget_type = 'input-text';
                                     }
                                     break;
-                
+
                                 case 'int':
                                 case 'decimal':
                                     if ($row2['Extra'] == 'auto_increment')
@@ -634,7 +634,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                         $required = 2;
                                     }
                                     break;
-                
+
                                 case 'tinyint':
                                     $default_widget_type = 'checkbox';
                                     if ($required == 1)
@@ -642,7 +642,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                         $required = 2;
                                     }
                                     break;
-                
+
                                 case 'enum':
                                     $enum_select_list = $field_size;
                                     $field_size ='';
@@ -652,12 +652,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                         $required = 2;
                                     }
                                     break;
-                
+
                                 default:
                                     $default_widget_type = 'input-text';
                                     break;
                             }
-            
+
                             // Run query to select data for the given table & field
                             $where_clause = 'table_name=? AND field_name=?';
                             $where_values = array('s',$table,'s',$field_name);
@@ -728,7 +728,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                     $display_order = $last_display_order + 5;
                                 }
                                 $last_display_order = $display_order;
-                
+
                                 // Insert record.
                                 // N.B. Set the 'list desktop' and 'list mobile' fields by default on
                                 // primary key fields only.
@@ -743,7 +743,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                             }
                         }
                     }
-        
+
                     // Delete redundant table field records
                     $where_clause = 'table_name=?';
                     $where_values = array('s',$table);
@@ -759,7 +759,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                             print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
                         }
                     }
-        
+
                     /*
                     Force certain widgets to static within the dba_table_fields table iteslf.
                     Although the 'table_name' field should not be editable, allow this to be

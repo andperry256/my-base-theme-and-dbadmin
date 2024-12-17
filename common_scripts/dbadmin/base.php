@@ -72,6 +72,10 @@ function display_sidebar_content()
         {
             update_session_var(array('dba_key_action',$relative_path),$_GET['-action']);
         }
+        elseif ((count($_GET) == 0) && (!empty($key_actions['main'])))
+        {
+            update_session_var(array('dba_key_action',$relative_path),'main');
+        }
         $latest_action = get_session_var(array('dba_key_action',$relative_path));
         print("<table class=\"sidebar-table\">");
         $add_clause = 'ORDER BY display_order ASC';
@@ -497,7 +501,7 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin))
     print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-table=dba_relationships\">Relationships</a>");
     print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-table=dba_change_log\">Change Log</a>");
     print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=update_table_data1\">Update&nbsp;Table&nbsp;Data</a>");
-    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=renumber_records1\">Renumber&nbsp;Records</a>");
+    print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=renumber_records1\">Renumber&nbsp;All</a>");
     if ($location == 'local')
     {
         print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=dbsync\">Sync&nbsp;Databases</a>");

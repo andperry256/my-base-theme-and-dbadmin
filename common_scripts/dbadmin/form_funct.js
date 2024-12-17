@@ -37,6 +37,16 @@ function confirmDelete(form)
   }
 }
 
+// Function to confirm submission for a renumber action
+function confirmRenumber(form)
+{
+    if (confirm("Renumber the records?")) {
+        element = document.getElementById("submitted");
+        element.value = 'renumber_records';
+        form.submit();
+      }
+    }
+
 // Functions to perform submission for an update action
 function selectUpdate(form)
 {

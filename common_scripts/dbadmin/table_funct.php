@@ -171,7 +171,7 @@ function generate_grid_styles($table)
     {
         $field_name = $row['Field'];
         $base_table = get_table_for_field($table,$field_name);
-    
+
         // Extract and save the grid co-ordinates for the given field.
         $where_clause = 'table_name=? AND field_name=? AND list_mobile=1';
         $where_values = array('s',$base_table,'s',$field_name);
@@ -214,7 +214,7 @@ function generate_grid_styles($table)
                         }
                     }
                 }
-        
+
                 // Check that fields don't overlap in the layout.
                 $end_col = $col_no + $col_span;
                 if (!isset($cells_used[$row_no]))
@@ -483,7 +483,7 @@ function display_table($params)
         $where_par = '';
     }
     update_session_var("$relative_sub_path-$table-where-par",$where_par);
-    
+
     // Initialise table filtering if not set
     if (empty(get_session_var("$relative_sub_path-$table-is-filtered")))
     {
@@ -524,13 +524,13 @@ function display_table($params)
         // with multiple submissions.
         $submit_option = $_POST['submitted'];
         unset($_POST['submitted']);
-    
+
         switch ($submit_option)
         {
             case 'delete':
                 $result = delete_record_set($table);
                 break;
-    
+
             case 'select_update';
                 $result = select_update($table,'selection');
                 if ($result === true)
@@ -539,7 +539,7 @@ function display_table($params)
                     $form_started = true;
                 }
                 break;
-    
+
             case 'select_update_all';
                 $result = select_update($table,'all');
                 if ($result === true)
@@ -548,11 +548,11 @@ function display_table($params)
                     $form_started = true;
                 }
                 break;
-    
+
             case 'run_update';
                 $result = run_update($table,'selection');
                 break;
-    
+
             case 'run_update_all';
                 if (isset($_POST['confirm_update_all']))
                 {
@@ -563,7 +563,7 @@ function display_table($params)
                     print("<p class=\"highlight-error\">'Update All' confirmation flag was not set - please try again.</p>\n");
                 }
                 break;
-    
+
             case 'select_copy';
                 $result = select_copy($table);
                 if ($result === true)
@@ -572,7 +572,11 @@ function display_table($params)
                     $form_started = true;
                 }
                 break;
-    
+
+            case 'renumber_records';
+                $result = renumber_records($table);
+                break;
+
             case 'run_copy';
                 $result = run_copy($table);
                 break;
@@ -681,7 +685,7 @@ function display_table($params)
     while ($row = mysqli_fetch_assoc($query_result))
     {
         $field_name = $row['Field'];
-    
+
         // Determine whether the field is to be displayed in the table listing.
         $tab = get_table_for_field($table,$field_name);
         $where_clause = 'table_name=? AND field_name=?';
@@ -836,7 +840,7 @@ function display_table($params)
             /* */
             $where_clause = 'table_name=? AND field_name=?';
             $where_values = array('s',$base_table,'s',$f);
-            if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) && 
+            if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) &&
                 ($row2['widget_type'] == 'checkbox'))
             {
                 $value = ($row[$f]) ? '[X]' : '';
@@ -863,7 +867,7 @@ function display_table($params)
         {
             // Mobile mode - </div> is output below (after relationships)
         }
-    
+
         if ($show_relationships)
         {
             if ($mode == 'desktop')
@@ -920,7 +924,7 @@ function display_table($params)
                 print("</div> <!-- .table-listing-cell -->\n");
             }
         }  // End of processing relationships
-    
+
         if ($mode == 'mobile')
         {
             print("</div> <!-- .table-listing -->\n");
@@ -943,6 +947,12 @@ function display_table($params)
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Update All\" onClick=\"selectUpdateAll(this.form)\"/>");
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Copy Selected\" onClick=\"selectCopy(this.form)\"/>");
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Delete Selected\" onClick=\"confirmDelete(this.form)\"/>");
+        $where_clause = 'table_name=? AND renumber_enabled=1';
+        $where_values = array('s',$table);
+        if (mysqli_num_rows(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) > 0)
+        {
+            print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Renumber Records\" onClick=\"confirmRenumber(this.form)\"/>");
+        }
     }
     if (!$display_table)
     {
@@ -973,7 +983,7 @@ function delete_record_set($table)
         if (substr($key,0,7) == 'select_')
         {
             $record_offset = substr($key,7);
-    
+
             // Build up array of deletions indexed by record ID.
             if (is_numeric($record_offset))
             {
@@ -1002,7 +1012,7 @@ function delete_record_set($table)
         $record = new db_record;
         $record->action = 'delete';
         $record->table = $table;
-    
+
         $where_clause = '';
         $where_values = array();
         $primary_keys = fully_decode_record_id($record_id);
@@ -1027,7 +1037,7 @@ function delete_record_set($table)
                 $record->SetField($field_name,$row[$field_name],query_field_type($db,$table,$field_name));
             }
         }
-    
+
         // Call the delete function on the record
         $result = delete_record($record,$record_id);
         unset($record);
@@ -1273,7 +1283,7 @@ function run_update($table,$option)
         $record = new db_record;
         $record->action = 'update';
         $record->table = $table;
-    
+
         $pk_values = '^';
         $where_clause = '';
         $where_values = array();
@@ -1344,7 +1354,7 @@ function run_update($table,$option)
                 }
             }
         }
-    
+
         // Call the save function on the record
         $result = save_record($record,$record_id,$record_id);
         unset($record);
@@ -1566,7 +1576,7 @@ function run_copy($table)
         $record = new db_record;
         $record->action = 'copy';
         $record->table = $table;
-    
+
         $pk_values = '^';
         $where_clause = '';
         $where_values = array();
@@ -1625,7 +1635,7 @@ function run_copy($table)
                 }
             }
         }
-    
+
         // Call the save function on the record
         $result = save_record($record,$record_id,$record_id);
         unset($record);
@@ -1685,7 +1695,7 @@ function renumber_records($table)
             $level_1_sort = false;
         }
         mysqli_query_normal($db,"ALTER TABLE $table $saved_add_clause");
-    
+
         // Renumber records to temporary range (outside existing range)
         $query_result = mysqli_select_query($db,$table,'*','',array(),'');
         $record_count = mysqli_num_rows($query_result);
@@ -1721,7 +1731,7 @@ function renumber_records($table)
             }
             $temp_rec_id += 10;
         }
-    
+
         // Renumber records to final values
         $new_id = 0;
         $first_sort_prev_value = '';
@@ -1748,6 +1758,7 @@ function renumber_records($table)
         }
         print("<p>Records renumbered for table <i>$table</i>.</p>\n");
     }
+    return true;
 }
 
 //==============================================================================

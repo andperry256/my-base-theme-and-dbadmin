@@ -32,10 +32,10 @@ function my_base_theme_setup()
      * to change 'my-base-theme' to the name of your theme in all the template files.
      */
     load_theme_textdomain( 'my-base-theme', get_template_directory() . '/languages' );
-  
+
     // Add default posts and comments RSS feed links to head.
     add_theme_support( 'automatic-feed-links' );
-  
+
     /*
      * Let WordPress manage the document title.
      * By adding theme support, we declare that this theme does not use a
@@ -43,19 +43,19 @@ function my_base_theme_setup()
      * provide it for us.
      */
     add_theme_support( 'title-tag' );
-  
+
     /*
      * Enable support for Post Thumbnails on posts and pages.
      *
      * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
      */
     add_theme_support( 'post-thumbnails' );
-  
+
     // This theme uses wp_nav_menu() in one location.
     register_nav_menus( array(
         'menu-1' => esc_html__( 'Primary', 'my-base-theme' ),
     ) );
-  
+
     /*
      * Switch default core markup for search form, comment form, and comments
      * to output valid HTML5.
@@ -67,13 +67,13 @@ function my_base_theme_setup()
         'gallery',
         'caption',
     ) );
-  
+
     // Set up the WordPress core custom background feature.
     add_theme_support( 'custom-background', apply_filters( 'my_base_theme_custom_background_args', array(
         'default-color' => 'ffffff',
         'default-image' => '',
     ) ) );
-  
+
     // Add theme support for selective refresh for widgets.
     add_theme_support( 'customize-selective-refresh-widgets' );
 }
@@ -133,11 +133,11 @@ function my_base_theme_scripts()
         $stylesheet_uri = url_to_static($stylesheet_uri);
     }
     wp_enqueue_style( 'my-base-theme-style', $stylesheet_uri, '', $link_version );
-  
+
     wp_enqueue_script( 'my-base-theme-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
-  
+
     wp_enqueue_script( 'my-base-theme-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
-  
+
     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) )
     {
         wp_enqueue_script( 'comment-reply' );
@@ -250,8 +250,10 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     global $show_author_in_post_summary;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
+    $post_content = $row->post_content;
     $post_date = substr($row->post_date,0,10);
     $post_date = date("d F Y", strtotime($post_date));
+    $slug = $row->post_name;
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
     $featured_image = get_the_post_thumbnail();
@@ -273,10 +275,12 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     }
     print("]</p>\n");
     the_content();
+    if (strpos($post_content,'<!--more-->') === false)
+    {
+        print("<a href=\"$base_url/$slug\">Go to Post</a>\n");
+    }
     if ($_SERVER['REMOTE_ADDR'] == $home_ip_addr)
     {
-        $post = get_post($id); 
-        $slug = $post->post_name;
         print("<a href=\"$base_url/post-to-social?slug=$slug\" target=\"_blank\">Post to Social</a>");
     }
     print("</div>\n");
@@ -390,7 +394,7 @@ function navigation_links($option,$filter='category',$filtered_name='')
         // This should not occur
         return;
     }
-    $nav_info = array ( 
+    $nav_info = array (
         array('nav-previous','',''),
         array('nav-next','','')
     );
@@ -434,7 +438,7 @@ function navigation_links($option,$filter='category',$filtered_name='')
             $cat_name_list = rtrim($cat_name_list,'| ');
             print("$cat_name_list");
             break;
-        
+
         case 'author':
             $row = $wpdb->get_row("SELECT * FROM wp_users WHERE user_nicename='$filtered_name'");
             $display_name = $row->display_name;
@@ -447,7 +451,7 @@ function navigation_links($option,$filter='category',$filtered_name='')
     {
         print("<td class=blog-nav-col2><a class=blog-nav-link href=\"{$nav_info[1][1]}\">{$nav_info[1][2]}</a></td>");
         print("<td class=blog-nav-col1><a href=\"{$nav_info[1][1]}\"><img align=\"absmiddle\" src=\"$theme_url/blog_nav_forward.svg\" class=\"blog-nav-button\"></a></td>");
-    }    
+    }
     else
     {
         print("<td class=blog-nav-col2></td>");
@@ -599,7 +603,7 @@ function check_uncategorised_post()
         }
         if ($uncategorised)
         {
-            print("<p><strong>Warning:</strong> You have saved this post with the 'uncategorised' category.</p>\n");            
+            print("<p><strong>Warning:</strong> You have saved this post with the 'uncategorised' category.</p>\n");
             print("<p><a href=\"$base_url/wp-admin/edit.php\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
             exit;
         }
@@ -657,7 +661,7 @@ class custom_categories_widget extends WP_Widget
           array( 'description' => __( 'Category selection with user authentication', 'custom_categories_widget_domain' ), )
         );
     }
-  
+
     public function widget( $args, $instance )
     {
         global $base_url;
@@ -669,7 +673,7 @@ class custom_categories_widget extends WP_Widget
             $top_level_category = strtok($hierarchy,'/');
             $category_list = array();
             $categories = get_categories();
-      
+
             // Create array of categories that belong to the current top level category
             foreach ($categories as $cat)
             {
@@ -692,7 +696,7 @@ class custom_categories_widget extends WP_Widget
                 }
             }
             ksort($category_list);
-      
+
             /*
             Output the sub-category links for the current top level category. Check
             that the array count is greater than 1 as a top level category with no
@@ -721,7 +725,7 @@ class custom_categories_widget extends WP_Widget
             }
         }
     }
-  
+
     public function form( $instance )
     {
         if ( isset( $instance[ 'title' ] ) )
@@ -734,7 +738,7 @@ class custom_categories_widget extends WP_Widget
         }
         // Functionality goes here
     }
-  
+
     public function update( $new_instance, $old_instance )
     {
         $instance = array();
@@ -771,7 +775,7 @@ class custom_posts_widget extends WP_Widget
           array( 'description' => __( 'Recent posts with enhanced formatting', 'custom_posts_widget_domain' ), )
         );
     }
-  
+
     public function widget( $args, $instance )
     {
         global $base_url, $base_dir, $link_version, $local_site_dir, $theme_url;
@@ -846,7 +850,7 @@ class custom_posts_widget extends WP_Widget
         }
         echo $args['after_widget'];
     }
-  
+
     public function form( $instance )
     {
         if ( isset( $instance[ 'title' ] ) )
@@ -859,7 +863,7 @@ class custom_posts_widget extends WP_Widget
         }
         // Functionality goes here
     }
-  
+
     public function update( $new_instance, $old_instance )
     {
         $instance = array();
@@ -893,7 +897,7 @@ class blog_home_widget extends WP_Widget
           array( 'description' => __( 'Blog home link', 'blog_home_widget_domain' ), )
         );
     }
-  
+
     public function widget( $args, $instance )
     {
         global $base_url;
@@ -901,7 +905,7 @@ class blog_home_widget extends WP_Widget
         echo "<a href=\"$base_url/blog\"><button>Blog Home</button></a>";
         echo $args['after_widget'];
     }
-  
+
     public function form( $instance )
     {
         if ( isset( $instance[ 'title' ] ) )
@@ -914,7 +918,7 @@ class blog_home_widget extends WP_Widget
         }
         // Functionality goes here
     }
-  
+
     public function update( $new_instance, $old_instance )
     {
         $instance = array();

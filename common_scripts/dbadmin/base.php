@@ -345,13 +345,14 @@ function display_main_content($mode)
                 break;
 
             case 'renumber_records1':
-                print("<h1>Renumber Records</h1>\n");
-                print("<p>This operation will cause a bulk database update.</p>\n");
+                print("<h1>Renumber Records (All Tables)</h1>\n");
+                print("<p>This operation will cause all sequenced tables to be renumbered.<br />");
+                print("(To renumber an individual table, go to the associated table editing screen.)</p>\n");
                 print("<p><a href=\"$base_url/$relative_path/?-action=renumber_records2\"><button>Continue</button></a></p>\n");
                 break;
 
             case 'renumber_records2':
-                print("<h1>Renumber Records</h1>\n");
+                print("<h1>Renumber Records (All Tables)</h1>\n");
                 $where_clause = 'renumber_enabled=1';
                 $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
                 while ($row = mysqli_fetch_assoc($query_result))

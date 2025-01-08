@@ -25,7 +25,7 @@ function multiply_money($value1,$value2)
 /*
   Function update_account_balances
 
-  This function is called when a transaction is saved, and will cause all 
+  This function is called when a transaction is saved, and will cause all
   balances (main, reconciled & quoted) to be updated on the given account from
   the given date onwards.
 */
@@ -70,7 +70,7 @@ function update_account_balances($account,$start_date)
         $reconciled_balance = 0;
         $quoted_balance = 0;
     }
-  
+
     /*
     Automatically clear the 'no quote' flag in any reconciled transactions that
     meet either of the following criteria:-
@@ -96,7 +96,7 @@ function update_account_balances($account,$start_date)
     $where_clause = 'reconciled=1 AND (credit_amount=0.00 OR date<=?)';
     $where_values = array('s',$date);
     mysqli_update_query($db,$view,$set_fields,$set_values,$where_clause,$where_values);
-  
+
     $where_clause = 'date>=?';
     $where_values = array('s',$start_date);
     $add_clause = ' ORDER BY date ASC,seq_no ASC';
@@ -131,7 +131,7 @@ function update_account_balances($account,$start_date)
 /*
   Function next_seq_no
 
-  This function returns the next sequence number for a new trasnaction on a 
+  This function returns the next sequence number for a new trasnaction on a
   given account.
 */
 //==============================================================================
@@ -255,7 +255,7 @@ function rationalise_transaction($account,$seq_no)
         {
             $source_split_count = 0;
         }
-    
+
         /*
         Update the fund to '-nosplit-' if it is '-split-' and there are no splits
         remaining. Do not act if the transaction is at the target end of a transfer,
@@ -275,7 +275,7 @@ function rationalise_transaction($account,$seq_no)
             $where_values = array('s',$account,'i',$seq_no);
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Check status of fund and category in relation to splits.
         if (($split_count > 0) || ($source_split_count > 0))
         {
@@ -310,7 +310,7 @@ function rationalise_transaction($account,$seq_no)
                 $where_values = array('s',$target_account,'i',$target_seq_no);
                 mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
             }
-      
+
             // Ensure that the category is not set to 'split' in the transaction and at the other end of any transfer.
             $set_fields = 'category';
             $set_values = array('s','-none-');
@@ -326,7 +326,7 @@ function rationalise_transaction($account,$seq_no)
                 mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
             }
         }
-    
+
         // Check status of category in relation to transfers.
         if (((!empty($row['target_account'])) || (!empty($row['source_account']))) &&
              ($row['category'] != '-split-'))
@@ -345,14 +345,14 @@ function rationalise_transaction($account,$seq_no)
             $where_values = array('s',$account,'s',$seq_no);
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Process associated splits
         $splits_total = 0.00;
         while ($row2 = mysqli_fetch_assoc($query_result2))
         {
             $split_no = $row2['split_no'];
             $splits_total = subtract_money(add_money($splits_total,$row2['credit_amount']),$row2['debit_amount']);
-      
+
             // Ensure that fund and category are not set to indicate a split.
             if ($row2['fund'] == '-split-')
             {
@@ -370,7 +370,7 @@ function rationalise_transaction($account,$seq_no)
                 $where_values = array('s',$account,'i',$seq_no,'i',$split_no);
                 mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
             }
-      
+
             // Check status of category in relation to transfers.
             if ((!empty($row['target_account'])) || (!empty($row['source_account'])))
             {
@@ -504,7 +504,7 @@ function copy_transaction($account,$seq_no,$new_date)
             // Do not allow copy on the target of a transfer
             return false;
         }
-    
+
         // Create copy of transaction using new sequence number
         $set_fields = 'copy_to_date';
         $set_values = array('n',null);
@@ -529,7 +529,7 @@ function copy_transaction($account,$seq_no,$new_date)
         mysqli_update_query($db,'temp_splits',$set_fields,$set_values,'',array());
         mysqli_query_normal($db,"INSERT INTO splits SELECT * FROM temp_splits");
         update_account_balances($account,$new_date);
-    
+
         // Create transfer if required
         if (!empty($row['target_account']))
         {
@@ -618,7 +618,7 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
             $where_values = array('s',$account,'i',$seq_no);
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Copy scheduled transaction to new transaction and remove schedule from
         // the latter
         $new_seq_no = copy_transaction($account,$seq_no,$date);
@@ -628,7 +628,7 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
         $where_values = array('s',$account,'i',$new_seq_no);
         mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         update_account_balances($account,$date);
-    
+
         // Update schedule count if appliable
         if ($sched_count > 0)
         {
@@ -639,7 +639,7 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
             $where_values = array('s',$account,'i',$seq_no);
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Update scheduled transaction to next date
         $type = substr($sched_freq,0,1);
         $multiplier = (int)(ltrim($sched_freq,'MWD'));
@@ -681,7 +681,7 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
             }
             print("$message<br />\n");
         }
-    
+
         // Send e-mail alert if required
         if (!empty($row['email_alert_id']))
         {
@@ -773,7 +773,7 @@ function delete_uncleared_cheques()
     $where_values = array('s',$cutoff_date);
     $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
     while ($row = mysqli_fetch_assoc($query_result))
-    {   
+    {
         $fields = 'account,chq_no,date,payee,amount';
         $values = array ('s',$row['account'],'i',$row['chq_no'],'s',$row['date'],'s',$row['payee'],'d',$row['debit_amount']);
         mysqli_insert_query($db,'expired_cheques',$fields,$values);
@@ -925,7 +925,7 @@ function initialise_archive_table_data($db)
     $where_clause = "table_name LIKE 'archived_%'";
     $where_values = array();
     mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
-  
+
     // Output warning if new tables have been added.
     if ($directory_created)
     {

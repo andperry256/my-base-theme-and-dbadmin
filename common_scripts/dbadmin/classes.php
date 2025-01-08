@@ -12,14 +12,14 @@ class db_record
     private $fields = array();
     private $old_primary_keys = array();
     private $custom_vars = array();
-  
+
     function SetField($field_name,$value,$type='s')
     {
         // Perform a trim because this is the format in which the field
         // will be submitted to any MySQL query.
         $this->fields[$field_name] = array(trim($value),$type);
     }
-  
+
     function FieldVal($field_name)
     {
         if (isset($this->fields[$field_name]))
@@ -31,7 +31,7 @@ class db_record
             return false;
         }
     }
-  
+
     function FieldType($field_name)
     {
         if (isset($this->fields[$field_name]))
@@ -43,12 +43,12 @@ class db_record
             return false;
         }
     }
-  
+
     function FieldIsSet($field_name)
     {
         return (isset($this->fields[$field_name]));
     }
-  
+
     function SaveOldPKs($primary_keys)
     {
         foreach ($primary_keys as $key => $val)
@@ -56,7 +56,7 @@ class db_record
             $this->old_primary_keys[$key] = $val;
         }
     }
-  
+
     function OldPKVal($field_name)
     {
         if (isset($this->old_primary_keys[$field_name]))
@@ -68,12 +68,12 @@ class db_record
             return false;
         }
     }
-  
+
     function SaveCustomVar($key,$val)
     {
         $this->$custom_vars[$key] = $val;
     }
-  
+
     function CustomVarVal($key)
     {
         if (isset($this->$custom_vars[$key]))
@@ -91,6 +91,24 @@ class db_record
 
 class tables_dba_table_info
 {
+    function sort_1_field__validate($record,$value)
+    {
+        $seq_no_field = $record->FieldVal('seq_no_field');
+        if ((!empty($value)) && (empty($seq_no_field)))
+        {
+            return report_error("Sort 1 field set without sequence number field");
+        }
+    }
+
+    function renumber_enabled__validate($record,$value)
+    {
+        $seq_no_field = $record->FieldVal('seq_no_field');
+        if ((!empty($value)) && (empty($seq_no_field)))
+        {
+            return report_error("Renumber set to enabled without sequence number field");
+        }
+    }
+
     function beforeSave($record)
     {
           $charset = $record->FieldVal('character_set');
@@ -101,7 +119,7 @@ class tables_dba_table_info
               return report_error("Collation does not match the character set");
           }
     }
-  
+
     function afterDelete($record)
     {
         $db = admin_db_connect();
@@ -128,31 +146,31 @@ class tables_dba_table_fields
         {
             $field_type = strtok($row['Type'],'(');
             $field_size = strtok(')');
-      
+
             // Ensure that the widget type is set to 'date' for any date field
             if (($field_type == 'date') && ($value != 'date') && ($value != 'static-date'))
             {
                 return report_error("Attempt to set non <em>date</em> widget type on date field <em>$field</em>");
             }
-      
+
             // Ensure that the widget type is not set to 'date' for a non date field
             if (($field_type != 'date') && (($value == 'date') || ($value == 'static-date')))
             {
                 return report_error("Attempt to set <em>date</em> widget type on non date field <em>$field</em>");
             }
-      
+
             // Ensure that the widget type is set to 'enum' for any enum field
             if (($field_type == 'enum') && ($value != 'enum'))
             {
                 return report_error("Attempt to set non <em>enum</em> widget type on enum field <em>$field</em>");
             }
-      
+
             // Ensure that the widget type is not set to 'enum' for a non enum field
             if (($field_type != 'enum') && ($value == 'enum'))
             {
                 return report_error("Attempt to set <em>enum</em> widget type on non enum field <em>$field</em>");
             }
-      
+
             // Only allow a 'checkbox' widget for an int(1) field
             if ($value == 'checkbox')
             {
@@ -161,7 +179,7 @@ class tables_dba_table_fields
                     return report_error("Attempt to set <em>checkbox</em> widget type on non int(1) field <em>$field</em>");
                 }
             }
-      
+
             // Ensure that a select widget has a valid vocabulary
             if ($value == 'select')
             {
@@ -170,7 +188,7 @@ class tables_dba_table_fields
                 $valid_select = false;
                 if ((!empty($vocab_table)) && (!empty($vocab_field)))
                 {
-          
+
                     if (mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),'',false))
                     {
                         $valid_select = true;
@@ -183,7 +201,7 @@ class tables_dba_table_fields
             }
         }
     }
-  
+
     function beforeSave($record)
     {
         /*
@@ -204,7 +222,7 @@ class tables__view_orphan_table_field_records extends tables_dba_table_fields {}
 
 class tables_dba_relationships
 {
-  
+
 }
 
 //==============================================================================
@@ -241,7 +259,7 @@ class tables_dba_sidebar_config
 
 class tables_dba_change_log
 {
-  
+
     function afterSave($record)
     {
         $delete_record = $record->FieldVal('delete_record');
@@ -266,7 +284,7 @@ class tables_admin_passwords
             return report_error("Passwords do not match");
         }
     }
-  
+
     function afterSave($record)
     {
         $db = admin_db_connect();

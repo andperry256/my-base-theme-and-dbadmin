@@ -823,7 +823,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     $query = str_replace('{query}','# Do not include (too complex)',$query);
     mysqli_query_normal($db,$query);
     $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables - Update',\"{query}\")";
-    $query = str_replace('{query}','UPDATE dba_table_info SET parent_table=\'$table_name WHERE parent_table=\'$$table_name\'',$query);
+    $query = str_replace('{query}','UPDATE dba_table_info SET parent_table=\'$table_name\' WHERE parent_table=\'$$table_name\'',$query);
     mysqli_query_normal($db,$query);
     $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Fields',\"{query}\")";
     $query = str_replace('{query}','SELECT * FROM dba_table_fields WHERE table_name=\'$table_name\'',$query);

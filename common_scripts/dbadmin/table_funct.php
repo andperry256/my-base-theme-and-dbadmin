@@ -1676,6 +1676,7 @@ function renumber_records($table)
 {
     $db = admin_db_connect();
     set_time_limit(30);
+    $table = get_base_table($table);
     $table = get_table_for_info_field($table,'seq_no_field');
     $where_clause = 'table_name=?';
     $where_values = array('s',$table);

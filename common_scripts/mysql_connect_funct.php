@@ -151,10 +151,13 @@ if (!function_exists('itservices_db_connect'))
         global $location, $www_root_dir;
         if (($location == 'local') && (function_exists('local_itservices_db_connect')))
         {
+            // Local host with a function 'local_itservices_db_connect' for the given web site.
             return local_itservices_db_connect($mode);
         }
         elseif (($location == 'local') && (is_dir("$www_root_dir/Sites/andperry.com/private_scripts")))
         {
+            // Local host with no function 'local_itservices_db_connect' for the given web site.
+            // Connect by default to the IT Services database for andperry.com.
             switch ($mode)
             {
                 case 'o':
@@ -170,6 +173,7 @@ if (!function_exists('itservices_db_connect'))
         }
         elseif (($location == 'real') && (function_exists('online_itservices_db_connect')))
         {
+            // Online host with a function 'online_itservices_db_connect' for the given web site.
             return online_itservices_db_connect($mode);
         }
         else

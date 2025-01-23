@@ -55,7 +55,7 @@ print("<br /><br />\n");
 
 //==============================================================================
 ?>
-        <input type="submit" value="Refresh">
+        <input type="submit" value="Update">
         <input type="hidden" name="submitted">
     </form>
 </body>

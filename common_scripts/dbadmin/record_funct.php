@@ -154,7 +154,7 @@ function generate_widget($table,$field_name,$field_value)
             case 'date':
                 datepicker_widget("field_$field_name",$field_value);
                 break;
-    
+
             case 'input-text':
             case 'input-text-small':
                 print("<input type=\"text\" name=\"field_$field_name\" value=\"$field_value\" size=\"");
@@ -190,15 +190,15 @@ function generate_widget($table,$field_name,$field_value)
                     print(">");
                 }
                 break;
-    
+
             case 'input-num':
                 print("<input type=\"text\" name=\"field_$field_name\" size=\"12\" value=\"$field_value\">");
                 break;
-    
+
             case 'password':
                 print("<input type=\"password\" name=\"field_$field_name\" value=\"$field_value\">");
                 break;
-    
+
             case 'enum':
                 print("<select name=\"field_$field_name\">\n");
                 print("<option value=\"\">Please select ...</option>\n");
@@ -222,7 +222,7 @@ function generate_widget($table,$field_name,$field_value)
                 }
                 print("</select>");
                 break;
-    
+
             case 'time':
                 if (empty($row['vocab_table']))
                 {
@@ -234,7 +234,7 @@ function generate_widget($table,$field_name,$field_value)
                     print("<input type=\"text\" name=\"field_$field_name\" size=\"8\" value=\"$field_value\">");
                     break;
                 }
-    
+
             case 'select':
                 print("<select name=\"field_$field_name\">\n");
                 print("<option value=\"\">Please select ...</option>\n");
@@ -254,7 +254,7 @@ function generate_widget($table,$field_name,$field_value)
                 }
                 print("</select>");
                 break;
-    
+
             case 'checklist':
                 $vocab_table = $row['vocab_table'];
                 $vocab_field = $row['vocab_field'];
@@ -292,11 +292,11 @@ function generate_widget($table,$field_name,$field_value)
                     }
                 }
                 break;
-    
+
             case 'textarea':
                 print("<textarea  name=\"field_$field_name\" rows=\"6\" cols=\"64\">$field_value</textarea>\n");
                 break;
-    
+
             case 'checkbox':
                 print("<input type=\"checkbox\" name=\"field_$field_name\"");
                 if ($field_value)
@@ -305,16 +305,16 @@ function generate_widget($table,$field_name,$field_value)
                 }
                 print(">");
                 break;
-    
+
             case 'auto-increment':
                 print("AI [$field_value]");
                 print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
                 break;
-    
+
             case 'static':
             case 'static-date':
                 print("$field_value");
-                if (strpos($field_value,'<a href') === false)
+                if ((empty($field_value)) || (strpos($field_value,'<a href') === false))
                 {
                     print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
                 }
@@ -329,12 +329,12 @@ function generate_widget($table,$field_name,$field_value)
                     print("<input type=\"hidden\" name=\"field_$field_name\" value=\"\">");
                 }
                 break;
-    
+
             case 'hidden':
                 print("******");
                 print("<input type=\"hidden\" name=\"field_$field_name\" value=\"$field_value\">");
                 break;
-    
+
             case 'file':
                 if (!empty($field_value))
                 {
@@ -502,7 +502,7 @@ function handle_file_widget_after_save($record,$field)
                 {
                     return report_error("File <em>$filename</em> could not be uploaded.");
                 }
-        
+
                 // Update record with the filename.
                 $where_clause = 'table_name=? AND is_primary=1';
                 $where_values = array('s',$base_table);
@@ -564,7 +564,7 @@ function run_relationship_update_queries($record)
         {
             $query = $row['query'];
             $matches = array();
-    
+
             /*
             Substitute variable names of type $$name. Only valid for primary key fields
             and works on the original value of the field.
@@ -577,7 +577,7 @@ function run_relationship_update_queries($record)
                 $value = str_replace('$','\\$',$value);
                 $query = str_replace($matches[0],"$leading_char$value",$query);
             }
-    
+
             /*
             Substitute variable names of type $name. Works on the final value of the field.
             */
@@ -623,7 +623,7 @@ function run_relationship_delete_query($query,$remainder)
             */
             mysqli_query_normal($db,$query);
             return;
-        
+
         case 'DELETE':
             if (!empty($remainder))
             {
@@ -631,7 +631,7 @@ function run_relationship_delete_query($query,$remainder)
                 {
                     $next_query = strtok($remainder,';');
                     $next_remainder = trim(substr($remainder,strlen($next_query)),'; ');
-            
+
                     // Run a SELECT query on the set of records that are due to be
                     // deleted by the current query.
                     $query_result = mysqli_query_normal($db,preg_replace('/DELETE FROM/i','SELECT * FROM',$query));
@@ -648,7 +648,7 @@ function run_relationship_delete_query($query,$remainder)
                             $value = str_replace('$','\\$',$value);
                             $query2 = str_replace($matches[0],"$leading_char$value",$query2);
                         }
-            
+
                         // Run the next query in line against the individual record from the
                         // SELECT query (via a recursive function call).
                         run_relationship_delete_query($query2,$next_remainder);
@@ -658,7 +658,7 @@ function run_relationship_delete_query($query,$remainder)
             // Run the current query.
             mysqli_query_normal($db,$query);
             return;
-    
+
         default:
             return;
     }
@@ -676,7 +676,7 @@ function run_relationship_delete_queries($record)
     {
         $query = strtok($row['query'],';');
         $remainder = trim(substr($row['query'],strlen($query)),'; ');
-    
+
         // Substitute variable names of type $name.
         $matches = array();
         while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query,$matches))
@@ -687,7 +687,7 @@ function run_relationship_delete_queries($record)
             $value = str_replace('$','\\$',$value);
             $query = str_replace($matches[0],"$leading_char$value",$query);
         }
-    
+
         // Run the query and any sub-queries.
         run_relationship_delete_query($query,$remainder);
     }
@@ -734,7 +734,7 @@ function previous_record_link($table,$record_id)
     if (($query_result) && ($current_record = mysqli_fetch_assoc($query_result)))
     {
         $sort_field_count = count($sort_field_list);
-    
+
         $where_clause = get_session_var('search_clause')." AND {$sort_field_list[0]}<=?";
         if (substr($where_clause,0,5) == ' AND ')
         {
@@ -813,7 +813,7 @@ function next_record_link($table,$record_id)
     if (($query_result) && ($current_record = mysqli_fetch_assoc($query_result)))
     {
         $sort_field_count = count($sort_field_list);
-    
+
         // Loop through table to find current and next record
         $where_clause = get_session_var('search_clause')." AND {$sort_field_list[0]}>=?";
         if (substr($where_clause,0,5) == ' AND ')
@@ -904,7 +904,7 @@ function save_record($record,$old_record_id,$new_record_id)
             {
                 // Field is empty.
                 if (($row['Null'] == 'YES') &&
-                    (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'static-date') || 
+                    (($row2['widget_type'] == 'date') || ($row2['widget_type'] == 'static-date') ||
                      ($row2['widget_type'] == 'enum') || ($record->FieldType($field_name) != 's')))
                 {
                     // Set to null if allowed.
@@ -959,7 +959,7 @@ function save_record($record,$old_record_id,$new_record_id)
     if  (class_exists ($classname,false))
     {
         $table_obj = new $classname;
-    
+
         // Run any validate methods
         foreach ($new_mysql_fields as $field => $value)
         {
@@ -968,7 +968,7 @@ function save_record($record,$old_record_id,$new_record_id)
             {
                 return false;
             }
-    
+
             $method = $field.'__validate';
             if (method_exists($table_obj,$method))
             {
@@ -978,7 +978,7 @@ function save_record($record,$old_record_id,$new_record_id)
                     return false;
                 }
             }
-    
+
             $where_clause = 'table_name=? AND field_name=?';
             $where_values = array('s',$base_table,'s',$field);
             $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
@@ -992,7 +992,7 @@ function save_record($record,$old_record_id,$new_record_id)
                 $new_mysql_fields[$field] = $record->FieldVal($field);
             }
         }
-    
+
         // Run beforeSave method if available
         if (method_exists($table_obj,'beforeSave'))
         {
@@ -1027,7 +1027,7 @@ function save_record($record,$old_record_id,$new_record_id)
         }
         $where_clause = rtrim($where_clause,' AND');
         $main_query_result = mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
-    
+
         if (isset($_POST['replicate_changes']))
         {
             // Replicate change to online site
@@ -1303,10 +1303,10 @@ function handle_record($action,$params)
                         print("<table class=\"table-record\">\n");
                     }
                 }
-        
+
                 $label = field_label($table,$field_name);
                 $description = $row3['description'];
-                if (substr($description,0,1) == '@')
+                if ((!empty($description)) && (substr($description,0,1) == '@'))
                 {
                     $linked_field = strtok(substr($description,1)," \n");
                     $where_clause = 'table_name=? AND field_name=?';
@@ -1330,7 +1330,7 @@ function handle_record($action,$params)
                     }
                     $description .= NEXT_SEQ_NO_INDICATOR . " = Save automatically with next number in sequence.";
                 }
-        
+
                 // Create the URL to edit the field attributes in table dba_table_fields
                 if ($table == 'dba_table_fields')
                 {
@@ -1348,7 +1348,7 @@ function handle_record($action,$params)
                         $edit_field_atts_url .= "&-returnurl=$return_url";
                     }
                 }
-        
+
                 // Select the CSS class for use with the field label
                 if (($row3['required'] == 2) && ($row3['widget_type'] != 'checkbox') && ($row3['widget_type'] != 'static'))
                 {
@@ -1358,7 +1358,7 @@ function handle_record($action,$params)
                 {
                     $class = 'not-required';
                 }
-        
+
                 /*
                 Determine the value to be placed into the field. This will be set to
                 the first of the following which applies (list checked in order):-
@@ -1411,7 +1411,7 @@ function handle_record($action,$params)
                     $value = false;
                 }
             }
-    
+
             switch ($action)
             {
                 case 'edit':
@@ -1444,7 +1444,7 @@ function handle_record($action,$params)
                         break;
                     }
                 // Drop down to next case if access level is read-only.
-        
+
                 case 'view':
                     if ($mode == 'desktop')
                     {
@@ -1457,7 +1457,7 @@ function handle_record($action,$params)
                         print("<div class=\"edit-field-cell edit-field-value\">{$row[$field_name]}</div></div>\n");
                     }
                     break;
-        
+
                 case 'new':
                     if ($access_level == 'full')
                     {
@@ -1503,7 +1503,7 @@ function handle_record($action,$params)
                 // Generate 'save as new record' selector
                 print("<input type=\"checkbox\" name =\"save_as_new\">&nbsp;Save as new record\n");
                 print("<div class=\"halfspace\">&nbsp;</div>");
-        
+
                 // Generate 'replicate changes' selector if required conditions are met
                 $where_clause = 'table_name=?';
                 $where_values = array('s',$base_table);
@@ -1575,7 +1575,7 @@ function delete_record($record,$record_id)
     if  (class_exists ($classname,false))
     {
         $table_obj = new $classname;
-    
+
         // Run beforeDelete method if available
         if (method_exists($table_obj,'beforeDelete'))
         {
@@ -1585,7 +1585,7 @@ function delete_record($record,$record_id)
                 return false;
             }
         }
-    
+
         // Delete the record
         $where_clause = '';
         $where_values = array();
@@ -1598,7 +1598,7 @@ function delete_record($record,$record_id)
         }
         $where_clause = rtrim($where_clause,' AND');
         mysqli_delete_query($db,$table,$where_clause,$where_values);
-    
+
         if  (class_exists ($classname,false))
         {
             // Run afterDelete method if available
@@ -1783,7 +1783,7 @@ function post_change_snapshot($record)
                 }
             }
         }
-    
+
         // Add record to change log
         $date_and_time = date('Y-m-d H:i:s');
         if ($action == 'Delete')

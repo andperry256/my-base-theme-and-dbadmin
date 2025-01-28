@@ -657,7 +657,7 @@ function display_table($params)
     $query_result = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
     if ((!empty($where_par)) || (!empty($search_clause)))
     {
-        print("<div class=\"top-navigation-item clear-filter-button\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/clear_table_filters.php?sub_path=$relative_sub_path&table=$table&option=$option\">Clear Filters</a></div>\n");
+        print("<div class=\"top-navigation-item clear-filter-button\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/clear_table_filters.php?sub_path=$relative_sub_path&table=$table\">Clear Filters</a></div>\n");
     }
     if (mysqli_num_rows($query_result) > 0)
     {

@@ -584,6 +584,7 @@ function check_uncategorised_post()
 {
     global $base_url;
     $post = get_post();
+    $id = $post->ID;
     if ($post->post_type == 'post')
     {
         $uncategorised = true;
@@ -604,7 +605,7 @@ function check_uncategorised_post()
         if ($uncategorised)
         {
             print("<p><strong>Warning:</strong> You have saved this post with the 'uncategorised' category.</p>\n");
-            print("<p><a href=\"$base_url/wp-admin/edit.php\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
+            print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
             exit;
         }
     }

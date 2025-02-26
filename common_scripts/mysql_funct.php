@@ -202,7 +202,7 @@ function mysqli_query_strict($db,$query,$debug=false,$continue=false)
 Function query_field_type
 
 This function returns the variable type for a given field given the table and
-field name. The possible values that can be returned as as specified in the 
+field name. The possible values that can be returned as as specified in the
 comment at the top of this script.
 */
 //==============================================================================
@@ -410,7 +410,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
     $pos = 0;
     for ($i=0; $i<$all_values_count; $i+=2)
     {
-        if (($all_values[$i] == 'n') || 
+        if (($all_values[$i] == 'n') ||
             (($all_values[$i] == 'sn') && (empty($all_values[$i+1]))))
         {
             $param = 'NULL';
@@ -493,7 +493,7 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
     $values_list = '';
     for ($i=0; $i<$values_count; $i+=2)
     {
-        if (($values[$i] == 'n') || 
+        if (($values[$i] == 'n') ||
             (($values[$i] == 'sn') && (empty($values[$i+1]))))
         {
             $param = 'NULL';

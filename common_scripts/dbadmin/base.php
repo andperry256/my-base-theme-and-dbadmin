@@ -125,7 +125,12 @@ function display_sidebar_content()
                         }
                         print("-table=$table_name");
                     }
-                    print("\">$label</a></td></tr>\n");
+                    print("\"");
+                    if ($row['new_window'])
+                    {
+                        print(" target=\"_blank\"");
+                    }
+                    print(">$label</a></td></tr>\n");
                 }
                 else
                 {

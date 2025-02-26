@@ -104,6 +104,11 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         print("<p>Failed to connect to database</p>");
         return;
     }
+    elseif (empty($dbname))
+    {
+        print("<p>Failed to identify database name</p>");
+        return;
+    }
 
     if ($update_charsets)
     {

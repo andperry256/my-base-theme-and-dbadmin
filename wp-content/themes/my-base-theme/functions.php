@@ -626,29 +626,32 @@ function check_spaces_at_start()
 {
     global $base_url;
     global $min_post_content_line_length;
-    $db = db_connect(WP_DBID);
     $post = get_post();
     $id = $post->ID;
-    if (!isset($min_post_content_line_length))
+    if ($post->post_type == 'post')
     {
-        $min_post_content_line_length = 12;
-    }
-    $where_clause = 'ID=?';
-    $where_values = array('i',$id);
-    if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
-        ($row['post_type'] == 'post'))
-    {
-        // Check for spaces at start of content. Replace '&nbsp;' with a single character to test on a
-        // substring of the required length with no distinction between breaking and non-breaking spaces.
-        $temp_str = str_replace('&nbsp;','_',$row['post_content']);
-        $temp_str = strip_tags($temp_str);
-        $temp_substr = substr($temp_str,0,$min_post_content_line_length);
-        $space_count = substr_count($temp_substr,' ');
-        if (($row['post_type'] == 'post') && ($space_count > 0))
+        $db = db_connect(WP_DBID);
+        if (!isset($min_post_content_line_length))
         {
-            print("<p><strong>Warning:</strong> You have saved this post with spaces near the beginning. Please replace at least $space_count space(s) with non-breaking spaces.</p>\n");
-            print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
-            exit;
+            $min_post_content_line_length = 12;
+        }
+        $where_clause = 'ID=?';
+        $where_values = array('i',$id);
+        if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
+            ($row['post_type'] == 'post'))
+        {
+            // Check for spaces at start of content. Replace '&nbsp;' with a single character to test on a
+            // substring of the required length with no distinction between breaking and non-breaking spaces.
+            $temp_str = str_replace('&nbsp;','_',$row['post_content']);
+            $temp_str = strip_tags($temp_str);
+            $temp_substr = substr($temp_str,0,$min_post_content_line_length);
+            $space_count = substr_count($temp_substr,' ');
+            if (($row['post_type'] == 'post') && ($space_count > 0))
+            {
+                print("<p><strong>Warning:</strong> You have saved this post with spaces near the beginning. Please replace at least $space_count space(s) with non-breaking spaces.</p>\n");
+                print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
+                exit;
+            }
         }
     }
 }
@@ -666,19 +669,22 @@ the tag '<!--no-more-->' within the post content (typically at the end).
 function check_more_directive()
 {
     global $base_url;
-    $db = db_connect(WP_DBID);
     $post = get_post();
     $id = $post->ID;
-    $where_clause = 'ID=?';
-    $where_values = array('i',$id);
-    if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
-        ($row['post_type'] == 'post') &&
-        (strpos($row['post_content'],'<!--more-->') === false) &&
-        (strpos($row['post_content'],'<!--no-more-->') === false))
+    if ($post->post_type == 'post')
     {
-        print("<p><strong>Warning:</strong> You have saved this post without a &lt;!--more--&gt; or &lt;!--no-more--&gt; directive.</p>\n");
-        print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
-        exit;
+        $db = db_connect(WP_DBID);
+        $where_clause = 'ID=?';
+        $where_values = array('i',$id);
+        if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
+            ($row['post_type'] == 'post') &&
+            (strpos($row['post_content'],'<!--more-->') === false) &&
+            (strpos($row['post_content'],'<!--no-more-->') === false))
+        {
+            print("<p><strong>Warning:</strong> You have saved this post without a &lt;!--more--&gt; or &lt;!--no-more--&gt; directive.</p>\n");
+            print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
+            exit;
+        }
     }
 }
 

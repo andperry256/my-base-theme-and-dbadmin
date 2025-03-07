@@ -35,7 +35,9 @@ if (isset($_GET['selection']))
     $selected_rec_id = strtok($_GET['selection'],'^');
     $selected_date = strtok('^');
     $selected_amount = strtok('^');
-    $match = find_matching_transaction($account,$selected_date,$selected_amount);
+    $match = (!empty($selected_amount))
+        ? find_matching_transaction($account,$selected_date,$selected_amount)
+        : null;
 }
 
 print("<h1>Reconcile Account ($account_name)</h1>\n");
@@ -95,6 +97,12 @@ foreach ($csvlist as $key => $value)
         break;
     }
 }
+print("<option value=\"BULK\"");
+if ((isset($_GET['selection'])) && ($_GET['selection'] == "BULK"))
+{
+    print(" selected");
+}
+print(">Bulk Reconcile</option>\n");
 
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY rec_id DESC';

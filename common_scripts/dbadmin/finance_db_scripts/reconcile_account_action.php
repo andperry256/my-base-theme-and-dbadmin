@@ -1,4 +1,6 @@
 <?php
+//==============================================================================
+
 $local_site_dir = $_POST['site'];
 $account = $_POST['account'];
 $account_type = $_POST['account_type'];
@@ -87,6 +89,11 @@ if ((substr($bank_transaction,0,6) == 'IMPORT') && ($account_transaction == 'IMP
 elseif ((substr($bank_transaction,0,6) == 'IMPORT') || ($account_transaction == 'IMPORT'))
 {
     // No action
+}
+elseif($bank_transaction == 'BULK')
+{
+    header("Location: $base_url/$relative_path/?-action=bulk_reconcile&site=$local_site_dir&account=$account");
+    exit;
 }
 elseif ($account_transaction == 'NONE')
 {
@@ -208,4 +215,6 @@ else
 $message = urlencode($user_message);
 header("Location: $base_url/$relative_path/?-action=reconcile_account&-account=$account&message=$message");
 exit;
+
+//==============================================================================
 ?>

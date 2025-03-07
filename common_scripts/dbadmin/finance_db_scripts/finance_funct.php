@@ -739,19 +739,28 @@ function find_matching_transaction($account,$date,$amount)
     $end_date = add_days($date,1);
     $credit_amount = ($amount > 0) ? $amount : 0;
     $debit_amount = ($amount < 0) ? -$amount : 0;
-    $where_clause = 'account=? AND date>=? AND date<=? AND credit_amount=? AND debit_amount=? and reconciled=0';
-    $where_values = array('s',$account,'s',$start_date,'s',$end_date,'d',$credit_amount,'d',$debit_amount);
-    $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-    $count = mysqli_num_rows($query_result);
-    if (($count == 1) && ($row = mysqli_fetch_assoc($query_result)))
+
+    // Count matching records in bank import table
+    $where_clause_1 = 'date>=? AND date<=? AND amount=? and reconciled=0';
+    $where_values_1 = array('s',$start_date,'s',$end_date,'d',$amount);
+    $query_result_1 = mysqli_select_query($db,'bank_import','*',$where_clause_1,$where_values_1,'');
+    $count_1 = mysqli_num_rows($query_result_1);
+
+    // Count matching records in transactions table
+    $where_clause_2 = 'account=? AND date>=? AND date<=? AND credit_amount=? AND debit_amount=? and reconciled=0';
+    $where_values_2 = array('s',$account,'s',$start_date,'s',$end_date,'d',$credit_amount,'d',$debit_amount);
+    $query_result_2 = mysqli_select_query($db,'transactions','*',$where_clause_2,$where_values_2,'');
+    $count_2 = mysqli_num_rows($query_result_2);
+
+    if (($count_1 == 1) && ($count_2 == 1) && ($row2 = mysqli_fetch_assoc($query_result_2)))
     {
         // Unique match found
-        return ($row['seq_no']);
+        return ($row2['seq_no']);
     }
     else
     {
         // Return zero or a negated match count.
-        return -$count;
+        return -$count_2;
     }
 }
 

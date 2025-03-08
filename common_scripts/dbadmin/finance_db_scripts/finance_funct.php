@@ -741,8 +741,8 @@ function find_matching_transaction($account,$date,$amount)
     $debit_amount = ($amount < 0) ? -$amount : 0;
 
     // Count matching records in bank import table
-    $where_clause_1 = 'date>=? AND date<=? AND amount=? and reconciled=0';
-    $where_values_1 = array('s',$start_date,'s',$end_date,'d',$amount);
+    $where_clause_1 = 'amount=? and reconciled=0';
+    $where_values_1 = array('d',$amount);
     $query_result_1 = mysqli_select_query($db,'bank_import','*',$where_clause_1,$where_values_1,'');
     $count_1 = mysqli_num_rows($query_result_1);
 

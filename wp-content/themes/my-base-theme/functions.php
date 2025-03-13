@@ -217,6 +217,34 @@ function authenticate_post($slug,$use_overriding_access_level=false)
 
 //==============================================================================
 
+function get_top_level_category_for_post()
+{
+    global $base_url;
+    $category_list = array();
+    $categories = get_the_category();
+    foreach ($categories as $cat)
+    {
+        $id = (int)$cat->term_id;
+        $name = $cat->cat_name;
+        $top_level_category = get_term_meta($id,'top_level_category',true);
+        if ($top_level_category)
+        {
+            if (isset($retval))
+            {
+                // More than one top level category allocated.
+                return '*';
+            }
+            else
+            {
+                $retval = $name;
+            }
+        }
+    }
+    return $retval ?? false;
+}
+
+//==============================================================================
+
 function display_category_summary($category_name,$category_info,$image_max_width,$image_max_height)
 {
     global $base_url;

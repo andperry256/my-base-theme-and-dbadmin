@@ -61,6 +61,10 @@ function display_sidebar_content()
         include("$custom_pages_path/$relative_path/key_actions.php");
     }
     print("<p class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=main\">Main Page</a>");
+    if (is_file("$custom_pages_path/$relative_path/actions/run_cron.php"))
+    {
+        print("<p class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=run_cron\">Run Cron</a>");
+    }
     if (is_file("$custom_pages_path/$relative_path/custom_sidebar.php"))
     {
         require("$custom_pages_path/$relative_path/custom_sidebar.php");

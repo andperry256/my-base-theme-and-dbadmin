@@ -17,8 +17,6 @@ global $mobile_header_image_path, $mobile_header_image_url;
 global $private_scripts_dir;
 global $custom_footer_script;
 global $wpdb;
-global $favicon_loaded;
-global $favicon_path;
 
 $themes_dir = get_theme_root();
 $site_path_defs_path = "$themes_dir/site_path_defs.php";
@@ -26,19 +24,19 @@ $base_theme_dir = get_template_directory();
 $base_theme_url = get_template_directory_uri();
 if (!is_file($site_path_defs_path))
 {
-  
+
     //================================================================================
     // SIMPLE MODE
     // Most of the complex functionality is excluded.
     //================================================================================
-  
+
     $my_base_theme_mode = 'simple';
     set_default_header_image_paths();
     $menu_id = 'Main';
     $menu_description = 'Menu';
-  
+
     //================================================================================
-  
+
 } else {
 
     //================================================================================
@@ -162,13 +160,6 @@ if (!is_file($site_path_defs_path))
             {
                 // Include any meta tag variables
                 include("$custom_pages_path/$uri_sub_path/metadata.php");
-            }
-            if (is_file("$custom_pages_path/$uri_sub_path/favicon.png"))
-            {
-                // Add favicon link
-                $favicon_loaded = true;
-                $favicon_path = $uri_sub_path;
-                print("<link rel=\"icon\" href=\"$custom_pages_url/$uri_sub_path/favicon.png?v=$link_version\" type=\"image/x-icon\" />\n");
             }
             if (is_file("$custom_pages_path/$uri_sub_path/init.php"))
             {

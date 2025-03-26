@@ -717,6 +717,26 @@ function check_more_directive()
 }
 
 //================================================================================
+/*
+Function check_favicon_for_mainwp
+*/
+//================================================================================
+
+function check_favicon_for_mainwp()
+{
+    global $location, $mainwp_remote_ip_addr, $base_url, $link_version;
+    if (($location == 'local') && (is_front_page()))
+    {
+        print("<link rel=\"icon\" href=\"$base_url/wp-content/themes/my-base-theme/local_mainwp_favicon-2.png?v=$link_version\" type=\"image/x-icon\" />\n");
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+//================================================================================
 
 /*
  * Implement the Custom Header feature.

@@ -847,7 +847,7 @@ function display_table($params)
             }
             else
             {
-                $value = $row[$f];
+                $value = strip_tags($row[$f]);
             }
             if ($mode == 'desktop')
             {

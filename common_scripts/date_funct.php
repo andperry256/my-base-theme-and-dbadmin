@@ -21,46 +21,67 @@ require("$base_dir/alt_date_funct.php");
 /*
 The following six functions make use of day and month names. The data arrays
 are structured to handle a multilingual environment, though the versions here
-use only English. Where more languages are required, each function needs to be
-re-defined in an alt_date_funct.php script for the given site.
+use only English. Where more languages are required, alternate functions
+need to be defined in an alt_date_funct.php script for the given site.
 */
 //==============================================================================
 
 function day_name($day,$language='en')
 {
-    $name = array('en' => array("Sunday","Monday","Tuesday","Wednesday",
-                                "Thursday","Friday","Saturday"));
-    return $name[$language][$day] ?? '';
+    if (function_exists('alt_day_name'))
+    {
+        return alt_day_name($day,$language);
+    }
+    else
+    {
+        $name = array('en' => array("Sunday","Monday","Tuesday","Wednesday",
+                                    "Thursday","Friday","Saturday"));
+        return $name[$language][$day] ?? '';
+    }
 }
 
 //==============================================================================
 
 function short_day_name($day,$language='en')
 {
-    $name = array('en' => array("Sun","Mon","Tue","Wed","Thu","Fri","Sat"));
-    return $name[$language][$day] ?? '';
+    if (function_exists('alt_short_day_name'))
+    {
+        return alt_short_day_name($day,$language);
+    }
+    else
+    {
+        $name = array('en' => array("Sun","Mon","Tue","Wed","Thu","Fri","Sat"));
+        return $name[$language][$day] ?? '';
+    }
 }
 
 //==============================================================================
 
 function day_number($day,$language='en',$length='')
 {
-    $day = strtolower($day);
-    $short_name = array('en' => array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
-                                        "thu" => 4, "fri" => 5, "sat" => 6));
-    $long_name = array('en' => array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
-                                        "thursday" => 4, "friday" => 5, "saturday" => 6));
-    if ((isset($short_name[$language][$day])) && ($length != 'long'))
+    if (function_exists('alt_day_number'))
     {
-        return $short_name[$language][$day];
-    }
-    elseif ((isset($long_name[$language][$day])) && ($length != 'short'))
-    {
-        return $long_name[$language][$day];
+        return alt_day_number($day,$language,$length);
     }
     else
     {
-        return -1;
+        $day = strtolower($day);
+        $short_name = array('en' => array("sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
+                                            "thu" => 4, "fri" => 5, "sat" => 6));
+        $long_name = array('en' => array("sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
+                                            "thursday" => 4, "friday" => 5, "saturday" => 6));
+        if ((isset($short_name[$language][$day])) && ($length != 'long'))
+        {
+            return $short_name[$language][$day];
+        }
+        elseif ((isset($long_name[$language][$day])) && ($length != 'short'))
+        {
+            return $long_name[$language][$day];
+        }
+        else
+        {
+            return -1;
+        }
     }
 }
 
@@ -68,45 +89,66 @@ function day_number($day,$language='en',$length='')
 
 function month_name($month,$language='en')
 {
-    $name = array('en' => array("","January","February","March","April",
-                                "May","June","July","August","September",
-                                "October","November","December"));
-    return $name[$language][$month] ?? '';
+    if (function_exists('alt_month_name'))
+    {
+        return alt_month_name($day,$language);
+    }
+    else
+    {
+        $name = array('en' => array("","January","February","March","April",
+                                    "May","June","July","August","September",
+                                    "October","November","December"));
+        return $name[$language][$month] ?? '';
+    }
 }
 
 //==============================================================================
 
 function short_month_name($month,$language='en')
 {
-    $name = array('en' =>array("","Jan","Feb","Mar","Apr","May","Jun",
-                                "Jul","Aug","Sep","Oct","Nov","Dec"));
-    return $name[$language][$month] ?? '';
+    if (function_exists('alt_short_month_name'))
+    {
+        return alt_short_month_name($day,$language);
+    }
+    else
+    {
+        $name = array('en' =>array("","Jan","Feb","Mar","Apr","May","Jun",
+                                    "Jul","Aug","Sep","Oct","Nov","Dec"));
+        return $name[$language][$month] ?? '';
+    }
 }
 
 //==============================================================================
 
 function month_number($month,$language='en',$length='')
 {
-    $month = strtolower($month);
-    $short_name = array('en' => array("jan" => 1, "feb" => 2, "mar" => 3,
-                                        "apr" => 4, "may" => 5, "jun" => 6,
-                                        "jul" => 7, "aug" => 8, "sep" => 9,
-                                        "oct" => 10, "nov" => 11, "dec" => 12));
-    $long_name = array('en' => array("january" => 1, "february" => 2, "march" => 3,
-                                        "april" => 4, "may" => 5, "june" => 6,
-                                        "july" => 7, "august" => 8, "september" => 9,
-                                        "october" => 10, "november" => 11, "december" => 12));
-    if ((isset($short_name[$language][$month])) && ($length != 'long'))
+    if (function_exists('alt_month_number'))
     {
-        return $short_name[$language][$month];
-    }
-    elseif ((isset($long_name[$language][$month])) && ($length != 'short'))
-    {
-        return $long_name[$language][$month];
+        return alt_month_number($day,$language,$length);
     }
     else
     {
-        return 0;
+        $month = strtolower($month);
+        $short_name = array('en' => array("jan" => 1, "feb" => 2, "mar" => 3,
+                                            "apr" => 4, "may" => 5, "jun" => 6,
+                                            "jul" => 7, "aug" => 8, "sep" => 9,
+                                            "oct" => 10, "nov" => 11, "dec" => 12));
+        $long_name = array('en' => array("january" => 1, "february" => 2, "march" => 3,
+                                            "april" => 4, "may" => 5, "june" => 6,
+                                            "july" => 7, "august" => 8, "september" => 9,
+                                            "october" => 10, "november" => 11, "december" => 12));
+        if ((isset($short_name[$language][$month])) && ($length != 'long'))
+        {
+            return $short_name[$language][$month];
+        }
+        elseif ((isset($long_name[$language][$month])) && ($length != 'short'))
+        {
+            return $long_name[$language][$month];
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
 //==============================================================================
@@ -260,7 +302,7 @@ function short_date($date,$day_offset=0)
 
 //==============================================================================
 
-function title_date($date,$day_offset=0)
+function title_date($date,$day_offset=0,$language='en')
 {
     if (empty($date))
     {
@@ -286,12 +328,12 @@ function title_date($date,$day_offset=0)
         }
     }
     $dow = dmy_to_dow($day,$month,$year);
-    return sprintf("%s %02d %s %04d",short_day_name($dow),$day,short_month_name($month),$year);
+    return sprintf("%s %02d %s %04d",short_day_name($dow,$language),$day,short_month_name($month,$language),$year);
 }
 
 //==============================================================================
 
-function long_title_date($date,$day_offset=0)
+function long_title_date($date,$day_offset=0,$language='en')
 {
     if (empty($date))
     {
@@ -317,7 +359,7 @@ function long_title_date($date,$day_offset=0)
         }
     }
     $dow = dmy_to_dow($day,$month,$year);
-    return sprintf("%s %02d %s %04d",day_name($dow),$day,month_name($month),$year);
+    return sprintf("%s %02d %s %04d",day_name($dow,$language),$day,month_name($month,$language),$year);
 }
 
 //==============================================================================

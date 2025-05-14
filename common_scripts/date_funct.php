@@ -91,7 +91,7 @@ function month_name($month,$language='en')
 {
     if (function_exists('alt_month_name'))
     {
-        return alt_month_name($day,$language);
+        return alt_month_name($month,$language);
     }
     else
     {
@@ -108,7 +108,7 @@ function short_month_name($month,$language='en')
 {
     if (function_exists('alt_short_month_name'))
     {
-        return alt_short_month_name($day,$language);
+        return alt_short_month_name($month,$language);
     }
     else
     {

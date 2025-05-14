@@ -20,7 +20,7 @@ function display_email_addr($address)
 function display_email_addr_image($address_id)
 {
     global $email_addr_images_url;
-    return "<img align =\"absmiddle\" src=\"$email_addr_images_url/$address_id.svg\">";
+    return "<img style=\"height:1.1em; width:auto;\" align=\"absmiddle\" src=\"$email_addr_images_url/$address_id.svg\">";
 }
 
 function display_email_copy_button($address,$include_mail_client_link=false)

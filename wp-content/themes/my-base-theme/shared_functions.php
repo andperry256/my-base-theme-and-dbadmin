@@ -135,20 +135,19 @@ function output_page_header()
 */
 //================================================================================
 
-function get_content_part($part_no,$option='')
+function get_content_part($part_no)
 {
-    $page_id = get_the_ID();
-    $page_object = get_page($page_id);
-    $content = $page_object->post_content;
-    $dummy = "[[[[[[[[";  // To prevent false positive in PHP code checker
+    $post = get_post();
+    $content = $post->post_content;
+    $content = apply_filters( 'the_content', $content );
+
     if ($part_no == 0)
     {
-        // Use part number 0 to return whole page content
-        $content = apply_filters( 'the_content', $content );
-        $content = str_replace( ']]>', ']]&gt;', $content );
+        // Use part number 0 to return whole page content.
     }
     else
     {
+        // Extract required part of page content.
         $pos1 = strpos($content,"[part$part_no]");
         $pos2 = strpos($content,"[/part$part_no]");
         if (($pos1 === false) || ($pos2 === false))
@@ -157,15 +156,9 @@ function get_content_part($part_no,$option='')
         }
         $pos1 += strlen("[part$part_no]");
         $content = substr($content,$pos1,$pos2-$pos1);
-        $content = apply_filters( 'the_content', $content );
-        $content = str_replace( ']]>', ']]&gt;', $content );
-        $content = str_replace( '__', '&nbsp;', $content );
     }
-    if ($option == 'strip_paras')
-    {
-        $content = str_replace('<p>','',$content);
-        $content = str_replace('</p>','',$content);
-    }
+    $content = str_replace( ']]>', ']]&gt;', $content );
+    $content = str_replace( '__', '&nbsp;', $content );
     return $content;
 }
 
@@ -598,7 +591,7 @@ function simplify_html($content)
     {
         /*
         The '$allowed_tags' array specifies those tags that are to be retained in the
-        generated HTML code. This is the default version but can be overridden by 
+        generated HTML code. This is the default version but can be overridden by
         declaring a custom version outside the function call.
         */
         $allowed_tags = array('<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<strong>','<i>','<em>','<u>');
@@ -716,7 +709,7 @@ function recache_page($page_path,$run_count=1)
                 }
             }
         }
-    
+
         // Activate page to regenerate cache.
         $dummy = file_get_contents("$base_url/$uri_subpath");
     }
@@ -725,7 +718,7 @@ function recache_page($page_path,$run_count=1)
 //================================================================================
 /*
 * Function recache_all_pages
-* 
+*
 * This function is called to execute the recache_page function on all published
 * pages/posts within the site.
 */
@@ -949,7 +942,7 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
             {
                 // Category exists in both DBs. Now check if both posts are in that category.
                 if (($row5 = mysqli_fetch_assoc(mysqli_query($db1,"SELECT * FROM wp_term_relationships WHERE object_id={$row1['ID']} AND term_taxonomy_id={$row3['term_taxonomy_id']}"))) &&
-                    ($row6 = mysqli_fetch_assoc(mysqli_query($db2,"SELECT * FROM wp_term_relationships WHERE object_id={$row2['ID']} AND term_taxonomy_id={$row4['term_taxonomy_id']}"))))   
+                    ($row6 = mysqli_fetch_assoc(mysqli_query($db2,"SELECT * FROM wp_term_relationships WHERE object_id={$row2['ID']} AND term_taxonomy_id={$row4['term_taxonomy_id']}"))))
                 {
                     $category_match = true;
                 }
@@ -1004,7 +997,7 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                         }
                     }
                 }
-            }    
+            }
         }
     }
 }

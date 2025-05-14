@@ -317,7 +317,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
 
 //==============================================================================
 
-function display_post_content($header_level,$image_max_width,$image_max_height)
+function display_post_content($header_level=1,$image_max_width=400,$image_max_height=400)
 {
     global $wpdb;
     $id = get_the_ID();
@@ -326,14 +326,17 @@ function display_post_content($header_level,$image_max_width,$image_max_height)
     $post_date = date("d F Y", strtotime($post_date));
     echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
     print("<p>[Posted on: $post_date]</p>\n");
-    $featured_image = get_the_post_thumbnail();
-    $featured_image = adjust_featured_image_size($featured_image,$image_max_width,$image_max_height);
-    if (!empty($featured_image))
+    if (($image_max_width * $image_max_height) != 0)
     {
+        $featured_image = get_the_post_thumbnail();
         $featured_image = adjust_featured_image_size($featured_image,$image_max_width,$image_max_height);
-        print("<div class=\"right-aligned-image\">$featured_image</div>\n");
+        if (!empty($featured_image))
+        {
+            $featured_image = adjust_featured_image_size($featured_image,$image_max_width,$image_max_height);
+            print("<div class=\"right-aligned-image\">$featured_image</div>\n");
+        }
     }
-    the_content();
+    echo get_content_part(0);
 }
 
 //==============================================================================
@@ -541,7 +544,7 @@ function output_post_archive_item($post_id)
                 $date = str_replace(' ','&nbsp;',title_date(substr($row['post_date'],0,10)));
                 $post_url = "$base_url/{$row['post_name']}";
                 $author_url = "$base_url/author/{$row2['user_nicename']}";
-                print("<p>Posted on <a href=\"$post_url\">$date</a> by <a href=\"$author_url\">${row2['display_name']}</a></p>");
+                print("<p>Posted on <a href=\"$post_url\">$date</a> by <a href=\"$author_url\">{$row2['display_name']}</a></p>");
             }
             print("{$row['post_content']}\n");
             print("<p>[<a href=\"./#{$row['post_name']}\">Close</a>]</p>\n");
@@ -1093,6 +1096,13 @@ function blog_home_load_widget()
     register_widget( 'blog_home_widget' );
 }
 add_action( 'widgets_init', 'blog_home_load_widget' );
+
+//================================================================================
+
+if (is_file("{$_SERVER['DOCUMENT_ROOT']}/wp-content/themes/auto_include.php"))
+{
+    include("{$_SERVER['DOCUMENT_ROOT']}/wp-content/themes/auto_include.php");
+}
 
 //================================================================================
 endif;

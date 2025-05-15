@@ -644,10 +644,49 @@ function check_uncategorised_post()
 
 //================================================================================
 /*
+Function replace_spaces_at_start
+
+This function searches for two double tildes (~~) in the post content, and coverts
+these to HTML tags to force the content in between them to remain on one line with
+no automatic breaks;
+*/
+//================================================================================
+
+function replace_spaces_at_start()
+{
+    $db = db_connect(WP_DBID);
+    $post = get_post();
+    $id = $post->ID;
+    $where_clause = 'ID=?';
+    $where_values = array('i',$id);
+    if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
+        ($row['post_type'] == 'post'))
+    {
+        $content = $row['post_content'];
+        if (substr_count($content,'~~') == 2)
+        {
+            $opening_wspace_tag = '<span style="white-space: pre">';
+            $pos1 = strpos($content,'~~',0);
+            $pos2 = strpos($content,'~~',$pos1+2);
+            $temp_str1 = substr($content,$pos1,$pos2+2-$pos1);
+            $temp_str2 = str_replace('&nbsp;',' ',$temp_str1);
+            $temp_str2 = str_replace(chr(194).chr(160),' ',$temp_str2);
+            $temp_str2 = trim($temp_str2,'~');
+            $temp_str2 = $opening_wspace_tag."$temp_str2</span>";
+            $content = str_replace($temp_str1,$temp_str2,$content);
+            $fields = 'post_content';
+            $values = array('s',$content);
+            mysqli_update_query($db,'wp_posts',$fields,$values,$where_clause,$where_values);
+        }
+    }
+}
+
+//================================================================================
+/*
 Function check_spaces_at_start
 
 This function checks for the presence of breaking spaces within a short substring
-(default length 12 characters) at the start of the post content. This is to force
+(default length 15 characters) at the start of the post content. This is to force
 the text to a minimum width, thus avoiding the situation where stray words get
 wrapped around an image.
 */
@@ -664,24 +703,47 @@ function check_spaces_at_start()
         $db = db_connect(WP_DBID);
         if (!isset($min_post_content_line_length))
         {
-            $min_post_content_line_length = 12;
+            $min_post_content_line_length = 15;
         }
+        $opening_wspace_tag = '<span style="white-space: pre">';
+        $tag_length = strlen($opening_wspace_tag);
         $where_clause = 'ID=?';
         $where_values = array('i',$id);
         if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
             ($row['post_type'] == 'post'))
         {
-            // Check for spaces at start of content. Replace '&nbsp;' with a single character to test on a
-            // substring of the required length with no distinction between breaking and non-breaking spaces.
-            $temp_str = str_replace('&nbsp;','_',$row['post_content']);
-            $temp_str = strip_tags($temp_str);
-            $temp_substr = substr($temp_str,0,$min_post_content_line_length);
-            $space_count = substr_count($temp_substr,' ');
-            if (($row['post_type'] == 'post') && ($space_count > 0))
+            // Check for spaces at start of content. Replace non-breaking spaces with normal spaces to test on a
+            // substring of the required length, with no distinction between breaking and non-breaking spaces.
+            $content = $row['post_content'];
+            $content = str_replace('&nbsp;',' ',$content);
+            $content = str_replace(chr(194).chr(160),' ',$content);
+            $pos1 = strpos($content,$opening_wspace_tag);
+            if (($pos1 !== false) &&
+                ($pos2 = strpos($content,'</span>',$pos1+$tag_length)) &&
+                ($pos2 !== false) &&
+                (($pos2 - ($pos1+$tag_length)) >= $min_post_content_line_length)
+               )
             {
-                print("<p><strong>Warning:</strong> You have saved this post with spaces near the beginning. Please replace at least $space_count space(s) with non-breaking spaces.</p>\n");
-                print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
-                exit;
+                // There is an appropriate set of tags spanning sufficient characters.
+                return true;
+            }
+            else
+            {
+                $content = strip_tags($content);
+                if (strpos(substr($content,0,$min_post_content_line_length),' ') === false)
+                {
+                    // There are no spaces in the opening substring of the required length.
+                    return true;
+                }
+                else
+                {
+                    print("<p><strong>Warning:</strong> You have saved this post with breaking spaces near the beginning.</p>");
+                    print("<p>Please re-save the post with a double tilde (~~) at each end of a substring covering at least $min_post_content_line_length characters at the start of the content.");
+                    print(" The correct formatting will be generated on saving the post.</p>\n");
+                    print("<p>If the above has already been done, then try moving the closing &lt;/span&gt; tag to include more characters.</p>\n");
+                    print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
+                    exit;
+                }
             }
         }
     }

@@ -816,9 +816,17 @@ function put_user($username)
     if (empty($username))
     {
         // Perform operations for user logout
+        $db = db_connect(WP_DBID);
         update_session_var(SV_USER,'');
         update_session_var(SV_ACCESS_LEVEL,DEFAULT_ACCESS_LEVEL);
         setcookie(LOGIN_COOKIE_ID,'',time()-3600,LOGIN_COOKIE_PATH);
+        $session_id = session_id();
+        if (!empty($session_id))
+        {
+            $where_clause = 'session_id=? AND (name=? OR name=?)';
+            $where_values = array('s',$session_id,'s',SV_USER,'s',SV_ACCESS_LEVEL);
+            mysqli_delete_query($db,'wp_session_updates',$where_clause,$where_values);
+        }
     }
     else
     {

@@ -66,7 +66,6 @@ if (!is_file($site_path_defs_path))
         include("$custom_scripts_path/functions.php");
     }
     set_default_header_image_paths();
-    output_font_stylesheet_links();
 
     if (is_file("$custom_scripts_path/footer.php"))
     {

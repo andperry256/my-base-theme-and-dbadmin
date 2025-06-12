@@ -1,7 +1,7 @@
 <html><head>
 <style>
   html {
-    font-size: 16px;
+    font-size: 100%;
     font-family: Arial,Helvetica,Sans-serif;
   }
   table {
@@ -145,7 +145,7 @@ if ($display_mode == 'count_summary')
     $page_accesses = array();
     $page_counts = array();
     $output_list = array();
-  
+
     // Record each IP/page combination as a unique page access
     foreach($content as $line)
     {
@@ -158,14 +158,14 @@ if ($display_mode == 'count_summary')
         $page_accesses["$ip $page"] = true;
         $page_counts[$page] = 0;
     }
-  
+
     // Count the accesses for each page address
     foreach ($page_accesses as $key => $value)
     {
         $page = substr($key,16);
         $page_counts[$page]++;
     }
-  
+
     // Organise the data as a 2-dimensional array, grouping first by count
     foreach ($page_counts as $page => $count)
     {
@@ -175,7 +175,7 @@ if ($display_mode == 'count_summary')
         }
         $output_list[$count][$page] = true;
     }
-  
+
     // Output the data - ordered by count descending then page address ascending
     krsort($output_list);
     print("<table>\n");
@@ -212,7 +212,7 @@ else
         {
             // Finish processing and output the line
             $line = '/'.strtok("\n");
-      
+
             // Check for a user directive
             $start_pos = strpos($line,'[user');
             if ($start_pos !== false)
@@ -226,7 +226,7 @@ else
             {
                 $user = '';
             }
-      
+
             // Check for a referrer directive
             $start_pos = strpos($line,'[referrer');
             if ($start_pos !== false)
@@ -240,7 +240,7 @@ else
             {
                 $referrer = '';
             }
-      
+
             // Check for an additional info directive
             $start_pos = strpos($line,'[');
             if ($start_pos !== false)
@@ -254,7 +254,7 @@ else
             {
                 $add_info = '';
             }
-      
+
             // The remainder of the line should constitute the page URL
             $url = trim($line);
             $url = str_replace($base_url,"<br/>",$url);

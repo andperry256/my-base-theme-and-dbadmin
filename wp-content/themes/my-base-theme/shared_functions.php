@@ -227,158 +227,6 @@ function output_meta_data()
 
 //================================================================================
 /*
-* Function output_font_stylesheet_links
-*
-* This function is used to generate the stylesheet links for the main and header
-* fonts assigned within the given theme. It relies on access to Google Fonts.
-*
-* It generates the necessary CSS files in the root directory of the Base Theme if
-* not already present. To force regeneration of all such files, load any page on
-* the site with the parameter 'reloadfonts' appended to the URL.
-*/
-//================================================================================
-
-function output_font_stylesheet_links()
-{
-    global $base_theme_dir;
-    global $base_theme_url;
-    global $link_version;
-    global $main_font;
-    global $header_font;
-    $main_elements = 'html, body, div, p, li, td, select, input';
-    $default_main_font = 'Noto Sans';
-    $header_elements = 'h1, h2, h3, h4, h5, h6';
-    $default_header_font = 'Roboto';
-    $mono_elements = 'pre, code, textarea';
-    $default_mono_font = 'Source Code Pro';
-    require(__DIR__.'/font_lists.php');
-
-    // Set up variables for main, header and mono fonts.
-    if ((!isset($main_font)) || (!isset($main_fonts[$main_font])))
-    {
-        $main_font = $default_main_font;
-    }
-    $lc_main_font = strtolower($main_font);
-    $lc_main_font = str_replace(' ','_',$lc_main_font);
-    if ((!isset($header_font)) || (!isset($main_fonts[$header_font])))
-    {
-        $header_font = $default_header_font;
-    }
-    $lc_header_font = strtolower($header_font);
-    $lc_header_font = str_replace(' ','_',$lc_header_font);
-    if ((!isset($mono_font)) || (!isset($main_fonts[$mono_font])))
-    {
-        $mono_font = $default_mono_font;
-    }
-    $lc_mono_font = strtolower($mono_font);
-    $lc_mono_font = str_replace(' ','_',$lc_mono_font);
-
-    if (isset($_GET['reloadfonts']))
-    {
-        // Regenerate CSS files for all available fonts.
-        $dirlist = scandir($base_theme_dir);
-        foreach($dirlist as $file)
-        {
-            if ((strpos($file,'_font_') !== false) && (pathinfo($file,PATHINFO_EXTENSION) == 'css'))
-            {
-                unlink("$base_theme_dir/$file");
-            }
-        }
-        foreach ($main_fonts as $font => $link)
-        {
-            $lc_font = strtolower($font);
-            $lc_font = str_replace(' ','_',$lc_font);
-            $ofp = fopen("$base_theme_dir/main_font_$lc_font.css",'w');
-            fprintf($ofp,"$main_elements {\nfont-family: '$font', sans-serif;\n}\n");
-            fclose($ofp);
-            $ofp = fopen("$base_theme_dir/header_font_$lc_font.css",'w');
-            fprintf($ofp,"$header_elements {\nfont-family: '$font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-        foreach ($mono_fonts as $font => $link)
-        {
-            $lc_font = strtolower($font);
-            $lc_font = str_replace(' ','_',$lc_font);
-            $ofp = fopen("$base_theme_dir/mono_font_$lc_font.css",'w');
-            fprintf($ofp,"$mono_elements {\nfont-family: '$font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-    }
-    else
-    {
-        if (!is_file("$base_theme_dir/main_font_$lc_main_font.css"))
-        {
-            // Regenerate CSS file for assigned main font.
-            $ofp = fopen("$base_theme_dir/main_font_$lc_main_font.css",'w');
-            fprintf($ofp,"$main_elements {\nfont-family: '$main_font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-        if (!is_file("$base_theme_dir/header_font_$lc_header_font.css"))
-        {
-            // Regenerate CSS file for assigned header font.
-            $ofp = fopen("$base_theme_dir/header_font_$lc_header_font.css",'w');
-            fprintf($ofp,"$header_elements {\nfont-family: '$header_font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-        if (!is_file("$base_theme_dir/mono_font_$lc_mono_font.css"))
-        {
-            // Regenerate CSS file for assigned mono font.
-            $ofp = fopen("$base_theme_dir/mono_font_$lc_mono_font.css",'w');
-            fprintf($ofp,"$mono_elements {\nfont-family: '$mono_font', sans-serif;\n}\n");
-            fclose($ofp);
-        }
-    }
-
-    // Create links to Google fonts.
-    print("\n");
-    print("<link rel='preconnect' href='https://fonts.googleapis.com'>\n");
-    print("<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>\n");
-    print("<link rel='stylesheet' id='main-font-css1'  href='{$main_fonts[$main_font]}' type='text/css' media='all' />\n");
-    if ($header_font != $main_font)
-    {
-        print("<link rel='stylesheet' id='header-font-css1'  href='{$main_fonts[$header_font]}' type='text/css' media='all' />\n");
-    }
-    print("<link rel='stylesheet' id='mono-font-css1'  href='{$mono_fonts[$mono_font]}' type='text/css' media='all' />\n");
-
-    // Create link to CSS for main font.
-    if (is_file("$base_theme_dir/main_font_$lc_main_font.css"))
-    {
-        print("<link rel='stylesheet' id='main-font-css2'  href='$base_theme_url/main_font_$lc_main_font.css?v=$link_version' media='all' />\n");
-    }
-    else
-    {
-        // This should not occur unless folder permissions prevent creation of CSS file.
-        print("<style>\n$main_elements {\nfont-family: '$main_font', sans-serif;\n</style>\n");
-    }
-
-    // Create link to CSS for header font.
-    if ($header_font != $main_font)
-    {
-        if (is_file("$base_theme_dir/header_font_$lc_header_font.css"))
-        {
-            print("<link rel='stylesheet' id='header-font-css2'  href='$base_theme_url/header_font_$lc_header_font.css?v=$link_version' media='all' />\n");
-        }
-        else
-        {
-            // This should not occur unless folder permissions prevent creation of CSS file.
-            print("<style>\n$header_elements {\nfont-family: '$header_font', sans-serif;\n</style>\n");
-        }
-    }
-
-    // Create link to CSS for mono font.
-    if (is_file("$base_theme_dir/mono_font_$lc_mono_font.css"))
-    {
-        print("<link rel='stylesheet' id='mono-font-css2'  href='$base_theme_url/mono_font_$lc_mono_font.css?v=$link_version' media='all' />\n");
-    }
-    else
-    {
-        // This should not occur unless folder permissions prevent creation of CSS file.
-        print("<style>\n$mono_elements {\nfont-family: '$mono_font', sans-serif;\n</style>\n");
-    }
-}
-
-//================================================================================
-/*
 * Function output_stylesheet_link
 *
 * This function is used to output a stylesheet link in the HTML header when
@@ -1025,6 +873,161 @@ function readable_markup($str)
     $str = str_replace(">","&gt;",$str);
     $str = str_replace("\n","<br />\n",$str);
     return $str;
+}
+
+//================================================================================
+/*
+* Function output_font_stylesheet_links
+*
+* ******** THIS FUNCTION IS DEPRECATED ********
+*
+* This function is used to generate the stylesheet links for the main and header
+* fonts assigned within the given theme. It relies on access to Google Fonts.
+*
+* It generates the necessary CSS files in the root directory of the Base Theme if
+* not already present. To force regeneration of all such files, load any page on
+* the site with the parameter 'reloadfonts' appended to the URL.
+*/
+//================================================================================
+
+function output_font_stylesheet_links()
+{
+
+    global $base_theme_dir;
+    global $base_theme_url;
+    global $link_version;
+    global $main_font;
+    global $header_font;
+    $main_elements = 'html, body, div, p, li, td, select, input';
+    $default_main_font = 'Noto Sans';
+    $header_elements = 'h1, h2, h3, h4, h5, h6';
+    $default_header_font = 'Roboto';
+    $mono_elements = 'pre, code, textarea';
+    $default_mono_font = 'Source Code Pro';
+    require(__DIR__.'/font_lists.php');
+
+    // Set up variables for main, header and mono fonts.
+    if ((!isset($main_font)) || (!isset($main_fonts[$main_font])))
+    {
+        $main_font = $default_main_font;
+    }
+    $lc_main_font = strtolower($main_font);
+    $lc_main_font = str_replace(' ','_',$lc_main_font);
+    if ((!isset($header_font)) || (!isset($main_fonts[$header_font])))
+    {
+        $header_font = $default_header_font;
+    }
+    $lc_header_font = strtolower($header_font);
+    $lc_header_font = str_replace(' ','_',$lc_header_font);
+    if ((!isset($mono_font)) || (!isset($main_fonts[$mono_font])))
+    {
+        $mono_font = $default_mono_font;
+    }
+    $lc_mono_font = strtolower($mono_font);
+    $lc_mono_font = str_replace(' ','_',$lc_mono_font);
+
+    if (isset($_GET['reloadfonts']))
+    {
+        // Regenerate CSS files for all available fonts.
+        $dirlist = scandir($base_theme_dir);
+        foreach($dirlist as $file)
+        {
+            if ((strpos($file,'_font_') !== false) && (pathinfo($file,PATHINFO_EXTENSION) == 'css'))
+            {
+                unlink("$base_theme_dir/$file");
+            }
+        }
+        foreach ($main_fonts as $font => $link)
+        {
+            $lc_font = strtolower($font);
+            $lc_font = str_replace(' ','_',$lc_font);
+            $ofp = fopen("$base_theme_dir/main_font_$lc_font.css",'w');
+            fprintf($ofp,"$main_elements {\nfont-family: '$font', sans-serif;\n}\n");
+            fclose($ofp);
+            $ofp = fopen("$base_theme_dir/header_font_$lc_font.css",'w');
+            fprintf($ofp,"$header_elements {\nfont-family: '$font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+        foreach ($mono_fonts as $font => $link)
+        {
+            $lc_font = strtolower($font);
+            $lc_font = str_replace(' ','_',$lc_font);
+            $ofp = fopen("$base_theme_dir/mono_font_$lc_font.css",'w');
+            fprintf($ofp,"$mono_elements {\nfont-family: '$font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+    }
+    else
+    {
+        if (!is_file("$base_theme_dir/main_font_$lc_main_font.css"))
+        {
+            // Regenerate CSS file for assigned main font.
+            $ofp = fopen("$base_theme_dir/main_font_$lc_main_font.css",'w');
+            fprintf($ofp,"$main_elements {\nfont-family: '$main_font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+        if (!is_file("$base_theme_dir/header_font_$lc_header_font.css"))
+        {
+            // Regenerate CSS file for assigned header font.
+            $ofp = fopen("$base_theme_dir/header_font_$lc_header_font.css",'w');
+            fprintf($ofp,"$header_elements {\nfont-family: '$header_font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+        if (!is_file("$base_theme_dir/mono_font_$lc_mono_font.css"))
+        {
+            // Regenerate CSS file for assigned mono font.
+            $ofp = fopen("$base_theme_dir/mono_font_$lc_mono_font.css",'w');
+            fprintf($ofp,"$mono_elements {\nfont-family: '$mono_font', sans-serif;\n}\n");
+            fclose($ofp);
+        }
+    }
+
+    // Create links to Google fonts.
+    print("\n");
+    print("<link rel='preconnect' href='https://fonts.googleapis.com'>\n");
+    print("<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>\n");
+    print("<link rel='stylesheet' id='main-font-css1'  href='{$main_fonts[$main_font]}' type='text/css' media='all' />\n");
+    if ($header_font != $main_font)
+    {
+        print("<link rel='stylesheet' id='header-font-css1'  href='{$main_fonts[$header_font]}' type='text/css' media='all' />\n");
+    }
+    print("<link rel='stylesheet' id='mono-font-css1'  href='{$mono_fonts[$mono_font]}' type='text/css' media='all' />\n");
+
+    // Create link to CSS for main font.
+    if (is_file("$base_theme_dir/main_font_$lc_main_font.css"))
+    {
+        print("<link rel='stylesheet' id='main-font-css2'  href='$base_theme_url/main_font_$lc_main_font.css?v=$link_version' media='all' />\n");
+    }
+    else
+    {
+        // This should not occur unless folder permissions prevent creation of CSS file.
+        print("<style>\n$main_elements {\nfont-family: '$main_font', sans-serif;\n</style>\n");
+    }
+
+    // Create link to CSS for header font.
+    if ($header_font != $main_font)
+    {
+        if (is_file("$base_theme_dir/header_font_$lc_header_font.css"))
+        {
+            print("<link rel='stylesheet' id='header-font-css2'  href='$base_theme_url/header_font_$lc_header_font.css?v=$link_version' media='all' />\n");
+        }
+        else
+        {
+            // This should not occur unless folder permissions prevent creation of CSS file.
+            print("<style>\n$header_elements {\nfont-family: '$header_font', sans-serif;\n</style>\n");
+        }
+    }
+
+    // Create link to CSS for mono font.
+    if (is_file("$base_theme_dir/mono_font_$lc_mono_font.css"))
+    {
+        print("<link rel='stylesheet' id='mono-font-css2'  href='$base_theme_url/mono_font_$lc_mono_font.css?v=$link_version' media='all' />\n");
+    }
+    else
+    {
+        // This should not occur unless folder permissions prevent creation of CSS file.
+        print("<style>\n$mono_elements {\nfont-family: '$mono_font', sans-serif;\n</style>\n");
+    }
 }
 
 //================================================================================

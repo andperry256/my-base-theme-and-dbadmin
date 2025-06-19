@@ -860,23 +860,6 @@ function copyright_notice($owner,$start_year)
 
 //================================================================================
 /*
-* Function readable_markup
-*
-* This function is used to display markup code (HTML/XML) visibly in the
-* browser window when setting a debug point.
-*/
-//================================================================================
-
-function readable_markup($str)
-{
-    $str = str_replace("<","&lt;",$str);
-    $str = str_replace(">","&gt;",$str);
-    $str = str_replace("\n","<br />\n",$str);
-    return $str;
-}
-
-//================================================================================
-/*
 * Function output_font_stylesheet_links
 *
 * ******** THIS FUNCTION IS DEPRECATED ********

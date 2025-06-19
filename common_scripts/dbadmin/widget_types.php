@@ -17,6 +17,7 @@ $widget_types = array (
   'enum' => true,
   'file' => false,
   'hidden' => false,
+  'htmlarea' => true,
   'input-num' => false,
   'input-text' => true,
   'input-text-small' => false,

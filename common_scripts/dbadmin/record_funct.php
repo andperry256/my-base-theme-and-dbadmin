@@ -126,7 +126,7 @@ Function generate_widget
 
 function generate_widget($table,$field_name,$field_value)
 {
-    global $base_dir, $base_url, $db_admin_url;
+    global $base_dir, $base_url, $db_admin_url, $codemirror_dir;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     $base_table = get_table_for_field($table,$field_name);
@@ -295,6 +295,20 @@ function generate_widget($table,$field_name,$field_value)
 
             case 'textarea':
                 print("<textarea  name=\"field_$field_name\" rows=\"6\" cols=\"64\">$field_value</textarea>\n");
+                break;
+
+            case 'htmlarea':
+                print("<textarea name=\"field_$field_name\" id=\"content_$field_name\">$field_value</textarea>\n");
+                if (defined('CODEMIRROR_INSTALLED'))
+                {
+                    print("<script>\n");
+                    print("const Textarea_$field_name = document.getElementById('content_$field_name');\n");
+                    print("var editor = CodeMirror.fromTextArea(Textarea_$field_name, {\n");
+                    print("    lineWrapping: true,\n");
+                    print("    mode: \"htmlmixed\"\n");
+                    print("});\n");
+                    print("</script>\n");
+                }
                 break;
 
             case 'checkbox':
@@ -1212,7 +1226,8 @@ function handle_record($action,$params)
         }
         else
         {
-            print("<p class=\"highlight-error\">".get_session_var('error_message')."</p>\n");
+            print("<p class=\"highlight-error\">".get_session_var('error_message'));
+            print("&nbsp; <a href=\"javascript:history.go(-1)\"><button>Go Back</button></a></p>\n");
             delete_session_var('error_message');
         }
         if (!empty(get_session_var('save_info')))

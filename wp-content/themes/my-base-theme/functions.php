@@ -837,6 +837,52 @@ function check_local_home_favicon()
 }
 
 //================================================================================
+/*
+Shortcode functions
+*/
+//================================================================================
+
+if (!defined('NO_COPY_SHORTCODE'))
+{
+    function copy_shortcode($atts,$content=null)
+    {
+        $content = '&copy;';
+        return $content;
+    }
+    add_shortcode('copy', 'copy_shortcode');
+}
+
+if (!defined('NO_NBSP_SHORTCODE'))
+{
+    function nbsp_shortcode($atts,$content=null)
+    {
+        $content = '&nbsp;';
+        return $content;
+    }
+    add_shortcode('nbsp', 'nbsp_shortcode');
+}
+
+if (!defined('NO_POUND_SHORTCODE'))
+{
+    function pound_shortcode($atts,$content=null)
+    {
+        $content = '&pound;';
+        return $content;
+    }
+    add_shortcode('pound', 'pound_shortcode');
+}
+
+if (!defined('NO_SQUOTE_SHORTCODE'))
+{
+    function squote_shortcode($atts,$content=null)
+    {
+        $content = "'";
+        return $content;
+    }
+    add_shortcode('squote', 'squote_shortcode');
+}
+
+//================================================================================
 
 /*
  * Implement the Custom Header feature.

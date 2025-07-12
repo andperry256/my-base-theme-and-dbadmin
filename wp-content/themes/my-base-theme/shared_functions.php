@@ -157,8 +157,6 @@ function get_content_part($part_no)
         $pos1 += strlen("[part$part_no]");
         $content = substr($content,$pos1,$pos2-$pos1);
     }
-    $content = str_replace( ']]>', ']]&gt;', $content );
-    $content = str_replace( '__', '&nbsp;', $content );
     return $content;
 }
 
@@ -721,8 +719,12 @@ function check_login_status($db)
         {
             // Update user, login cookie and DB record
             put_user($row['username']);
-            setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
             mysqli_query($db,"UPDATE login_sessions SET update_time=$current_time,date_and_time='$date_and_time' WHERE id='$login_id'");
+            if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR))
+            {
+                mysqli_query($db,"UPDATE login_sessions SET remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
+            }
+            setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
         }
     }
     elseif ((!empty($username)) && (!empty($access_level)))
@@ -732,6 +734,10 @@ function check_login_status($db)
         $query = "INSERT INTO login_sessions (id,username,access_level,update_time,date_and_time)";
         $query .= " VALUES ('$login_id','$username','$access_level',$current_time,'$date_and_time')";
         mysqli_query($db,$query);
+        if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR))
+        {
+            mysqli_query($db,"UPDATE login_sessions SET remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
+        }
         setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
     }
 }

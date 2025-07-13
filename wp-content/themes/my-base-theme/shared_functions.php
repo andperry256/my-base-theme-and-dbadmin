@@ -1,4 +1,6 @@
 <?php
+//==============================================================================
+if (!defined('SHARED_FUNCT_DEFINED')):
 //================================================================================
 /*
  * My Base Theme - Shared Functions
@@ -8,9 +10,6 @@
  * 2. By scripts in the wp-custom-scripts directory.
  * 3. By child theme scripts.
  */
- //================================================================================
- if (!function_exists('set_default_header_image_paths'))
- {
 //================================================================================
 /*
 * Function set_default_header_image_paths
@@ -157,6 +156,7 @@ function get_content_part($part_no)
         $pos1 += strlen("[part$part_no]");
         $content = substr($content,$pos1,$pos2-$pos1);
     }
+    $content = substitute_shortcodes($content);
     return $content;
 }
 
@@ -615,6 +615,37 @@ function create_cache_reload_link()
 
 //================================================================================
 /*
+Function substitute_shortcodes
+
+This function replicates the functionality for the shortcode handling functions
+in functions.php, and is available for use in situations where the normal
+WordPress loop is not in operation.
+*/
+//================================================================================
+
+function substitute_shortcodes($text)
+{
+    if (!defined('NO_COPY_SHORTCODE'))
+    {
+        $text = str_replace('[copy]','&copy;',$text);
+    }
+    if (!defined('NO_NBSP_SHORTCODE'))
+    {
+        $text = str_replace('[nbsp]','&nbsp;',$text);
+    }
+    if (!defined('NO_POUND_SHORTCODE'))
+    {
+        $text = str_replace('[pound]','&pound;',$text);
+    }
+    if (!defined('NO_SQUOT_SHORTCODE'))
+    {
+        $text = str_replace('[squot]',"'",$text);
+    }
+    return $text;
+}
+
+//================================================================================
+/*
 Functions for handling user login status
 
 When these functions are to be used, the following constants must be pre-defined:
@@ -1019,7 +1050,8 @@ function output_font_stylesheet_links()
     }
 }
 
-//================================================================================
-}
-//================================================================================
+//==============================================================================
+define('SHARED_FUNCT_DEFINED',true);
+endif;
+//==============================================================================
 ?>

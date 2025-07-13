@@ -872,14 +872,14 @@ if (!defined('NO_POUND_SHORTCODE'))
     add_shortcode('pound', 'pound_shortcode');
 }
 
-if (!defined('NO_SQUOTE_SHORTCODE'))
+if (!defined('NO_SQUOT_SHORTCODE'))
 {
-    function squote_shortcode($atts,$content=null)
+    function squot_shortcode($atts,$content=null)
     {
         $content = "'";
         return $content;
     }
-    add_shortcode('squote', 'squote_shortcode');
+    add_shortcode('squot', 'squot_shortcode');
 }
 
 //================================================================================

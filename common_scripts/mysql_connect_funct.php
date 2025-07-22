@@ -32,18 +32,28 @@ function db_connect($dbid,$mode='p',$alt_user='')
     $main_user = (!empty($alt_user))
         ? $alt_user
         : REAL_DB_USER;
+
+    $local_db = strtok($dbinfo[$dbid][0],'/');
+    $tok = strtok('/');
+    $local_host = (!empty($tok)) ? $tok : 'localhost';
+
+    $online_db = strtok($dbinfo[$dbid][1],'/');
+    $tok = strtok('/');
+    $online_host = (!empty($tok)) ? $tok : 'localhost';
+    $remote_host = (!empty($tok)) ? $tok : REMOTE_DB_HOST;
+
     switch ($db_mode)
     {
         case 'normal':
             $connect_params = ($location == 'local')
-              ? array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][0] )
-              : array( 'localhost', $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
+              ? array( $local_host, $main_user, REAL_DB_PASSWD, $local_db )
+              : array( $online_host, $main_user, REAL_DB_PASSWD, $online_db );
             break;
         case 'local':
-            $connect_params = array( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, $dbinfo[$dbid][0] );
+            $connect_params = array( $local_host, LOCAL_DB_USER, LOCAL_DB_PASSWD, $local_db );
             break;
         case 'remote':
-            $connect_params = array( REMOTE_DB_HOST, $main_user, REAL_DB_PASSWD, $dbinfo[$dbid][1] );
+            $connect_params = array( $remote_host, $main_user, REAL_DB_PASSWD, $online_db );
             break;
     }
     $connect_error = false;

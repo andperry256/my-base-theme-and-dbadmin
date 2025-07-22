@@ -4,7 +4,7 @@
 // Variables $local_site_dir and $relative_path must be set up beforehand
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 require_once("$base_dir/common_scripts/date_funct.php");
-require_once("$private_scripts_dir/mysql_connect.php");
+require_once("$base_dir/mysql_connect.php");
 require("$custom_pages_path/$relative_path/db_funct.php");
 $db = admin_db_connect();
 $table = $_GET['table'];

@@ -8,7 +8,7 @@ $relative_path = $_POST['relpath'];
 $bank_transaction = $_POST['bank_transaction'];
 $account_transaction = $_POST['account_transaction'];
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-require("$private_scripts_dir/mysql_connect.php");
+require("$base_dir/mysql_connect.php");
 require("$base_dir/common_scripts/date_funct.php");
 require("$db_admin_dir/common_funct.php");
 require("$custom_pages_path/$relative_path/db_funct.php");

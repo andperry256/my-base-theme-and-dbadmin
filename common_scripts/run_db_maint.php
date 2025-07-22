@@ -19,7 +19,7 @@ if (!isset($argc))
 {
     exit("script only allowed in command mode\n");
 }
-if (count($argv) < 4) 
+if (count($argv) < 4)
 {
     exit("ERROR - Missing parameter(s)\n");
 }
@@ -68,7 +68,7 @@ foreach($argv as $key => $value)
 }
 
 // Run the maintenance
-require("$private_scripts_dir/mysql_connect.php");
+require("$base_dir/mysql_connect.php");
 require("$base_dir/common_scripts/dbadmin/widget_types.php");
 require("$base_dir/common_scripts/dbadmin/table_funct.php");
 require("$base_dir/common_scripts/dbadmin/record_funct.php");

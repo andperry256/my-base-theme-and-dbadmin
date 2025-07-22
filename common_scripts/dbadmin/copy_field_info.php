@@ -7,7 +7,7 @@ if (isset($_GET['site']))
 {
     $local_site_dir = $_GET['site'];
     require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-    require("$private_scripts_dir/mysql_connect.php");
+    require("$base_dir/mysql_connect.php");
 }
 else
 {

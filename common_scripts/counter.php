@@ -18,7 +18,7 @@ if (!function_exists('day_name'))
 }
 if (!function_exists('db_connect'))
 {
-    require("$private_scripts_dir/mysql_connect.php");
+    require("$base_dir/mysql_connect.php");
 }
 $db = db_connect($dbid);
 

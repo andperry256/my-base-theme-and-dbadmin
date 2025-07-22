@@ -34,7 +34,7 @@
   {
       exit("Page edit keycode not set.");
   }
-  require_once("$private_scripts_dir/mysql_connect.php");
+  require_once("$base_dir/mysql_connect.php");
   $db = db_connect($dbid);
 
   $return_url = urldecode($_GET['-returnurl']);

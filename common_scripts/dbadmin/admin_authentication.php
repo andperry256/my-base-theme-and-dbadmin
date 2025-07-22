@@ -3,7 +3,7 @@
 
 if (!function_exists('db_connect'))
 {
-    require_once("$private_scripts_dir/mysql_connect.php");
+    require_once("$base_dir/mysql_connect.php");
 }
 require_once("$db_admin_dir/common_funct.php");
 $db = db_connect($auth_dbid);

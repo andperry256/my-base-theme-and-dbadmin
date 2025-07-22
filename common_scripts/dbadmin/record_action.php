@@ -68,7 +68,7 @@ else
 }
 
 require("$base_dir/path_defs.php");
-require("$private_scripts_dir/mysql_connect.php");
+require("$base_dir/mysql_connect.php");
 require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
 require("$db_admin_dir/functions.php");
 require("$db_admin_dir/classes.php");

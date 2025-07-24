@@ -9,7 +9,7 @@ $fund_exclusions = select_excluded_funds('name');
 
 $previous_superfund = '';
 $where_clause = "(type<>'built-in' OR name='-none-') $fund_exclusions";
-$query_result = mysqli_select_query($db,'funds','*',$where_clause,array(),'');
+$query_result = mysqli_select_query($db,'funds','*',$where_clause,[],'');
 print("<ul>\n");
 while ($row = mysqli_fetch_assoc($query_result))
 {

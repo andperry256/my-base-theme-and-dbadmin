@@ -64,12 +64,12 @@ print("<h2>Table [$table]</h2>\n");
 
 // Build lists of primary keys and fields to display.
 $base_table = get_base_table($table,$db);
-$display_fields = array();
+$display_fields = [];
 $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $where_clause = 'table_name=? AND field_name=? AND list_desktop=1';
-    $where_values = array('s',$base_table,'s',$row['Field']);
+    $where_values = ['s',$base_table,'s',$row['Field']];
     if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'')))
     {
         $display_fields[$row2['display_order']] = $row2['field_name'];
@@ -100,7 +100,7 @@ print("</tr>\n");
 Main loop to output the table records. The primary keys are only used to order
 the records in the case of a base table.
 */
-$query_result = mysqli_select_query($db,$table,'*',$search_clause,array(),$sort_clause);
+$query_result = mysqli_select_query($db,$table,'*',$search_clause,[],$sort_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     print("<tr>");
@@ -109,7 +109,7 @@ while ($row = mysqli_fetch_assoc($query_result))
         if (strpos($excluded_fields,"^$field^") === false)
         {
             $where_clause = 'table_name=? AND field_name=?';
-            $where_values = array('s',$base_table,'s',$field);
+            $where_values = ['s',$base_table,'s',$field];
             if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) && 
                 ($row2['widget_type'] == 'checkbox'))
             {

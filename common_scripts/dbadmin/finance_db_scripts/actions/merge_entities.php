@@ -2,7 +2,7 @@
 //==============================================================================
 
 $db = admin_db_connect();
-$entities = array ( 'funds'=>'fund', 'categories'=>'category', 'payees'=>'payee');
+$entities = [ 'funds'=>'fund', 'categories'=>'category', 'payees'=>'payee'];
 
 if ((!isset($_GET['type'])) && (!isset($_POST['type'])))
 {
@@ -43,20 +43,20 @@ else
         {
               // Run the merge
               $set_fields = "$entity";
-              $set_values = array('s',$_POST['target']);
+              $set_values = ['s',$_POST['target']];
               $where_clause = "$entity=?";
-              $where_values = array('s',$_POST['source']);
+              $where_values = ['s',$_POST['source']];
               mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
               if ($type != 'payees')
               {
                   $set_fields = "$entity";
-                  $set_values = array('s',$_POST['target']);
+                  $set_values = ['s',$_POST['target']];
                   $where_clause = "$entity=?";
-                  $where_values = array('s',$_POST['source']);
+                  $where_values = ['s',$_POST['source']];
                   mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
               }
               $where_clause = 'name=?';
-              $where_values = array('s',$_POST['source']);
+              $where_values = ['s',$_POST['source']];
               mysqli_delete_query($db,$type,$where_clause,$where_values);
               print("<p>$entity_name <strong>{$_POST['source']}</strong> successfully merged into <strong>{$_POST['target']}</strong>.</p>\n");
               print("<p><a href=\"index.php?-action=merge_entities&type={$_POST['type']}\"><button>Go Back</button></a></p>\n");
@@ -78,7 +78,7 @@ else
         print("<option value=\"\">Please select ...</option>");
         $where_clause = "name NOT LIKE '-%'";
         $add_clause = 'ORDER BY name ASC';
-        $query_result = mysqli_select_query($db,$type,'*',$where_clause,array(),$add_clause);
+        $query_result = mysqli_select_query($db,$type,'*',$where_clause,[],$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
         {
             print("<option value=\"{$row['name']}\"");
@@ -97,7 +97,7 @@ else
         print("<option value=\"\">Please select ...</option>");
         $where_clause = "name NOT LIKE '-%'";
         $add_clause = 'ORDER BY name ASC';
-        $query_result = mysqli_select_query($db,$type,'*',$where_clause,array(),$add_clause);
+        $query_result = mysqli_select_query($db,$type,'*',$where_clause,[],$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
         {
             print("<option value=\"{$row['name']}\"");

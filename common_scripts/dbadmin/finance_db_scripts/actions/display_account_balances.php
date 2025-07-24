@@ -13,14 +13,14 @@ $table_filler_line = "line-height:0.7em;";
 $account_exclusions = select_excluded_accounts('label');
 
 // Initialise the balances array
-$balances = array();
+$balances = [];
 $where_clause = "label IS NOT NULL $account_exclusions";
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),'');
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,[],'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $account = $row['label'];
     $where_clause = "type='localised'";
-    $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,array(),'');
+    $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,[],'');
     while ($row2 = mysqli_fetch_assoc($query_result2))
     {
         $fund = $row2['name'];
@@ -32,13 +32,13 @@ while ($row = mysqli_fetch_assoc($query_result))
 // Calculate the balances
 $where_clause = "label IS NOT NULL $account_exclusions";
 $add_clause = 'ORDER BY sort_order ASC';
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $account = $row['label'];
   
     $where_clause = "currency='GBP' AND account=? AND sched_freq='#'";
-    $where_values = array('s',$account);
+    $where_values = ['s',$account];
     $add_clause = '';
     if (defined('ACCT_BAL_END_DATE'))
     {
@@ -64,7 +64,7 @@ while ($row = mysqli_fetch_assoc($query_result))
         elseif (empty($row2['source_account']))
         {
             $where_clause = 'account=? AND transact_seq_no=?';
-            $where_values = array('s',$account,'i',$row2['seq_no']);
+            $where_values = ['s',$account,'i',$row2['seq_no']];
             $query_result3 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
             while ($row3 = mysqli_fetch_assoc($query_result3))
             {
@@ -82,7 +82,7 @@ while ($row = mysqli_fetch_assoc($query_result))
         else
         {
             $where_clause = 'account=? AND transact_seq_no=?';
-            $where_values = array('s',$row2['source_account'],'i',$row2['source_seq_no']);
+            $where_values = ['s',$row2['source_account'],'i',$row2['source_seq_no']];
             $query_result3 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
             while ($row3 = mysqli_fetch_assoc($query_result3))
             {
@@ -105,7 +105,7 @@ print("<h1>Account Balances</h1>\n");
 print("<table style=\"$table_style\">\n");
 $where_clause = "label IS NOT NULl $account_exclusions";
 $add_clause = 'ORDER BY sort_order ASC';
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $account = $row['label'];
@@ -121,7 +121,7 @@ while ($row = mysqli_fetch_assoc($query_result))
             {
                 // Output fund name and balance
                 $where_clause = 'name=?';
-                $where_values = array('s',$fund);
+                $where_values = ['s',$fund];
                 $query_result2 = mysqli_select_query($db,'funds','*',$where_clause,$where_values,'');
                 if ($row2 = mysqli_fetch_assoc($query_result2))
                 {

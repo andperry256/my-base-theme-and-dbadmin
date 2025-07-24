@@ -46,14 +46,14 @@ function db_connect($dbid,$mode='p',$alt_user='')
     {
         case 'normal':
             $connect_params = ($location == 'local')
-              ? array( $local_host, $main_user, REAL_DB_PASSWD, $local_db )
-              : array( $online_host, $main_user, REAL_DB_PASSWD, $online_db );
+              ? [ $local_host, $main_user, REAL_DB_PASSWD, $local_db ]
+              : [ $online_host, $main_user, REAL_DB_PASSWD, $online_db ];
             break;
         case 'local':
-            $connect_params = array( $local_host, LOCAL_DB_USER, LOCAL_DB_PASSWD, $local_db );
+            $connect_params = [ $local_host, LOCAL_DB_USER, LOCAL_DB_PASSWD, $local_db ];
             break;
         case 'remote':
-            $connect_params = array( $remote_host, $main_user, REAL_DB_PASSWD, $online_db );
+            $connect_params = [ $remote_host, $main_user, REAL_DB_PASSWD, $online_db ];
             break;
     }
     $connect_error = false;

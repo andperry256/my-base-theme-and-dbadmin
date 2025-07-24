@@ -77,16 +77,16 @@ function display_sidebar_content()
         $action_filter = '';
         if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']])))
         {
-            update_session_var(array('dba_key_action',$relative_path),$_GET['-action']);
+            update_session_var(['dba_key_action',$relative_path],$_GET['-action']);
         }
         elseif ((count($_GET) == 0) && (!empty($key_actions['main'])))
         {
-            update_session_var(array('dba_key_action',$relative_path),'main');
+            update_session_var(['dba_key_action',$relative_path],'main');
         }
-        $latest_action = get_session_var(array('dba_key_action',$relative_path));
+        $latest_action = get_session_var(['dba_key_action',$relative_path]);
         print("<table class=\"sidebar-table\">");
         $add_clause = 'ORDER BY display_order ASC';
-        $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',array(),$add_clause);
+        $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',[],$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
         {
             $label = $row['label'];
@@ -280,7 +280,7 @@ function display_main_content($mode)
                 }
                 else
                 {
-                    $params = array();
+                    $params = [];
                     $params['mode'] = $mode;
                     display_table($params);
                 }
@@ -297,7 +297,7 @@ function display_main_content($mode)
                 }
                 else
                 {
-                    $params = array();
+                    $params = [];
                     handle_record('edit',$params);
                 }
                 break;
@@ -313,7 +313,7 @@ function display_main_content($mode)
                 }
                 else
                 {
-                    $params = array();
+                    $params = [];
                     if (isset($_GET['-presets']))
                     {
                         $params['presets'] = urlencode($_GET['-presets']);
@@ -333,7 +333,7 @@ function display_main_content($mode)
                 }
                 else
                 {
-                    $params = array();
+                    $params = [];
                     handle_record('view',$params);
                 }
                 break;
@@ -366,7 +366,7 @@ function display_main_content($mode)
             case 'renumber_records2':
                 print("<h1>Renumber Records (All Tables)</h1>\n");
                 $where_clause = 'renumber_enabled=1';
-                $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
+                $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,[],'');
                 while ($row = mysqli_fetch_assoc($query_result))
                 {
                     renumber_records($row['table_name']);
@@ -426,12 +426,12 @@ if (($db_master_location[$db_sub_path] != $location) &&
     {
         $table = get_base_table($_GET['-table']);
         $where_clause = 'site_path=? AND table_name=?';
-        $where_values = array('s',$local_site_dir,'s',$table);
+        $where_values = ['s',$local_site_dir,'s',$table];
         if (function_exists('admin_sub_path'))
         {
             $sub_path = admin_sub_path();
             $where_clause .= ' AND sub_path=?';
-            $where_values = array_merge($where_values,array('s',$sub_path));
+            $where_values = array_merge($where_values,['s',$sub_path]);
         }
         if (mysqli_num_rows(mysqli_select_query($db_itservices,'nosync_tables','*',$where_clause,$where_values,'')) > 0)
         {

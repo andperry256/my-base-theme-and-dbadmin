@@ -23,7 +23,7 @@ if (!function_exists('db_connect'))
 $db = db_connect($dbid);
 
 // Determine if the remote user is likely to be a search engine / robot.
-$bot_identifiers = array(
+$bot_identifiers = [
 'bot',
 'slurp',
 'crawler',
@@ -31,7 +31,7 @@ $bot_identifiers = array(
 'curl',
 'facebook',
 'fetch',
-);
+];
 $is_bot = false;
 if (isset($_SERVER['HTTP_USER_AGENT']))
 {

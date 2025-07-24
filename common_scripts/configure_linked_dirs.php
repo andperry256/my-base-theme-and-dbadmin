@@ -27,7 +27,7 @@ else
     print("<h1>Configure Linked Directories</h1>$eol");
 }
 
-$rewrite_rules = array();
+$rewrite_rules = [];
 foreach ($dirs as $dir)
 {
     print("$eol*** Processing $dir ***$eol");

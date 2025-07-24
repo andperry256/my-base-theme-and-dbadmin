@@ -50,7 +50,7 @@ foreach ($content1 as $line)
     if (strpos($line,'#### ADD FIXED') !== false)
     {
         $where_clause = "ip_element_4>=1 AND ip_element_4<=254";
-        $where_values = array();
+        $where_values = [];
         $add_clause = 'ORDER BY ip_element_4 ASC';
         $query_result = mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
@@ -81,7 +81,7 @@ foreach ($content1 as $line)
     if (strpos($line,'#### ADD FIXED') !== false)
     {
         $where_clause = "ip_element_4>=1 AND ip_element_4<=254";
-        $where_values = array();
+        $where_values = [];
         $add_clause = 'ORDER BY ip_element_4 ASC';
         $query_result = mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
@@ -118,7 +118,7 @@ foreach ($content1 as $line)
     elseif (strpos($line,'#### ADD FIXED') !== false)
     {
         $where_clause = "ip_element_4>=1 AND ip_element_4<=254";
-        $where_values = array();
+        $where_values = [];
         $add_clause = 'ORDER BY ip_element_4 ASC';
         $query_result = mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))

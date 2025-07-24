@@ -152,7 +152,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     }
 
     // Run the following queries to create/update the structure for the table info table
-    $fieldlist = array();
+    $fieldlist = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_table_info");
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -247,7 +247,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     }
 
     // Run the following queries to create/update the structure for the table fields table.
-    $fieldlist = array();
+    $fieldlist = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_table_fields");
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -355,7 +355,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"ALTER TABLE `dba_table_fields` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
 
     // Run the following queries to create/update the structure for the sidebar configuration table.
-    $fieldlist = array();
+    $fieldlist = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_sidebar_config");
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -389,7 +389,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `new_window` `new_window` TINYINT( 1 ) NOT NULL DEFAULT '0'");
 
     // Run the following queries to create/update the structure for the relationships table.
-    $fieldlist = array();
+    $fieldlist = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_relationships");
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -408,7 +408,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"ALTER TABLE `dba_relationships` CHANGE `query` `query` VARCHAR( 255 ) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL");
 
     // Run the following queries to create/update the structure for the change log table.
-    $fieldlist = array();
+    $fieldlist = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM dba_change_log");
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -448,13 +448,13 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_orphan_table_info_records AS SELECT * FROM dba_table_info WHERE orphan=1");
     mysqli_query_normal($db,"CREATE OR REPLACE VIEW _view_orphan_table_field_records AS SELECT * FROM dba_table_fields WHERE orphan=1");
     $fields = 'table_name,parent_table';
-    $values = array('s','_view_orphan_table_info_records','s','dba_table_info');
+    $values = ['s','_view_orphan_table_info_records','s','dba_table_info'];
     $where_clause = "table_name='_view_orphan_table_info_records'";
-    mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,array());
+    mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,[]);
     $fields = 'table_name,parent_table';
-    $values = array('s','_view_orphan_table_field_records','s','dba_table_fields');
+    $values = ['s','_view_orphan_table_field_records','s','dba_table_fields'];
     $where_clause = "table_name='_view_orphan_table_field_records'";
-    mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,array());
+    mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,[]);
     mysqli_query_normal($db,"UPDATE dba_table_info SET orphan=1");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET orphan=1");
 
@@ -476,7 +476,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         {
             print ("Purging view $ltag$table$rtag ...$eol");
             $where_clause = 'table_name=?';
-            $where_values = array('s',$table);
+            $where_values = ['s',$table];
             if (($query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) &&
                 ($row2 = mysqli_fetch_assoc($query_result2)) &&
                 (!empty($row2['parent_table'])))
@@ -520,7 +520,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                     $collation = $default_collation;
                     $engine = $default_engine;
                     $where_clause = 'table_name=?';
-                    $where_values = array('s',$table);
+                    $where_values = ['s',$table];
                     $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
                     if ($row2 = mysqli_fetch_assoc($query_result2))
                     {
@@ -567,14 +567,14 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                     (substr($table,0,4) == 'dba_'))
                 {
                     $fields = 'table_name';
-                    $values = array('s',$table);
+                    $values = ['s',$table];
                     $where_clause = "table_name=?";
-                    $where_values = array('s',$table);
+                    $where_values = ['s',$table];
                     mysqli_conditional_insert_query($db,'dba_table_info',$fields,$values,$where_clause,$where_values);
                     $last_display_order = 0;
 
                     // Loop through the table fields
-                    $field_list = array();
+                    $field_list = [];
                     if ($query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
                     {
                         while ($row2 = mysqli_fetch_assoc($query_result2))
@@ -665,7 +665,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
                             // Run query to select data for the given table & field
                             $where_clause = 'table_name=? AND field_name=?';
-                            $where_values = array('s',$table,'s',$field_name);
+                            $where_values = ['s',$table,'s',$field_name];
                             $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
                             if ($row3 = mysqli_fetch_assoc($query_result3))
                             {
@@ -722,7 +722,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                 */
                                 $next_display_order = $last_display_order + 10;
                                 $where_clause = 'table_name=? AND display_order=?';
-                                $where_values = array('s',$table,'i',$next_display_order);
+                                $where_values = ['s',$table,'i',$next_display_order];
                                 $query_result4 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
                                 if (mysqli_num_rows($query_result4) == 0)
                                 {
@@ -738,9 +738,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                                 // N.B. Set the 'list desktop' and 'list mobile' fields by default on
                                 // primary key fields only.
                                 $where_clause = 'table_name=? AND field_name=?';
-                                $where_values = array('s',$table,'s',$field_name);
+                                $where_values = ['s',$table,'s',$field_name];
                                 $fields = 'table_name,field_name,is_primary,required,widget_type,list_desktop,list_mobile,display_order';
-                                $values = array('s',$table,'s',$field_name,'i',$is_primary,'i',$required,'s',$default_widget_type,'i',$is_primary,'i',$is_primary,'i',$display_order);
+                                $values = ['s',$table,'s',$field_name,'i',$is_primary,'i',$required,'s',$default_widget_type,'i',$is_primary,'i',$is_primary,'i',$display_order];
                                 if (mysqli_conditional_insert_query($db,'dba_table_fields',$fields,$values,$where_clause,$where_values) === true);
                                 {
                                     print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag added$eol");
@@ -751,7 +751,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
                     // Delete redundant table field records
                     $where_clause = 'table_name=?';
-                    $where_values = array('s',$table);
+                    $where_values = ['s',$table];
                     $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
                     while ($row2 = mysqli_fetch_assoc($query_result2))
                     {
@@ -759,7 +759,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
                         if (!isset($field_list[$field_name]))
                         {
                             $where_clause = 'table_name=? AND field_name=?';
-                            $where_values = array('s',$table,'s',$field_name);
+                            $where_values = ['s',$table,'s',$field_name];
                             mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
                             print("$nbsp$nbsp$nbsp"."Field $ltag$field_name$rtag removed$eol");
                         }
@@ -819,7 +819,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     // Add/re-create relationships for built-in tables
     // The queries are built the way they are due to problems with syntax highlighting in Atom
     $where_clause = "table_name LIKE 'dba_%'";
-    $where_values = array();
+    $where_values = [];
     mysqli_delete_query($db,'dba_relationships',$where_clause,$where_values);
     $query = "INSERT INTO dba_relationships VALUES ('dba_table_info','Child Tables',\"{query}\")";
     $query = str_replace('{query}','SELECT * FROM dba_table_info WHERE parent_table=\'$table_name\'',$query);
@@ -850,7 +850,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,$query);
 
     $where_clause = 'orphan=1';
-    $where_values = array();
+    $where_values = [];
     mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
     mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
     print("Operation completed.$eol");

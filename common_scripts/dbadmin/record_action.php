@@ -80,7 +80,7 @@ $relative_path = $_GET['-relpath'];  // Required because value is getting corrup
 if (($action == 'edit') && (isset($_POST['save_as_new'])))
 {
     $action = 'new';
-    update_session_var(array('dba_action',$relative_path),$action);
+    update_session_var(['dba_action',$relative_path],$action);
     $record_id = '';
 }
 run_session();
@@ -92,7 +92,7 @@ if (session_var_is_set('get_vars'))
 }
 foreach ($_GET as $key => $value)
 {
-    update_session_var(array('get_vars',$key),$value);
+    update_session_var(['get_vars',$key],$value);
 }
 if (session_var_is_set('post_vars'))
 {
@@ -100,7 +100,7 @@ if (session_var_is_set('post_vars'))
 }
 foreach ($_POST as $key => $value)
 {
-    update_session_var(array('post_vars',$key),$value);
+    update_session_var(['post_vars',$key],$value);
 }
 if (is_file("$custom_pages_path/$relative_path/tables/$table/$table.php"))
 {
@@ -123,13 +123,13 @@ $dbase = admin_db_name();
 
 // Handle the saving of the record.
 $record = new db_record;
-$new_primary_keys = array();
+$new_primary_keys = [];
 $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $field_name = $row['Field'];
     $where_clause = 'table_name=? AND field_name=?';
-    $where_values = array('s',$base_table,'s',$field_name);
+    $where_values = ['s',$base_table,'s',$field_name];
     $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
     if ($row2 = mysqli_fetch_assoc($query_result2))
     {
@@ -172,7 +172,7 @@ while ($row = mysqli_fetch_assoc($query_result))
             {
                 // Predict the next auto-increment value for the field
                 $where_clause = 'TABLE_SCHEMA=? AND TABLE_NAME=?';
-                $where_values = array('s',$dbase,'s',$base_table);
+                $where_values = ['s',$dbase,'s',$base_table];
                 $query_result3 = mysqli_select_query($db,'information_schema.TABLES','AUTO_INCREMENT',$where_clause,$where_values,'');
                 if ($row3 = mysqli_fetch_assoc($query_result3))
                 {

@@ -30,7 +30,7 @@ Functions decode_record_id / fully_decode_record_id
 
 function decode_record_id($record_id)
 {
-    $result = array();
+    $result = [];
     $tok = strtok($record_id,'=');
     while ($tok !== false)
     {
@@ -94,15 +94,15 @@ Function check_new_action
 function check_new_action($action,$table)
 {
     global $relative_path;
-    if (!session_var_is_set(array('dba_action',$relative_path)))
+    if (!session_var_is_set(['dba_action',$relative_path]))
     {
-        update_session_var(array('dba_action',$relative_path),'');
+        update_session_var(['dba_action',$relative_path],'');
     }
-    if (!session_var_is_set(array('dba_table',$relative_path)))
+    if (!session_var_is_set(['dba_table',$relative_path]))
     {
-        update_session_var(array('dba_table',$relative_path),'');
+        update_session_var(['dba_table',$relative_path],'');
     }
-    if (($action != get_session_var(array('dba_action',$relative_path))) || ($table != get_session_var('dba_table')))
+    if (($action != get_session_var(['dba_action',$relative_path])) || ($table != get_session_var('dba_table')))
     {
         // Action and/or table has changed - clear temporary session variables
         if (session_var_is_set('get_vars'))
@@ -114,8 +114,8 @@ function check_new_action($action,$table)
             delete_session_var('post_vars');
         }
     }
-    update_session_var(array('dba_action',$relative_path),$action);
-    update_session_var(array('dba_table',$relative_path),$table);
+    update_session_var(['dba_action',$relative_path],$action);
+    update_session_var(['dba_table',$relative_path],$table);
 }
 
 //==============================================================================

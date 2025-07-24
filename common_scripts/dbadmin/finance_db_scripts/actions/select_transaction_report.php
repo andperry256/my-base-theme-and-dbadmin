@@ -18,7 +18,7 @@ print("<select name=\"account\">\n");
 print("<option value=\"\">--all--</option>\n");
 $where_clause = "label IS NOT NULL $account_exclusions";
 $add_clause = 'ORDER BY name ASC';
-$query_result = mysqli_select_query($db,'accounts','*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,'accounts','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     print("<option value=\"{$row['label']}\">{$row['name']}</option>\n");
@@ -33,7 +33,7 @@ print("<select name=\"fund\">\n");
 print("<option value=\"\">--all--</option>\n");
 $where_clause = "name IS NOT NULL $fund_exclusions";
 $add_clause = 'ORDER BY name ASC';
-$query_result = mysqli_select_query($db,'funds','*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,'funds','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $fund = $row['name'];
@@ -56,7 +56,7 @@ print("<tr><td>Category:</td><td>\n");
 print("<select name=\"category\">\n");
 print("<option value=\"\">--all--</option>\n");
 $add_clause = 'ORDER BY name ASC';
-$query_result = mysqli_select_query($db,'categories','*','',array(),$add_clause);
+$query_result = mysqli_select_query($db,'categories','*','',[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $category = $row['name'];
@@ -78,7 +78,7 @@ print("<tr><td>Payee:</td><td>\n");
 print("<select name=\"payee\">\n");
 print("<option value=\"\">-all--</option>\n");
 $add_clause = 'ORDER BY name ASC';
-$query_result = mysqli_select_query($db,'payees','*','',array(),$add_clause);
+$query_result = mysqli_select_query($db,'payees','*','',[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $payee_par = urlencode($row['name']);
@@ -91,7 +91,7 @@ print("</td></tr>\n");
 print("<tr><td>Currency:</td>\n");
 print("<td colspan=2><select name=\"currency\">\n");
 $add_clause = 'ORDER BY id ASC';
-$query_result = mysqli_select_query($db,'currencies','*','',array(),$add_clause);
+$query_result = mysqli_select_query($db,'currencies','*','',[],$add_clause);
 while($row = mysqli_fetch_assoc($query_result))
 {
     $id = $row['id'];

@@ -9,7 +9,7 @@
 */
 //==============================================================================
 
-$widget_types = array (
+$widget_types = [
   'auto-increment' => false,
   'checkbox' => false,
   'checklist' => false,
@@ -27,7 +27,7 @@ $widget_types = array (
   'static-date' => false,
   'textarea' => true,
   'time' => false,
-);
+];
 
 //==============================================================================
 ?>

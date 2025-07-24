@@ -54,7 +54,7 @@ function get_imap_message($mbox,$mid,$noattach=false)
     global $total_attachment_size;
     global $htmlmsg,$plainmsg,$charset,$attachments;
     $htmlmsg = $plainmsg = $charset = '';
-    $attachments = array();
+    $attachments = [];
     $total_attachment_size = 0;
   
     // Header
@@ -76,7 +76,7 @@ function get_imap_message($mbox,$mid,$noattach=false)
         }
     }
   
-    $return_info = array();
+    $return_info = [];
     $return_info['header'] = $header;
     if (strtolower($charset) == 'iso-8859-1')
     {
@@ -117,7 +117,7 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
     }
   
     // Get all parameters, like charset, filenames of attachments, etc.
-    $params = array();
+    $params = [];
     if ((isset($part->parameters)) && ($part->parameters))
     {
         foreach ($part->parameters as $x)
@@ -268,7 +268,7 @@ Offset 1 = Additional error information
 */
 //==============================================================================
 
-function output_mail($mail_info,$host,$attachments=array())
+function output_mail($mail_info,$host,$attachments=[])
 {
     global $default_sender_email;
     global $alt_sender_email;
@@ -281,28 +281,28 @@ function output_mail($mail_info,$host,$attachments=array())
     if ((!isset($mail_info['from_name'])) || (empty($mail_info['from_name'])))
     {
         // No originator name
-        return array(11,'');
+        return [11,''];
     }
     elseif ((!isset($mail_info['from_addr'])) || (empty($mail_info['from_addr'])))
     {
         // No originator address
-        return array(12,'');
+        return [12,''];
     }
     elseif ((!isset($mail_info['to_addr'])) || (empty($mail_info['to_addr'])))
     {
         // No destination address
-        return array(13,'');
+        return [13,''];
     }
     elseif ((!isset($mail_info['subject'])) || (empty($mail_info['subject'])))
     {
         // No subject
-        return array(15,'');
+        return [15,''];
     }
     elseif (((!isset($mail_info['html_content'])) || (empty($mail_info['html_content']))) &&
             ((!isset($mail_info['plain_content'])) || (empty($mail_info['plain_content']))))
     {
         // No content
-        return array(16,'');
+        return [16,''];
     }
   
     // Process any default values
@@ -323,7 +323,7 @@ function output_mail($mail_info,$host,$attachments=array())
     if ($db = mail_db_connect())
     {
         $where_clause = 'orig_domain=?';
-        $where_values = array('s',$host);
+        $where_values = ['s',$host];
         if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'mail_routes','*',$where_clause,$where_values,'')))
         {
             // Create PHPMailer object
@@ -387,7 +387,7 @@ function output_mail($mail_info,$host,$attachments=array())
                 {
                     // Success
                     log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
-                    return array(0,'');
+                    return [0,''];
                 }
         
                 // Send failure
@@ -400,27 +400,27 @@ function output_mail($mail_info,$host,$attachments=array())
                     $error_info = '';
                 }
                 log_message_info_to_file(2,$mail->Host,$mail_info,$error_info);
-                return array(2,$error_info);
+                return [2,$error_info];
             }
             else
             {
                 // Success
                 log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
-                return array(0,'');
+                return [0,''];
             }
         }
         else
         {
             // Mail route not found
             log_message_info_to_file(14,'',$mail_info,'');
-            return array(14,'');
+            return [14,''];
         }
     }
     else
     {
         // Cannot connect to remote DB
         log_message_info_to_file(1,'',$mail_info,'');
-        return array(1,'');
+        return [1,''];
     }
 }
 
@@ -516,14 +516,14 @@ function email_previous_day_mail_log($station_id,$from_addr)
     $log_file = "$mail_log_dir/mail-"."$yesterday_date.log";
     if (is_file($log_file))
     {
-        $message_info = array();
+        $message_info = [];
         $message_info['subject'] = "Mail Log File for $station_id on $yesterday_date";
         $message_info['plain_content'] = "See attachment.\n";
         $message_info['from_addr'] = $from_addr;
         $message_info['from_name'] = $station_id;
         $message_info['to_addr'] = 'domains@andperry.com';
         $message_info['to_name'] = '';
-        $attachments = array();
+        $attachments = [];
         $attachments[$log_file] = true;
         $error_info = output_mail($message_info,$station_id,$attachments);
         return $error_info[0];

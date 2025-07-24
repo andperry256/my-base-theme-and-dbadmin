@@ -142,9 +142,9 @@ $content = file("$access_logs_dir/$current_file");
 
 if ($display_mode == 'count_summary')
 {
-    $page_accesses = array();
-    $page_counts = array();
-    $output_list = array();
+    $page_accesses = [];
+    $page_counts = [];
+    $output_list = [];
 
     // Record each IP/page combination as a unique page access
     foreach($content as $line)
@@ -171,7 +171,7 @@ if ($display_mode == 'count_summary')
     {
         if (!isset($output_list[$count]))
         {
-            $output_list[$count] = array();
+            $output_list[$count] = [];
         }
         $output_list[$count][$page] = true;
     }

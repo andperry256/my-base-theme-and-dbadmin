@@ -38,13 +38,13 @@ get_header();
             navigation_links('multi','author',$row['user_nicename']);
             // Set up the parameters for the main loop query
             $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-            $args = array ( 'author' => $author,
-                            'paged' => $paged,
-                            'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_STANDARD,
-                            'meta_key' => 'access_level',
-                            'meta_value' => $user_access_level,
-                            'meta_compare' => '<=',
-                        );
+            $args = [ 'author' => $author,
+                      'paged' => $paged,
+                      'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_STANDARD,
+                      'meta_key' => 'access_level',
+                      'meta_value' => $user_access_level,
+                      'meta_compare' => '<=',
+                  ];
 
             // Run the WordPress loop
             $local_query = new WP_Query($args);

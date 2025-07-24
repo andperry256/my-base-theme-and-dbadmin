@@ -61,7 +61,7 @@ function array_deslash (array $data)
 {
     foreach ($data as $key => $val)
     {
-        $data [$key] = is_array ($val) ? array_deslash ($val) : stripslashes ($val);
+        $data [$key] = is_array($val) ? array_deslash ($val) : stripslashes ($val);
     }
     return $data;
 }

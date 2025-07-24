@@ -18,7 +18,7 @@ if (!defined('SHARED_FUNCT_DEFINED')):
 
 function set_default_header_image_paths()
 {
-    $image_file_exts = array( 'svg', 'png', 'jpg' );
+    $image_file_exts = [ 'svg', 'png', 'jpg' ];
     global $desktop_header_image_path;
     global $desktop_header_image_url;
     global $intermediate_header_image_path;
@@ -427,7 +427,7 @@ function simplify_html($content)
         generated HTML code. This is the default version but can be overridden by
         declaring a custom version outside the function call.
         */
-        $allowed_tags = array('<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<strong>','<i>','<em>','<u>');
+        $allowed_tags = ['<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<strong>','<i>','<em>','<u>'];
     }
     if (!isset($simplified_tags))
     {
@@ -436,7 +436,7 @@ function simplify_html($content)
         'simplify_html_tag' function is to be run. This is the default version but
         can be overridden by declaring a custom version outside the function call.
         */
-        $simplified_tags = array('p');
+        $simplified_tags = ['p'];
     }
 
     // Strip out any <style> tags. This is done long-hand as there have been
@@ -496,7 +496,7 @@ function recache_page($page_path,$run_count=1)
         // Parameter is a page slug - build full sub-path by looping through page hierarchy.
         $uri_subpath = '';
         $where_clause = 'post_name=?';
-        $where_values = array('s',$page_path);
+        $where_values = ['s',$page_path];
         while($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'')))
         {
             $uri_subpath = "{$row['post_name']}/$uri_subpath";
@@ -507,7 +507,7 @@ function recache_page($page_path,$run_count=1)
             else
             {
                 $where_clause = 'ID=?';
-                $where_values = array('i',$row['post_parent']);
+                $where_values = ['i',$row['post_parent']];
             }
         }
         if (substr($uri_subpath,0,5) == 'home/')
@@ -564,7 +564,7 @@ function recache_all_pages($type='page')
         $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
         $db = db_connect(WP_DBID);
         $where_clause = "post_type='$type' AND post_status='publish'";
-        $where_values = array();
+        $where_values = [];
         $add_clause = "ORDER BY post_name ASC";
         $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
         while ($row = mysqli_fetch_assoc($query_result))
@@ -701,7 +701,7 @@ function put_user($username)
         if (!empty($session_id))
         {
             $where_clause = 'session_id=? AND (name=? OR name=?)';
-            $where_values = array('s',$session_id,'s',SV_USER,'s',SV_ACCESS_LEVEL);
+            $where_values = ['s',$session_id,'s',SV_USER,'s',SV_ACCESS_LEVEL];
             mysqli_delete_query($db,'wp_session_updates',$where_clause,$where_values);
         }
     }
@@ -794,12 +794,12 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
 {
     $db1 = db_connect($source_dbid,'p',$source_user);
     $db2 = db_connect($target_dbid,'p',$target_user);
-    $meta_fields = array('pinterest_title',
-                         'pinterest_description',
-                         'facebook_text',
-                         'twitter_text');
+    $meta_fields = ['pinterest_title',
+                   'pinterest_description',
+                   'facebook_text',
+                   'twitter_text'];
     $where_clause = "post_type='post' AND post_status='publish'";
-    $where_values = array();
+    $where_values = [];
     $query_result = mysqli_select_query($db1,'wp_posts','*',$where_clause,$where_values,'');
 
     // Loop through posts in source database.
@@ -807,7 +807,7 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
     {
         $post_name = $row1['post_name'];
         $where_clause = "post_name=? AND post_status='publish'";
-        $where_values = array('s',$row1['post_name']);
+        $where_values = ['s',$row1['post_name']];
         if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_posts','*',$where_clause,$where_values,'')))
         {
             // Matching post name found in target database.
@@ -830,7 +830,7 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
             if ($category_match)
             {
                 $where_clause = "post_id=? AND meta_key='inhibit_sync'";
-                $where_values = array('post_id',$row2['ID']);
+                $where_values = ['post_id',$row2['ID']];
                 if ($row3 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values,'')));
                 {
                     $inhibit_sync = ($row3['meta_value']) ?? false;
@@ -842,9 +842,9 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                         // Synchronise post timestamp.
                         echo "Synchronising timestamp for post $post_name\n";
                         $where_clause = "post_name=?";
-                        $where_values = array('s',$post_name);
+                        $where_values = ['s',$post_name];
                         $fields = ('post_date,post_date_gmt');
-                        $values = array ('s',$row1['post_date'],'s',$row1['post_date_gmt']);
+                        $values = ['s',$row1['post_date'],'s',$row1['post_date_gmt']];
                         mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                     }
                     elseif ($option == 'content')
@@ -854,24 +854,24 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                             // Synchronise post content.
                             echo "Synchronising content for post $post_name\n";
                             $where_clause = "post_name=?";
-                            $where_values = array('s',$post_name);
+                            $where_values = ['s',$post_name];
                             $fields = ('post_content');
-                            $values = array ('s',$row1['post_content']);
+                            $values = ['s',$row1['post_content']];
                             mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                         }
                         // Synchronise any meta values.
                         foreach ($meta_fields as $field)
                         {
                             $where_clause = 'post_id=? AND meta_key=?';
-                            $where_values_1 = array('',$row1['ID'],'s',$field);
-                            $where_values_2 = array('',$row2['ID'],'s',$field);
+                            $where_values_1 = ['',$row1['ID'],'s',$field];
+                            $where_values_2 = ['',$row2['ID'],'s',$field];
                             if (($row3 = mysqli_fetch_assoc(mysqli_select_query($db1,'wp_postmeta','*',$where_clause,$where_values_1,''))) &&
                                 ($row4 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values_2,''))) &&
                                 ($row3['meta_value'] != $row4['meta_value']))
                             {
                                 echo "Synchronising meta value for post $post_name => $field\n";
                                 $fields = 'meta_value';
-                                $values = array('s',$row3['meta_value']);
+                                $values = ['s',$row3['meta_value']];
                                 mysqli_update_query($db2,'wp_postmeta',$fields,$values,$where_clause,$where_values_2);
                             }
                         }

@@ -16,7 +16,7 @@ Long -  This performs the operation long hand to avoid having to set up any
 
 function import_table_from_csv($file_path,$db,$table,$method='long')
 {
-    mysqli_delete_query($db,$table,'1',array());
+    mysqli_delete_query($db,$table,'1',[]);
     if ($method == 'short')
     {
         $query = "LOAD DATA INFILE '$file_path' INTO TABLE $table FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n'";
@@ -56,7 +56,7 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
 {
     if ($method == 'short')
     {
-        $where_values = array('s',$file_path,'s',$table);
+        $where_values = ['s',$file_path,'s',$table];
         $query = "SELECT * INTO OUTFILE ? FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n' FROM ?";
         mysqli_free_format_query($db,$query,$where_values);
     }
@@ -110,7 +110,7 @@ function export_table_to_csv($file_path,$db,$table,$fields,$method='long',$where
     
         // Query and main loop to process the table records.
         $add_clause = '';
-        $query_result = mysqli_select_query($db,$table,$field_selection,$where_clause,array(),"$order_clause $limit_clause");
+        $query_result = mysqli_select_query($db,$table,$field_selection,$where_clause,[],"$order_clause $limit_clause");
         while ($row = mysqli_fetch_assoc($query_result))
         {
             $field_count = 0;

@@ -30,12 +30,12 @@ get_header();
 
         // Set up the parameters for the main loop query
         $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-        $args = array ( 'paged' => $paged,
-                        'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_LONG,
-                        'meta_key' => 'access_level',
-                        'meta_value' => $user_access_level,
-                        'meta_compare' => '<=',
-                      );
+        $args = [ 'paged' => $paged,
+                  'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_LONG,
+                  'meta_key' => 'access_level',
+                  'meta_value' => $user_access_level,
+                  'meta_compare' => '<=',
+                ];
 
         // Handle the sort order for the posts
         if (isset($_GET['orderby']))

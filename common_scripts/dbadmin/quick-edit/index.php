@@ -61,7 +61,7 @@
 
   print("<h1>Edit page/post [$page_slug]</h1>\n");
   $where_clause = 'post_name=?';
-  $where_values = array('s',$page_slug);
+  $where_values = ['s',$page_slug];
   $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result))
   {

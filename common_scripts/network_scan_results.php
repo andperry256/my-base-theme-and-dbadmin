@@ -6,8 +6,8 @@ require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 require("$base_dir/non_wp_header.php");
 $db = local_itservices_db_connect();
 
-$mac_addresses = array();
-$vendors = array();
+$mac_addresses = [];
+$vendors = [];
 $content = file_get_contents($network_scan_output);
 
 // Loop through all host specifications in the XML script
@@ -67,7 +67,7 @@ for ($sub_addr=1; $sub_addr<=254; $sub_addr++)
         // IP address found on scan (online)
         $mac_address = $mac_addresses[$ip_address];
         $where_clause = 'mac_address=?';
-        $where_values = array('s',$mac_addresses[$ip_address]);
+        $where_values = ['s',$mac_addresses[$ip_address]];
         if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,'')))
         {
             // Device matches item in DHCP settings table
@@ -82,22 +82,22 @@ for ($sub_addr=1; $sub_addr<=254; $sub_addr++)
         $status = 'online';
     }
     elseif (($where_clause = 'ip_element_4=?') &&
-            ($where_values = array('i',$sub_addr)) && 
-            ($row = mysqli_fetch_assoc(mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,''))))
+            ($where_values = ['i',$sub_addr]) &&
+      ($row = mysqli_fetch_assoc(mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,''))))
     {
-        // Item in DHCP settings table not found on scan (offline)
-        $mac_address = $row['mac_address'];
-        $name = (empty($row['friendly_name'])) ? $row['hostname'] : $row['friendly_name'];
-        $vendor = '';
-        $status = 'offline';
+  // Item in DHCP settings table not found on scan (offline)
+  $mac_address = $row['mac_address'];
+  $name = (empty($row['friendly_name'])) ? $row['hostname'] : $row['friendly_name'];
+  $vendor = '';
+  $status = 'offline';
     }
     else
     {
-        $status = '';
+  $status = '';
     }
     if (!empty($status))
     {
-        print("<tr><td class=\"td-$status\">$ip_address</td><td class=\"td-$status\">$name</td><td class=\"td-$status\">$mac_address</td><td class=\"td-$status\">$vendor</td></tr>");
+  print("<tr><td class=\"td-$status\">$ip_address</td><td class=\"td-$status\">$name</td><td class=\"td-$status\">$mac_address</td><td class=\"td-$status\">$vendor</td></tr>");
         print("\n");
     }
 }

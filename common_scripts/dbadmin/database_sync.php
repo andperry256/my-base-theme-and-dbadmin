@@ -25,7 +25,7 @@ function sync_databases($local_db_name)
         $sync_direction = 'in';  // Default direction
         $db_sites = itservices_db_connect();
         $where_clause = 'dbname=? AND domname=?';
-        $where_values = array('s',$local_db_name,'s',$server_station_id);
+        $where_values = ['s',$local_db_name,'s',$server_station_id];
         $query_result = mysqli_select_query($db_sites,'dbases','*',$where_clause,$where_values,'');
         if ($row = mysqli_fetch_assoc($query_result))
         {
@@ -70,7 +70,7 @@ function sync_databases($local_db_name)
                         fprintf($ofp,"## LOCKED ##\n");
                         $count = 0;
                         $where_clause = "table_name NOT LIKE '%dba_%'";
-                        $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,array(),'');
+                        $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,[],'');
                         while ($row2 = mysqli_fetch_assoc($query_result2))
                         {
                             $relationship_name_par = mysqli_real_escape_string($db,$row2['relationship_name']);
@@ -114,7 +114,7 @@ function sync_databases($local_db_name)
                                 $pk_fields = '';
                                 $field_added = false;
                                 $where_clause = 'table_name=? AND is_primary=1';
-                                $where_values = array('s',$table);
+                                $where_values = ['s',$table];
                                 $add_clause = 'ORDER BY display_order ASC';
                                 $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
                                 if (mysqli_num_rows($query_result) == 0)

@@ -26,11 +26,11 @@ if (empty($_GET['field']))
 }
 $field = $_GET['field'];
 $sort_level = (int)get_session_var("$sub_path-$table-sort-level");
-$next_sort_order = array ( 'ASC'=>'DESC', 'DESC'=>'NONE', 'NONE'=>'ASC');
+$next_sort_order = [ 'ASC'=>'DESC', 'DESC'=>'NONE', 'NONE'=>'ASC'];
 
 // Extract any existing sort settings.
-$sort_field = array();
-$sort_order = array();
+$sort_field = [];
+$sort_order = [];
 $field_sort_level = 0;
 for ($i=1; $i<=$sort_level; $i++)
 {

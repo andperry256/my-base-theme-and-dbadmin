@@ -17,7 +17,7 @@ $db = admin_db_connect();
 
 $account = $_GET['-account'];
 $where_clause = 'label=?';
-$where_values = array('s',$account);
+$where_values = ['s',$account];
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
@@ -58,7 +58,7 @@ print("<select name=\"bank_transaction\" onchange=\"selectTransaction('$account'
 print("<option value=\"null\">Please select ...</option>\n");
 
 $dirlist = scandir($bank_import_dir);
-$csvlist = array();
+$csvlist = [];
 foreach ($dirlist as $file)
 {
     if ((preg_match("/^Account_$account/",$file)) && (pathinfo($file,PATHINFO_EXTENSION) == 'csv'))
@@ -106,7 +106,7 @@ print(">Bulk Reconcile</option>\n");
 
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY rec_id DESC';
-$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $text = $row['date'].' | '.$row['description'].' | ';
@@ -157,7 +157,7 @@ if ((isset($_GET['selection'])) && ($match == 0))
 print(">Create New Transaction</option>\n");
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
-$query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,[],$add_clause);
 $match_count = 0;
 while ($row = mysqli_fetch_assoc($query_result))
 {

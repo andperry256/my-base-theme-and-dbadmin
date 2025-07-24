@@ -31,7 +31,7 @@ if (!isset($base_dir))
 }
 
 // Set up debug file paths
-$debug_file_path = array();
+$debug_file_path = [];
 if (is_file("/Config/localhost.php"))
 {
     // Local server

@@ -11,14 +11,14 @@ $account = $primary_keys['account'];
 $seq_no = $primary_keys['seq_no'];
 rationalise_transaction($account,$seq_no);
 $where_clause = ' account=? AND seq_no=?';
-$where_values = array('s',$account,'i',$seq_no);
+$where_values = ['s',$account,'i',$seq_no];
 $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
     if (!isset($_GET['summary']))
     {
         // Display record edit screen
-        $params = array();
+        $params = [];
         $params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=edit&-table=$table&-recordid=$record_id&summary\">Summary&nbsp;&amp;&nbsp;Splits</a></div>\n";
         if (get_table_access_level('transactions') != 'read-only')
         {
@@ -26,7 +26,7 @@ if ($row = mysqli_fetch_assoc($query_result))
         }
         if (!empty($row['target_account']))
         {
-            $primary_keys2 = array();
+            $primary_keys2 = [];
             $primary_keys2['account'] = $row['target_account'];
             $primary_keys2['seq_no'] = $row['target_seq_no'];
             $record_id2 = encode_record_id($primary_keys2);
@@ -34,7 +34,7 @@ if ($row = mysqli_fetch_assoc($query_result))
         }
         if (!empty($row['source_account']))
         {
-            $primary_keys2 = array();
+            $primary_keys2 = [];
             $primary_keys2['account'] = $row['source_account'];
             $primary_keys2['seq_no'] = $row['source_seq_no'];
             $record_id2 = encode_record_id($primary_keys2);
@@ -61,7 +61,7 @@ if ($row = mysqli_fetch_assoc($query_result))
             print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=reconcile_account&-account=$account\">Reconcile</a></div>");
             if (!empty($row['target_account']))
             {
-                $primary_keys2 = array();
+                $primary_keys2 = [];
                 $primary_keys2['account'] = $row['target_account'];
                 $primary_keys2['seq_no'] = $row['target_seq_no'];
                 $record_id2 = encode_record_id($primary_keys2);
@@ -69,7 +69,7 @@ if ($row = mysqli_fetch_assoc($query_result))
             }
             if (!empty($row['source_account']))
             {
-                $primary_keys2 = array();
+                $primary_keys2 = [];
                 $primary_keys2['account'] = $row['source_account'];
                 $primary_keys2['seq_no'] = $row['source_seq_no'];
                 $record_id2 = encode_record_id($primary_keys2);
@@ -85,7 +85,7 @@ if ($row = mysqli_fetch_assoc($query_result))
         }
     
         $where_clause = 'account=? AND transact_seq_no=?';
-        $where_values = array('s',$account,'i',$seq_no);
+        $where_values = ['s',$account,'i',$seq_no];
         $add_clause = 'ORDER BY split_no ASC';
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
         if (mysqli_num_rows($query_result2) > 0)
@@ -101,9 +101,9 @@ if ($row = mysqli_fetch_assoc($query_result))
                 $category = '-split-';
             }
             $set_fields = 'fund,category';
-            $set_values = array('s',$fund,'s',$category);
+            $set_values = ['s',$fund,'s',$category];
             $where_clause = 'account=? AND seq_no=?';
-            $where_values = array('s',$account,'i',$seq_no);
+            $where_values = ['s',$account,'i',$seq_no];
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
         else
@@ -122,7 +122,7 @@ if ($row = mysqli_fetch_assoc($query_result))
     
         // Row 1 - Account Name
         $where_clause = 'label=?';
-        $where_values = array('s',$account);
+        $where_values = ['s',$account];
         $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
@@ -240,7 +240,7 @@ if ($row = mysqli_fetch_assoc($query_result))
         }
     
         // Row 18 - 'New Split' Button
-        $presets = array();
+        $presets = [];
         $presets['account'] = $account;
         $presets['transact_seq_no'] = $seq_no;
         $presets['acct_month'] = $row['acct_month'];
@@ -257,12 +257,12 @@ if ($row = mysqli_fetch_assoc($query_result))
         print("<h2>Splits</h2>\n");
         print("<ul>\n");
         $where_clause = 'account=? AND transact_seq_no=?';
-        $where_values = array('s',$account,'i',$seq_no);
+        $where_values = ['s',$account,'i',$seq_no];
         $add_clause = 'ORDER BY split_no ASC';
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
         while ($row2 = mysqli_fetch_assoc($query_result2))
         {
-            $split_pks = array();
+            $split_pks = [];
             $split_pks['account'] = $account;
             $split_pks['transact_seq_no'] = $seq_no;
             $split_pks['split_no'] = $row2['split_no'];

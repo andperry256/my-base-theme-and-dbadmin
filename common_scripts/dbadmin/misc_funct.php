@@ -22,7 +22,7 @@ function get_table_access_level($table)
     }
 
     $where_clause = 'table_name=?';
-    $where_values = array('s',$table);
+    $where_values = ['s',$table];
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
     if ((session_var_is_set('read_only')) && (get_session_var('read_only')))
     {
@@ -99,7 +99,7 @@ function next_seq_number($table,$sort_1_value,$interval=10)
     $db = admin_db_connect();
     $table = get_table_for_info_field($table,'seq_no_field');
     $where_clause = 'table_name=?';
-    $where_values = array('s',$table);
+    $where_values = ['s',$table];
     $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''));
     if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
     {
@@ -111,7 +111,7 @@ function next_seq_number($table,$sort_1_value,$interval=10)
         $seq_type = $row['seq_method'];
         $next_seq_no_indicator = NEXT_SEQ_NO_INDICATOR;
         $where_clause = "$seq_no_name<>$next_seq_no_indicator";
-        $where_values = array();
+        $where_values = [];
         if ((!empty($sort_1_name)) && ($seq_type == 'repeat'))
         {
             $where_clause .= " AND $sort_1_name=?";
@@ -139,7 +139,7 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
     }
     $db = admin_db_connect();
     $where_clause = 'table_name=?';
-    $where_values = array('s',$table);
+    $where_values = ['s',$table];
     $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''));
     if (($seq_no == NEXT_SEQ_NO_INDICATOR) && (isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])))
     {
@@ -147,12 +147,12 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
         $new_seq_no = next_seq_number($table,$sort_1_value,$interval);
         $sort_1_name = $row['sort_1_field'];
         $seq_no_name =  $row['seq_no_field'];
-        $primary_keys = array();
+        $primary_keys = [];
     
         $set_fields = "$seq_no_name";
-        $set_values = array('i',$new_seq_no);
+        $set_values = ['i',$new_seq_no];
         $where_clause = "$seq_no_name=?";
-        $where_values = array('i',$seq_no);
+        $where_values = ['i',$seq_no];
         if (!empty($sort_1_name))
         {
             $primary_keys[$sort_1_name] = $sort_1_value;
@@ -186,9 +186,9 @@ function enable_non_null_empty($table,$field)
 {
     $db = admin_db_connect();
     $set_fields = 'required';
-    $set_values = array('i',1);
+    $set_values = ['i',1];
     $where_clause = 'table_name=? AND field_name=?';
-    $where_values = array('s',$table,'s',$field);
+    $where_values = ['s',$table,'s',$field];
     mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 }
 

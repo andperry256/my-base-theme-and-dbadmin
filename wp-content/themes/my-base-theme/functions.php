@@ -160,7 +160,7 @@ add_action('login_head', 'wpb_remove_loginshake');
 function output_header_links()
 {
     global $base_url;
-    $category_list = array();
+    $category_list = [];
     $categories = get_categories();
     foreach ($categories as $cat)
     {
@@ -176,7 +176,7 @@ function output_header_links()
         $blog_home_description = get_term_meta($id,'blog_home_description',true);
         if (($top_level_category) && (!empty($blog_home_description)) && ($user_access_level >= $access_level))
         {
-            $category_list[$name] = array($hierarchy,$image_id);
+            $category_list[$name] = [$hierarchy,$image_id];
         }
     }
     ksort($category_list);
@@ -185,7 +185,7 @@ function output_header_links()
         $category_url = "$base_url/category/{$info[0]}";
         print("<div class=\"category-icon-link\">");
         print("<a href=\"$category_url\">");
-        $image_info = wp_get_attachment_image_src($info[1],array(480,320));
+        $image_info = wp_get_attachment_image_src($info[1],[480,320]);
         if (function_exists('url_to_static'))
         {
             $image_url = url_to_static($image_info[0]);
@@ -220,7 +220,7 @@ function authenticate_post($slug,$use_overriding_access_level=false)
 function get_top_level_category_for_post()
 {
     global $base_url;
-    $category_list = array();
+    $category_list = [];
     $categories = get_the_category();
     foreach ($categories as $cat)
     {
@@ -253,7 +253,7 @@ function display_category_summary($category_name,$category_info,$image_max_width
     print("<div class=\"post-image-holder\">");
     if (!empty($category_info[1]))
     {
-        $image_info = wp_get_attachment_image_src($category_info[1],array($image_max_width,$image_max_height));
+        $image_info = wp_get_attachment_image_src($category_info[1],[$image_max_width,$image_max_height]);
         $image_url = (function_exists('url_to_static'))
             ? url_to_static($image_info[0])
             : $image_info[0];
@@ -343,7 +343,7 @@ function display_post_content($header_level=1,$image_max_width=400,$image_max_he
 
 function adjust_featured_image_size($image_spec,$max_width=200,$max_height=200)
 {
-    $matches = array();
+    $matches = [];
     if (preg_match('/width="[0-9]+"/',$image_spec,$matches))
     {
         $width_spec = $matches[0];
@@ -404,20 +404,20 @@ function navigation_links($option,$filter='category',$filtered_name='')
     global $wpdb;
     if ($option == 'single')
     {
-        $args = array (
+        $args = [
             'prev_text' => '%title',
             'next_text' => '%title',
             'in_same_term' => true,
             'taxonomy' => 'category',
-        );
+        ];
         $navigation = get_the_post_navigation($args);
     }
     elseif ($option == 'multi')
     {
-        $args = array (
+        $args = [
             'prev_text' => 'Older Posts',
             'next_text' => 'Newer Posts',
-        );
+        ];
         $navigation = get_the_posts_navigation($args);
     }
     else
@@ -425,12 +425,12 @@ function navigation_links($option,$filter='category',$filtered_name='')
         // This should not occur
         return;
     }
-    $nav_info = array (
-        array('nav-previous','',''),
-        array('nav-next','','')
-    );
-    $cat_list_array = array();
-    foreach (array(0,1) as $i)
+    $nav_info = [
+        ['nav-previous','',''],
+        ['nav-next','','']
+    ];
+    $cat_list_array = [];
+    foreach ([0,1] as $i)
     {
         $pos1 = strpos($navigation,"<div class=\"{$nav_info[$i][0]}\">");
         if ($pos1 !== false)
@@ -658,7 +658,7 @@ function replace_spaces_at_start()
     $post = get_post();
     $id = $post->ID;
     $where_clause = 'ID=?';
-    $where_values = array('i',$id);
+    $where_values = ['i',$id];
     if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
         ($row['post_type'] == 'post'))
     {
@@ -675,7 +675,7 @@ function replace_spaces_at_start()
             $temp_str2 = $opening_wspace_tag."$temp_str2</span>";
             $content = str_replace($temp_str1,$temp_str2,$content);
             $fields = 'post_content';
-            $values = array('s',$content);
+            $values = ['s',$content];
             mysqli_update_query($db,'wp_posts',$fields,$values,$where_clause,$where_values);
         }
     }
@@ -708,7 +708,7 @@ function check_spaces_at_start()
         $opening_wspace_tag = '<span style="white-space: pre">';
         $tag_length = strlen($opening_wspace_tag);
         $where_clause = 'ID=?';
-        $where_values = array('i',$id);
+        $where_values = ['i',$id];
         if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
             ($row['post_type'] == 'post'))
         {
@@ -768,7 +768,7 @@ function check_more_directive()
     {
         $db = db_connect(WP_DBID);
         $where_clause = 'ID=?';
-        $where_values = array('i',$id);
+        $where_values = ['i',$id];
         if (($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) &&
             ($row['post_type'] == 'post') &&
             (strpos($row['post_content'],'<!--more-->') === false) &&

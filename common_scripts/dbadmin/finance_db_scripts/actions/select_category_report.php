@@ -8,7 +8,7 @@ print("<p>Please select the required category:-</p>\n");
 
 $previous_supercategory = '';
 $where_clause = "type<>'built-in' OR name='-none-' OR name='-transfer-'";
-$query_result = mysqli_select_query($db,'categories','*',$where_clause,array(),'');
+$query_result = mysqli_select_query($db,'categories','*',$where_clause,[],'');
 print("<ul>\n");
 while ($row = mysqli_fetch_assoc($query_result))
 {

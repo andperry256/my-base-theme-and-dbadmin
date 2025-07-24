@@ -58,7 +58,7 @@ $count_set_acct_month = 0;
 $dummy_count = 0;
 
 // BEGIN - Main loop for processing transactions
-$query_result = mysqli_select_query($db,'transactions','*','',array(),'');
+$query_result = mysqli_select_query($db,'transactions','*','',[],'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $account = $row['account'];
@@ -74,13 +74,13 @@ while ($row = mysqli_fetch_assoc($query_result))
     if ((!empty($source_account)) && (!empty($source_seq_no)))
     {
         $where_clause = 'account=? AND transact_seq_no=?';
-        $where_values = array('s',$source_account,'i',$source_seq_no);
+        $where_values = ['s',$source_account,'i',$source_seq_no];
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
     }
     else
     {
         $where_clause = 'account=? AND transact_seq_no=?';
-        $where_values = array('s',$account,'i',$seq_no);
+        $where_values = ['s',$account,'i',$seq_no];
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
     }
     $split_count = mysqli_num_rows($query_result2);
@@ -136,7 +136,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     if ((!empty($target_account)) && (!empty($target_seq_no)))
     {
         $where_clause = 'account=? AND seq_no=?';
-        $where_values = array('s',$target_account,'i',$target_seq_no);
+        $where_values = ['s',$target_account,'i',$target_seq_no];
         $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
         if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['source_account'] == $account) && ($row2['source_seq_no'] == $seq_no))
         {
@@ -153,7 +153,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     if ((!empty($source_account)) && (!empty($source_seq_no)))
     {
         $where_clause = 'account=? AND seq_no=?';
-        $where_values = array('s',$source_account,'i',$source_seq_no);
+        $where_values = ['s',$source_account,'i',$source_seq_no];
         $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
         if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['target_account'] == $account) && ($row2['target_seq_no'] == $seq_no))
         {
@@ -175,7 +175,7 @@ while ($row = mysqli_fetch_assoc($query_result))
   
     // Check for -split- fund with no splits present
     $where_clause = 'account=? AND transact_seq_no=?';
-    $where_values = array('s',$row['account'],'i',$row['seq_no']);
+    $where_values = ['s',$row['account'],'i',$row['seq_no']];
     if (($fund == '-split-') && (empty($source_account)) &&
         (mysqli_num_rows(mysqli_select_query($db,'splits','*',$where_clause,$where_values,'')) == 0))
     {
@@ -186,7 +186,7 @@ while ($row = mysqli_fetch_assoc($query_result))
   
     // Check for unmatching split total
     $where_clause = 'account=? AND transact_seq_no=?';
-    $where_values = array('s',$account,'i',$seq_no);
+    $where_values = ['s',$account,'i',$seq_no];
     $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
     if (mysqli_num_rows($query_result2) > 0)
     {
@@ -227,7 +227,7 @@ while ($row = mysqli_fetch_assoc($query_result))
 // END -  Main loop for processing transactions
 
 // BEGIN - Main loop for processing splits
-$query_result = mysqli_select_query($db,'splits','*','',array(),'');
+$query_result = mysqli_select_query($db,'splits','*','',[],'');
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $account = $row['account'];
@@ -237,7 +237,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     $category = $row['category'];
     $acct_month = $row['acct_month'];
     $where_clause = 'account=? AND seq_no=?';
-    $where_values = array('s',$account,'i',$transact_seq_no);
+    $where_values = ['s',$account,'i',$transact_seq_no];
     $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
     if ($row2 = mysqli_fetch_assoc($query_result2))
     {

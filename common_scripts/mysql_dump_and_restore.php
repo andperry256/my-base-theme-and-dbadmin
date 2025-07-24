@@ -7,7 +7,7 @@ function dump_db_table($dbid,$table)
     $db = db_connect($dbid);
 
     // Compile list of field types (numeric/string)
-    $field_types = array();
+    $field_types = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -95,8 +95,8 @@ function mysql_db_dump($dbid,$full_backup=false)
     $db = db_connect($dbid);
 
     // Compile lists of normal tables and noSync tables
-    $normal_tables = array();
-    $nosync_tables = array();
+    $normal_tables = [];
+    $nosync_tables = [];
     $nosync_table_list = file_get_contents("https://remote.andperry.com/nosync_tables.php?dbname=$dbname");
     $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
     while ($row = mysqli_fetch_assoc($query_result))

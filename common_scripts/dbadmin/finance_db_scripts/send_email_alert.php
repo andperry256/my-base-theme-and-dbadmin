@@ -7,11 +7,11 @@
   require("$base_dir/mysql_connect.php");
   $db = finance_db_connect();
   $where_clause = 'rec_id=?';
-  $where_values = array('s',$_GET['recid']);
+  $where_values = ['s',$_GET['recid']];
   $query_result = mysqli_select_query($db,'email_alerts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result))
   {
-      $message_info = array();
+      $message_info = [];
       $message_info['subject'] = $row['subject'];
       $message_info['plain_content'] = $row['content'];
       $message_info['plain_content'] = str_replace('{date}',title_date($_GET['dt'],0),$message_info['plain_content']);

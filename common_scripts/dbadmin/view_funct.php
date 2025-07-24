@@ -81,16 +81,16 @@ function create_view_structure($view,$table,$conditions)
 
     // Set the parent table in the table info record for the view
     $where_clause = 'table_name=?';
-    $where_values = array('s',$view);
+    $where_values = ['s',$view];
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
     if (mysqli_num_rows($query_result) == 0)
     {
         // New table info record
         $fields = 'table_name,parent_table';
-        $values = array('s',$view,'s',$table);
+        $values = ['s',$view,'s',$table];
         mysqli_insert_query($db,'dba_table_info',$fields,$values);
         $where_clause = 'table_name=?';
-        $where_values = array('s',$table);
+        $where_values = ['s',$table];
         $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
@@ -100,14 +100,14 @@ function create_view_structure($view,$table,$conditions)
             the parent table should that ever be required.
             */
             $set_fields = 'local_access';
-            $set_values = array('s',$row2['local_access']);
+            $set_values = ['s',$row2['local_access']];
             $where_clause = 'table_name=?';
-            $where_values = array('s',$view);
+            $where_values = ['s',$view];
             mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
             $set_fields = 'real_access';
-            $set_values = array('s',$row2['real_access']);
+            $set_values = ['s',$row2['real_access']];
             $where_clause = 'table_name=?';
-            $where_values = array('s',$view);
+            $where_values = ['s',$view];
             mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
@@ -115,9 +115,9 @@ function create_view_structure($view,$table,$conditions)
     {
         // Update existing table info record
         $set_fields = 'parent_table';
-        $set_values = array('s',$table);
+        $set_values = ['s',$table];
         $where_clause = 'table_name=?';
-        $where_values = array('s',$view);
+        $where_values = ['s',$view];
         mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
     }
 }
@@ -145,7 +145,7 @@ function delete_view_structure($view,$table)
         unlink($link);
     }
     $where_clause = 'table_name=? AND parent_table=?';
-    $where_values = array('s',$view,'s',$table);
+    $where_values = ['s',$view,'s',$table];
     mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
 }
 
@@ -179,16 +179,16 @@ function create_child_table_structure($child,$parent)
 
     // Set the parent table in the table info record for the child table
     $where_clause = 'table_name=?';
-    $where_values = array('s',$child);
+    $where_values = ['s',$child];
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
     if (mysqli_num_rows($query_result) == 0)
     {
         // New table info record
         $fields = 'table_name,parent_table';
-        $values = array('s',$child,'s',$parent);
+        $values = ['s',$child,'s',$parent];
         mysqli_insert_query($db,'dba_table_info',$fields,$values);
         $where_clause = 'table_name=?';
-        $where_values = array('s',$parent);
+        $where_values = ['s',$parent];
         $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {
@@ -198,14 +198,14 @@ function create_child_table_structure($child,$parent)
             subsequently altered from  the parent table should that ever be required.
             */
             $set_fields = 'local_access';
-            $set_values = array('s',$row2['local_access']);
+            $set_values = ['s',$row2['local_access']];
             $where_clause = 'table_name=?';
-            $where_values = array('s',$child);
+            $where_values = ['s',$child];
             mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
             $set_fields = 'real_access';
-            $set_values = array('s',$row2['real_access']);
+            $set_values = ['s',$row2['real_access']];
             $where_clause = 'table_name=?';
-            $where_values = array('s',$child);
+            $where_values = ['s',$child];
             mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
@@ -213,9 +213,9 @@ function create_child_table_structure($child,$parent)
     {
         // Update existing table info record
         $set_fields = 'parent_table';
-        $set_values = array('s',$parent);
+        $set_values = ['s',$parent];
         $where_clause = 'table_name=?';
-        $where_values = array('s',$child);
+        $where_values = ['s',$child];
         mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
     }
 }
@@ -243,7 +243,7 @@ function delete_child_table_structure($child,$parent)
         unlink($link);
     }
     $where_clause = 'table_name=? AND parent_table=?';
-    $where_values = array('s',$child,'s',$parent);
+    $where_values = ['s',$child,'s',$parent];
     mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
 }
 
@@ -257,9 +257,9 @@ function set_primary_key_on_view($table,$field)
 {
     $db = admin_db_connect();
     $set_fields = 'is_primary,required';
-    $set_values = array('i',1,'i',2);
+    $set_values = ['i',1,'i',2];
     $where_clause = 'table_name=? AND field_name=?';
-    $where_values = array('s',$table,'s',$field);
+    $where_values = ['s',$table,'s',$field];
     mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 }
 
@@ -273,9 +273,9 @@ function clear_primary_key_on_view($table,$field)
 {
     $db = admin_db_connect();
     $set_fields = 'is_primary,required';
-    $set_values = array('i',0,'i',0);
+    $set_values = ['i',0,'i',0];
     $where_clause = 'table_name=? AND field_name=?';
-    $where_values = array('s',$table,'s',$field);
+    $where_values = ['s',$table,'s',$field];
     mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
 }
 

@@ -10,7 +10,7 @@ $db = admin_db_connect();
 $table = $_GET['table'];
 
 $where_clause = "table_name='transactions'";
-$query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,array(),'');
+$query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,[],'');
 if ($row = mysqli_fetch_assoc($query_result))
 {
     $list_size = $row['list_size'];
@@ -30,7 +30,7 @@ if (isset($_POST['submitted']))
     else
     {
         $where_clause = 'date>?';
-        $where_values = array('s',$_POST['date_selection']);
+        $where_values = ['s',$_POST['date_selection']];
         $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
         $display_offset = mysqli_num_rows($query_result);
         $display_offset = floor($display_offset/$list_size) * $list_size;

@@ -14,7 +14,7 @@ $username = $_POST['username'];
 $password = $_POST['password'];
 $user_authenticated = false;
 $where_clause = "$auth_db_username_field=?";
-$where_values = array('s',$username);
+$where_values = ['s',$username];
 if ((preg_match("/^[A-Z0-9.]*$/i", $username)) &&
     ($row = mysqli_fetch_assoc(mysqli_select_query($db,$auth_db_table,'*',$where_clause,$where_values,''))))
 {

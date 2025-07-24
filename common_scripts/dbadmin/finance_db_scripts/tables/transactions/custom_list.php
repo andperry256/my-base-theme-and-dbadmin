@@ -2,16 +2,16 @@
 //==============================================================================
 
 $db = admin_db_connect();
-$params = array();
+$params = [];
 $mode = get_viewing_mode();
 if ($mode == 'mobile')
 {
     $where_clause = "table_name='transactions'";
-    $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','grid_columns',$where_clause,array(),''));
+    $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','grid_columns',$where_clause,[],''));
     $set_fields = 'grid_columns';
-    $set_values = array('s',$row['grid_columns']);
+    $set_values = ['s',$row['grid_columns']];
     $where_clause = "parent_table='transactions' OR parent_table LIKE '_view_transactions%'";
-    $where_values = array();
+    $where_values = [];
     mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
 }
 $account = $table;
@@ -26,7 +26,7 @@ if (get_table_access_level('transactions') != 'read-only')
 }
 
 $where_clause = 'label=?';
-$where_values = array('s',$account);
+$where_values = ['s',$account];
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 if ($row = mysqli_fetch_assoc($query_result))
 {

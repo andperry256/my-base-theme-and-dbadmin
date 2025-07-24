@@ -9,15 +9,15 @@ class db_record
 {
     public $action;
     public $table;
-    private $fields = array();
-    private $old_primary_keys = array();
-    private $custom_vars = array();
+    private $fields = [];
+    private $old_primary_keys = [];
+    private $custom_vars = [];
 
     function SetField($field_name,$value,$type='s')
     {
         // Perform a trim because this is the format in which the field
         // will be submitted to any MySQL query.
-        $this->fields[$field_name] = array(trim($value),$type);
+        $this->fields[$field_name] = [trim($value),$type];
     }
 
     function FieldVal($field_name)
@@ -125,7 +125,7 @@ class tables_dba_table_info
         $db = admin_db_connect();
         $table = $record->FieldVal('table_name');
         $where_clause = 'table_name=?';
-        $where_values = array('s',$table);
+        $where_values = ['s',$table];
         mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
     }
 }
@@ -189,7 +189,7 @@ class tables_dba_table_fields
                 if ((!empty($vocab_table)) && (!empty($vocab_field)))
                 {
 
-                    if (mysqli_select_query($db,$vocab_table,$vocab_field,'',array(),'',false))
+                    if (mysqli_select_query($db,$vocab_table,$vocab_field,'',[],'',false))
                     {
                         $valid_select = true;
                     }
@@ -237,7 +237,7 @@ class tables_dba_sidebar_config
         if ($display_order == $default_seq_no)
         {
             $add_clause = 'ORDER BY display_order DESC LIMIT 1';
-            $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',array(),$add_clause);
+            $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',[],$add_clause);
             if ($row = mysqli_fetch_assoc($query_result))
             {
                 $new_display_order = $row['display_order'] + 10;
@@ -247,9 +247,9 @@ class tables_dba_sidebar_config
                 $new_display_order = 10;
             }
             $set_fields = 'display_order';
-            $set_values = array('i',$new_display_order);
+            $set_values = ['i',$new_display_order];
             $where_clause = 'display_order=?';
-            $where_values = array('i',$default_seq_no);
+            $where_values = ['i',$default_seq_no];
             mysqli_update_query($db,'dba_sidebar_config',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
@@ -294,9 +294,9 @@ class tables_admin_passwords
         {
             $enc_passwd = password_hash($new_passwd,PASSWORD_DEFAULT);
             $set_fields = 'new_passwd,conf_new_passwd,enc_passwd';
-            $set_values = array('s','','s','','s',$enc_passwd);
+            $set_values = ['s','','s','','s',$enc_passwd];
             $where_clause = 'username=?';
-            $where_values = array('s',$username);
+            $where_values = ['s',$username];
             mysqli_update_query($db,'admin_passwords',$set_fields,$set_values,$where_clause,$where_values);
         }
     }

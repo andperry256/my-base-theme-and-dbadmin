@@ -19,7 +19,7 @@ if (!is_file(__DIR__.'/path_defs.php'))
 include("path_defs.php");
 $db = db_connect(WP_DBID);
 $where_clause = "post_type='post'";
-$where_values = array();
+$where_values = [];
 $add_clause = "ORDER BY post_name ASC";
 $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
@@ -51,9 +51,9 @@ while ($row = mysqli_fetch_assoc($query_result))
         }
         $content = $new_content;
         $set_fields = 'post_content';
-        $set_values = array('s',$content);
+        $set_values = ['s',$content];
         $where_clause = 'ID=?';
-        $where_values = array('i',$row['ID']);
+        $where_values = ['i',$row['ID']];
         mysqli_update_query($db,'wp_posts',$set_fields,$set_values,$where_clause,$where_values);
     }
 
@@ -63,9 +63,9 @@ while ($row = mysqli_fetch_assoc($query_result))
         print("Adding '<!--no-more-->' directive to post [{$row['post_name']}]\n");
         $content .= "\n<!--no-more-->";
         $set_fields = 'post_content';
-        $set_values = array('s',$content);
+        $set_values = ['s',$content];
         $where_clause = 'ID=?';
-        $where_values = array('i',$row['ID']);
+        $where_values = ['i',$row['ID']];
         mysqli_update_query($db,'wp_posts',$set_fields,$set_values,$where_clause,$where_values);
     }
 }

@@ -117,7 +117,7 @@ if (!is_file($site_path_defs_path))
 
         // Move down the page hierarchy to the given address, matching various items along the way.
         $page_uri .= '/';
-        $hierarchy = array();
+        $hierarchy = [];
         $tok = strtok($page_uri,'/');
         while ($tok !== false)
         {

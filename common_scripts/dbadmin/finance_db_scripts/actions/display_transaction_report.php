@@ -6,7 +6,7 @@ global $base_url;
 $db = admin_db_connect();
 delete_session_var('csv_report');
 clear_session_update_records('csv_report');
-update_session_var(array('csv_report','000001'),"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance");
+update_session_var(['csv_report','000001'],"Date,Account,Payee,Fund,Category,Memo,Amount,Running Balance");
 $csv_line = 2;
 print("<h1>Transaction Report</h1>\n");
 $account_exclusions = select_excluded_accounts('account');
@@ -171,12 +171,12 @@ if (isset($_POST['submitted']))
                 $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
             }
             break;
-    
+
         case 'this_month':
             $start_month = accounting_month(date('Y-m-d'));
             $end_month = $start_month;
             break;
-    
+
         case 'last_month':
             $current_month = accounting_month(date('Y-m-d'));
             $month_value = (int)substr($current_month,5,2);
@@ -190,12 +190,12 @@ if (isset($_POST['submitted']))
             $start_month = sprintf("%04d-%02d",$year_value,$month_value);
             $end_month = $start_month;
             break;
-    
+
         case 'this_year':
             $start_month = year_start(date('Y-m-d'));
             $end_month = year_end(date('Y-m-d'));
             break;
-    
+
         case 'last_year':
             $year = (int)date('Y') - 1;
             $month = date('m');
@@ -219,9 +219,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
 {
     mysqli_query_normal($db,"DROP TABLE IF EXISTS report");
     mysqli_query_normal($db,"CREATE TEMPORARY TABLE report LIKE transaction_report");
-  
+
     $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND fund LIKE ? AND category LIKE ? AND payee LIKE ? AND sched_freq='#'";
-    $where_values = array('s',$currency,'s',$account_name,'s',$fund_name,'s',$category_name,'s',$payee_name);
+    $where_values = ['s',$currency,'s',$account_name,'s',$fund_name,'s',$category_name,'s',$payee_name];
     $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
     while ($row = mysqli_fetch_assoc($query_result))
     {
@@ -235,29 +235,29 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
             $chq_no = 'NULL';
         }
         $fields = "account,seq_no,split_no,date,chq_no,payee,credit_amount,debit_amount,fund,category,memo,acct_month,reconciled,target_account,source_account";
-        $values = array('s',$row['account'],'i',$row['seq_no'],'i',0,'s',$row['date'],'i',$chq_no,'s',$row['payee'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month'],'i',$row['reconciled'],'s',$row['target_account'],'s',$row['source_account']);
+        $values = ['s',$row['account'],'i',$row['seq_no'],'i',0,'s',$row['date'],'i',$chq_no,'s',$row['payee'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month'],'i',$row['reconciled'],'s',$row['target_account'],'s',$row['source_account']];
         mysqli_insert_query($db,'report',$fields,$values);
     }
-  
+
     // Process associated splits as required
     if (($fund_name != '%') || ($category_name != '%'))
     {
         // Fund and/or category has been specified. Process any splits relating
         // to the given fund/category.
         $where_clause = "fund LIKE ? $fund_exclusions AND category LIKE ?";
-        $where_values = array('s',$fund_name,'s',$category_name);
+        $where_values = ['s',$fund_name,'s',$category_name];
         $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
         while ($row = mysqli_fetch_assoc($query_result))
         {
             // Check for transaction directly related to the split
             $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
-            $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+            $where_values = ['s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']];
             $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
             if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
             {
                 // Add split with matching parameters into the table
                 $fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
-                $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+                $values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']];
                 mysqli_insert_query($db,'report',$fields,$values);
                 // Add record fields from parent transaction
                 if (!empty($row2['chq_no']))
@@ -269,21 +269,21 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     $chq_no = 'NULL';
                 }
                 $set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
-                $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+                $set_values = ['s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']];
                 $where_clause = 'account=? AND seq_no=? AND split_no=?';
-                $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+                $where_values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']];
                 mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
             }
-      
+
             // Check for transaction at opposite end of transfer
             $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND source_account=? AND source_seq_no=?";
-            $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+            $where_values = ['s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']];
             $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
             if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
             {
                 // Add split with matching parameters into the table
                 $fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
-                $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',-$row['credit_amount'],'d',-$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+                $values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',-$row['credit_amount'],'d',-$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']];
                 mysqli_insert_query($db,'report',$fields,$values);
                 // Add record fields from parent transaction
                 if (!empty($row2['chq_no']))
@@ -295,9 +295,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     $chq_no = 'NULL';
                 }
                 $set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
-                $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+                $set_values = ['s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']];
                 $where_clause = 'account=? AND seq_no=? AND split_no=?';
-                $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+                $where_values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']];
                 mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
             }
         }
@@ -307,18 +307,18 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
         // Account has been specified. All funds and categories are included.
         // Process all associated splits.
         $where_clause = "account IS NOT NULL $fund_exclusions";
-        $query_result = mysqli_select_query($db,'splits','*',$where_clause,array(),'');
+        $query_result = mysqli_select_query($db,'splits','*',$where_clause,[],'');
         while ($row = mysqli_fetch_assoc($query_result))
         {
             // Check for transaction directly related to the split
             $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
-            $where_values = array('s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']);
+            $where_values = ['s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']];
             $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
             if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
             {
                 // Add split with matching parameters into the table
                 $fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
-                $values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']);
+                $values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']];
                 mysqli_insert_query($db,'report',$fields,$values);
                 // Add record fields from parent transaction
                 if (!empty($row2['chq_no']))
@@ -330,20 +330,20 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     $chq_no = 'NULL';
                 }
                 $set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
-                $set_values = array('s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']);
+                $set_values = ['s',$row2['date'],'i',$chq_no,'s',$row2['payee'],'i',$row2['reconciled'],'s',$row2['target_account'],'s',$row2['source_account']];
                 $where_clause = 'account=? AND seq_no=? AND split_no=?';
-                $where_values = array('s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']);
+                $where_values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no']];
                 mysqli_update_query($db,'report',$set_fields,$set_values,$where_clause,$where_values);
             }
         }
     }
-  
+
     // Re-order table
     mysqli_query_normal($db,"ALTER TABLE report ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC");
-  
+
     // Create link to CSV report.
     print("<p><a href=\"$base_url/common_scripts/dbadmin/finance_db_scripts/display_csv_report.php\" target=\"_blank\">CSV Report</a> (opens in new window)</p>\n");
-    
+
     // Print report
     $row_no = 0;
     $running_total = 0;
@@ -353,9 +353,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     $table_cell_style_ra = $table_cell_style. " text-align:right;";
     $table_header_style = $table_cell_style." font-weight:bold;";
     $table_header_style_ra = $table_header_style." text-align:right;";
-  
+
     $where_clause = 'acct_month<=?';
-    $where_values = array('s',$end_month);
+    $where_values = ['s',$end_month];
     $query_result = mysqli_select_query($db,'report','*',$where_clause,$where_values,'');
     if (mysqli_num_rows($query_result) == 0)
     {
@@ -365,7 +365,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     else
     {
         $add_clause = 'ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC';
-        $query_result = mysqli_select_query($db,'report','*','',array(),$add_clause);
+        $query_result = mysqli_select_query($db,'report','*','',[],$add_clause);
         $row_count = mysqli_num_rows($query_result);
         while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))
         {
@@ -441,7 +441,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                         print("</td>");
                         print("<td style=\"$table_cell_style\">&nbsp;</td></tr>\n");
                         print("</table>\n");
-            
+
                         if ($accounting_month == '#')
                         {
                             // Final iteration of loop (beyond last record of query)
@@ -468,7 +468,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     }
                     $month_description = month_name((int)substr($accounting_month,5,2)).' '.substr($accounting_month,0,4);
                     print("<h2>$month_description</h2>\n");
-          
+
                     // New table header
                     print("<table>\n");
                     print("<tr> <td style=\"$table_header_style\" width=\"100px\">Date</td>");
@@ -487,9 +487,9 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 }
                 print("</td>");
                 $where_clause = 'label=?';
-                $where_values = array('s',$row['account']);
+                $where_values = ['s',$row['account']];
                 $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
-        
+
                 // Account
                 if ($row2 = mysqli_fetch_assoc($query_result2))
                 {
@@ -505,13 +505,13 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     $account_description = "$account_description [split]";
                 }
                 print("<td style=\"$table_cell_style\">$account_description</td>");
-        
+
                 // Description
                 $account = $row['account'];
                 $seq_no = $row['seq_no'];
                 if ($split_no == 0)
                 {
-                    $primary_keys = array();
+                    $primary_keys = [];
                     $primary_keys['account'] = $account;
                     $primary_keys['seq_no'] = $seq_no;
                     $record_id = encode_record_id($primary_keys);
@@ -520,7 +520,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 }
                 else
                 {
-                    $primary_keys = array();
+                    $primary_keys = [];
                     $primary_keys['account'] = $account;
                     $primary_keys['transact_seq_no'] = $seq_no;
                     $primary_keys['split_no'] = $split_no;
@@ -536,7 +536,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     print("<br />[M] $tempstr");
                 }
                 print("</a></td>");
-        
+
                 // Amount
                 $credit_amount = $row['credit_amount'];
                 $debit_amount = $row['debit_amount'];
@@ -584,11 +584,11 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 {
                     printf("<td style=\"$table_cell_style_ra\">%01.2f</td>",$running_balance);
                 }
-        
+
                 print("</td></tr>\n");
-        
+
                 // Add line to CSV report
-                update_session_var(array('csv_report',sprintf("%06d",$csv_line++)),"{$row['date']},\"$account_description\",\"{$row['payee']}\",\"{$row['fund']}\",\"{$row['category']}\",\"{$row['memo']}\",".sprintf("%1.2f",$amount).",".sprintf("%1.2f",$running_balance));
+                update_session_var(['csv_report',sprintf("%06d",$csv_line++)],"{$row['date']},\"$account_description\",\"{$row['payee']}\",\"{$row['fund']}\",\"{$row['category']}\",\"{$row['memo']}\",".sprintf("%1.2f",$amount).",".sprintf("%1.2f",$running_balance));
                 $row_no++;
             }
         }

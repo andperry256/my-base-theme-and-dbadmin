@@ -33,7 +33,7 @@ else
     require("$custom_pages_path/dbadmin/db_funct.php");
 }
 
-$tables = array();
+$tables = [];
 if ($table == '*')
 {
     if (is_dir($tables_dir))
@@ -65,11 +65,11 @@ foreach ($tables as $table => $val)
 
     $base_table = get_base_table($table);
     $where_clause = 'table_name=?';
-    $where_values = array('s',$base_table);
+    $where_values = ['s',$base_table];
     $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
     if (mysqli_num_rows($query_result) > 0)
     {
-        $list_desktop = array();
+        $list_desktop = [];
         $input = file($source);
         foreach ($input as $line)
         {
@@ -91,18 +91,18 @@ foreach ($tables as $table => $val)
             {
                 $label = trim(substr($line,12)," =\"\n\r\t");
                 $set_fields = 'alt_label';
-                $set_values = array('s',$label);
+                $set_values = ['s',$label];
                 $where_clause = 'table_name=? AND field_name=?';
-                $where_values = array('s',$table,'s',$field_name);
+                $where_values = ['s',$table,'s',$field_name];
                 mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
             }
             elseif (substr($line,0,18) == 'widget:description')
             {
                 $description = trim(substr($line,18)," =\"\n\r\t");
                 $set_fields = 'description';
-                $set_values = array('s',$description);
+                $set_values = ['s',$description];
                 $where_clause = 'table_name=? AND field_name=?';
-                $where_values = array('s',$table,'s',$field_name);
+                $where_values = ['s',$table,'s',$field_name];
                 mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
             }
             elseif (substr($line,0,10) == 'vocabulary')
@@ -114,9 +114,9 @@ foreach ($tables as $table => $val)
         foreach ($list_desktop as $field => $status)
         {
             $set_fields = 'list_desktop';
-            $set_values = array('i',$status);
+            $set_values = ['i',$status];
             $where_clause = 'table_name=? AND field_name=?';
-            $where_values = array('s',$table,'s',$field);
+            $where_values = ['s',$table,'s',$field];
             mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
         }
     }

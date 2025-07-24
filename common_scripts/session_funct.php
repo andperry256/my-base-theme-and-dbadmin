@@ -62,7 +62,7 @@ function run_session()
     If the table is not present then no action is performed and the PHP session
     left permanently open (not recommended).
     */
-    $query_result = mysqli_select_query($db_wp,'wp_session_updates','*','',array(),'');
+    $query_result = mysqli_select_query($db_wp,'wp_session_updates','*','',[],'');
     if ($query_result !== false)
     {
         // Transfer all updates for the current session from the database to the
@@ -71,7 +71,7 @@ function run_session()
         {
             // Inside the WordPress environment
             $where_clause = 'session_id=?';
-            $where_values = array('s',$global_session_id);
+            $where_values = ['s',$global_session_id];
             $query_result2 = mysqli_select_query($db_wp,'wp_session_updates','*',$where_clause,$where_values,'');
             while ($row2 = mysqli_fetch_assoc($query_result2))
             {
@@ -86,7 +86,7 @@ function run_session()
                     {
                         if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']])))
                         {
-                            $_SESSION[$row2['name']] = array();
+                            $_SESSION[$row2['name']] = [];
                         }
                         $_SESSION[$row2['name']][$row2['name2']] = $row2['value'];
                     }
@@ -109,7 +109,7 @@ function run_session()
         {
             // Outside the WordPress environment
             $where_clause = 'session_id=?';
-            $where_values = array('s',$global_session_id);
+            $where_values = ['s',$global_session_id];
             $query_result2 = mysqli_select_query($db_wp,'wp_session_updates','*',$where_clause,$where_values,'');
             while ($row2 = mysqli_fetch_assoc($query_result2))
             {
@@ -124,7 +124,7 @@ function run_session()
                     {
                         if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']])))
                         {
-                            $_SESSION[$row2['name']] = array();
+                            $_SESSION[$row2['name']] = [];
                         }
                         $_SESSION[$row2['name']][$row2['name2']] = $row2['value'];
                     }
@@ -144,16 +144,16 @@ function run_session()
             }
         }
         $where_clause = 'session_id=?';
-        $where_values = array('s',$global_session_id);
+        $where_values = ['s',$global_session_id];
         mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
 
         // Transfer all $_SESSION variables into the $global_session_vars array.
-        $global_session_vars = array();
+        $global_session_vars = [];
         foreach($_SESSION as $name => $value)
         {
             if (is_array($_SESSION[$name]))
             {
-                $global_session_vars[$name] = array();
+                $global_session_vars[$name] = [];
                 foreach($_SESSION[$name] as $name2 => $value2)
                 {
                     $global_session_vars[$name][$name2] = $value2;
@@ -204,7 +204,7 @@ function session_var_is_set($name)
     global $global_session_vars;
     if (!is_array($name))
     {
-        $name = array($name,'');
+        $name = [$name,''];
     }
 
     if (count($name) != 2)
@@ -239,7 +239,7 @@ function get_session_var($name)
     global $global_session_vars;
     if (!is_array($name))
     {
-        $name = array($name,'');
+        $name = [$name,''];
     }
 
     if (count($name) != 2)
@@ -282,7 +282,7 @@ function update_session_var($name,$value)
     }
     if (!is_array($name))
     {
-        $name = array($name,'');
+        $name = [$name,''];
     }
 
     if (count($name) != 2)
@@ -294,32 +294,32 @@ function update_session_var($name,$value)
         $timestamp = time();
         $old_timestamp = $timestamp - 86400;  // 24 hours ago
         $where_clause = 'timestamp<?';
-        $where_values = array('i',$old_timestamp);
+        $where_values = ['i',$old_timestamp];
         mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
         if (empty($name[1]))
         {
             $global_session_vars[$name[0]] = $value;
             $fields = 'session_id,name,value,type,timestamp';
-            $values = array('s',$global_session_id,'s',$name[0],'s',$value,'s','update','i',$timestamp);
+            $values = ['s',$global_session_id,'s',$name[0],'s',$value,'s','update','i',$timestamp];
             $where_clause = 'session_id=? AND name=?';
-            $where_values = array('s',$global_session_id,'s',$name[0]);
+            $where_values = ['s',$global_session_id,'s',$name[0]];
         }
         else
         {
             if ((!isset($global_session_vars[$name[0]])) || (!is_array($global_session_vars[$name[0]])))
             {
-                $global_session_vars[$name[0]] = array();
+                $global_session_vars[$name[0]] = [];
             }
             $global_session_vars[$name[0]][$name[1]] = $value;
             $fields = 'session_id,name,name2,value,type,timestamp';
-            $values = array('s',$global_session_id,'s',$name[0],'s',$name[1],'s',$value,'s','update','i',$timestamp);
+            $values = ['s',$global_session_id,'s',$name[0],'s',$name[1],'s',$value,'s','update','i',$timestamp];
             $where_clause = 'session_id=? AND name=? AND name2=?';
-            $where_values = array('s',$global_session_id,'s',$name[0],'s',$name[1]);
+            $where_values = ['s',$global_session_id,'s',$name[0],'s',$name[1]];
         }
         if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
         {
             $set_fields = 'value,type';
-            $set_values = array('s',$value,'s','update');
+            $set_values = ['s',$value,'s','update'];
             mysqli_update_query($db_wp,'wp_session_updates',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
@@ -331,7 +331,7 @@ function update_session_var($name,$value)
     {
         if (!isset($_SESSION[$name[0]]))
         {
-            $_SESSION[$name[0]] = array();
+            $_SESSION[$name[0]] = [];
         }
         $_SESSION[$name[0]][$name[1]] = $value;
     }
@@ -351,7 +351,7 @@ function delete_session_var($name)
     }
     if (!is_array($name))
     {
-        $name = array($name,'');
+        $name = [$name,''];
     }
 
     if (count($name) != 2)
@@ -368,9 +368,9 @@ function delete_session_var($name)
                 unset($global_session_vars[$name[0]]);
             }
             $fields = 'session_id,name,type,timestamp';
-            $values = array('s',$global_session_id,'s',$name[0],'s','delete','i',$timestamp);
+            $values = ['s',$global_session_id,'s',$name[0],'s','delete','i',$timestamp];
             $where_clause = 'session_id=? AND name=?';
-            $where_values = array('s',$global_session_id,'s',$name[0]);
+            $where_values = ['s',$global_session_id,'s',$name[0]];
         }
         else
         {
@@ -379,14 +379,14 @@ function delete_session_var($name)
                 unset($global_session_vars[$name[0]][$name[1]]);
             }
             $fields = 'session_id,name,name2,type,timestamp';
-            $values = array('s',$global_session_id,'s',$name[0],'s',$name[1],'s','delete','i',$timestamp);
+            $values = ['s',$global_session_id,'s',$name[0],'s',$name[1],'s','delete','i',$timestamp];
             $where_clause = 'session_id=? AND name=? AND name2=?';
-            $where_values = array('s',$global_session_id,'s',$name[0],'s',$name[1]);
+            $where_values = ['s',$global_session_id,'s',$name[0],'s',$name[1]];
         }
         if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
         {
             $set_fields = 'type';
-            $set_values = array('s','update');
+            $set_values = ['s','update'];
             mysqli_update_query($db_wp,'wp_session_updates',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
@@ -414,7 +414,7 @@ function clear_session_update_records($name)
     }
     if (!is_array($name))
     {
-        $name = array($name,null);
+        $name = [$name,null];
     }
 
     if (count($name) != 2)
@@ -424,12 +424,12 @@ function clear_session_update_records($name)
     if ($name[1] === null)
     {
         $where_clause = 'session_id=? AND name=?';
-        $where_values = array('s',$global_session_id,'s',$name[0]);
+        $where_values = ['s',$global_session_id,'s',$name[0]];
     }
     else
     {
         $where_clause = 'session_id=? AND name=? AND name2=?';
-        $where_values = array('s',$global_session_id,'s',$name[0],'s',$name[1]);
+        $where_values = ['s',$global_session_id,'s',$name[0],'s',$name[1]];
     }
     mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
 }

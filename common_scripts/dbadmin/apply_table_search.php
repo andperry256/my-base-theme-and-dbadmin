@@ -49,7 +49,7 @@ if (!empty($_POST['search_string']))
     {
         $field_name = $row['Field'];
         $where_clause = 'table_name=? AND field_name=?';
-        $where_values = array('s',$base_table,'s',$field_name);
+        $where_values = ['s',$base_table,'s',$field_name];
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
         if ($row2 = mysqli_fetch_assoc($query_result2))
         {

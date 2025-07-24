@@ -12,7 +12,7 @@ print("<tr><td colspan=2>Bank Transaction</td><td>Amount</td><td colspan=2>Regis
 // Loop through unreconciled bank transactions.
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY rec_id DESC';
-$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,array(),$add_clause);
+$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result))
 {
     $match = find_matching_transaction($account,$row['date'],$row['amount']);
@@ -20,7 +20,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     {
         // Unique match found.
         $where_clause = 'account=? AND seq_no=?';
-        $where_values = array('s',$account,'i',$match);
+        $where_values = ['s',$account,'i',$match];
         if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'')))
         {
             print("<tr><td>{$row['date']}</td><td>{$row['description']}</td>");

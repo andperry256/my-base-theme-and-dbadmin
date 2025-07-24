@@ -90,7 +90,7 @@ output_meta_data();
         <nav id="site-navigation" class="main-navigation" role="navigation">
             <div id="main-menu">
                 <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( $menu_description, 'my-base-theme' ); ?></button>
-                <?php wp_nav_menu( array( 'menu' => $menu_id,  'menu_class' => 'main-navigation', 'theme_location' => 'menu-1', 'menu_id' => 'primary-menu' ) ); ?>
+                <?php wp_nav_menu( [ 'menu' => $menu_id,  'menu_class' => 'main-navigation', 'theme_location' => 'menu-1', 'menu_id' => 'primary-menu' ] ); ?>
             </div>
         </nav><!-- #site-navigation -->
     <?php endif; ?>

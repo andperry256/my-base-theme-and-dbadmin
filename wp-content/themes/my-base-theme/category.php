@@ -46,7 +46,7 @@ get_header();
                 print("<div class=\"post-image-holder\">");
                 if (!empty($image_id))
                 {
-                    $image_info = wp_get_attachment_image_src($image_id,array(480,320));
+                    $image_info = wp_get_attachment_image_src($image_id,[480,320]);
                     if (function_exists('url_to_static'))
                     {
                         $image_url = url_to_static($image_info[0]);
@@ -91,13 +91,13 @@ get_header();
 
             // Set up the parameters for the main loop query
             $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-            $args = array ( 'cat' => $own_id,
-                            'paged' => $paged,
-                            array('key' => 'access_level',
-                                    'value' => $user_access_level,
-                                    'compare' => '<=',
-                                    'type' => 'NUMERIC')
-                        );
+            $args = [ 'cat' => $own_id,
+                      'paged' => $paged,
+                      array ('key' => 'access_level',
+                              'value' => $user_access_level,
+                              'compare' => '<=',
+                              'type' => 'NUMERIC')
+                  ];
 
             // Run the WordPress loop
             $local_query = new WP_Query($args);

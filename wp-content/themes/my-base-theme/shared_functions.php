@@ -794,10 +794,12 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
 {
     $db1 = db_connect($source_dbid,'p',$source_user);
     $db2 = db_connect($target_dbid,'p',$target_user);
-    $meta_fields = ['pinterest_title',
-                   'pinterest_description',
-                   'facebook_text',
-                   'twitter_text'];
+    $meta_fields = [
+        'pinterest_title',
+        'pinterest_description',
+        'facebook_text',
+        'twitter_text'
+    ];
     $where_clause = "post_type='post' AND post_status='publish'";
     $where_values = [];
     $query_result = mysqli_select_query($db1,'wp_posts','*',$where_clause,$where_values,'');

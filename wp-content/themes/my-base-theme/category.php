@@ -91,13 +91,16 @@ get_header();
 
             // Set up the parameters for the main loop query
             $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-            $args = [ 'cat' => $own_id,
-                      'paged' => $paged,
-                      array ('key' => 'access_level',
-                              'value' => $user_access_level,
-                              'compare' => '<=',
-                              'type' => 'NUMERIC')
-                  ];
+            $args = [
+                'cat' => $own_id,
+                'paged' => $paged,
+                [
+                    'key' => 'access_level',
+                    'value' => $user_access_level,
+                    'compare' => '<=',
+                    'type' => 'NUMERIC'
+                ]
+            ];
 
             // Run the WordPress loop
             $local_query = new WP_Query($args);

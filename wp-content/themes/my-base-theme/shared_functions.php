@@ -896,6 +896,47 @@ function copyright_notice($owner,$start_year)
     return "Copyright &copy; $date $owner, all rights reserved.";
 }
 
+//================================================================================
+/*
+Function load_codemirror
+
+This function is normally called from init.php in the custom scripts directory
+for the DB admin interface for a given site database.
+
+It checks the current URL parameters against the data in the $use_codemirror
+array to determine whether the CodeMirror functionality is required. If there
+is a match, then the JavaScript links for CodeMirror are loaded into the page.
+
+The parameter $sub_path indicates the sub-path for the required database
+interface under the main DB admin directory in the custom scripts. Each element
+of the $user_codemirror array is itself an array of data for a given sub-path.
+
+The table_funct.php script must have been included prior to calling this function.
+*/
+//================================================================================
+
+function load_codemirror($sub_path)
+{
+    global $use_codemirror, $base_dir;
+    if ((isset($use_codemirror[$sub_path]['dbid'])) && (function_exists('get_base_table')))
+    {
+        if (isset($_GET['-table']))
+        {
+            // Do a lookup on the current table.
+            $option = get_base_table($_GET['-table'],db_connect($use_codemirror[$sub_path]['dbid']));
+        }
+        else
+        {
+            // Do a lookup on the current action.
+            $option = $_GET['-action'] ?? '';
+        }
+        if (isset($use_codemirror[$sub_path][$option]))
+        {
+            include("$base_dir/libraries/codemirror_links.php");
+        }
+    }
+}
+
 
 //================================================================================
 /*

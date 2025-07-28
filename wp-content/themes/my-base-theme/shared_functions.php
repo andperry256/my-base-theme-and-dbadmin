@@ -900,18 +900,36 @@ function copyright_notice($owner,$start_year)
 /*
 Function load_codemirror
 
-This function is normally called from init.php in the custom scripts directory
-for the DB admin interface for a given site database.
+This function is called to include the links for the CodeMirror library, if they
+are required in the current context. It relies on the settings in a global array
+$user_codemirror, which has the following formmat:
 
-It checks the current URL parameters against the data in the $use_codemirror
-array to determine whether the CodeMirror functionality is required. If there
-is a match, then the JavaScript links for CodeMirror are loaded into the page.
+$use_codemirror = [
+    '<subpath1>' => [
+        'dbid' => '<dbid>',
+        '<item1>' => true,
+        '<item2>' => true,
+        ...
+    ],
+    '<subpath2>' => [
+        'dbid' => '<dbid>',
+        '<item1>' => true,
+        '<item2>' => true,
+        ...
+    ],
+    ...
+]
 
-The parameter $sub_path indicates the sub-path for the required database
-interface under the main DB admin directory in the custom scripts. Each element
-of the $user_codemirror array is itself an array of data for a given sub-path.
+where:
+* <subpath1>, <subpath2> etc. are database sub-paths on the main DB admin
+  directory, and are matched to the $sub_path parameter passed to the function.
+* There is one 'dbid' element for each sub-path, which specifies the DB ID that is
+  passed to the db_connect function for the associated database.
+* <item1>, <item2> etc. are the various tables and actions associated with the
+  given sub-path for which the CodeMirror library needs to be loaded.
 
-The table_funct.php script must have been included prior to calling this function.
+N.B. This function relies on the inclusion of the table_funct.php script by the
+calling software.
 */
 //================================================================================
 

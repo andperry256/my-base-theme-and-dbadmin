@@ -3,15 +3,15 @@
 
 if (!defined('DEFAULT_CHARSET'))
 {
-    define ('DEFAULT_CHARSET','utf8');
+    define('DEFAULT_CHARSET','utf8');
 }
 if (!defined('DEFAULT_COLLATION'))
 {
-    define ('DEFAULT_COLLATION','utf8_general_ci');
+    define('DEFAULT_COLLATION','utf8_general_ci');
 }
 if (!defined('DEFAULT_ENGINE'))
 {
-    define ('DEFAULT_ENGINE','InnoDB');
+    define('DEFAULT_ENGINE','InnoDB');
 }
 
 //==============================================================================

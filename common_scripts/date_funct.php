@@ -5,7 +5,7 @@ if (!defined('DATE_FUNCT_DEFINED')):
 
 if (!defined('TODAY_DATE'))
 {
-DEFINE ('TODAY_DATE',date('Y-m-d'));
+define('TODAY_DATE',date('Y-m-d'));
 }
 
 if (is_file(__DIR__."../alt_date_funct.php"))

@@ -9,13 +9,11 @@
    * @package My_Base_Theme
    */
    global $link_version;
-   if (is_file("last_preset_link_version.php"))
-   {
+   if (is_file("last_preset_link_version.php")) {
         require("last_preset_link_version.php");
    }
    $link_version = date('ym').'01';
-   if ((isset($last_preset_link_version)) && ($link_version < $last_preset_link_version))
-   {
+   if ((isset($last_preset_link_version)) && ($link_version < $last_preset_link_version)) {
        $link_version = $last_preset_link_version;
    }
 ?>
@@ -43,16 +41,13 @@ output_meta_data();
 <header id="masthead" class="site-header" role="banner">
     <div class="site-branding">
         <?php
-            if (is_file($desktop_header_image_path))
-            {
+            if (is_file($desktop_header_image_path)) {
                 echo("<div class=\"desktop-only-item\"><img src=\"$desktop_header_image_url?v=$link_version\" /></div>");
             }
-            if (is_file($intermediate_header_image_path))
-            {
+            if (is_file($intermediate_header_image_path)) {
                 echo("<div class=\"intermediate-width-item\"><img src=\"$intermediate_header_image_url?v=$link_version\" /></div>");
             }
-            if (is_file($mobile_header_image_path))
-            {
+            if (is_file($mobile_header_image_path)) {
                 echo("<div class=\"mobile-only-item\"><img src=\"$mobile_header_image_url?v=$link_version\" /></div>");
             }
       ?>    
@@ -71,16 +66,13 @@ output_meta_data();
     </div><!-- .site-branding -->
 
     <?php
-    if (isset($custom_theme_path))
-    {
+    if (isset($custom_theme_path)) {
         // The main stylesheet (style.css) is included by default. Include the associated
         // light/dark theme stylesheet here if applicable.
-        if ((is_file("$custom_theme_path/style-light.css")) && (get_session_var('theme_mode') == 'light'))
-        {
+        if ((is_file("$custom_theme_path/style-light.css")) && (get_session_var('theme_mode') == 'light')) {
             print("<link rel='stylesheet' id='-home-styles-css'  href='$custom_theme_url/style-light.css?v=$link_version' type='text/css' media='all' />");
         }
-        elseif ((is_file("$custom_theme_path/style-dark.css")) && (get_session_var('theme_mode') == 'dark'))
-        {
+        elseif ((is_file("$custom_theme_path/style-dark.css")) && (get_session_var('theme_mode') == 'dark')) {
             print("<link rel='stylesheet' id='-home-styles-css'  href='$custom_theme_url/style-dark.css?v=$link_version' type='text/css' media='all' />");
         }
     }

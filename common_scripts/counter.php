@@ -12,12 +12,10 @@ $standalone_counter (optional) - Indicates that the counter is being
 */
 //==============================================================================
 
-if (!function_exists('day_name'))
-{
+if (!function_exists('day_name')) {
     require("$base_dir/common_scripts/date_funct.php");
 }
-if (!function_exists('db_connect'))
-{
+if (!function_exists('db_connect')) {
     require("$base_dir/mysql_connect.php");
 }
 $db = db_connect($dbid);
@@ -33,13 +31,10 @@ $bot_identifiers = [
 'fetch',
 ];
 $is_bot = false;
-if (isset($_SERVER['HTTP_USER_AGENT']))
-{
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
     $user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
-    foreach ($bot_identifiers as $identifier)
-    {
-        if (strpos($user_agent, $identifier) !== FALSE)
-        {
+    foreach ($bot_identifiers as $identifier) {
+        if (strpos($user_agent, $identifier) !== FALSE) {
             $is_bot = true;
             break;
         }
@@ -50,38 +45,30 @@ if (isset($_SERVER['HTTP_USER_AGENT']))
 $this_year = (int)date('Y');
 $this_month = (int)date('m');
 $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='start_month'");
-if (($query_result) && ($row = mysqli_fetch_assoc($query_result)))
-{
+if (($query_result) && ($row = mysqli_fetch_assoc($query_result))) {
     $start_month = (int)$row['value'];
-    if ($this_month >= $start_month)
-    {
+    if ($this_month >= $start_month) {
         $start_year = $this_year;
     }
-    else
-    {
+    else {
         $start_year = $this_year - 1;
     }
-    if ($start_month == 1)
-    {
+    if ($start_month == 1) {
         $end_year = $start_year;
     }
-    else
-    {
+    else {
         $end_year = $start_year + 1;
     }
     $counter_enabled = true;
 }
-else
-{
+else {
     $counter_enabled = false;
 }
 
-if ($counter_enabled)
-{
+if ($counter_enabled) {
     // Check if a counter exists for the current year.
     $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='$end_year"."_count'");
-    if (mysqli_num_rows($query_result) == 0)
-    {
+    if (mysqli_num_rows($query_result) == 0) {
         // New counter year - add the required initialised records.
         mysqli_query($db,"INSERT INTO counter_info (id,value) VALUES ('$end_year"."_count','0')");
         mysqli_query($db,"INSERT INTO counter_info (id,value) VALUES ('$end_year"."_daily','0.0')");
@@ -91,12 +78,10 @@ if ($counter_enabled)
 
     // Obtain the current counter start date.
     $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='$end_year"."_start'");
-    if ($row = mysqli_fetch_assoc($query_result))
-    {
+    if ($row = mysqli_fetch_assoc($query_result)) {
         $counter_start_date = $row['value'];
     }
-    else
-    {
+    else {
         // This should not occur.
         exit;
     }
@@ -108,30 +93,25 @@ if ($counter_enabled)
 
     // Read the counter for the current year.
     $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='$end_year"."_count'");
-    if ($row = mysqli_fetch_assoc($query_result))
-    {
+    if ($row = mysqli_fetch_assoc($query_result)) {
         $counter_val = (int)$row['value'];
     }
-    else
-    {
+    else {
         // This should not occur.
         exit;
     }
 
-    if (((!isset($standalone_counter)) || (!$standalone_counter)) && (!$is_bot))
-    {
+    if (((!isset($standalone_counter)) || (!$standalone_counter)) && (!$is_bot)) {
         $ip_addr = $_SERVER['REMOTE_ADDR'];
         mysqli_query($db,"DELETE FROM counter_hits WHERE date<'$today_date'");
         $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date' AND ip_addr='$ip_addr'");
-        if (mysqli_num_rows($query_result) == 0)
-        {
+        if (mysqli_num_rows($query_result) == 0) {
             // First visit of the day for the given client, so update the counter
             $counter_val++;
             mysqli_query($db,"UPDATE counter_info SET value='$counter_val' WHERE id='$end_year"."_count'");
             mysqli_query($db,"INSERT INTO counter_hits VALUES('$today_date','$ip_addr',$counter_val)");
         }
-        elseif ($row = mysqli_fetch_assoc($query_result))
-        {
+        elseif ($row = mysqli_fetch_assoc($query_result)) {
             // Client has already visited today.
             $own_counter = $row['count'];
         }
@@ -144,8 +124,7 @@ if ($counter_enabled)
     $daily_average = sprintf("%01.1f",$counter_val/$days_counting);
     mysqli_query($db,"UPDATE counter_info SET value='$daily_average' WHERE id='$end_year"."_daily'");
 
-    if (!empty($standalone_counter))
-    {
+    if (!empty($standalone_counter)) {
         // Generate 'standalone counter' display (i.e. not on native web page).
         $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date'");
         $today_count = mysqli_num_rows($query_result);
@@ -156,21 +135,17 @@ if ($counter_enabled)
         print("<tr><td>Today:</td><td>$today_count</td></tr>\n");
         print("</table>\n");
     }
-    else
-    {
-        if (($display_counter) || (isset($_GET['showcount'])))
-        {
+    else {
+        if (($display_counter) || (isset($_GET['showcount']))) {
             // Generate normal counter display (i.e. on native web page).
             print("You are visitor number ");
-            if (isset($own_counter))
-            {
+            if (isset($own_counter)) {
                 $counter_val = $own_counter;
             }
             print(sprintf("<span class=\"counter\">&nbsp;%05d&nbsp;</span>",$counter_val));
             print(sprintf("<br />since %02d %s $start_year",$start_day, month_name($start_month)));
         }
-        if (isset($_GET['showcount']))
-        {
+        if (isset($_GET['showcount'])) {
             // Add daily average to the display.
             print(sprintf("<br/>Average %01.1f counts per day",$counter_val/$days_counting));
         }

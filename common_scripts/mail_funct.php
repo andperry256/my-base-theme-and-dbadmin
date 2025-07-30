@@ -19,12 +19,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-if (!is_dir($php_mailer_dir))
-{
+if (!is_dir($php_mailer_dir)) {
     exit("PHPMailer directory not defined");
 }
-else
-{
+else {
     require_once("$php_mailer_dir/src/PHPMailer.php");
     require_once("$php_mailer_dir/src/SMTP.php");
     require_once("$php_mailer_dir/src/Exception.php");
@@ -62,24 +60,20 @@ function get_imap_message($mbox,$mid,$noattach=false)
   
     // Body
     $struct = imap_fetchstructure($mbox,$mid);
-    if ((!isset($struct->parts)) || (!$struct->parts))
-    {
+    if ((!isset($struct->parts)) || (!$struct->parts)) {
         // Not multipart
         get_message_part($mbox,$mid,$struct,0,$noattach);
     }
-    else
-    {
+    else {
         // Multipart: iterate through each part
-        foreach ($struct->parts as $partno0=>$part)
-        {
+        foreach ($struct->parts as $partno0=>$part) {
             get_message_part($mbox,$mid,$part,$partno0+1,$noattach);
         }
     }
   
     $return_info = [];
     $return_info['header'] = $header;
-    if (strtolower($charset) == 'iso-8859-1')
-    {
+    if (strtolower($charset) == 'iso-8859-1') {
         $plainmsg = utf8_encode($plainmsg);
         $htmlmsg = utf8_encode($htmlmsg);
     }
@@ -96,39 +90,31 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
     global $htmlmsg,$plainmsg,$charset,$attachments;
   
     // Extract decode data
-    if($partno)
-    {
+    if($partno) {
         $data = imap_fetchbody($mbox,$mid,$partno);  // Multipart
     }
-    else
-    {
+    else {
         $data = imap_body($mbox,$mid);  // Not multipart
     }
   
     // Any part may be encoded, even plain text messages, so check everything.
     // No need to decode 7-bit, 8-bit, or binary.
-    if ($part->encoding==4)
-    {
+    if ($part->encoding==4) {
         $data = quoted_printable_decode($data);
     }
-    elseif ($part->encoding==3)
-    {
+    elseif ($part->encoding==3) {
         $data = base64_decode($data);
     }
   
     // Get all parameters, like charset, filenames of attachments, etc.
     $params = [];
-    if ((isset($part->parameters)) && ($part->parameters))
-    {
-        foreach ($part->parameters as $x)
-        {
+    if ((isset($part->parameters)) && ($part->parameters)) {
+        foreach ($part->parameters as $x) {
             $params[ strtolower( $x->attribute ) ] = $x->value;
         }
     }
-    if ((isset($part->dparameters)) && ($part->dparameters))
-    {
-        foreach ($part->dparameters as $x)
-        {
+    if ((isset($part->dparameters)) && ($part->dparameters)) {
+        foreach ($part->dparameters as $x) {
             $params[ strtolower( $x->attribute ) ] = $x->value;
         }
     }
@@ -136,15 +122,12 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
     // Check for attachment
     if ((!$noattach) &&
         (((isset($params['filename'])) && ($params['filename'])) ||
-         ((isset($params['name'])) && ($params['name']))))
-    {
+         ((isset($params['name'])) && ($params['name'])))) {
         // Filename may be given as 'filename', 'name' or both.
-        if ($params['filename'])
-        {
+        if ($params['filename']) {
             $filename = $params['filename'];
         }
-        else
-        {
+        else {
             $filename = $params['name'];
         }
     
@@ -153,8 +136,7 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
         $ext = $path_parts['extension'];
         $filename_base = substr($filename,0,strlen($filename)-strlen($ext)-1);
         $fileno = 0;
-        while (isset($attachments[$filename]))
-        {
+        while (isset($attachments[$filename])) {
             $fileno++;
             $filename = $filename_base.'-'."$fileno.$ext";
         }
@@ -166,23 +148,18 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
         fwrite($ofp,$data);
     
         // Add missing file extensions to image files where possible
-        if (empty($ext))
-        {
+        if (empty($ext)) {
             $image_type = exif_imagetype("$attachments_dir/$filename");
-             if ($image_type == IMAGETYPE_JPEG)
-            {
+             if ($image_type == IMAGETYPE_JPEG) {
                 rename("$attachments_dir/$filename","$attachments_dir/$filename.jpg");
             }
-            elseif ($image_type == IMAGETYPE_PNG)
-            {
+            elseif ($image_type == IMAGETYPE_PNG) {
                 rename("$attachments_dir/$filename","$attachments_dir/$filename.png");
             }
-            elseif ($image_type == IMAGETYPE_GIF)
-            {
+            elseif ($image_type == IMAGETYPE_GIF) {
                 rename("$attachments_dir/$filename","$attachments_dir/$filename.gif");
             }
-            elseif ($image_type == IMAGETYPE_BMP)
-            {
+            elseif ($image_type == IMAGETYPE_BMP) {
                 rename("$attachments_dir/$filename","$attachments_dir/$filename.bmp");
             }
         }
@@ -191,33 +168,27 @@ function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
     }
   
     // Check for text.
-    elseif ($part->type==0 && $data)
-    {
+    elseif ($part->type==0 && $data) {
         // Messages may be split in different parts because of inline attachments,
         // so append parts together with blank row.
-        if (strtolower($part->subtype)=='plain')
-        {
+        if (strtolower($part->subtype)=='plain') {
             $plainmsg .= trim($data) ."\n\n";
         }
-        else
-        {
+        else {
             $htmlmsg .= $data ."<br><br>";
         }
         $charset = $params['charset'];  // assume all parts are same charset
     }
   
     // Check for embedded message.
-    elseif ($part->type==2 && $data)
-    {
+    elseif ($part->type==2 && $data) {
         // Append raw source to main message.
         $plainmsg .= trim($data) ."\n\n";
     }
   
     // Subpart recursion
-    if ((isset($part->parts)) && ($part->parts))
-    {
-        foreach ($part->parts as $partno0=>$subpart)
-        {
+    if ((isset($part->parts)) && ($part->parts)) {
+        foreach ($part->parts as $partno0=>$subpart) {
             get_message_part($mbox,$mid,$subpart,$partno.'.'.($partno0+1));
         }
     }
@@ -272,96 +243,79 @@ function output_mail($mail_info,$host,$attachments=[])
 {
     global $default_sender_email;
     global $alt_sender_email;
-    foreach ($mail_info as $key => $value)
-    {
+    foreach ($mail_info as $key => $value) {
         $mail_info[$key] = trim($value);
     }
   
     // Check for mandatory data
-    if ((!isset($mail_info['from_name'])) || (empty($mail_info['from_name'])))
-    {
+    if ((!isset($mail_info['from_name'])) || (empty($mail_info['from_name']))) {
         // No originator name
         return [11,''];
     }
-    elseif ((!isset($mail_info['from_addr'])) || (empty($mail_info['from_addr'])))
-    {
+    elseif ((!isset($mail_info['from_addr'])) || (empty($mail_info['from_addr']))) {
         // No originator address
         return [12,''];
     }
-    elseif ((!isset($mail_info['to_addr'])) || (empty($mail_info['to_addr'])))
-    {
+    elseif ((!isset($mail_info['to_addr'])) || (empty($mail_info['to_addr']))) {
         // No destination address
         return [13,''];
     }
-    elseif ((!isset($mail_info['subject'])) || (empty($mail_info['subject'])))
-    {
+    elseif ((!isset($mail_info['subject'])) || (empty($mail_info['subject']))) {
         // No subject
         return [15,''];
     }
     elseif (((!isset($mail_info['html_content'])) || (empty($mail_info['html_content']))) &&
-            ((!isset($mail_info['plain_content'])) || (empty($mail_info['plain_content']))))
-    {
+            ((!isset($mail_info['plain_content'])) || (empty($mail_info['plain_content'])))) {
         // No content
         return [16,''];
     }
   
     // Process any default values
-    if ((!isset($mail_info['to_name'])) || (empty($mail_info['to_name'])))
-    {
+    if ((!isset($mail_info['to_name'])) || (empty($mail_info['to_name']))) {
         $mail_info['to_name'] = $mail_info['to_addr'];
     }
-    if (!isset($mail_info['reply_addr']))
-    {
+    if (!isset($mail_info['reply_addr'])) {
         $mail_info['reply_addr'] = '';
     }
-    if (!isset($mail_info['message_id']))
-    {
+    if (!isset($mail_info['message_id'])) {
         $mail_info['message_id'] = 0;
     }
   
     // Connect to database and request routing information
-    if ($db = mail_db_connect())
-    {
+    if ($db = mail_db_connect()) {
         $where_clause = 'orig_domain=?';
         $where_values = ['s',$host];
-        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'mail_routes','*',$where_clause,$where_values,'')))
-        {
+        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'mail_routes','*',$where_clause,$where_values,''))) {
             // Create PHPMailer object
             $mail = new PHPMailer();
             $mail->CharSet = 'UTF-8';
       
             // Process message content
-            if ((isset($mail_info['html_content'])) && (!empty($mail_info['html_content'])))
-            {
+            if ((isset($mail_info['html_content'])) && (!empty($mail_info['html_content']))) {
                 // HTML content present
                 $mail->IsHTML(true);
                 $mail->Body = $mail_info['html_content'];
-                if ((isset($mail_info['plain_content'])) && (!empty($mail_info['plain_content'])))
-                {
+                if ((isset($mail_info['plain_content'])) && (!empty($mail_info['plain_content']))) {
                     $mail->AltBody = $mail_info['plain_content'];
                 }
-                else
-                {
+                else {
                     $mail->AltBody = 'This e-mail must be viewed in an HTML compatible application.';
                 }
             }
-            else
-            {
+            else {
                 // No HTML content
                 $mail->IsHTML(false);
                 $mail->Body = $mail_info['plain_content'];
             }
       
             // Process any attachments
-            foreach($attachments as $key => $value)
-            {
+            foreach($attachments as $key => $value) {
                 $mail->AddAttachment($key);
             }
       
             // Process remaining info
             $mail->Subject = $mail_info['subject'];
-            if (!empty($mail_info['reply_addr']))
-            {
+            if (!empty($mail_info['reply_addr'])) {
                 $mail->AddReplyTo($mail_info['reply_addr'],$mail_info['from_name']);
             }
             $mail->AddAddress($mail_info['to_addr'],$mail_info['to_name']);
@@ -379,45 +333,38 @@ function output_mail($mail_info,$host,$attachments=[])
             // Send message and process result
             $send_retval = $mail->Send();
             $error_info = '';
-            if ($send_retval === false)
-            {
+            if ($send_retval === false) {
                 // Make a 2nd attempt to send
                 $send_retval = $mail->Send();
-                if ($send_retval !== false)
-                {
+                if ($send_retval !== false) {
                     // Success
                     log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
                     return [0,''];
                 }
         
                 // Send failure
-                if (isset($mail->ErrorInfo))
-                {
+                if (isset($mail->ErrorInfo)) {
                     $error_info = $mail->ErrorInfo;
                 }
-                else
-                {
+                else {
                     $error_info = '';
                 }
                 log_message_info_to_file(2,$mail->Host,$mail_info,$error_info);
                 return [2,$error_info];
             }
-            else
-            {
+            else {
                 // Success
                 log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
                 return [0,''];
             }
         }
-        else
-        {
+        else {
             // Mail route not found
             log_message_info_to_file(14,'',$mail_info,'');
             return [14,''];
         }
     }
-    else
-    {
+    else {
         // Cannot connect to remote DB
         log_message_info_to_file(1,'',$mail_info,'');
         return [1,''];
@@ -434,54 +381,42 @@ function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
 {
     global $mail_log_dir;
   
-    if (!is_dir("$mail_log_dir"))
-    {
+    if (!is_dir("$mail_log_dir")) {
         return;
     }
-    if (isset($mail_info['message_id']))
-    {
+    if (isset($mail_info['message_id'])) {
         $id = $mail_info['message_id'];
     }
-    else
-    {
+    else {
         $id = 0;
     }
-    if (isset($mail_info['from_name']))
-    {
+    if (isset($mail_info['from_name'])) {
         $from_name = trim($mail_info['from_name']);
     }
-    else
-    {
+    else {
         $from_name = '';
     }
-    if (isset($mail_info['from_addr']))
-    {
+    if (isset($mail_info['from_addr'])) {
         $from_addr = trim($mail_info['from_addr']);
     }
-    else
-    {
+    else {
         $from_addr = '';
     }
-    if (isset($mail_info['to_name']))
-    {
+    if (isset($mail_info['to_name'])) {
         $to_name = trim($mail_info['to_name']);
     }
-    else
-    {
+    else {
         $to_name = '';
     }
-    if (isset($mail_info['to_addr']))
-    {
+    if (isset($mail_info['to_addr'])) {
         $to_addr = trim($mail_info['to_addr']);
     }
-    else
-    {
+    else {
         $to_addr = '';
     }
     $log_file_name = 'mail-'.date('Y-m-d').'.log';
     $ofp = fopen("$mail_log_dir/$log_file_name",'a');
-    if ($ofp !== false)
-    {
+    if ($ofp !== false) {
         $line = date('H:i:s');
         $line .= " EC=$error_code ID=$id";
         $line .= "  MH=$host";
@@ -493,8 +428,7 @@ function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
         $line = str_replace("\r",'',$line);
         $line .= "\n";
         fprintf($ofp,$line);
-        if (!empty($error_info))
-        {
+        if (!empty($error_info)) {
             $line = "   Error Info: $error_info\n";
             fprintf($ofp,$line);
         }
@@ -514,8 +448,7 @@ function email_previous_day_mail_log($station_id,$from_addr)
     global $mail_log_dir;
     $yesterday_date = previous_date(TODAY_DATE);
     $log_file = "$mail_log_dir/mail-"."$yesterday_date.log";
-    if (is_file($log_file))
-    {
+    if (is_file($log_file)) {
         $message_info = [];
         $message_info['subject'] = "Mail Log File for $station_id on $yesterday_date";
         $message_info['plain_content'] = "See attachment.\n";
@@ -528,8 +461,7 @@ function email_previous_day_mail_log($station_id,$from_addr)
         $error_info = output_mail($message_info,$station_id,$attachments);
         return $error_info[0];
     }
-    else
-    {
+    else {
         return -1;
     }
 }

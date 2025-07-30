@@ -2,10 +2,8 @@
 //==============================================================================
 
 global $calendar_icon;
-if (!function_exists('datepicker_widget'))
-{
-    if (!isset($calendar_icon))
-    {
+if (!function_exists('datepicker_widget')) {
+    if (!isset($calendar_icon)) {
         $calendar_icon = 'calendar-cyan-20px.gif';
     }
     print("<link rel='stylesheet' type=\"text/css\" href=\"$db_admin_url/datepicker/css/jquery.datepick.css?v=$link_version\">\n");
@@ -18,12 +16,10 @@ if (!function_exists('datepicker_widget'))
     function datepicker_widget($field_name,$field_value)
     {
         global $new_date_start_year, $new_date_start_month;
-        if (!isset($new_date_start_year))
-        {
+        if (!isset($new_date_start_year)) {
             $new_date_start_year = 2010;
         }
-        if (!isset($new_date_start_month))
-        {
+        if (!isset($new_date_start_month)) {
             $new_date_start_month = 1;
         }
         print("<input type=\"text\" id=\"$field_name\" name=\"$field_name\"  value=\"$field_value\" size=\"10\" style=\"margin-right:0.5em\"

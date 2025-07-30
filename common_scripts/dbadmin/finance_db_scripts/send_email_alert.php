@@ -9,8 +9,7 @@
   $where_clause = 'rec_id=?';
   $where_values = ['s',$_GET['recid']];
   $query_result = mysqli_select_query($db,'email_alerts','*',$where_clause,$where_values,'');
-  if ($row = mysqli_fetch_assoc($query_result))
-  {
+  if ($row = mysqli_fetch_assoc($query_result)) {
       $message_info = [];
       $message_info['subject'] = $row['subject'];
       $message_info['plain_content'] = $row['content'];

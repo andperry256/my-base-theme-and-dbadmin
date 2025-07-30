@@ -9,45 +9,37 @@ script. On entry the following conditions must be met:-
 */
 //==============================================================================
 
-if (!isset($base_dir))
-{
+if (!isset($base_dir)) {
     exit("Path definitions file not found");
 }
 require_once("$base_dir/keycode.php");
 
-if (empty($_SERVER['REMOTE_ADDR']))
-{
+if (empty($_SERVER['REMOTE_ADDR'])) {
     $mode = 'command';
     $eol = "\n";
 }
-else
-{
+else {
     $mode = 'web';
     $eol = "<br />\n";
     print("<h1>Configure Linked Directories</h1>$eol");
 }
 
 $rewrite_rules = [];
-foreach ($dirs as $dir)
-{
+foreach ($dirs as $dir) {
     print("$eol*** Processing $dir ***$eol");
     $dir_path = "$files_subdomain_dir/$dir";
     $dirlist = scandir($dir_path);
-    foreach ($dirlist as $file)
-    {
-        if (substr($file,0,8)  == 'storage-')
-        {
+    foreach ($dirlist as $file) {
+        if (substr($file,0,8)  == 'storage-') {
             $storage_dir = $file;
             break;
         }
     }
-    if ($storage_dir == 'storage-000000')
-    {
+    if ($storage_dir == 'storage-000000') {
         // Local server
         $links_path = 'links-000000';
     }
-    else
-    {
+    else {
         // Online site
         $key = password_hash($key,PASSWORD_DEFAULT);
         $key = md5($key);

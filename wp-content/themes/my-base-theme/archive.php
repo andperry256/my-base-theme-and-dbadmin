@@ -19,12 +19,10 @@ get_header();
         //==============================================================================
 
         // Determine the user access level
-        if (session_var_is_set(SV_ACCESS_LEVEL))
-        {
+        if (session_var_is_set(SV_ACCESS_LEVEL)) {
             $user_access_level = get_session_var(SV_ACCESS_LEVEL);
         }
-        else
-        {
+        else {
             $user_access_level = DEFAULT_ACCESS_LEVEL;
         }
         
@@ -41,18 +39,15 @@ get_header();
 
         // Run the WordPress loop
         $local_query = new WP_Query($args);
-        if ( $local_query->have_posts() )
-        {
-            while ( $local_query->have_posts() )
-            {
+        if ( $local_query->have_posts() ) {
+            while ( $local_query->have_posts() ) {
                 $local_query->the_post();
                 display_post_summary(2,200,200);
                 print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
             }
             navigation_links('multi','');
         }
-        else
-        {
+        else {
             get_template_part( 'template-parts/content', 'none' );
         }
         wp_reset_postdata();

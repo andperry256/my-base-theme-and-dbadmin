@@ -19,18 +19,15 @@ $account = $_GET['-account'];
 $where_clause = 'label=?';
 $where_values = ['s',$account];
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
-if ($row = mysqli_fetch_assoc($query_result))
-{
+if ($row = mysqli_fetch_assoc($query_result)) {
     $account_type = $row['type'];
     $account_name = $row['name'];
 }
-else
-{
+else {
     $account_name = '';  // This should not occur
 }
 
-if (isset($_GET['selection']))
-{
+if (isset($_GET['selection'])) {
     // Save details of selected bank transaction
     $selected_rec_id = strtok($_GET['selection'],'^');
     $selected_date = strtok('^');
@@ -44,8 +41,7 @@ print("<h1>Reconcile Account ($account_name)</h1>\n");
 print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=_view_account_$account\">All&nbsp;Transactions</a></div>");
 print("<div style=\"clear:both\"></div>\n");
 
-if ((isset($_GET['message'])) && (!empty($_GET['message'])))
-{
+if ((isset($_GET['message'])) && (!empty($_GET['message']))) {
     print($_GET['message']);
 }
 
@@ -59,47 +55,38 @@ print("<option value=\"null\">Please select ...</option>\n");
 
 $dirlist = scandir($bank_import_dir);
 $csvlist = [];
-foreach ($dirlist as $file)
-{
-    if ((preg_match("/^Account_$account/",$file)) && (pathinfo($file,PATHINFO_EXTENSION) == 'csv'))
-    {
+foreach ($dirlist as $file) {
+    if ((preg_match("/^Account_$account/",$file)) && (pathinfo($file,PATHINFO_EXTENSION) == 'csv')) {
         $statement_date = substr(pathinfo($file,PATHINFO_FILENAME),strlen($account)+9);
         $csvlist["#$statement_date"] = true;
         krsort($csvlist);
     }
 }
 $count = 0;
-foreach ($csvlist as $key => $value)
-{
-    if ($key == '#')
-    {
+foreach ($csvlist as $key => $value) {
+    if ($key == '#') {
         // Single (continuous) CSV file
         print("<option value=\"IMPORT\"");
-        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT"))
-        {
+        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT")) {
             print(" selected");
         }
         print(">Re-Import CSV</option>\n");
     }
-    else
-    {
+    else {
         // Separate (dated) CSV files
         $date = substr($key,1);
         print("<option value=\"IMPORT-$date\"");
-        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT-$date"))
-        {
+        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT-$date")) {
             print(" selected");
         }
         print(">Re-Import CSV [$date]</option>\n");
     }
-    if (++$count >= 4)
-    {
+    if (++$count >= 4) {
         break;
     }
 }
 print("<option value=\"BULK\"");
-if ((isset($_GET['selection'])) && ($_GET['selection'] == "BULK"))
-{
+if ((isset($_GET['selection'])) && ($_GET['selection'] == "BULK")) {
     print(" selected");
 }
 print(">Bulk Reconcile</option>\n");
@@ -107,34 +94,27 @@ print(">Bulk Reconcile</option>\n");
 $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY rec_id DESC';
 $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,[],$add_clause);
-while ($row = mysqli_fetch_assoc($query_result))
-{
+while ($row = mysqli_fetch_assoc($query_result)) {
     $text = $row['date'].' | '.$row['description'].' | ';
     $amount = $row['amount'];
-    if (($account_type == 'bank') && ($amount > 0))
-    {
+    if (($account_type == 'bank') && ($amount > 0)) {
         $text .= sprintf("C %01.2f",$amount);
     }
-    elseif (($account_type == 'bank') && ($amount < 0))
-    {
+    elseif (($account_type == 'bank') && ($amount < 0)) {
         $text .= sprintf("D %01.2f",-$amount);
     }
-    elseif (($account_type == 'credit-card') && ($amount > 0))
-    {
+    elseif (($account_type == 'credit-card') && ($amount > 0)) {
         $text .= sprintf("Pmt %01.2f",$amount);
     }
-    elseif (($account_type == 'credit-card') && ($amount < 0))
-    {
+    elseif (($account_type == 'credit-card') && ($amount < 0)) {
         $text .= sprintf("Chg %01.2f",-$amount);
     }
-    if ($row['balance'] != 0)
-    {
+    if ($row['balance'] != 0) {
         $text .= ' | '.$row['balance'];
     }
     $value = "{$row['rec_id']}^{$row['date']}^{$row['amount']}^{$row['balance']}";
     print("<option value=\"$value\"");
-    if ((isset($_GET['selection'])) && ($_GET['selection'] == $value))
-    {
+    if ((isset($_GET['selection'])) && ($_GET['selection'] == $value)) {
         print(" selected");
     }
     print(">$text</option>\n");
@@ -149,8 +129,7 @@ print("<option value=\"null\">Please select ...</option>\n");
 print("<option value=\"IMPORT\">Re-Import CSV</option>\n");
 print("<option value=\"NONE\">Discard Bank Transaction</option>\n");
 print("<option value=\"NEW\"");
-if ((isset($_GET['selection'])) && ($match == 0))
-{
+if ((isset($_GET['selection'])) && ($match == 0)) {
     // No match on selected transation
     print(" selected");
 }
@@ -159,49 +138,40 @@ $where_clause = 'reconciled=0';
 $add_clause = 'ORDER BY payee ASC,date ASC,seq_no ASC';
 $query_result = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,[],$add_clause);
 $match_count = 0;
-while ($row = mysqli_fetch_assoc($query_result))
-{
+while ($row = mysqli_fetch_assoc($query_result)) {
     $date = $row['date'];
     $chq_no = $row['chq_no'];
     $payee = $row['payee'];
     $text = "$date | ";
-    if (!empty($chq_no))
-    {
+    if (!empty($chq_no)) {
         $text .= "$chq_no | ";
     }
     $text .= "$payee | ";
     $credit_amount = $row['credit_amount'];
     $debit_amount = $row['debit_amount'];
-    if ($credit_amount != 0)
-    {
+    if ($credit_amount != 0) {
         $text .= "C $credit_amount";
         $amount = $credit_amount;
     }
-    elseif ($debit_amount != 0)
-    {
+    elseif ($debit_amount != 0) {
         $text .= "D $debit_amount";
         $amount = -$debit_amount;
     }
-    else
-    {
+    else {
         $text .= "* Zero *";
         $amount = 0;
     }
     print("<option value=\"{$row['seq_no']}[$amount]\"");
-    if (isset($_GET['selection']))
-    {
-        if ((!empty($selected_date)) && (!empty($selected_amount)) && ($match == $row['seq_no']))
-        {
+    if (isset($_GET['selection'])) {
+        if ((!empty($selected_date)) && (!empty($selected_amount)) && ($match == $row['seq_no'])) {
             // Unique match
             print(" selected");
             $match_count = 1;
         }
-        elseif (substr($_GET['selection'],0,6) == 'IMPORT' )
-        {
+        elseif (substr($_GET['selection'],0,6) == 'IMPORT' ) {
             $match_count = 0;
         }
-        else
-        {
+        else {
             // Multiple match or no match
             $match_count = -$match;
         }
@@ -209,8 +179,7 @@ while ($row = mysqli_fetch_assoc($query_result))
     print(">$text</option>\n");
 }
 print("</select>\n");
-if ($match_count >= 2)
-{
+if ($match_count >= 2) {
     print("<br /><span style=\"font-weight:bold;color:orange\">WARNING</span> - There are <strong>$match_count</strong> potentially matching transactions.\n");
 }
 print("</td></tr>\n");

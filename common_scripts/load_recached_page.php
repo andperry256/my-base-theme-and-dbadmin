@@ -5,8 +5,7 @@ $tok1 = strtok(__DIR__,'/');
 $tok2 = strtok('/');
 $tok3 = strtok('/');
 $root_dir = "/$tok1/$tok2";
-if ($tok3 != 'public_html')
-{
+if ($tok3 != 'public_html') {
     // Extra directory level in special cases
     $root_dir .= "/$tok3";
 }

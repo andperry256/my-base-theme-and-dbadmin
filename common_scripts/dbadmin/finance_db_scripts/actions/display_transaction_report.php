@@ -11,14 +11,11 @@ $csv_line = 2;
 print("<h1>Transaction Report</h1>\n");
 $account_exclusions = select_excluded_accounts('account');
 $fund_exclusions = select_excluded_funds('fund');
-if (isset($_GET['autodates']))
-{
-    if (isset($_GET['start_date']))
-    {
+if (isset($_GET['autodates'])) {
+    if (isset($_GET['start_date'])) {
         $_POST['start_year'] = substr($_GET['start_date'],0,4);
         $_POST['start_month'] = substr($_GET['start_date'],5,2);
-        if (isset($_GET['end_date']))
-        {
+        if (isset($_GET['end_date'])) {
             $_POST['end_year'] = substr($_GET['end_date'],0,4);
             $_POST['end_month'] = substr($_GET['end_date'],5,2);
             $_POST['submitted'] = true;
@@ -28,145 +25,113 @@ if (isset($_GET['autodates']))
 }
 
 // Account filter
-if (!isset($_GET['account']))
-{
+if (!isset($_GET['account'])) {
     $account_name = '%';
 }
-else
-{
+else {
     $account_name = $_GET['account'];
-    if ($account_name == '-none-')
-    {
+    if ($account_name == '-none-') {
         print("<h2>Account - Unallocated</h2>\n");
     }
-    else
-    {
+    else {
         print("<h2>Account - $account_name</h2>\n");
     }
 }
 
 // Fund filter
-if (!isset($_GET['fund']))
-{
+if (!isset($_GET['fund'])) {
     $fund_name = '%';
 }
-else
-{
+else {
     $fund_name = urldecode($_GET['fund']);
-    if ($fund_name == '-none-')
-    {
+    if ($fund_name == '-none-') {
         print("<h2>Fund - Unallocated</h2>\n");
     }
-    elseif ($fund_name == '-transfer-')
-    {
+    elseif ($fund_name == '-transfer-') {
         print("<h2>Fund - Transfers</h2>\n");
     }
-    elseif (strpos($fund_name,'%') !== false)
-    {
+    elseif (strpos($fund_name,'%') !== false) {
         $superfund_name = strtok($fund_name,':');
         print("<h2>Fund - $superfund_name [ALL]</h2>\n");
     }
-    else
-    {
+    else {
         print("<h2>Fund - $fund_name</h2>\n");
     }
 }
 
 // Category filter
-if (!isset($_GET['category']))
-{
+if (!isset($_GET['category'])) {
     $category_name = '%';
 }
-else
-{
+else {
     $category_name = urldecode($_GET['category']);
-    if ($category_name == '-none-')
-    {
+    if ($category_name == '-none-') {
         print("<h2>Category - Unallocated</h2>\n");
     }
-    elseif ($category_name == '-transfer-')
-    {
+    elseif ($category_name == '-transfer-') {
         print("<h2>Category - Transfers</h2>\n");
     }
-    elseif (strpos($category_name,'%') !== false)
-    {
+    elseif (strpos($category_name,'%') !== false) {
         $supercategory_name = strtok($category_name,':');
         print("<h2>Category - $supercategory_name [ALL]</h2>\n");
     }
-    else
-    {
+    else {
         print("<h2>Category - $category_name</h2>\n");
     }
 }
 
 // Payee filter
-if (!isset($_GET['payee']))
-{
+if (!isset($_GET['payee'])) {
     $payee_name = '%';
 }
-else
-{
+else {
     $payee_name = urldecode($_GET['payee']);
-    if ($payee_name == '-none-')
-    {
+    if ($payee_name == '-none-') {
         print("<h2>Payee - Unallocated</h2>\n");
     }
-    else
-    {
+    else {
         print("<h2>Payee - $payee_name</h2>\n");
     }
 }
 
 // Currency filter
-if (isset($_GET['currency']))
-{
+if (isset($_GET['currency'])) {
     $currency = $_GET['currency'];
 }
-else
-{
+else {
     $currency = 'GBP';
 }
-if ($currency != 'GBP')
-{
+if ($currency != 'GBP') {
     print("<h2>Currency - $currency</h2>\n");
 }
 
 // Determine start and end months
 $error = false;
-if (isset($_GET['start_month']))
-{
+if (isset($_GET['start_month'])) {
     $start_month = $_GET['start_month'];
 }
-else
-{
+else {
     // Default to no date limit
     $start_month = NO_START_MONTH;
 }
-if (isset($_GET['end_month']))
-{
+if (isset($_GET['end_month'])) {
     $end_month = $_GET['end_month'];
 }
-else
-{
+else {
     // Default to no date limit
     $end_month = NO_END_MONTH;
 }
-if (isset($_POST['submitted']))
-{
-    switch ($_POST['date_range'])
-    {
+if (isset($_POST['submitted'])) {
+    switch ($_POST['date_range']) {
         case 'select':
-            if ((is_numeric($_POST['start_year'])) && (is_numeric($_POST['start_month'])))
-            {
+            if ((is_numeric($_POST['start_year'])) && (is_numeric($_POST['start_month']))) {
                 // Set start year/month to an actual date. Set end date if specified as being the same.
                 $start_month = sprintf("%04d-%02d",$_POST['start_year'],$_POST['start_month']);
-                if (($_POST['end_year'] == 'same') && ($_POST['end_month'] = 'same'))
-                {
+                if (($_POST['end_year'] == 'same') && ($_POST['end_month'] = 'same')) {
                     $end_month = $start_month;
                 }
             }
-            if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
-            {
+            if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month']))) {
                 // Set end year/month to an actual date.
                 $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
             }
@@ -182,8 +147,7 @@ if (isset($_POST['submitted']))
             $month_value = (int)substr($current_month,5,2);
             $year_value = (int)substr($current_month,0,4);
             $month_value--;
-            if ($month_value == 0)
-            {
+            if ($month_value == 0) {
                 $month_value = 12;
                 $year_value--;
             }
@@ -200,8 +164,7 @@ if (isset($_POST['submitted']))
             $year = (int)date('Y') - 1;
             $month = date('m');
             $day = date('d');
-            if ("$month-$day" == "02-29")
-            {
+            if ("$month-$day" == "02-29") {
                 $day = '28';
             }
             $start_month = year_start("$year-$month-$day");
@@ -209,29 +172,24 @@ if (isset($_POST['submitted']))
             break;
     }
 }
-if ($start_month > $end_month)
-{
+if ($start_month > $end_month) {
     $error = true;
     print("<p><b>ERROR</b> - start month is later than end month.</p>\n");
 }
 
-if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_GET['end_month']))) && (!$error))
-{
+if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_GET['end_month']))) && (!$error)) {
     mysqli_query_normal($db,"DROP TABLE IF EXISTS report");
     mysqli_query_normal($db,"CREATE TEMPORARY TABLE report LIKE transaction_report");
 
     $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND fund LIKE ? AND category LIKE ? AND payee LIKE ? AND sched_freq='#'";
     $where_values = ['s',$currency,'s',$account_name,'s',$fund_name,'s',$category_name,'s',$payee_name];
     $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         // Add transaction with matching parameters into the table
-        if (!empty($row['chq_no']))
-        {
+        if (!empty($row['chq_no'])) {
             $chq_no = $row['chq_no'];
         }
-        else
-        {
+        else {
             $chq_no = 'NULL';
         }
         $fields = "account,seq_no,split_no,date,chq_no,payee,credit_amount,debit_amount,fund,category,memo,acct_month,reconciled,target_account,source_account";
@@ -240,32 +198,27 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     }
 
     // Process associated splits as required
-    if (($fund_name != '%') || ($category_name != '%'))
-    {
+    if (($fund_name != '%') || ($category_name != '%')) {
         // Fund and/or category has been specified. Process any splits relating
         // to the given fund/category.
         $where_clause = "fund LIKE ? $fund_exclusions AND category LIKE ?";
         $where_values = ['s',$fund_name,'s',$category_name];
         $query_result = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
-        while ($row = mysqli_fetch_assoc($query_result))
-        {
+        while ($row = mysqli_fetch_assoc($query_result)) {
             // Check for transaction directly related to the split
             $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
             $where_values = ['s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']];
             $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-            if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
-            {
+            if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#')) {
                 // Add split with matching parameters into the table
                 $fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
                 $values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']];
                 mysqli_insert_query($db,'report',$fields,$values);
                 // Add record fields from parent transaction
-                if (!empty($row2['chq_no']))
-                {
+                if (!empty($row2['chq_no'])) {
                     $chq_no = $row2['chq_no'];
                 }
-                else
-                {
+                else {
                     $chq_no = 'NULL';
                 }
                 $set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
@@ -279,19 +232,16 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
             $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND source_account=? AND source_seq_no=?";
             $where_values = ['s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']];
             $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-            if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
-            {
+            if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#')) {
                 // Add split with matching parameters into the table
                 $fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
                 $values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',-$row['credit_amount'],'d',-$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']];
                 mysqli_insert_query($db,'report',$fields,$values);
                 // Add record fields from parent transaction
-                if (!empty($row2['chq_no']))
-                {
+                if (!empty($row2['chq_no'])) {
                     $chq_no = $row2['chq_no'];
                 }
-                else
-                {
+                else {
                     $chq_no = 'NULL';
                 }
                 $set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
@@ -302,31 +252,26 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
             }
         }
     }
-    elseif ($account_name != '%')
-    {
+    elseif ($account_name != '%') {
         // Account has been specified. All funds and categories are included.
         // Process all associated splits.
         $where_clause = "account IS NOT NULL $fund_exclusions";
         $query_result = mysqli_select_query($db,'splits','*',$where_clause,[],'');
-        while ($row = mysqli_fetch_assoc($query_result))
-        {
+        while ($row = mysqli_fetch_assoc($query_result)) {
             // Check for transaction directly related to the split
             $where_clause = "currency=? AND account LIKE ? $account_exclusions $fund_exclusions AND account=? AND seq_no=?";
             $where_values = ['s',$currency,'s',$account_name,'s',$row['account'],'i',$row['transact_seq_no']];
             $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-            if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#'))
-            {
+            if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['sched_freq'] == '#')) {
                 // Add split with matching parameters into the table
                 $fields = 'account,seq_no,split_no,credit_amount,debit_amount,fund,category,memo,acct_month';
                 $values = ['s',$row['account'],'i',$row['transact_seq_no'],'i',$row['split_no'],'d',$row['credit_amount'],'d',$row['debit_amount'],'s',$row['fund'],'s',$row['category'],'s',$row['memo'],'s',$row['acct_month']];
                 mysqli_insert_query($db,'report',$fields,$values);
                 // Add record fields from parent transaction
-                if (!empty($row2['chq_no']))
-                {
+                if (!empty($row2['chq_no'])) {
                     $chq_no = $row2['chq_no'];
                 }
-                else
-                {
+                else {
                     $chq_no = 'NULL';
                 }
                 $set_fields = 'date,chq_no,payee,reconciled,target_account,source_account';
@@ -357,84 +302,66 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     $where_clause = 'acct_month<=?';
     $where_values = ['s',$end_month];
     $query_result = mysqli_select_query($db,'report','*',$where_clause,$where_values,'');
-    if (mysqli_num_rows($query_result) == 0)
-    {
+    if (mysqli_num_rows($query_result) == 0) {
         // Empty result
         print("<p style=\"color:blue\">No transactions found</p>\n");
     }
-    else
-    {
+    else {
         $add_clause = 'ORDER BY acct_month ASC, date ASC, seq_no ASC, split_no ASC';
         $query_result = mysqli_select_query($db,'report','*','',[],$add_clause);
         $row_count = mysqli_num_rows($query_result);
-        while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count))
-        {
-            if ($row_count == 0)
-            {
+        while (($row = mysqli_fetch_assoc($query_result)) || ($row_no < $row_count)) {
+            if ($row_count == 0) {
                 // Empty result
                 print("<p style=\"color:blue\">No transactions found</p>\n");
                 break;
             }
-            elseif (($row_no == $row_count) || ($row['acct_month'] > $end_month))
-            {
+            elseif (($row_no == $row_count) || ($row['acct_month'] > $end_month)) {
                 // Set loop terminator
                 $accounting_month = '#';
             }
-            else
-            {
+            else {
                 $accounting_month = $row['acct_month'];
             }
-            if (($accounting_month < $start_month) && ($accounting_month != '#'))
-            {
+            if (($accounting_month < $start_month) && ($accounting_month != '#')) {
                 // Prior to start month
                 $row_no++;
-                if (($row['fund'] == '-split-') && (($fund_name != '%') || ($category_name != '%')))
-                {
+                if (($row['fund'] == '-split-') && (($fund_name != '%') || ($category_name != '%'))) {
                     // Transaction is a split but the fund and/or category has been specified - no action
                 }
-                elseif (($row['category'] == '-transfer-') && ($account_name == '%') && ($payee_name == '%'))
-                {
+                elseif (($row['category'] == '-transfer-') && ($account_name == '%') && ($payee_name == '%')) {
                     // Transaction is a transfer and the account and payee have not been specified - no action
                 }
-                else
-                {
+                else {
                     // Transaction would have been counted, so update running balance
                     $running_balance = add_money($running_balance,subtract_money($row['credit_amount'],$row['debit_amount']));
                 }
-                if ($row_no == $row_count)
-                {
+                if ($row_no == $row_count) {
                     print("<p style=\"color:blue\">No transactions found</p>\n");
                     break;
                 }
             }
-            elseif (($row['fund'] == '-split-') && (($fund_name != '%') || ($category_name != '%')))
-            {
+            elseif (($row['fund'] == '-split-') && (($fund_name != '%') || ($category_name != '%'))) {
                 // Transaction is a split but the fund and/or category has been specified
                 $row_no++;
             }
-            elseif (($row['category'] == '-transfer-') && ($account_name == '%') && ($payee_name == '%'))
-            {
+            elseif (($row['category'] == '-transfer-') && ($account_name == '%') && ($payee_name == '%')) {
                 // Transaction is a transfer and the account and payee have not been specified
                 $row_no++;
             }
-            else
-            {
-                if ($accounting_month != $last_accounting_month)
-                {
+            else {
+                if ($accounting_month != $last_accounting_month) {
                     // New month
-                    if (!empty($last_accounting_month))
-                    {
+                    if (!empty($last_accounting_month)) {
                         // Monthly total / end of table
                         print("<tr><td style=\"$table_cell_style\"><b>Total</b></td>");
                         print("<td style=\"$table_cell_style\">&nbsp;</td>");
                         print("<td style=\"$table_cell_style\">&nbsp;</td>");
                         print("<td style=\"$table_cell_style_ra\">");
-                        if ($monthly_total >= 0)
-                        {
+                        if ($monthly_total >= 0) {
                             printf("%01.2f", $monthly_total);
                         }
-                        else
-                        {
+                        else {
                             printf("<span style=\"color:red\">%01.2f</span>", $monthly_total);
                         }
                         $running_total = add_money($running_total,$monthly_total);
@@ -442,8 +369,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                         print("<td style=\"$table_cell_style\">&nbsp;</td></tr>\n");
                         print("</table>\n");
 
-                        if ($accounting_month == '#')
-                        {
+                        if ($accounting_month == '#') {
                             // Final iteration of loop (beyond last record of query)
                             print("<h2>Grand Total</h2>\n");
                             print("<table>\n");
@@ -454,12 +380,10 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                             print("<td style=\"$table_header_style_ra\" width=\"100px\">&nbsp;</td></tr>\n");
                             print("<td style=\"$table_cell_style\" colspan=\"3\">&nbsp;</td>");
                             print("<td style=\"$table_cell_style_ra\">");
-                            if ($running_total >= 0)
-                            {
+                            if ($running_total >= 0) {
                                 printf("%01.2f", $running_total);
                             }
-                            else
-                            {
+                            else {
                                 printf("<span style=\"color:red\">%01.2f</span>", $running_total);
                             }
                             print("</table>\n");
@@ -481,8 +405,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 }
                 // Date
                 print("<tr><td style=\"$table_cell_style\">{$row['date']}");
-                if ($accounting_month != accounting_month($row['date']))
-                {
+                if ($accounting_month != accounting_month($row['date'])) {
                     print('[*]');
                 }
                 print("</td>");
@@ -491,17 +414,14 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
 
                 // Account
-                if ($row2 = mysqli_fetch_assoc($query_result2))
-                {
+                if ($row2 = mysqli_fetch_assoc($query_result2)) {
                     $account_description = $row2['name'];
                 }
-                else
-                {
+                else {
                     $account_description = '';  // This should never occur
                 }
                 $split_no = $row['split_no'];
-                if ($split_no != 0)
-                {
+                if ($split_no != 0) {
                     $account_description = "$account_description [split]";
                 }
                 print("<td style=\"$table_cell_style\">$account_description</td>");
@@ -509,8 +429,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 // Description
                 $account = $row['account'];
                 $seq_no = $row['seq_no'];
-                if ($split_no == 0)
-                {
+                if ($split_no == 0) {
                     $primary_keys = [];
                     $primary_keys['account'] = $account;
                     $primary_keys['seq_no'] = $seq_no;
@@ -518,8 +437,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                     unset($primary_keys);
                     $edit_link = "index.php?-action=edit&-table=transactions&-recordid=$record_id";
                 }
-                else
-                {
+                else {
                     $primary_keys = [];
                     $primary_keys['account'] = $account;
                     $primary_keys['transact_seq_no'] = $seq_no;
@@ -530,8 +448,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 }
                 print("<td style=\"$table_cell_style\"><a href=\"$edit_link\" target=\"_blank\">");
                 print("{$row['payee']}<br />[F] {$row['fund']}<br />[C] {$row['category']}");
-                if (!empty($row['memo']))
-                {
+                if (!empty($row['memo'])) {
                     $tempstr= str_replace('%','%%',$row['memo']);
                     print("<br />[M] $tempstr");
                 }
@@ -540,48 +457,39 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
                 // Amount
                 $credit_amount = $row['credit_amount'];
                 $debit_amount = $row['debit_amount'];
-                if ($debit_amount != 0)
-                {
+                if ($debit_amount != 0) {
                     printf("<td style=\"$table_cell_style_ra\"><span style=\"color:red\">%01.2f</span></td>",-$debit_amount);
-                    if (($account_name != '%' ) && ($fund_name == '%') && ($category_name == '%') && ($row['category'] == '-split-') && (empty($row['source_account'])))
-                    {
+                    if (($account_name != '%' ) && ($fund_name == '%') && ($category_name == '%') && ($row['category'] == '-split-') && (empty($row['source_account']))) {
                         // Balances to be updated when processing splits.
                         $update_balances = false;
                     }
-                    else
-                    {
+                    else {
                         $monthly_total = subtract_money($monthly_total,$debit_amount);
                         $running_balance = subtract_money($running_balance,$debit_amount);
                         $update_balances = true;
                     }
                     $amount = -$debit_amount;
                 }
-                else
-                {
+                else {
                     printf("<td style=\"$table_cell_style_ra\">%01.2f</td>",$credit_amount);
-                    if (($account_name != '%' ) && ($fund_name == '%') && ($category_name == '%') && ($row['category'] == '-split-') && (empty($row['source_account'])))
-                    {
+                    if (($account_name != '%' ) && ($fund_name == '%') && ($category_name == '%') && ($row['category'] == '-split-') && (empty($row['source_account']))) {
                         // Balances to be updated when processing splits.
                         $update_balances = false;
                     }
-                    else
-                    {
+                    else {
                         $monthly_total = add_money($monthly_total,$credit_amount);
                         $running_balance = add_money($running_balance,$credit_amount);
                         $update_balances = true;
                     }
                     $amount = $credit_amount;
                 }
-                if (!$update_balances)
-                {
+                if (!$update_balances) {
                     print("<td style=\"$table_cell_style_ra\">&nbsp;</td>");
                 }
-                elseif ($running_balance < 0)
-                {
+                elseif ($running_balance < 0) {
                     printf("<td style=\"$table_cell_style_ra\"><span style=\"color:red\">%01.2f</span></td>",$running_balance);
                 }
-                else
-                {
+                else {
                     printf("<td style=\"$table_cell_style_ra\">%01.2f</td>",$running_balance);
                 }
 
@@ -610,8 +518,7 @@ print("<table cellpadding=\"5\">\n");
 print("<tr><td>Start Month:</td>\n");
 print("<td><select name=\"start_month\">\n");
 print("<option value=\"all\" selected>All Dates</option>\n");
-for ($month = 1; $month <= 12; $month++)
-{
+for ($month = 1; $month <= 12; $month++) {
     $month_name = month_name($month);
     print("<option value=\"$month\">$month_name</option>\n");
 }
@@ -619,8 +526,7 @@ print("</select></td>\n");
 print("<td><select name=\"start_year\">\n");
 print("<option value=\"all\" selected>All Dates</option>\n");
 $this_year = (int)date('Y');
-for ($year = START_YEAR; $year <= $this_year; $year++)
-{
+for ($year = START_YEAR; $year <= $this_year; $year++) {
     print("<option value=\"$year\">$year</option>\n");
 }
 print("</select></td></tr>\n");
@@ -628,8 +534,7 @@ print("<tr><td>End Month:</td>\n");
 print("<td><select name=\"end_month\">\n");
 print("<option value=\"same\" selected>Same as Start</option>\n");
 print("<option value=\"all\">All Dates</option>\n");
-for ($month = 1; $month <= 12; $month++)
-{
+for ($month = 1; $month <= 12; $month++) {
     $month_name = month_name($month);
     print("<option value=\"$month\">$month_name</option>\n");
 }
@@ -638,8 +543,7 @@ print("<td><select name=\"end_year\">\n");
 print("<option value=\"same\" selected>Same as Start</option>\n");
 print("<option value=\"all\">All Dates</option>\n");
 $this_year = (int)date('Y');
-for ($year = START_YEAR; $year <= $this_year; $year++)
-{
+for ($year = START_YEAR; $year <= $this_year; $year++) {
     print("<option value=\"$year\">$year</option>\n");
 }
 print("</select></td></tr>\n");

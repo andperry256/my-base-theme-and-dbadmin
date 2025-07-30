@@ -8,8 +8,7 @@
 */
 //================================================================================
 
-if (!function_exists('readable_markup'))
-{
+if (!function_exists('readable_markup')) {
     function readable_markup($str)
     {
         $str = str_replace("<","&lt;",$str);
@@ -21,8 +20,7 @@ if (!function_exists('readable_markup'))
 
 //==============================================================================
 
-if (!function_exists('output_back_button'))
-{
+if (!function_exists('output_back_button')) {
     function output_back_button($size)
     {
         print("<p><a href=# onclick=\"window.history.back()\"><button style=\"font-size:$size;\">&lt; Back</button></a></p>");

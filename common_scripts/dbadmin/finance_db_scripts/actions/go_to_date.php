@@ -9,8 +9,7 @@ $account = $_GET['account'];
 print("<h1>Go to Date</h1>\n");
 print("<p>Please select the required date. You will be redirected to the page containing the last entry for the given date");
 print(" using defaut pagination.</p>\n");
-if (isset($error_message))
-{
+if (isset($error_message)) {
     print("<p>ERROR - $error_message</p>\n");
 }
 

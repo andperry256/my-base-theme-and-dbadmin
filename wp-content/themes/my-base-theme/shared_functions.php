@@ -30,10 +30,8 @@ function set_default_header_image_paths()
 
     $desktop_header_image_path = '';
     $desktop_header_image_url = '';
-    foreach ($image_file_exts as $ext)
-    {
-        if (is_file("$current_theme_dir/header_image_desktop.$ext"))
-        {
+    foreach ($image_file_exts as $ext) {
+        if (is_file("$current_theme_dir/header_image_desktop.$ext")) {
             $desktop_header_image_path = "$current_theme_dir/header_image_desktop.$ext";
             $desktop_header_image_url = "$current_theme_url/header_image_desktop.$ext";
             break;
@@ -42,10 +40,8 @@ function set_default_header_image_paths()
 
     $intermediate_header_image_path = $desktop_header_image_path;
     $intermediate_header_image_url = $desktop_header_image_url;
-    foreach ($image_file_exts as $ext)
-    {
-        if (is_file("$current_theme_dir/header_image_intermediate.$ext"))
-        {
+    foreach ($image_file_exts as $ext) {
+        if (is_file("$current_theme_dir/header_image_intermediate.$ext")) {
             $intermediate_header_image_path = "$current_theme_dir/header_image_intermediate.$ext";
             $intermediate_header_image_url = "$current_theme_url/header_image_intermediate.$ext";
             break;
@@ -54,10 +50,8 @@ function set_default_header_image_paths()
 
     $mobile_header_image_path = $intermediate_header_image_path;
     $mobile_header_image_url = $intermediate_header_image_url;
-    foreach ($image_file_exts as $ext)
-    {
-        if (is_file("$current_theme_dir/header_image_mobile.$ext"))
-        {
+    foreach ($image_file_exts as $ext) {
+        if (is_file("$current_theme_dir/header_image_mobile.$ext")) {
             $mobile_header_image_path = "$current_theme_dir/header_image_mobile.$ext";
             $mobile_header_image_url = "$current_theme_url/header_image_mobile.$ext";
             break;
@@ -73,13 +67,11 @@ function set_default_header_image_paths()
 
 function set_header_image_paths($slug,$type)
 {
-    if (function_exists('set_custom_header_image_paths'))
-    {
+    if (function_exists('set_custom_header_image_paths')) {
         // Call child theme function
         set_custom_header_image_paths($slug,$type);
     }
-    else
-    {
+    else {
         // No action - the default paths will apply
     }
 }
@@ -94,24 +86,19 @@ function set_header_image_paths($slug,$type)
 
 function output_page_header()
 {
-    if (function_exists('get_secondary_title'))
-    {
+    if (function_exists('get_secondary_title')) {
         $secondary_title = get_secondary_title();
     }
-    else
-    {
+    else {
         $secondary_title = '';
     }
-    if ($secondary_title == '#')
-    {
+    if ($secondary_title == '#') {
         // No action
     }
-    elseif (!empty($secondary_title))
-    {
+    elseif (!empty($secondary_title)) {
         echo("<h1>$secondary_title</h1>\n");
     }
-    else
-    {
+    else {
         the_title( '<h1 class="entry-title">', '</h1>' );
     }
 }
@@ -140,17 +127,14 @@ function get_content_part($part_no)
     $content = $post->post_content;
     $content = apply_filters( 'the_content', $content );
 
-    if ($part_no == 0)
-    {
+    if ($part_no == 0) {
         // Use part number 0 to return whole page content.
     }
-    else
-    {
+    else {
         // Extract required part of page content.
         $pos1 = strpos($content,"[part$part_no]");
         $pos2 = strpos($content,"[/part$part_no]");
-        if (($pos1 === false) || ($pos2 === false))
-        {
+        if (($pos1 === false) || ($pos2 === false)) {
             return "**** Unable to retrieve part $part_no from page ****";
         }
         $pos1 += strlen("[part$part_no]");
@@ -184,39 +168,30 @@ function output_meta_data()
     global $meta_refresh_url_pars;
     global $location;
 
-    if ((isset($location)) && ($location == 'local'))
-    {
+    if ((isset($location)) && ($location == 'local')) {
         print("<meta name=\"robots\" content=\"noindex,nofollow\">\n");
     }
-    else
-    {
-        if ((isset($meta_description)) && (!empty($meta_description)))
-        {
+    else {
+        if ((isset($meta_description)) && (!empty($meta_description))) {
             print("<meta name=\"description\" content=\"$meta_description\">\n");
         }
         $robots_content = '';
-        if ((isset($meta_robots_noindex)) && ($meta_robots_noindex))
-        {
+        if ((isset($meta_robots_noindex)) && ($meta_robots_noindex)) {
             $robots_content = 'noindex';
         }
-        if ((isset($meta_robots_nofollow)) && ($meta_robots_nofollow))
-        {
-            if (!empty($robots_content))
-            {
+        if ((isset($meta_robots_nofollow)) && ($meta_robots_nofollow)) {
+            if (!empty($robots_content)) {
                 $robots_content .= ',';
             }
             $robots_content .= 'nofollow';
         }
-        if (!empty($robots_content))
-        {
+        if (!empty($robots_content)) {
             print("<meta name=\"robots\" content=\"$robots_content\">\n");
         }
     }
 
-    if ((isset($meta_refresh_interval)) && (isset($meta_refresh_url)) && (!isset($_GET['norefresh'])))
-    {
-        if (!isset($meta_refresh_url_pars))
-        {
+    if ((isset($meta_refresh_interval)) && (isset($meta_refresh_url)) && (!isset($_GET['norefresh']))) {
+        if (!isset($meta_refresh_url_pars)) {
             $meta_refresh_url_pars = '';
         }
         print("<meta http-equiv=\"refresh\" content=\"$meta_refresh_interval;URL='$meta_refresh_url/$meta_refresh_url_pars'\" />\n");
@@ -242,14 +217,11 @@ function output_stylesheet_link($path,$sub_path)
     $dir_path = str_replace($base_url,$base_dir,$path);
     print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-css'  href='$path/$sub_path/styles.css?v=$link_version' type='text/css' media='all' />\n");
 
-    if (function_exists('get_session_var'))
-    {
-        if ((get_session_var('theme_mode') == 'light') && (is_file("$dir_path/$sub_path/styles-light.css")))
-        {
+    if (function_exists('get_session_var')) {
+        if ((get_session_var('theme_mode') == 'light') && (is_file("$dir_path/$sub_path/styles-light.css"))) {
             print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-light-css'  href='$path/$sub_path/styles-light.css?v=$link_version' type='text/css' media='all' />\n");
         }
-        elseif ((get_session_var('theme_mode') == 'dark') && (is_file("$dir_path/$sub_path/styles-dark.css")))
-        {
+        elseif ((get_session_var('theme_mode') == 'dark') && (is_file("$dir_path/$sub_path/styles-dark.css"))) {
             print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-dark-css'  href='$path/$sub_path/styles-dark.css?v=$link_version' type='text/css' media='all' />\n");
         }
     }
@@ -272,20 +244,16 @@ function output_stylesheet_link($path,$sub_path)
 function include_inline_stylesheet($path)
 {
     print("<style>\n");
-    if (is_file($path))
-    {
+    if (is_file($path)) {
         include($path);
     }
     $light_theme_path = str_replace('.css','-light.css',$path);
     $dark_theme_path = str_replace('.css','-dark.css',$path);
-    if (function_exists('get_session_var'))
-    {
-        if ((get_session_var('theme_mode') == 'light') && (is_file($light_theme_path)))
-        {
+    if (function_exists('get_session_var')) {
+        if ((get_session_var('theme_mode') == 'light') && (is_file($light_theme_path))) {
         include($light_theme_path);
     }
-        elseif ((get_session_var('theme_mode') == 'dark') && (is_file($dark_theme_path)))
-        {
+        elseif ((get_session_var('theme_mode') == 'dark') && (is_file($dark_theme_path))) {
             include($dark_theme_path);
         }
     }
@@ -315,8 +283,7 @@ function include_inline_javascript($path)
 function save_php_error_log()
 {
     global $root_dir;
-    if (is_file("$root_dir/logs/php_error.log"))
-    {
+    if (is_file("$root_dir/logs/php_error.log")) {
         copy("$root_dir/logs/php_error.log","$root_dir/logs/php_error.log.sav");
     }
 }
@@ -324,12 +291,10 @@ function save_php_error_log()
 function restore_php_error_log()
 {
     global $root_dir;
-    if (is_file("$root_dir/logs/php_error.log"))
-    {
+    if (is_file("$root_dir/logs/php_error.log")) {
         unlink("$root_dir/logs/php_error.log");
     }
-    if (is_file("$root_dir/logs/php_error.log.sav"))
-    {
+    if (is_file("$root_dir/logs/php_error.log.sav")) {
         rename("$root_dir/logs/php_error.log.sav","$root_dir/logs/php_error.log");
     }
 }
@@ -345,34 +310,28 @@ function output_to_access_log($user='',$add_info='')
     global $access_logs_dir;
     global $base_dir;
     include("$base_dir/common_scripts/allowed_hosts.php");
-    if (is_dir($access_logs_dir))
-    {
+    if (is_dir($access_logs_dir)) {
         $date = date('Y-m-d');
         $ofp = fopen("$access_logs_dir/$date.log",'a');
         $time = date('H:i:s');
         $addr_str = $_SERVER['REMOTE_ADDR'];
-        if (is_local_ip($_SERVER['REMOTE_ADDR']))
-        {
+        if (is_local_ip($_SERVER['REMOTE_ADDR'])) {
             $addr_str = '[Local]';
         }
-        elseif (isset($allowed_hosts[$addr_str]))
-        {
+        elseif (isset($allowed_hosts[$addr_str])) {
             $addr_str = "[{$allowed_hosts[$addr_str]}]";
         }
         $addr_str = substr("$addr_str               ",0,15);
         $uri_str = str_replace('%','%%',$_SERVER['REQUEST_URI']);
         fprintf($ofp,"$date $time ".'-'." $addr_str $uri_str");
-        if (!empty($user))
-        {
+        if (!empty($user)) {
             fprintf($ofp," [user = $user]");
         }
-        if ((isset($_SERVER['HTTP_REFERER'])) && (!empty($_SERVER['HTTP_REFERER'])))
-        {
+        if ((isset($_SERVER['HTTP_REFERER'])) && (!empty($_SERVER['HTTP_REFERER']))) {
             $referrer_str = str_replace('%','%%',$_SERVER['HTTP_REFERER']);
             fprintf($ofp,$referrer_str);
         }
-        if (!empty($add_info))
-        {
+        if (!empty($add_info)) {
             fprintf($ofp," [$add_info]");
         }
         fprintf($ofp,"\n");
@@ -394,8 +353,7 @@ function output_to_access_log($user='',$add_info='')
 function simplify_html_tag($content,$tag)
 {
     $pos1 = strpos($content,"<$tag");
-    while ($pos1 !== false)
-    {
+    while ($pos1 !== false) {
         $pos2 = strpos($content,'>',$pos1);
         $content = substr($content,0,$pos1+strlen($tag)+1).substr($content,$pos2);
         $pos1 = strpos($content,"<$tag",$pos1+1);
@@ -420,8 +378,7 @@ function simplify_html_tag($content,$tag)
 function simplify_html($content)
 {
     global $allowed_tags, $simplified_tags;
-    if (!isset($allowed_tags))
-    {
+    if (!isset($allowed_tags)) {
         /*
         The '$allowed_tags' array specifies those tags that are to be retained in the
         generated HTML code. This is the default version but can be overridden by
@@ -429,8 +386,7 @@ function simplify_html($content)
         */
         $allowed_tags = ['<p>','<br>','<a>','<table>','<th>','<tr>','<td>','<ul>','<ol>','<li>','<b>','<strong>','<i>','<em>','<u>'];
     }
-    if (!isset($simplified_tags))
-    {
+    if (!isset($simplified_tags)) {
         /*
         The '$simplified_tags' array specifies those tag types for which the
         'simplify_html_tag' function is to be run. This is the default version but
@@ -442,8 +398,7 @@ function simplify_html($content)
     // Strip out any <style> tags. This is done long-hand as there have been
     // issues when just relying on the call to strip_tags.
     $pos1 = strpos($content,'<style');
-    while ($pos1 !== false)
-    {
+    while ($pos1 !== false) {
         $pos2 = strpos($content,'</style>',$pos1);
         $content = substr($content,0,$pos1).substr($content,$pos2+8);
         $pos1 = strpos($content,'<style',$pos1+1);
@@ -453,8 +408,7 @@ function simplify_html($content)
     $content = strip_tags($content,$allowed_tags);
 
     // Apply the simplify_html_tag function to selected tag types
-    foreach ($simplified_tags as $tag)
-    {
+    foreach ($simplified_tags as $tag) {
         $content = simplify_html_tag($content,$tag);
     }
     $content = str_replace('<li><p>','<li>',$content);
@@ -485,39 +439,32 @@ function recache_page($page_path,$run_count=1)
 {
     global $cache_dir;
     global $base_url;
-    if ((!isset($cache_dir)) || (!defined('WP_DBID')))
-    {
+    if ((!isset($cache_dir)) || (!defined('WP_DBID'))) {
         // Return with no action/error.
         return;
     }
     $db = db_connect(WP_DBID);
-    if (strpos($page_path,'/') === false)
-    {
+    if (strpos($page_path,'/') === false) {
         // Parameter is a page slug - build full sub-path by looping through page hierarchy.
         $uri_subpath = '';
         $where_clause = 'post_name=?';
         $where_values = ['s',$page_path];
-        while($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'')))
-        {
+        while($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) {
             $uri_subpath = "{$row['post_name']}/$uri_subpath";
-            if ($row['post_parent'] == 0)
-            {
+            if ($row['post_parent'] == 0) {
                 break;
             }
-            else
-            {
+            else {
                 $where_clause = 'ID=?';
                 $where_values = ['i',$row['post_parent']];
             }
         }
-        if (substr($uri_subpath,0,5) == 'home/')
-        {
+        if (substr($uri_subpath,0,5) == 'home/') {
             $uri_subpath = substr($uri_subpath,5);
         }
         $uri_subpath = trim($uri_subpath,'/');
     }
-    else
-    {
+    else {
         // Parameter is a full URI sub-path.
         $uri_subpath = $page_path;
     }
@@ -528,16 +475,12 @@ function recache_page($page_path,$run_count=1)
     $cache_subdir = rtrim($cache_subdir,'/');
 
     // Run operation for prescribed number of times.
-    for ($i=1; $i<=$run_count; $i++)
-    {
+    for ($i=1; $i<=$run_count; $i++) {
         // Delete cache files for page.
-        if (is_dir($cache_subdir))
-        {
+        if (is_dir($cache_subdir)) {
             $dirlist = scandir($cache_subdir);
-            foreach ($dirlist as $file)
-            {
-                if (is_file("$cache_subdir/$file"))
-                {
+            foreach ($dirlist as $file) {
+                if (is_file("$cache_subdir/$file")) {
                     unlink("$cache_subdir/$file");
                 }
             }
@@ -559,16 +502,14 @@ function recache_page($page_path,$run_count=1)
 
 function recache_all_pages($type='page')
 {
-    if (defined('WP_DBID'))
-    {
+    if (defined('WP_DBID')) {
         $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
         $db = db_connect(WP_DBID);
         $where_clause = "post_type='$type' AND post_status='publish'";
         $where_values = [];
         $add_clause = "ORDER BY post_name ASC";
         $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
-        while ($row = mysqli_fetch_assoc($query_result))
-        {
+        while ($row = mysqli_fetch_assoc($query_result)) {
             set_time_limit(30);
             print("Re-caching $type [{$row['post_name']}]$eol");
             recache_page($row['post_name']);
@@ -591,22 +532,18 @@ function create_cache_reload_link()
 {
     global $base_url;
     $recache_indicator = (defined('RECACHE_INDICATOR')) ? RECACHE_INDICATOR : 'recache';
-    if (isset($_GET[$recache_indicator]))
-    {
+    if (isset($_GET[$recache_indicator])) {
         $uri_path = $_SERVER['REQUEST_URI'];
         $pos1 = strpos($uri_path,"?$recache_indicator");
         $pos2 = strpos($uri_path,"&$recache_indicator");
-        if ($pos1 !== false)
-        {
+        if ($pos1 !== false) {
             $uri_path = substr($uri_path,0,$pos1);
         }
-        elseif ($pos2 !== false)
-        {
+        elseif ($pos2 !== false) {
             $uri_path = substr($uri_path,0,$pos2);
         }
         $uri_path = trim($uri_path,'/');
-        if (empty($uri_path))
-        {
+        if (empty($uri_path)) {
             $uri_path = 'home';
         }
         print("<meta http-equiv=\"refresh\" content=\"0;URL='$base_url/common_scripts/load_recached_page.php?uripath=$uri_path'\" />\n");
@@ -625,20 +562,16 @@ WordPress loop is not in operation.
 
 function substitute_shortcodes($text)
 {
-    if (!defined('NO_COPY_SHORTCODE'))
-    {
+    if (!defined('NO_COPY_SHORTCODE')) {
         $text = str_replace('[copy]','&copy;',$text);
     }
-    if (!defined('NO_NBSP_SHORTCODE'))
-    {
+    if (!defined('NO_NBSP_SHORTCODE')) {
         $text = str_replace('[nbsp]','&nbsp;',$text);
     }
-    if (!defined('NO_POUND_SHORTCODE'))
-    {
+    if (!defined('NO_POUND_SHORTCODE')) {
         $text = str_replace('[pound]','&pound;',$text);
     }
-    if (!defined('NO_SQUOT_SHORTCODE'))
-    {
+    if (!defined('NO_SQUOT_SHORTCODE')) {
         $text = str_replace('[squot]',"'",$text);
     }
     return $text;
@@ -674,13 +607,11 @@ built-in function introduced in WordPress 6.7.
 */
 function get__user()
 {
-    if (session_var_is_set(SV_USER))
-    {
+    if (session_var_is_set(SV_USER)) {
         // User logged in
         return get_session_var(SV_USER);
     }
-    else
-    {
+    else {
         // No user logged in
         return '';
     }
@@ -690,30 +621,26 @@ function get__user()
 
 function put_user($username)
 {
-    if (empty($username))
-    {
+    if (empty($username)) {
         // Perform operations for user logout
         $db = db_connect(WP_DBID);
         update_session_var(SV_USER,'');
         update_session_var(SV_ACCESS_LEVEL,DEFAULT_ACCESS_LEVEL);
         setcookie(LOGIN_COOKIE_ID,'',time()-3600,LOGIN_COOKIE_PATH);
         $session_id = session_id();
-        if (!empty($session_id))
-        {
+        if (!empty($session_id)) {
             $where_clause = 'session_id=? AND (name=? OR name=?)';
             $where_values = ['s',$session_id,'s',SV_USER,'s',SV_ACCESS_LEVEL];
             mysqli_delete_query($db,'wp_session_updates',$where_clause,$where_values);
         }
     }
-    else
-    {
+    else {
         // Perform operations for user login
         update_session_var(SV_USER,$username);
         update_session_var(SV_ACCESS_LEVEL,user_access_level($username));
     }
     // Perform any additional site-specific operations
-    if (function_exists('put_user_additions'))
-    {
+    if (function_exists('put_user_additions')) {
         put_user_additions($username);
     }
 }
@@ -722,12 +649,10 @@ function put_user($username)
 
 function get_access_level()
 {
-    if (session_var_is_set(SV_ACCESS_LEVEL))
-    {
+    if (session_var_is_set(SV_ACCESS_LEVEL)) {
         return get_session_var(SV_ACCESS_LEVEL);
     }
-    else
-    {
+    else {
         return DEFAULT_ACCESS_LEVEL;
     }
 }
@@ -743,30 +668,25 @@ function check_login_status($db)
     $expiry_time = $current_time+USER_LOGIN_TIMEOUT;
     $date_and_time = date('Y-m-d H:i:s',$current_time);
     mysqli_query($db,"DELETE FROM login_sessions WHERE update_time<$purge_time");
-    if (isset($_COOKIE[LOGIN_COOKIE_ID]))
-    {
+    if (isset($_COOKIE[LOGIN_COOKIE_ID])) {
         $login_id = $_COOKIE[LOGIN_COOKIE_ID];
-        if ((!empty($login_id)) && ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM login_sessions WHERE id='$login_id'"))))
-        {
+        if ((!empty($login_id)) && ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM login_sessions WHERE id='$login_id'")))) {
             // Update user, login cookie and DB record
             put_user($row['username']);
             mysqli_query($db,"UPDATE login_sessions SET update_time=$current_time,date_and_time='$date_and_time' WHERE id='$login_id'");
-            if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR))
-            {
+            if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR)) {
                 mysqli_query($db,"UPDATE login_sessions SET remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
             }
             setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
         }
     }
-    elseif ((!empty($username)) && (!empty($access_level)))
-    {
+    elseif ((!empty($username)) && (!empty($access_level))) {
         // New login - create cookie and associated login session record
         $login_id = md5($username.date('YmdHis'));
         $query = "INSERT INTO login_sessions (id,username,access_level,update_time,date_and_time)";
         $query .= " VALUES ('$login_id','$username','$access_level',$current_time,'$date_and_time')";
         mysqli_query($db,$query);
-        if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR))
-        {
+        if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR)) {
             mysqli_query($db,"UPDATE login_sessions SET remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
         }
         setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
@@ -779,8 +699,7 @@ function log_user_out($db)
 {
     // Clear all user info, including the cookie and login session record.
     put_user('');
-    if (isset($_COOKIE[LOGIN_COOKIE_ID]))
-    {
+    if (isset($_COOKIE[LOGIN_COOKIE_ID])) {
         $login_id = $_COOKIE[LOGIN_COOKIE_ID];
         mysqli_query($db,"DELETE FROM login_sessions WHERE id='$login_id'");
         $expiry_time = time() - 3600;
@@ -805,42 +724,33 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
     $query_result = mysqli_select_query($db1,'wp_posts','*',$where_clause,$where_values,'');
 
     // Loop through posts in source database.
-    while ($row1 = mysqli_fetch_assoc($query_result))
-    {
+    while ($row1 = mysqli_fetch_assoc($query_result)) {
         $post_name = $row1['post_name'];
         $where_clause = "post_name=? AND post_status='publish'";
         $where_values = ['s',$row1['post_name']];
-        if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_posts','*',$where_clause,$where_values,'')))
-        {
+        if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_posts','*',$where_clause,$where_values,''))) {
             // Matching post name found in target database.
             $query = "SELECT * FROM wp_terms LEFT JOIN wp_term_taxonomy ON wp_terms.term_id=wp_term_taxonomy.term_ID WHERE slug='$category' AND taxonomy='category'";
             $category_match = false;
-            if (empty($category))
-            {
+            if (empty($category)) {
                 $category_match = true;
             }
             elseif (($row3 = mysqli_fetch_assoc(mysqli_query($db1,$query))) &&
-                    ($row4 = mysqli_fetch_assoc(mysqli_query($db2,$query))))
-            {
+                    ($row4 = mysqli_fetch_assoc(mysqli_query($db2,$query)))) {
                 // Category exists in both DBs. Now check if both posts are in that category.
                 if (($row5 = mysqli_fetch_assoc(mysqli_query($db1,"SELECT * FROM wp_term_relationships WHERE object_id={$row1['ID']} AND term_taxonomy_id={$row3['term_taxonomy_id']}"))) &&
-                    ($row6 = mysqli_fetch_assoc(mysqli_query($db2,"SELECT * FROM wp_term_relationships WHERE object_id={$row2['ID']} AND term_taxonomy_id={$row4['term_taxonomy_id']}"))))
-                {
+                    ($row6 = mysqli_fetch_assoc(mysqli_query($db2,"SELECT * FROM wp_term_relationships WHERE object_id={$row2['ID']} AND term_taxonomy_id={$row4['term_taxonomy_id']}")))) {
                     $category_match = true;
                 }
             }
-            if ($category_match)
-            {
+            if ($category_match) {
                 $where_clause = "post_id=? AND meta_key='inhibit_sync'";
                 $where_values = ['post_id',$row2['ID']];
-                if ($row3 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values,'')));
-                {
+                if ($row3 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values,''))); {
                     $inhibit_sync = ($row3['meta_value']) ?? false;
                 }
-                if (empty($inhibit_sync))
-                {
-                    if (($option == 'timestamp') && ($row1['post_date'] != $row2['post_date']))
-                    {
+                if (empty($inhibit_sync)) {
+                    if (($option == 'timestamp') && ($row1['post_date'] != $row2['post_date'])) {
                         // Synchronise post timestamp.
                         echo "Synchronising timestamp for post $post_name\n";
                         $where_clause = "post_name=?";
@@ -849,10 +759,8 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                         $values = ['s',$row1['post_date'],'s',$row1['post_date_gmt']];
                         mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                     }
-                    elseif ($option == 'content')
-                    {
-                        if ($row1['post_content'] != $row2['post_content'])
-                        {
+                    elseif ($option == 'content') {
+                        if ($row1['post_content'] != $row2['post_content']) {
                             // Synchronise post content.
                             echo "Synchronising content for post $post_name\n";
                             $where_clause = "post_name=?";
@@ -862,15 +770,13 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                             mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                         }
                         // Synchronise any meta values.
-                        foreach ($meta_fields as $field)
-                        {
+                        foreach ($meta_fields as $field) {
                             $where_clause = 'post_id=? AND meta_key=?';
                             $where_values_1 = ['',$row1['ID'],'s',$field];
                             $where_values_2 = ['',$row2['ID'],'s',$field];
                             if (($row3 = mysqli_fetch_assoc(mysqli_select_query($db1,'wp_postmeta','*',$where_clause,$where_values_1,''))) &&
                                 ($row4 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values_2,''))) &&
-                                ($row3['meta_value'] != $row4['meta_value']))
-                            {
+                                ($row3['meta_value'] != $row4['meta_value'])) {
                                 echo "Synchronising meta value for post $post_name => $field\n";
                                 $fields = 'meta_value';
                                 $values = ['s',$row3['meta_value']];
@@ -936,20 +842,16 @@ calling software.
 function load_codemirror($sub_path)
 {
     global $use_codemirror, $base_dir;
-    if ((isset($use_codemirror[$sub_path]['dbid'])) && (function_exists('get_base_table')))
-    {
-        if (isset($_GET['-table']))
-        {
+    if ((isset($use_codemirror[$sub_path]['dbid'])) && (function_exists('get_base_table'))) {
+        if (isset($_GET['-table'])) {
             // Do a lookup on the current table.
             $option = get_base_table($_GET['-table'],db_connect($use_codemirror[$sub_path]['dbid']));
         }
-        else
-        {
+        else {
             // Do a lookup on the current action.
             $option = $_GET['-action'] ?? '';
         }
-        if (isset($use_codemirror[$sub_path][$option]))
-        {
+        if (isset($use_codemirror[$sub_path][$option])) {
             include("$base_dir/libraries/codemirror_links.php");
         }
     }
@@ -988,38 +890,31 @@ function output_font_stylesheet_links()
     require(__DIR__.'/font_lists.php');
 
     // Set up variables for main, header and mono fonts.
-    if ((!isset($main_font)) || (!isset($main_fonts[$main_font])))
-    {
+    if ((!isset($main_font)) || (!isset($main_fonts[$main_font]))) {
         $main_font = $default_main_font;
     }
     $lc_main_font = strtolower($main_font);
     $lc_main_font = str_replace(' ','_',$lc_main_font);
-    if ((!isset($header_font)) || (!isset($main_fonts[$header_font])))
-    {
+    if ((!isset($header_font)) || (!isset($main_fonts[$header_font]))) {
         $header_font = $default_header_font;
     }
     $lc_header_font = strtolower($header_font);
     $lc_header_font = str_replace(' ','_',$lc_header_font);
-    if ((!isset($mono_font)) || (!isset($main_fonts[$mono_font])))
-    {
+    if ((!isset($mono_font)) || (!isset($main_fonts[$mono_font]))) {
         $mono_font = $default_mono_font;
     }
     $lc_mono_font = strtolower($mono_font);
     $lc_mono_font = str_replace(' ','_',$lc_mono_font);
 
-    if (isset($_GET['reloadfonts']))
-    {
+    if (isset($_GET['reloadfonts'])) {
         // Regenerate CSS files for all available fonts.
         $dirlist = scandir($base_theme_dir);
-        foreach($dirlist as $file)
-        {
-            if ((strpos($file,'_font_') !== false) && (pathinfo($file,PATHINFO_EXTENSION) == 'css'))
-            {
+        foreach($dirlist as $file) {
+            if ((strpos($file,'_font_') !== false) && (pathinfo($file,PATHINFO_EXTENSION) == 'css')) {
                 unlink("$base_theme_dir/$file");
             }
         }
-        foreach ($main_fonts as $font => $link)
-        {
+        foreach ($main_fonts as $font => $link) {
             $lc_font = strtolower($font);
             $lc_font = str_replace(' ','_',$lc_font);
             $ofp = fopen("$base_theme_dir/main_font_$lc_font.css",'w');
@@ -1029,8 +924,7 @@ function output_font_stylesheet_links()
             fprintf($ofp,"$header_elements {\nfont-family: '$font', sans-serif;\n}\n");
             fclose($ofp);
         }
-        foreach ($mono_fonts as $font => $link)
-        {
+        foreach ($mono_fonts as $font => $link) {
             $lc_font = strtolower($font);
             $lc_font = str_replace(' ','_',$lc_font);
             $ofp = fopen("$base_theme_dir/mono_font_$lc_font.css",'w');
@@ -1038,24 +932,20 @@ function output_font_stylesheet_links()
             fclose($ofp);
         }
     }
-    else
-    {
-        if (!is_file("$base_theme_dir/main_font_$lc_main_font.css"))
-        {
+    else {
+        if (!is_file("$base_theme_dir/main_font_$lc_main_font.css")) {
             // Regenerate CSS file for assigned main font.
             $ofp = fopen("$base_theme_dir/main_font_$lc_main_font.css",'w');
             fprintf($ofp,"$main_elements {\nfont-family: '$main_font', sans-serif;\n}\n");
             fclose($ofp);
         }
-        if (!is_file("$base_theme_dir/header_font_$lc_header_font.css"))
-        {
+        if (!is_file("$base_theme_dir/header_font_$lc_header_font.css")) {
             // Regenerate CSS file for assigned header font.
             $ofp = fopen("$base_theme_dir/header_font_$lc_header_font.css",'w');
             fprintf($ofp,"$header_elements {\nfont-family: '$header_font', sans-serif;\n}\n");
             fclose($ofp);
         }
-        if (!is_file("$base_theme_dir/mono_font_$lc_mono_font.css"))
-        {
+        if (!is_file("$base_theme_dir/mono_font_$lc_mono_font.css")) {
             // Regenerate CSS file for assigned mono font.
             $ofp = fopen("$base_theme_dir/mono_font_$lc_mono_font.css",'w');
             fprintf($ofp,"$mono_elements {\nfont-family: '$mono_font', sans-serif;\n}\n");
@@ -1068,44 +958,36 @@ function output_font_stylesheet_links()
     print("<link rel='preconnect' href='https://fonts.googleapis.com'>\n");
     print("<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>\n");
     print("<link rel='stylesheet' id='main-font-css1'  href='{$main_fonts[$main_font]}' type='text/css' media='all' />\n");
-    if ($header_font != $main_font)
-    {
+    if ($header_font != $main_font) {
         print("<link rel='stylesheet' id='header-font-css1'  href='{$main_fonts[$header_font]}' type='text/css' media='all' />\n");
     }
     print("<link rel='stylesheet' id='mono-font-css1'  href='{$mono_fonts[$mono_font]}' type='text/css' media='all' />\n");
 
     // Create link to CSS for main font.
-    if (is_file("$base_theme_dir/main_font_$lc_main_font.css"))
-    {
+    if (is_file("$base_theme_dir/main_font_$lc_main_font.css")) {
         print("<link rel='stylesheet' id='main-font-css2'  href='$base_theme_url/main_font_$lc_main_font.css?v=$link_version' media='all' />\n");
     }
-    else
-    {
+    else {
         // This should not occur unless folder permissions prevent creation of CSS file.
         print("<style>\n$main_elements {\nfont-family: '$main_font', sans-serif;\n</style>\n");
     }
 
     // Create link to CSS for header font.
-    if ($header_font != $main_font)
-    {
-        if (is_file("$base_theme_dir/header_font_$lc_header_font.css"))
-        {
+    if ($header_font != $main_font) {
+        if (is_file("$base_theme_dir/header_font_$lc_header_font.css")) {
             print("<link rel='stylesheet' id='header-font-css2'  href='$base_theme_url/header_font_$lc_header_font.css?v=$link_version' media='all' />\n");
         }
-        else
-        {
+        else {
             // This should not occur unless folder permissions prevent creation of CSS file.
             print("<style>\n$header_elements {\nfont-family: '$header_font', sans-serif;\n</style>\n");
         }
     }
 
     // Create link to CSS for mono font.
-    if (is_file("$base_theme_dir/mono_font_$lc_mono_font.css"))
-    {
+    if (is_file("$base_theme_dir/mono_font_$lc_mono_font.css")) {
         print("<link rel='stylesheet' id='mono-font-css2'  href='$base_theme_url/mono_font_$lc_mono_font.css?v=$link_version' media='all' />\n");
     }
-    else
-    {
+    else {
         // This should not occur unless folder permissions prevent creation of CSS file.
         print("<style>\n$mono_elements {\nfont-family: '$mono_font', sans-serif;\n</style>\n");
     }

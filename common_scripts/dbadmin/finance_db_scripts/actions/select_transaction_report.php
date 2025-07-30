@@ -19,8 +19,7 @@ print("<option value=\"\">--all--</option>\n");
 $where_clause = "label IS NOT NULL $account_exclusions";
 $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,[],$add_clause);
-while ($row = mysqli_fetch_assoc($query_result))
-{
+while ($row = mysqli_fetch_assoc($query_result)) {
     print("<option value=\"{$row['label']}\">{$row['name']}</option>\n");
 }
 print("</select>\n");
@@ -34,12 +33,10 @@ print("<option value=\"\">--all--</option>\n");
 $where_clause = "name IS NOT NULL $fund_exclusions";
 $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'funds','*',$where_clause,[],$add_clause);
-while ($row = mysqli_fetch_assoc($query_result))
-{
+while ($row = mysqli_fetch_assoc($query_result)) {
     $fund = $row['name'];
     $superfund = strtok($fund,':');
-    if (($superfund != $previous_superfund ) && (strpos($fund,':') !== false))
-    {
+    if (($superfund != $previous_superfund ) && (strpos($fund,':') !== false)) {
         $superfund_par = urlencode($superfund);
         print("<option value=\"$superfund_par:%\">$superfund [ALL]</option>\n");
     }
@@ -57,12 +54,10 @@ print("<select name=\"category\">\n");
 print("<option value=\"\">--all--</option>\n");
 $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'categories','*','',[],$add_clause);
-while ($row = mysqli_fetch_assoc($query_result))
-{
+while ($row = mysqli_fetch_assoc($query_result)) {
     $category = $row['name'];
     $supercategory = strtok($category,':');
-    if (($supercategory != $previous_supercategory ) && (strpos($category,':') !== false))
-    {
+    if (($supercategory != $previous_supercategory ) && (strpos($category,':') !== false)) {
         $supercategory_par = urlencode($supercategory);
         print("<option value=\"$supercategory_par:%\">$supercategory [ALL]</option>\n");
     }
@@ -79,8 +74,7 @@ print("<select name=\"payee\">\n");
 print("<option value=\"\">-all--</option>\n");
 $add_clause = 'ORDER BY name ASC';
 $query_result = mysqli_select_query($db,'payees','*','',[],$add_clause);
-while ($row = mysqli_fetch_assoc($query_result))
-{
+while ($row = mysqli_fetch_assoc($query_result)) {
     $payee_par = urlencode($row['name']);
     print("<option value=\"$payee_par\">{$row['name']}</option>\n");
 }
@@ -92,12 +86,10 @@ print("<tr><td>Currency:</td>\n");
 print("<td colspan=2><select name=\"currency\">\n");
 $add_clause = 'ORDER BY id ASC';
 $query_result = mysqli_select_query($db,'currencies','*','',[],$add_clause);
-while($row = mysqli_fetch_assoc($query_result))
-{
+while($row = mysqli_fetch_assoc($query_result)) {
     $id = $row['id'];
     print("<option value=\"$id\"");
-    if ($id == 'GBP')
-    {
+    if ($id == 'GBP') {
         print(" SELECTED");
     }
     print(">$id</option>\n");

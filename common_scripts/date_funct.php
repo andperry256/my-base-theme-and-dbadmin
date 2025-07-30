@@ -3,17 +3,14 @@
 if (!defined('DATE_FUNCT_DEFINED')):
 //==============================================================================
 
-if (!defined('TODAY_DATE'))
-{
+if (!defined('TODAY_DATE')) {
 define('TODAY_DATE',date('Y-m-d'));
 }
 
-if (is_file(__DIR__."../alt_date_funct.php"))
-{
+if (is_file(__DIR__."../alt_date_funct.php")) {
 require(__DIR__."../alt_date_funct.php");
 }
-elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php")))
-{
+elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php"))) {
 require("$base_dir/alt_date_funct.php");
 }
 
@@ -28,12 +25,10 @@ need to be defined in an alt_date_funct.php script for the given site.
 
 function day_name($day,$language='en')
 {
-    if (function_exists('alt_day_name'))
-    {
+    if (function_exists('alt_day_name')) {
         return alt_day_name($day,$language);
     }
-    else
-    {
+    else {
         $name = [
             'en' => [
                 "Sunday","Monday","Tuesday","Wednesday",
@@ -47,12 +42,10 @@ function day_name($day,$language='en')
 
 function short_day_name($day,$language='en')
 {
-    if (function_exists('alt_short_day_name'))
-    {
+    if (function_exists('alt_short_day_name')) {
         return alt_short_day_name($day,$language);
     }
-    else
-    {
+    else {
         $name = [
             'en' => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
         ];
@@ -64,12 +57,10 @@ function short_day_name($day,$language='en')
 
 function day_number($day,$language='en',$length='')
 {
-    if (function_exists('alt_day_number'))
-    {
+    if (function_exists('alt_day_number')) {
         return alt_day_number($day,$language,$length);
     }
-    else
-    {
+    else {
         $day = strtolower($day);
         $short_name = [
             'en' => [
@@ -81,16 +72,13 @@ function day_number($day,$language='en',$length='')
                 "sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
                 "thursday" => 4, "friday" => 5, "saturday" => 6
         ]];
-        if ((isset($short_name[$language][$day])) && ($length != 'long'))
-        {
+        if ((isset($short_name[$language][$day])) && ($length != 'long')) {
             return $short_name[$language][$day];
         }
-        elseif ((isset($long_name[$language][$day])) && ($length != 'short'))
-        {
+        elseif ((isset($long_name[$language][$day])) && ($length != 'short')) {
             return $long_name[$language][$day];
         }
-        else
-        {
+        else {
             return -1;
         }
     }
@@ -100,12 +88,10 @@ function day_number($day,$language='en',$length='')
 
 function month_name($month,$language='en')
 {
-    if (function_exists('alt_month_name'))
-    {
+    if (function_exists('alt_month_name')) {
         return alt_month_name($month,$language);
     }
-    else
-    {
+    else {
         $name = [
             'en' => [
                 "","January","February","March","April", "May","June",
@@ -119,12 +105,10 @@ function month_name($month,$language='en')
 
 function short_month_name($month,$language='en')
 {
-    if (function_exists('alt_short_month_name'))
-    {
+    if (function_exists('alt_short_month_name')) {
         return alt_short_month_name($month,$language);
     }
-    else
-    {
+    else {
         $name = [
             'en' => [
                 "","Jan","Feb","Mar","Apr","May","Jun",
@@ -138,12 +122,10 @@ function short_month_name($month,$language='en')
 
 function month_number($month,$language='en',$length='')
 {
-    if (function_exists('alt_month_number'))
-    {
+    if (function_exists('alt_month_number')) {
         return alt_month_number($day,$language,$length);
     }
-    else
-    {
+    else {
         $month = strtolower($month);
         $short_name = [
             'en' => [
@@ -157,16 +139,13 @@ function month_number($month,$language='en',$length='')
                 "may" => 5, "june" => 6, "july" => 7, "august" => 8,
                 "september" => 9, "october" => 10, "november" => 11, "december" => 12
         ]];
-        if ((isset($short_name[$language][$month])) && ($length != 'long'))
-        {
+        if ((isset($short_name[$language][$month])) && ($length != 'long')) {
             return $short_name[$language][$month];
         }
-        elseif ((isset($long_name[$language][$month])) && ($length != 'short'))
-        {
+        elseif ((isset($long_name[$language][$month])) && ($length != 'short')) {
             return $long_name[$language][$month];
         }
-        else
-        {
+        else {
             return 0;
         }
     }
@@ -191,16 +170,13 @@ function leap_year_days($month)
 
 function is_leap_year($year,$calendar=CAL_GREGORIAN)
 {
-    if (($calendar == CAL_GREGORIAN) && (($year % 100) == 0) && (($year % 400) != 0))
-    {
+    if (($calendar == CAL_GREGORIAN) && (($year % 100) == 0) && (($year % 400) != 0)) {
         return 0;
     }
-    elseif (($year % 4) == 0)
-    {
+    elseif (($year % 4) == 0) {
         return 1;
     }
-    else
-    {
+    else {
         return 0;
     }
 }
@@ -268,12 +244,10 @@ function is_working_day($date)
         (($month == 12) && ($day == 25)) ||  // Christmas Day
         (($month == 12) && ($day == 26)) ||  // Boxing Day
         (($month == 12) && ($dow <= 2) && ($day >= 27) && ($day <= 28))  // Christmas in lieu
-        )
-    {
+        ) {
         return false;
     }
-    else
-    {
+    else {
         return true;
     }
 }
@@ -294,8 +268,7 @@ function is_bst($date)
 
 function short_date($date,$day_offset=0)
 {
-    if (empty($date))
-    {
+    if (empty($date)) {
         return '';
     }
 
@@ -304,16 +277,13 @@ function short_date($date,$day_offset=0)
     $month = (int)substr($date,5,2);
     $year = (int)substr($date,0,4);
     $day += $day_offset;
-    if ($day > days_in_month($month,$year))
-    {
+    if ($day > days_in_month($month,$year)) {
         $day -= days_in_month($month,$year);
-        if ($month == 12)
-        {
+        if ($month == 12) {
             $month = 1;
             $year++;
         }
-        else
-        {
+        else {
             $month++;
         }
     }
@@ -324,8 +294,7 @@ function short_date($date,$day_offset=0)
 
 function title_date($date,$day_offset=0,$language='en')
 {
-    if (empty($date))
-    {
+    if (empty($date)) {
         return '';
     }
 
@@ -334,16 +303,13 @@ function title_date($date,$day_offset=0,$language='en')
     $month = (int)substr($date,5,2);
     $year = (int)substr($date,0,4);
     $day += $day_offset;
-    if ($day > days_in_month($month,$year))
-    {
+    if ($day > days_in_month($month,$year)) {
         $day -= days_in_month($month,$year);
-        if ($month == 12)
-        {
+        if ($month == 12) {
             $month = 1;
             $year++;
         }
-        else
-        {
+        else {
             $month++;
         }
     }
@@ -355,8 +321,7 @@ function title_date($date,$day_offset=0,$language='en')
 
 function long_title_date($date,$day_offset=0,$language='en')
 {
-    if (empty($date))
-    {
+    if (empty($date)) {
         return '';
     }
 
@@ -365,16 +330,13 @@ function long_title_date($date,$day_offset=0,$language='en')
     $month = (int)substr($date,5,2);
     $year = (int)substr($date,0,4);
     $day += $day_offset;
-    if ($day > days_in_month($month,$year))
-    {
+    if ($day > days_in_month($month,$year)) {
         $day -= days_in_month($month,$year);
-        if ($month == 12)
-        {
+        if ($month == 12) {
             $month = 1;
             $year++;
         }
-        else
-        {
+        else {
             $month++;
         }
     }
@@ -387,32 +349,26 @@ function long_title_date($date,$day_offset=0,$language='en')
 function start_week_of_month($month,$year)
 {
     $start_dow = dmy_to_dow(1,$month,$year);
-    if ($start_dow == 0)
-    {
+    if ($start_dow == 0) {
         // Month starts on a Sunday
         $sow_year = $year;
         $sow_month = $month;
         $sow_day = 1;
     }
-    else
-    {
+    else {
         // Start of week is in previous month
-        if ($month==1)
-        {
+        if ($month==1) {
             $sow_year = $year - 1;
             $sow_month = 12;
         }
-        else
-        {
+        else {
             $sow_year = $year;
             $sow_month = $month - 1;
         }
-        if (is_leap_year($sow_year))
-        {
+        if (is_leap_year($sow_year)) {
             $sow_day = leap_year_days($sow_month) + 1 - $start_dow;
         }
-        else
-        {
+        else {
             $sow_day = non_leap_year_days($sow_month) + 1 - $start_dow;
         }
     }
@@ -490,8 +446,7 @@ function add_months($date,$months,$last_day=false)
     $new_year = $year + $year_interval;
     $new_month = $projected_month - ($year_interval * 12);
     $days_in_month = days_in_month($new_month,$new_year);
-    if (($day > $days_in_month) || ($last_day))
-    {
+    if (($day > $days_in_month) || ($last_day)) {
         $day = $days_in_month;
     }
     return sprintf("%04d-%02d-%02d",$new_year,$new_month,$day);
@@ -515,19 +470,16 @@ function date_of_easter($year)
     $paschal_full_moon_month = [0,4,4,3,4,3,4,4,3,4,4,3,4,4,3,4,3,4,4,3];
     $paschal_full_moon_day = [0,14,3,23,11,31,18,8,28,16,5,25,13,2,22,10,30,17,7,27];
 
-    if (($year < 1900) || ($year > 2099))
-    {
+    if (($year < 1900) || ($year > 2099)) {
         return ('');
     }
-    else
-    {
+    else {
         $golden_number = ($year % 19) + 1;
         $day = $paschal_full_moon_day[$golden_number];
         $month = $paschal_full_moon_month[$golden_number];
         $dayofweek = dmy_to_dow($day, $month, $year);
         $day += (7 - $dayofweek);
-        if ($day > 31)
-        {
+        if ($day > 31) {
             $day -= 31;
             $month++;
         }
@@ -601,8 +553,7 @@ function church_calendar ($day,$month,$year)
   "4th Sunday in Advent"
     ];
 
-    if (dmy_to_dow($day,$month,$year) != 0)
-    {
+    if (dmy_to_dow($day,$month,$year) != 0) {
         // Abort if date is not a Sunday
         return "Error";
     }
@@ -611,57 +562,45 @@ function church_calendar ($day,$month,$year)
     // Calculate the dates of Septuagesima and Advent Sunday
     $date_of_septuagesima = add_days(date_of_easter($year),-63);
     $dow_of_christmas = dmy_to_dow(25,12,$year);
-    if ($dow_of_christmas == 0)
-    {
+    if ($dow_of_christmas == 0) {
         $days_in_advent = 28;
     }
-    else
-    {
+    else {
         $days_in_advent = $dow_of_christmas + 21;
     }
     $date_of_advent_sunday = add_days("$year-12-25",-$days_in_advent);
 
-    if ($date < $date_of_septuagesima)
-    {
+    if ($date < $date_of_septuagesima) {
         // Prior to Septuagesima
-        if ($date == "$year-01-01")
-        {
+        if ($date == "$year-01-01") {
             return "Sunday after Christmas";
         }
-        elseif ($date < "$year-01-06")
-        {
+        elseif ($date < "$year-01-06") {
             return "2nd Sunday after Christmas";
         }
-        elseif ($date == "$year-01-06")
-        {
+        elseif ($date == "$year-01-06") {
             return "Epiphany";
         }
-        else
-        {
+        else {
             $days_after_epiphany = date_difference("$year-01-06",$date);
             return $epiphany_sundays[($days_after_epiphany - 1) / 7];
         }
     }
-    elseif ($date < $date_of_advent_sunday)
-    {
+    elseif ($date < $date_of_advent_sunday) {
         // Dictated by the date of Easter
         $days_after_septuagesima = date_difference($date_of_septuagesima,$date);
         return $moveable_sundays[$days_after_septuagesima / 7];
     }
-    else
-    {
+    else {
         // Advent & Christmas
-        if ($date < "$year-12-25")
-        {
+        if ($date < "$year-12-25") {
             $days_into_advent = date_difference($date_of_advent_sunday,$date);
             return $advent_sundays[$days_into_advent / 7];
         }
-        elseif ($date == "$year-12-25")
-        {
+        elseif ($date == "$year-12-25") {
             return "Christmas Day";
         }
-        else
-        {
+        else {
             return "Sunday after Christmas";
         }
     }
@@ -678,16 +617,13 @@ function start_of_term()
     $today = TODAY_DATE;
     $this_year = date('Y');
     $easter = date_of_easter($this_year);
-    if ($today >= "$this_year-09-01")
-    {
+    if ($today >= "$this_year-09-01") {
         return ("$this_year-09-01");
     }
-    elseif ($today >= $easter)
-    {
+    elseif ($today >= $easter) {
         return ($easter);
     }
-    else
-    {
+    else {
         return ("$this_year-01-01");
     }
 }
@@ -702,11 +638,9 @@ function end_of_last_term()
     $month = (int)substr($start_of_term,5,2);
     $day = (int)substr($start_of_term,8,2);
     $day--;
-    if ($day == 0)
-    {
+    if ($day == 0) {
         $month--;
-        if ($month == 0)
-        {
+        if ($month == 0) {
             $year--;
             $month = 12;
         }
@@ -724,23 +658,18 @@ function end_of_this_term()
     $today = TODAY_DATE;
     $this_year = date('Y');
     $easter = date_of_easter($this_year);
-    if ($today >= "$this_year-09-01")
-    {
+    if ($today >= "$this_year-09-01") {
         return ("$this_year-12-31");
     }
-    elseif ($today >= $easter)
-    {
+    elseif ($today >= $easter) {
         return ("$this_year-08-31");
     }
-    else
-    {
+    else {
         $easter_day = (int)substr($easter,8,2);
-        if ($easter_day == 1)
-        {
+        if ($easter_day == 1) {
             $end_of_term = "$year-03-31";
         }
-        else
-        {
+        else {
             $end_of_term = substr($easter,0,8).sprintf("%02d",$easter_day-1);
         }
         return ($end_of_term);
@@ -758,25 +687,20 @@ function end_of_next_term()
     $easter = date_of_easter($this_year);
     $next_easter = date_of_easter($this_year+1);
 
-    if ($today >= "$this_year-09-01")
-    {
+    if ($today >= "$this_year-09-01") {
         $next_easter_day = (int)substr($next_easter,8,2);
-        if ($next_easter_day == 1)
-        {
+        if ($next_easter_day == 1) {
             $end_of_term = "$next_year-03-31";
         }
-        else
-        {
+        else {
             $end_of_term = substr($next_easter,0,8).sprintf("%02d",$next_easter_day-1);
         }
         return ($end_of_term);
     }
-    elseif ($today >= $easter)
-    {
+    elseif ($today >= $easter) {
         return ("$this_year-12-31");
     }
-    else
-    {
+    else {
         return ("$this_year-08-31");
     }
 }
@@ -800,24 +724,19 @@ function is_ordinal($value)
 function cardinal_to_ordinal($value)
 {
     $value = (int)$value;
-    if ($value < 0)
-    {
+    if ($value < 0) {
         return false;
     }
-    elseif((($value ^ 10) == 1) && (($value ^ 100) != 11))
-    {
+    elseif((($value ^ 10) == 1) && (($value ^ 100) != 11)) {
         return "{$value}st";
     }
-    elseif((($value ^ 10) == 2) && (($value ^ 100) != 12))
-    {
+    elseif((($value ^ 10) == 2) && (($value ^ 100) != 12)) {
         return "{$value}nd";
     }
-    elseif((($value ^ 10) == 3) && (($value ^ 100) != 13))
-    {
+    elseif((($value ^ 10) == 3) && (($value ^ 100) != 13)) {
         return "{$value}rd";
     }
-    else
-    {
+    else {
         return "{$value}th";
     }
 }
@@ -844,8 +763,7 @@ function gregorian_dow($day,$month,$year)
     $non_leap_year_month_adjust = [0,0,3,3,6,1,4,6,2,5,0,3,5];
     $gregorian_century_adjust = [6,4,2,0];
 
-    if (!checkdate((int)$month,(int)$day,(int)$year))
-    {
+    if (!checkdate((int)$month,(int)$day,(int)$year)) {
         return -1;
     }
     $result = floor((($year % 100) * 5) / 4);

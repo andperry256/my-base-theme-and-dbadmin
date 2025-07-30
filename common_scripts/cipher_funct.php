@@ -19,13 +19,11 @@ function decrypt_with_password($cipher_text,$password)
 {
     $cipher_text = base64_decode($cipher_text);
     $pos = strpos($cipher_text,'::');
-    if ($pos === false)
-    {
+    if ($pos === false) {
         //return openssl_decrypt($encrypted_content, CIPHER_METHOD, $key);
         return "*** Invalid Cipher Text ***";
     }
-    else
-    {
+    else {
         $encrypted_content = substr($cipher_text,0,$pos);
         $key = md5($password);
         $iv = hex2bin(substr($cipher_text,$pos+2));

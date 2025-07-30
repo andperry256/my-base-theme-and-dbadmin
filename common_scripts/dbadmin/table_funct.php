@@ -10,8 +10,7 @@ would only be a single iteration or at the very most two, but the definition
 of MAX_TABLE_NESTING_LEVEL provides a 'safety net' to prevent these functions
 from running into an infinte look in the case of a data error.
 */
-if (!defined('MAX_TABLE_NESTING_LEVEL'))
-{
+if (!defined('MAX_TABLE_NESTING_LEVEL')) {
     define('MAX_TABLE_NESTING_LEVEL',5);
 }
 
@@ -26,28 +25,22 @@ origin (i.e. the base table)
 
 function get_base_table($table,$db=false)
 {
-    if ($db === false)
-    {
+    if ($db === false) {
         $db = admin_db_connect();
     }
-    for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-    {
+    for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--) {
         $where_clause = 'table_name=?';
         $where_values = ['s',$table];
         $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
-            if (empty($row['parent_table']))
-            {
+        if ($row = mysqli_fetch_assoc($query_result)) {
+            if (empty($row['parent_table'])) {
                 return $table;
             }
-            else
-            {
+            else {
                 $table = $row['parent_table'];
             }
         }
-        else
-        {
+        else {
             return $table;
         }
     }
@@ -65,26 +58,21 @@ table until it finds a record for a given table field in the table fields table.
 
 function get_table_for_field($table,$field,$db=false)
 {
-    if ($db === false)
-    {
+    if ($db === false) {
         $db = admin_db_connect();
     }
-    for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-    {
+    for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--) {
         $where_clause = 'table_name=?';
         $where_values = ['s',$table];
         $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
+        if ($row = mysqli_fetch_assoc($query_result)) {
             $where_clause = 'table_name=? AND field_name=?';
             $where_values = ['s',$table,'s',$field];
             $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-            if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table'])))
-            {
+            if ((mysqli_num_rows($query_result2) > 0) || (empty($row['parent_table']))) {
                 return $table;
             }
-            else
-            {
+            else {
                 $table = $row['parent_table'];
             }
         }
@@ -103,23 +91,18 @@ table until it finds non-empty value for a given table info field.
 
 function get_table_for_info_field($table,$info_field,$db=false)
 {
-    if ($db === false)
-    {
+    if ($db === false) {
         $db = admin_db_connect();
     }
-    for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--)
-    {
+    for ($i=MAX_TABLE_NESTING_LEVEL; $i>0; $i--) {
         $where_clause = 'table_name=?';
         $where_values = ['s',$table];
         $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
-            if ((empty($row['parent_table'])) || (!empty($row[$info_field])))
-            {
+        if ($row = mysqli_fetch_assoc($query_result)) {
+            if ((empty($row['parent_table'])) || (!empty($row[$info_field]))) {
                 return $table;
             }
-            else
-            {
+            else {
                 $table = $row['parent_table'];
             }
         }
@@ -160,15 +143,13 @@ function generate_grid_styles($table)
     $base_table = get_table_for_info_field($table,'grid_columns');
     $where_clause = 'table_name=?';
     $where_values = ['s',$base_table];
-    if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')))
-    {
+    if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''))) {
         $grid_columns = $row['grid_columns'];
     }
 
     // Loop through the fields for the given table
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $field_name = $row['Field'];
         $base_table = get_table_for_field($table,$field_name);
 
@@ -176,40 +157,31 @@ function generate_grid_styles($table)
         $where_clause = 'table_name=? AND field_name=? AND list_mobile=1';
         $where_values = ['s',$base_table,'s',$field_name];
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-        if ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
             $grid_coords[$field_name] = $row2['grid_coords'];
             $field_count++;
-            if ($grid_coords[$field_name] == 'auto')
-            {
+            if ($grid_coords[$field_name] == 'auto') {
                 // Co-ordinates set to 'auto' - update the count
                 $auto_count++;
             }
-            else
-            {
+            else {
                 // Custom co-ordinates in use - check that they are valid.
                 $row_no = trim(strtok($grid_coords[$field_name],'/'));
-                if (!is_numeric($row_no))
-                {
+                if (!is_numeric($row_no)) {
                     return false;
                 }
-                else
-                {
+                else {
                     $col_no = trim(strtok('/'));
-                    if (!is_numeric($col_no))
-                    {
+                    if (!is_numeric($col_no)) {
                         $col_no = 2;
                         $col_span = 1;
                     }
-                    elseif ($col_no == 1)
-                    {
+                    elseif ($col_no == 1) {
                         return false;
                     }
-                    else
-                    {
+                    else {
                         $col_span = trim(strtok('/'));
-                        if (!is_numeric($col_span))
-                        {
+                        if (!is_numeric($col_span)) {
                             $col_span = 1;
                         }
                     }
@@ -217,18 +189,14 @@ function generate_grid_styles($table)
 
                 // Check that fields don't overlap in the layout.
                 $end_col = $col_no + $col_span;
-                if (!isset($cells_used[$row_no]))
-                {
+                if (!isset($cells_used[$row_no])) {
                     $cells_used[$row_no] = [];
                 }
-                for ($i=$col_no; $i<$end_col; $i++)
-                {
-                    if (isset($cells_used[$row_no][$i]))
-                    {
+                for ($i=$col_no; $i<$end_col; $i++) {
+                    if (isset($cells_used[$row_no][$i])) {
                         return false;
                     }
-                    else
-                    {
+                    else {
                         $cells_used[$row_no][$i] = true;
                     }
                 }
@@ -237,8 +205,7 @@ function generate_grid_styles($table)
     }
     $base_table = get_base_table($table);
 
-    if ($auto_count == $field_count)
-    {
+    if ($auto_count == $field_count) {
         /*
         Auto co-ordinates in use. Create styles to place the record fields one per
         row in the grid. The cell containing the select box goes into column 1
@@ -246,8 +213,7 @@ function generate_grid_styles($table)
         at the bottomn spanning both columns.
         */
         $result .= "<style>\n";
-        if (isset($grid_columns))
-        {
+        if (isset($grid_columns)) {
             $result .= "div.table-listing {\n";
             $result .= "  grid-template-columns: $grid_columns\n";
             $result .= "}\n";
@@ -257,10 +223,8 @@ function generate_grid_styles($table)
         $where_values = ['s',$base_table];
         $add_clause = 'ORDER BY display_order ASC';
         $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-        while ($row = mysqli_fetch_assoc($query_result))
-        {
-            if (isset($grid_coords[$row['field_name']]))
-            {
+        while ($row = mysqli_fetch_assoc($query_result)) {
+            if (isset($grid_coords[$row['field_name']])) {
                 $result .= ".field-{$row['field_name']} {\n";
                 $result .= "  grid-row: $row_no;\n";
                 $result .= "  grid-column: 2;\n";
@@ -279,8 +243,7 @@ function generate_grid_styles($table)
         $result .= "</style>\n";
         return $result;
     }
-    elseif ($auto_count == 0)
-    {
+    elseif ($auto_count == 0) {
         /*
         Custom co-ordinates in use. Create styles to place each record field
         according to its own custom co-ordinates. The cell containing the select box
@@ -288,8 +251,7 @@ function generate_grid_styles($table)
         links goes in a row at the bottomn spanning all the columns.
         */
         $result .= "<style>\n";
-        if (isset($grid_columns))
-        {
+        if (isset($grid_columns)) {
             $result .= "div.table-listing {\n";
             $result .= "  grid-template-columns: $grid_columns\n";
             $result .= "}\n";
@@ -300,31 +262,24 @@ function generate_grid_styles($table)
         $where_values = ['s',$base_table];
         $add_clause = 'ORDER BY display_order ASC';
         $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-        while ($row = mysqli_fetch_assoc($query_result))
-        {
-            if (isset($grid_coords[$row['field_name']]))
-            {
+        while ($row = mysqli_fetch_assoc($query_result)) {
+            if (isset($grid_coords[$row['field_name']])) {
                 $row_no = trim(strtok($grid_coords[$row['field_name']],'/'));
                 $col_no = trim(strtok('/'));
-                if (!is_numeric($col_no))
-                {
+                if (!is_numeric($col_no)) {
                     $col_no = 2;
                     $col_span = 1;
                 }
-                else
-                {
+                else {
                     $col_span = trim(strtok('/'));
-                    if (!is_numeric($col_span))
-                    {
+                    if (!is_numeric($col_span)) {
                         $col_span = 1;
                     }
                 }
-                if ($row_no > $row_count)
-                {
+                if ($row_no > $row_count) {
                     $row_count = $row_no;
                 }
-                if ($col_no > $col_count)
-                {
+                if ($col_no > $col_count) {
                     $col_count = $col_no;
                 }
                 $result .= ".field-{$row['field_name']} {\n";
@@ -347,8 +302,7 @@ function generate_grid_styles($table)
         $result .= "</style>\n";
         return $result;
     }
-    else
-    {
+    else {
         // Mixture of custom and auto co-ordinates (invalid)
         return false;
     }
@@ -362,16 +316,13 @@ Function combined_add_clause
 
 function combined_add_clause($where_par,$search_clause,$add_clause)
 {
-    if ((!empty($where_par)) && (!empty($search_clause)))
-    {
+    if ((!empty($where_par)) && (!empty($search_clause))) {
         return "WHERE ($where_par) AND ($search_clause) $add_clause";
     }
-    elseif ((empty($where_par)) && (empty($search_clause)))
-    {
+    elseif ((empty($where_par)) && (empty($search_clause))) {
         return "$add_clause";
     }
-    else
-    {
+    else {
         return "WHERE $where_par$search_clause $add_clause";
     }
 }
@@ -398,8 +349,7 @@ function display_table($params)
     //============================================================================
 
     // Interpret the URL parameters
-    if (!isset($_GET['-table']))
-    {
+    if (!isset($_GET['-table'])) {
         print("<p>Table parameter missing.</p>\n");
         return;
     }
@@ -408,36 +358,29 @@ function display_table($params)
     $where_clause = "table_name=?";
     $where_values = ['s',$base_table];
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-    if ($row = mysqli_fetch_assoc($query_result))
-    {
+    if ($row = mysqli_fetch_assoc($query_result)) {
         /*
         Set the display list size. This is normally taken from the associated table info record
         (default 100), but can be overwritten by a URL parameter. The value is constrained to
         be within the range 30-800.
         */
-        if (isset($_GET['-listsize']))
-        {
+        if (isset($_GET['-listsize'])) {
             $list_size = $_GET['-listsize'];
         }
-        elseif ((isset($_POST['listsize2'])) && ($_POST['listsize2'] > 0))
-        {
+        elseif ((isset($_POST['listsize2'])) && ($_POST['listsize2'] > 0)) {
             $list_size = $_POST['listsize2'];
         }
-        else
-        {
+        else {
             $list_size = $row['list_size'];
         }
-        if ($list_size < 30)
-        {
+        if ($list_size < 30) {
             $list_size = 30;
         }
-        if ($list_size > 800)
-        {
+        if ($list_size > 800) {
             $list_size = 800;
         }
     }
-    else
-    {
+    else {
         print("<p>Table record for <em>$base_table</em> not found.</p>\n");
         return;
     }
@@ -447,20 +390,16 @@ function display_table($params)
     Force this to 0 if the list size has changed.
     */
     if ((isset($_POST['listsize2'])) &&
-        (($_POST['listsize2']) != ($_POST['listsize'])))
-    {
+        (($_POST['listsize2']) != ($_POST['listsize']))) {
         $start_offset = 0;
     }
-    elseif (isset($_GET['-startoffset']))
-    {
+    elseif (isset($_GET['-startoffset'])) {
         $start_offset = $_GET['-startoffset'];
     }
-    elseif (isset($_POST['startoffset']))
-    {
+    elseif (isset($_POST['startoffset'])) {
         $start_offset = $_POST['startoffset'];
     }
-    else
-    {
+    else {
         $start_offset = 0;
     }
 
@@ -470,23 +409,19 @@ function display_table($params)
     It is separate from the filter that is initiated via the search box.
     Once set, it has to be cleared by clicking on the 'Clear Filters' button.
     */
-    if (!empty($_GET['-where']))
-    {
+    if (!empty($_GET['-where'])) {
         $where_par = stripslashes($_GET['-where']);
     }
-    elseif (!empty(get_session_var("$relative_sub_path-$table-where-par")))
-    {
+    elseif (!empty(get_session_var("$relative_sub_path-$table-where-par"))) {
         $where_par = get_session_var("$relative_sub_path-$table-where-par");
     }
-    else
-    {
+    else {
         $where_par = '';
     }
     update_session_var("$relative_sub_path-$table-where-par",$where_par);
 
     // Initialise table filtering if not set
-    if (empty(get_session_var("$relative_sub_path-$table-is-filtered")))
-    {
+    if (empty(get_session_var("$relative_sub_path-$table-is-filtered"))) {
         update_session_var("$relative_sub_path-$table-is-filtered",'*');
         update_session_var("$relative_sub_path-$table-sort-level",'0');
         update_session_var("$relative_sub_path-$table-sort-clause",'');
@@ -500,8 +435,7 @@ function display_table($params)
     $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
     $field_sort_level = [];
     $field_sort_order = [];
-    for ($i=1; $i<=$sort_level; $i++)
-    {
+    for ($i=1; $i<=$sort_level; $i++) {
         $field = get_session_var("$relative_sub_path-$table-sort-field-$i");
         $field_sort_level[$field] = $i;
         $field_sort_order[$field] = get_session_var("$relative_sub_path-$table-sort-order-$i");
@@ -518,23 +452,20 @@ function display_table($params)
     // Part 2 - Processing of Actions
     //============================================================================
 
-    if (isset($_POST['submitted']))
-    {
+    if (isset($_POST['submitted'])) {
         // Not quite sure yet why we need this, but it seems to prevent problems
         // with multiple submissions.
         $submit_option = $_POST['submitted'];
         unset($_POST['submitted']);
 
-        switch ($submit_option)
-        {
+        switch ($submit_option) {
             case 'delete':
                 $result = delete_record_set($table);
                 break;
 
             case 'select_update';
                 $result = select_update($table,'selection');
-                if ($result === true)
-                {
+                if ($result === true) {
                     $display_table = false;
                     $form_started = true;
                 }
@@ -542,8 +473,7 @@ function display_table($params)
 
             case 'select_update_all';
                 $result = select_update($table,'all');
-                if ($result === true)
-                {
+                if ($result === true) {
                     $display_table = false;
                     $form_started = true;
                 }
@@ -554,20 +484,17 @@ function display_table($params)
                 break;
 
             case 'run_update_all';
-                if (isset($_POST['confirm_update_all']))
-                {
+                if (isset($_POST['confirm_update_all'])) {
                     $result = run_update($table,'all');
                 }
-                else
-                {
+                else {
                     print("<p class=\"highlight-error\">'Update All' confirmation flag was not set - please try again.</p>\n");
                 }
                 break;
 
             case 'select_copy';
                 $result = select_copy($table);
-                if ($result === true)
-                {
+                if ($result === true) {
                     $display_table = false;
                     $form_started = true;
                 }
@@ -587,21 +514,17 @@ function display_table($params)
     // Part 3 - Generation of Page
     //============================================================================
 
-    if ($mode == 'mobile')
-    {
+    if ($mode == 'mobile') {
         $result = generate_grid_styles($table);
-        if ($result === false)
-        {
+        if ($result === false) {
             print("<p class=\"highlight-error\">ERROR - Cannot resolve the grid co-ordinates. Please check the table field definitions for possible errors.</p>\n");
             $display_table = false;
         }
-        else
-        {
+        else {
             print($result);
         }
     }
-    if (!$display_table)
-    {
+    if (!$display_table) {
         print("<div style=\"display:none\">\n");
     }
 
@@ -621,8 +544,7 @@ function display_table($params)
     $access_level = get_table_access_level($table);
 
     print("<h2>Table $table</h2>");
-    if (!$form_started)
-    {
+    if (!$form_started) {
         /*
         The target URL of the post is to the same script for the same table. A post
         is only performed for update, copy and delete requests, for all of which the
@@ -632,12 +554,10 @@ function display_table($params)
         print("<div class=\"top-navigation-item\"><input type=\"text\" size=\"24\" name=\"search_string\"/>");
         print("&nbsp;<input type=\"button\" value=\"Search\" onClick=\"applySearch(this.form)\"/>");
         print("</div>\n");
-        if (!empty($search_string))
-        {
+        if (!empty($search_string)) {
             print("<div class=\"search-string\">[$search_string]</div>\n</form>\n");
         }
-        else
-        {
+        else {
             print("</form><br />\n");
         }
         print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
@@ -655,25 +575,21 @@ function display_table($params)
     $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
     $where_values = ['s',$base_table];
     $query_result = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
-    if ((!empty($where_par)) || (!empty($search_clause)))
-    {
+    if ((!empty($where_par)) || (!empty($search_clause))) {
         print("<div class=\"top-navigation-item clear-filter-button\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/clear_table_filters.php?sub_path=$relative_sub_path&table=$table\">Clear Filters</a></div>\n");
     }
-    if (mysqli_num_rows($query_result) > 0)
-    {
+    if (mysqli_num_rows($query_result) > 0) {
         // One or more select relationships are defined for the given table
         $option = ($show_relationships) ? 'Hide' : 'Show';
         print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/show_hide_relationships.php?sub_path=$relative_sub_path&table=$table&option=$option\">$option Relationships</a></div>\n");
     }
     print("</p>\n");
-    if ($access_level == 'full')
-    {
+    if ($access_level == 'full') {
         print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=$table\">New&nbsp;Record</a></div>\n");
     }
     print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-table=$table&-showall\">Show&nbsp;All</a></div>\n");
     print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/common_scripts/dbadmin/display_table.php?sub_path=$relative_sub_path&table=$table\" target=\"_blank\">Print</a></div>\n");
-    if (isset($params['additional_links']))
-    {
+    if (isset($params['additional_links'])) {
         print($params['additional_links']);
     }
     print("<div style=\"clear:both\">&nbsp;</div>\n");
@@ -682,8 +598,7 @@ function display_table($params)
     // Determine fields to be processed.
     $fields = [];
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $field_name = $row['Field'];
 
         // Determine whether the field is to be displayed in the table listing.
@@ -691,11 +606,9 @@ function display_table($params)
         $where_clause = 'table_name=? AND field_name=?';
         $where_values = ['s',$tab,'s',$field_name];
         $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-        if ($row3 = mysqli_fetch_assoc($query_result3))
-        {
+        if ($row3 = mysqli_fetch_assoc($query_result3)) {
             // Table field found
-            if ($row3["list_$mode"] == 1)
-            {
+            if ($row3["list_$mode"] == 1) {
                 $fields[$field_name] = $row3['display_order'];
             }
         }
@@ -707,65 +620,52 @@ function display_table($params)
     $where_values = ['s',$base_table];
     $add_clause = 'ORDER BY display_order ASC';
     $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $primary_key[$row['field_name']] = '';
     }
-    if (count($primary_key) == 0)
-    {
+    if (count($primary_key) == 0) {
         exit("ERROR - no primary key defined for table/view $base_table");
     }
 
     // Output table header
-    if ($mode == 'desktop')
-    {
+    if ($mode == 'desktop') {
         print("<table class=\"table-listing\">\n");
         print("<tr>\n");
         print("<td class=\"table-listing-header\"><input type=\"checkbox\" name=\"select_all\" onclick=\"checkAll(this)\"></td>");
     }
-    else
-    {
+    else {
         print("<div class=\"table-listing\">\n");
         print("<div class=\"table-listing-cell record-select table-listing-header\"><input type=\"checkbox\" name=\"select_$record_offset\" onclick=\"checkAll(this)\"></div> <!-- .table-listing-cell -->");
     }
-    foreach ($fields as $f => $ord)
-    {
+    foreach ($fields as $f => $ord) {
         // Output the field name with a sort link
         $sort_link = "$base_url/common_scripts/dbadmin/apply_table_sort.php?sub_path=$relative_sub_path&table=$table&field=$f";
-        if ($mode == 'desktop')
-        {
+        if ($mode == 'desktop') {
             print("<td class=\"table-listing-header\"><a href=\"$sort_link\">");
         }
-        else
-        {
+        else {
             print("<div class=\"table-listing-cell field-$f table-listing-header\"><a href=\"$sort_link\">");
         }
         print(field_label($table,$f));
-        if (isset($field_sort_level[$f]))
-        {
+        if (isset($field_sort_level[$f])) {
             // Output details of sort
             print("<br /><span class=\"small-text\">");
-            if ($sort_level > 1)
-            {
+            if ($sort_level > 1) {
                 print("[{$field_sort_level[$f]}]");
             }
             print("[".strtolower($field_sort_order[$f])."]</span>");
         }
-        if ($mode == 'desktop')
-        {
+        if ($mode == 'desktop') {
             print("</a></td>");
         }
-        else
-        {
+        else {
             print("</a></div <!-- .table-listing-cell -->");
         }
     }
-    if ($mode == 'desktop')
-    {
+    if ($mode == 'desktop') {
         print("\n</tr>\n");
     }
-    else
-    {
+    else {
         print("\n</div> <!-- .table-listing -->\n");
     }  // End of table header
 
@@ -774,49 +674,38 @@ function display_table($params)
     $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $start_offset,$list_size");
     $query_result = mysqli_select_query($db,$table,'*','',[],$add_clause);
     $row_no = 0;
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
-        if ($access_level == 'read-only')
-        {
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        if ($access_level == 'read-only') {
             $record_action = 'view';
         }
-        else
-        {
+        else {
             $record_action = 'edit';
         }
-        if ($mode == 'desktop')
-        {
+        if ($mode == 'desktop') {
             print("<tr>\n");
         }
-        else
-        {
+        else {
             print("<div class=\"table-listing\">\n");
         }
-        if (($row_no % 2) == 1)
-        {
+        if (($row_no % 2) == 1) {
             $style = 'table-listing-odd-row';
         }
-        else
-        {
+        else {
             $style = 'table-listing-even-row';
         }
         $row_no++;
-        foreach ($primary_key as $f => $val)
-        {
+        foreach ($primary_key as $f => $val) {
             $primary_key[$f] = $row[$f];
         }
-        if ($mode == 'desktop')
-        {
+        if ($mode == 'desktop') {
             print("<td class=\"$style\"><input type=\"checkbox\" name=\"select_$record_offset\"");
         }
-        else
-        {
+        else {
             print("<div class=\"table-listing-cell record-select $style\"><input type=\"checkbox\" name=\"select_$record_offset\"");
         }
         if ((isset($submit_option)) &&
             (($submit_option == 'select_update') || ($submit_option == 'select_update_all') || ($submit_option == 'select_copy')) &&
-            (isset($_POST["select_$record_offset"])))
-        {
+            (isset($_POST["select_$record_offset"]))) {
             /*
             We are currently displaying a select update/copy screen. The table record
             list is present but invisible with a "display:none" style. We are here
@@ -825,65 +714,52 @@ function display_table($params)
             */
             print(" checked");
         }
-        if ($mode == 'desktop')
-        {
+        if ($mode == 'desktop') {
             print("></td>");
         }
-        else
-        {
+        else {
             print("></div> <!-- .table-listing-cell -->");
         }
         $record_offset++;
         $record_id = encode_record_id($primary_key);
-        foreach ($fields as $f => $ord)
-        {
+        foreach ($fields as $f => $ord) {
             /* */
             $where_clause = 'table_name=? AND field_name=?';
             $where_values = ['s',$base_table,'s',$f];
             if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) &&
-                ($row2['widget_type'] == 'checkbox'))
-            {
+                ($row2['widget_type'] == 'checkbox')) {
                 $value = ($row[$f]) ? '[X]' : '';
             }
-            else
-            {
+            else {
                 $value = strip_tags($row[$f]);
             }
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("<td class=\"$style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></td>");
             }
-            else
-            {
+            else {
                 print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></div> <!-- .table-listing-cell -->");
             }
         }
         print("\n");
-        if ($mode == 'desktop')
-        {
+        if ($mode == 'desktop') {
             print("</tr>\n");
         }
-        else
-        {
+        else {
             // Mobile mode - </div> is output below (after relationships)
         }
 
-        if ($show_relationships)
-        {
-            if ($mode == 'desktop')
-            {
+        if ($show_relationships) {
+            if ($mode == 'desktop') {
                 $colspan = count($fields) + 1;
                 print("<tr><td class=\"$style small-text\" colspan=\"$colspan\">");
             }
-            else
-            {
+            else {
                 print("<div class=\"table-listing-cell relationships $style small-text\">");
             }
             $where_clause = "table_name=? AND UPPER(query) LIKE 'SELECT%'";
             $where_values = ['s',$base_table];
             $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,$where_values,'');
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
+            while ($row2 = mysqli_fetch_assoc($query_result2)) {
                 /*
                 Add a link for the given relationship. Scan the relationship query for
                 variables of type $<field_name> and replace each such variable with the
@@ -891,8 +767,7 @@ function display_table($params)
                 */
                 $query = $row2['query'];
                 $matches = [];
-                while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query,$matches))
-                {
+                while (preg_match(RELATIONSHIP_VARIABLE_MATCH_1,$query,$matches)) {
                     $leading_char = substr($matches[0],0,1);
                     $field_name = substr($matches[0],2);
                     $value = mysqli_real_escape_string($db,$row[$field_name]);
@@ -900,13 +775,11 @@ function display_table($params)
                     $query = str_replace($matches[0],"$leading_char$value",$query);
                 }
                 $query_result3 = mysqli_query_normal($db,$query);
-                if (($query_result3 !== false) && (mysqli_num_rows($query_result3) > 0))
-                {
+                if (($query_result3 !== false) && (mysqli_num_rows($query_result3) > 0)) {
                     $uc_query = strtoupper($query);
                     $pos1 = strpos($uc_query,' FROM ');
                     $pos2 = strpos($uc_query,' WHERE ');
-                    if ($pos2 !== false)
-                    {
+                    if ($pos2 !== false) {
                         $tempstr =  trim(substr($query,$pos1+6));
                         $target_table = strtok($tempstr,' ');
                         $where_clause = trim(substr($query,$pos2+7));
@@ -915,47 +788,39 @@ function display_table($params)
                     print("&nbsp;&nbsp;<a href=\"./?-table=$target_table&-where=$where_par\" target=\"_blank\">{$row2['relationship_name']}</a>");
                 }
             }
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("</td></tr>\n");
             }
-            else
-            {
+            else {
                 print("</div> <!-- .table-listing-cell -->\n");
             }
         }  // End of processing relationships
 
-        if ($mode == 'mobile')
-        {
+        if ($mode == 'mobile') {
             print("</div> <!-- .table-listing -->\n");
         }
-        else
-        {
+        else {
             // Desktop mode - </tr> was output above (before relationships)
         }
     }  // End of loop for table records
 
-    if ($mode == 'desktop')
-    {
+    if ($mode == 'desktop') {
         print("</table>\n");
     }
 
     print("<p>$page_links</p>\n");
-    if ($access_level == 'full')
-    {
+    if ($access_level == 'full') {
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Update Selected\" onClick=\"selectUpdate(this.form)\"/>");
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Update All\" onClick=\"selectUpdateAll(this.form)\"/>");
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Copy Selected\" onClick=\"selectCopy(this.form)\"/>");
         print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Delete Selected\" onClick=\"confirmDelete(this.form)\"/>");
         $where_clause = 'table_name=? AND renumber_enabled=1';
         $where_values = ['s',$table];
-        if (mysqli_num_rows(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) > 0)
-        {
+        if (mysqli_num_rows(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) > 0) {
             print("&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"Renumber Records\" onClick=\"confirmRenumber(this.form)\"/>");
         }
     }
-    if (!$display_table)
-    {
+    if (!$display_table) {
         print("</div> <!-- display:none -->\n");
     }
     print("<input type=\"hidden\" name=\"submitted\" id=\"submitted\"/>");
@@ -978,25 +843,20 @@ function delete_record_set($table)
     $sort_clause = get_session_var("$relative_sub_path-$table-sort-clause");
     $where_par = get_session_var("$relative_sub_path-$table-where-par");
     $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
-    foreach ($_POST as $key => $value)
-    {
-        if (substr($key,0,7) == 'select_')
-        {
+    foreach ($_POST as $key => $value) {
+        if (substr($key,0,7) == 'select_') {
             $record_offset = substr($key,7);
 
             // Build up array of deletions indexed by record ID.
-            if (is_numeric($record_offset))
-            {
+            if (is_numeric($record_offset)) {
                 $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $record_offset,1");
                 $query_result = mysqli_select_query($db,$table,'*','',[],$add_clause);
-                if ($row = mysqli_fetch_assoc($query_result))
-                {
+                if ($row = mysqli_fetch_assoc($query_result)) {
                     $where_clause = 'table_name=? AND is_primary=1';
                     $where_values = ['s',$base_table];
                     $add_clause = 'ORDER by display_order ASC';
                     $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-                    while ($row2 = mysqli_fetch_assoc($query_result2))
-                    {
+                    while ($row2 = mysqli_fetch_assoc($query_result2)) {
                         $field_name = $row2['field_name'];
                         $primary_keys[$field_name] = $row[$field_name];
                     }
@@ -1007,8 +867,7 @@ function delete_record_set($table)
     }
 
     $delete_count = 0;
-    foreach ($deletions as $key => $record_id)
-    {
+    foreach ($deletions as $key => $record_id) {
         $record = new db_record;
         $record->action = 'delete';
         $record->table = $table;
@@ -1016,23 +875,20 @@ function delete_record_set($table)
         $where_clause = '';
         $where_values = [];
         $primary_keys = fully_decode_record_id($record_id);
-        foreach ($primary_keys as $field => $value)
-        {
+        foreach ($primary_keys as $field => $value) {
             $where_clause .= " $field=? AND";
             $where_values[count($where_values)] = query_field_type($db,$table,$field);
             $where_values[count($where_values)] = $value;
         }
         $where_clause = rtrim($where_clause,'AND ');
         $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
+        if ($row = mysqli_fetch_assoc($query_result)) {
             // Populate the record fields
             $where_clause = 'table_name=?';
             $where_values = ['s',$base_table];
             $add_clause = 'ORDER by display_order ASC';
             $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
+            while ($row2 = mysqli_fetch_assoc($query_result2)) {
                 $field_name = $row2['field_name'];
                 $record->SetField($field_name,$row[$field_name],query_field_type($db,$table,$field_name));
             }
@@ -1041,12 +897,10 @@ function delete_record_set($table)
         // Call the delete function on the record
         $result = delete_record($record,$record_id);
         unset($record);
-        if ($result === false)
-        {
+        if ($result === false) {
             return;
         }
-        else
-        {
+        else {
             $delete_count++;
         }
     }
@@ -1066,60 +920,47 @@ function select_update($table,$option)
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     $base_table = get_base_table($table);
-    if ($option == 'selection')
-    {
+    if ($option == 'selection') {
         $item_found = false;
-        foreach ($_POST as $key => $value)
-        {
-            if (substr($key,0,7) == 'select_')
-            {
+        foreach ($_POST as $key => $value) {
+            if (substr($key,0,7) == 'select_') {
                 $item_found = true;
                 break;
             }
         }
-        if (!$item_found)
-        {
+        if (!$item_found) {
             print("<p class=\"highlight-error\">No records selected.</p>\n");
             return false;
         }
         print("<h2>Update Records</h2>\n");
     }
-    elseif ($option == 'all')
-    {
+    elseif ($option == 'all') {
         print("<h2>Update All Records</h2>\n");
     }
 
     print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
-    if ($option == 'all')
-    {
+    if ($option == 'all') {
         print("<p><strong>Important</strong> - You are updating all records in the table - please check to confirm&nbsp;&nbsp;<input type=\"checkbox\" name=\"confirm_update_all\"></p>\n");
     }
     $last_display_group = '';
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $field_name = $row['Field'];
         $where_clause = 'table_name=? AND field_name=?';
         $where_values = ['s',$base_table,'s',$field_name];
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-        if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['widget_type'] != 'file'))
-        {
+        if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['widget_type'] != 'file')) {
             $display_group = $row2['display_group'];
-            if ($display_group != $last_display_group)
-            {
-                if (!empty($last_display_group))
-                {
-                    if ($mode == 'desktop')
-                    {
+            if ($display_group != $last_display_group) {
+                if (!empty($last_display_group)) {
+                    if ($mode == 'desktop') {
                         print("</table>\n");
                     }
-                    if ($display_group != '-default-')
-                    {
+                    if ($display_group != '-default-') {
                         print("<strong>$display_group</strong>\n");
                     }
                 }
-                if ($mode == 'desktop')
-                {
+                if ($mode == 'desktop') {
                     print("<table class=\"update-selection\">\n");
                     print("<tr><td class=\"update-selection-header\">Select</td>");
                     print("<td class=\"update-selection-header\">Field</td>");
@@ -1127,38 +968,31 @@ function select_update($table,$option)
                 }
                 $last_display_group = $display_group;
             }
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("<tr>");
                 print("<td class=\"update-selection\">");
             }
-            else
-            {
+            else {
                 print("<div class=\"update-field\">");
                 print("<div class=\"update-field-cell update-field-select\">");
             }
-            if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static'))
-            {
+            if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static')) {
                 print("<input type=\"checkbox\" name=\"select_$field_name\">");
             }
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("</td>");
             }
-            else
-            {
+            else {
                 print("</div>");
             }
             $label = field_label($table,$field_name);
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("<td class=\"update-selection\">$label</td>");
                 print("<td class=\"update-selection\">");
                 generate_widget($table,$field_name,false);
                 print("</td></tr>\n");
             }
-            else
-            {
+            else {
                 print("<div class=\"update-field-cell update-field-name\">$label</div>");
                 print("<div class=\"update-field-cell update-field-value\">");
                 generate_widget($table,$field_name,false);
@@ -1166,17 +1000,14 @@ function select_update($table,$option)
             }
         }
     }
-    if ($mode == 'desktop')
-    {
+    if ($mode == 'desktop') {
         print("</table>\n");
     }
     print("<p>&nbsp;&nbsp;<input type=\"checkbox\" name=\"show_progress\">&nbsp;Show&nbsp;Progress</p>\n");
-    if ($option == 'selection')
-    {
+    if ($option == 'selection') {
         print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runUpdate(this.form)\"/>");
     }
-    elseif ($option == 'all')
-    {
+    elseif ($option == 'all') {
         print("&nbsp;&nbsp;<input type=\"button\" value=\"Update\" onClick=\"runUpdateAll(this.form)\"/>");
     }
 
@@ -1205,25 +1036,19 @@ function run_update($table,$option)
     $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
 
     // Build up array of updates indexed by record ID.
-    if ($option == 'selection')
-    {
-        foreach ($post_copy as $key => $value)
-        {
-            if (substr($key,0,7) == 'select_')
-            {
+    if ($option == 'selection') {
+        foreach ($post_copy as $key => $value) {
+            if (substr($key,0,7) == 'select_') {
                 $record_offset = substr($key,7);
-                if (is_numeric($record_offset))
-                {
+                if (is_numeric($record_offset)) {
                     $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $record_offset,1");
                     $query_result = mysqli_select_query($db,$table,'*','',[],$add_clause);
-                    if ($row = mysqli_fetch_assoc($query_result))
-                    {
+                    if ($row = mysqli_fetch_assoc($query_result)) {
                         $where_clause = 'table_name=? AND is_primary=1';
                         $where_values = ['s',$base_table];
                         $add_clause = 'ORDER by display_order ASC';
                         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-                        while ($row2 = mysqli_fetch_assoc($query_result2))
-                        {
+                        while ($row2 = mysqli_fetch_assoc($query_result2)) {
                             $field_name = $row2['field_name'];
                             $primary_keys[$field_name] = $row[$field_name];
                         }
@@ -1233,22 +1058,18 @@ function run_update($table,$option)
             }
         }
     }
-    elseif ($option == 'all')
-    {
+    elseif ($option == 'all') {
         $add_clause = combined_add_clause($where_par,$search_clause,$sort_clause);
         $query_result = mysqli_select_query($db,$table,'*','',[],$add_clause);
         $record_count = mysqli_num_rows($query_result);
-        for ($record_offset=0; $record_offset<$record_count; $record_offset++)
-        {
+        for ($record_offset=0; $record_offset<$record_count; $record_offset++) {
             $add_clause2 = "$add_clause LIMIT $record_offset,1";
-            if ($row = mysqli_fetch_assoc(mysqli_select_query($db,$table,'*','',[],$add_clause2)))
-            {
+            if ($row = mysqli_fetch_assoc(mysqli_select_query($db,$table,'*','',[],$add_clause2))) {
                 $where_clause = 'table_name=? AND is_primary=1';
                 $where_values = ['s',$base_table];
                 $add_clause2 = 'ORDER by display_order ASC';
                 $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause2);
-                while ($row2 = mysqli_fetch_assoc($query_result2))
-                {
+                while ($row2 = mysqli_fetch_assoc($query_result2)) {
                     $field_name = $row2['field_name'];
                     $primary_keys[$field_name] = $row[$field_name];
                 }
@@ -1260,16 +1081,13 @@ function run_update($table,$option)
     // Count number of fields being updated
     $field_count = 0;
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $field_name = $row['Field'];
         $where_clause = ' table_name=? AND field_name=? AND is_primary=0';
         $where_values = ['s',$base_table,'s',$field_name];
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-        if ($row2 = mysqli_fetch_assoc($query_result2))
-        {
-            if (isset($_POST["select_$field_name"]))
-            {
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
+            if (isset($_POST["select_$field_name"])) {
                 $field_count++;
             }
         }
@@ -1278,8 +1096,7 @@ function run_update($table,$option)
     // Main loop to process the updates
     $success_count = 0;
     $failure_count = 0;
-    foreach ($updates as $key => $record_id)
-    {
+    foreach ($updates as $key => $record_id) {
         $record = new db_record;
         $record->action = 'update';
         $record->table = $table;
@@ -1288,65 +1105,51 @@ function run_update($table,$option)
         $where_clause = '';
         $where_values = [];
         $primary_keys = fully_decode_record_id($record_id);
-        foreach ($primary_keys as $field => $value)
-        {
+        foreach ($primary_keys as $field => $value) {
             $pk_values .= "$value^";
             $where_clause .= " $field=? AND";
             $where_values[count($where_values)] = query_field_type($db,$table,$field);
             $where_values[count($where_values)] = $value;
         }
         $where_clause = rtrim($where_clause,'AND ');
-        if (isset($_POST['show_progress']))
-        {
+        if (isset($_POST['show_progress'])) {
             set_time_limit(30);
             print("Processing record $pk_values<br />\n");
         }
         $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
+        if ($row = mysqli_fetch_assoc($query_result)) {
             // Populate the record fields
             $query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
+            while ($row2 = mysqli_fetch_assoc($query_result2)) {
                 $field_name = $row2['Field'];
                 $where_clause = 'table_name=? AND field_name=?';
                 $where_values = ['s',$base_table,'s',$field_name];
                 $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-                if ($row3 = mysqli_fetch_assoc($query_result3))
-                {
-                    if (isset($_POST["select_$field_name"]))
-                    {
+                if ($row3 = mysqli_fetch_assoc($query_result3)) {
+                    if (isset($_POST["select_$field_name"])) {
                         // Field is being updated
-                        if ($row3['widget_type'] == 'checkbox')
-                        {
-                            if (isset($_POST["field_$field_name"]))
-                            {
+                        if ($row3['widget_type'] == 'checkbox') {
+                            if (isset($_POST["field_$field_name"])) {
                                 $field_value = 1;
                             }
-                            else
-                            {
+                            else {
                                 $field_value = 0;
                             }
                         }
-                        elseif ($row3['widget_type'] == 'checklist')
-                        {
+                        elseif ($row3['widget_type'] == 'checklist') {
                             $field_value = '^';
-                            foreach ($_POST as $key => $value)
-                            {
-                                if (strpos($key,"item_$field_name"."___") !== false)
-                                {
+                            foreach ($_POST as $key => $value) {
+                                if (strpos($key,"item_$field_name"."___") !== false) {
                                     $item = urldecode(substr($key,strlen("item_$field_name"."___")));
                                     $field_value .= "$item^";
                                 }
                             }
                         }
-                        else
-                        {
+                        else {
                             $field_value = stripslashes($_POST["field_$field_name"]);
                         }
                     }
-                    else
-                    {
+                    else {
                         // Field is not being updated
                         $field_value = $row[$field_name];
                     }
@@ -1358,26 +1161,21 @@ function run_update($table,$option)
         // Call the save function on the record
         $result = save_record($record,$record_id,$record_id);
         unset($record);
-        if ($result === false)
-        {
+        if ($result === false) {
             $failure_count++;
         }
-        else
-        {
+        else {
             $success_count++;
         }
     }
     $alert_message = "$success_count record(s) updated, $failure_count record(s) not updated.";
-    if ((isset($location)) && ($location == 'local') && (isset($_POST['show_progress'])))
-    {
+    if ((isset($location)) && ($location == 'local') && (isset($_POST['show_progress']))) {
         print("<script>alert(\"$alert_message\")</script>\n");
     }
-    else
-    {
+    else {
         print("<p class=\"highlight-success\">$alert_message</p>\n");
     }
-    if (!empty(get_session_var('save_info')))
-    {
+    if (!empty(get_session_var('save_info'))) {
         delete_session_var('save_info');
     }
     return true;
@@ -1396,16 +1194,13 @@ function select_copy($table)
     $mode = get_viewing_mode();
     $base_table = get_base_table($table);
     $item_found = false;
-    foreach ($_POST as $key => $value)
-    {
-        if (substr($key,0,7) == 'select_')
-        {
+    foreach ($_POST as $key => $value) {
+        if (substr($key,0,7) == 'select_') {
             $item_found = true;
             break;
         }
     }
-    if (!$item_found)
-    {
+    if (!$item_found) {
         print("<p class=\"highlight-error\">No records selected.</p>\n");
         return false;
     }
@@ -1415,30 +1210,23 @@ function select_copy($table)
     print("<form method=\"post\" action=\"$base_url/$relative_path/?-table=$table\">\n");
     $last_display_group = '';
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $field_name = $row['Field'];
         $where_clause = 'table_name=? AND field_name=?';
         $where_values = ['s',$base_table,'s',$field_name];
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-        if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['widget_type'] != 'file'))
-        {
+        if (($row2 = mysqli_fetch_assoc($query_result2)) && ($row2['widget_type'] != 'file')) {
             $display_group = $row2['display_group'];
-            if ($display_group != $last_display_group)
-            {
-                if (!empty($last_display_group))
-                {
-                    if ($mode == 'desktop')
-                    {
+            if ($display_group != $last_display_group) {
+                if (!empty($last_display_group)) {
+                    if ($mode == 'desktop') {
                         print("</table>\n");
                     }
-                    if ($display_group != '-default-')
-                    {
+                    if ($display_group != '-default-') {
                         print("<strong>$display_group</strong>\n");
                     }
                 }
-                if ($mode == 'desktop')
-                {
+                if ($mode == 'desktop') {
                     print("<table class=\"update-selection\">\n");
                     print("<tr><td class=\"update-selection-header\">Select</td>");
                     print("<td class=\"update-selection-header\">Field</td>");
@@ -1446,42 +1234,34 @@ function select_copy($table)
                 }
                 $last_display_group = $display_group;
             }
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("<tr>");
                 print("<td class=\"update-selection\">");
             }
-            else
-            {
+            else {
                 print("<div class=\"update-field\">");
                 print("<div class=\"update-field-cell update-field-select\">");
             }
-            if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static'))
-            {
+            if (($row2['widget_type'] != 'auto-increment') && ($row2['widget_type'] != 'static')) {
                 print("<input type=\"checkbox\" name=\"select_$field_name\">");
-                if ($row2['is_primary'])
-                {
+                if ($row2['is_primary']) {
                     print("&nbsp;*");
                 }
             }
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("</td>");
             }
-            else
-            {
+            else {
                 print("</div>");
             }
             $label = field_label($table,$field_name);
-            if ($mode == 'desktop')
-            {
+            if ($mode == 'desktop') {
                 print("<td class=\"update-selection\">$label</td>");
                 print("<td class=\"update-selection\">");
                 generate_widget($table,$field_name,false);
                 print("</td></tr>\n");
             }
-            else
-            {
+            else {
                 print("<div class=\"update-field-cell update-field-name\">$label</div>");
                 print("<div class=\"update-field-cell update-field-value\">");
                 generate_widget($table,$field_name,false);
@@ -1489,8 +1269,7 @@ function select_copy($table)
             }
         }
     }
-    if ($mode == 'desktop')
-    {
+    if ($mode == 'desktop') {
         print("</table>\n");
     }
     print("<p>&nbsp;&nbsp;<input type=\"checkbox\" name=\"show_progress\">&nbsp;Show&nbsp;Progress</p>\n");
@@ -1521,23 +1300,18 @@ function run_copy($table)
     $search_clause = get_session_var("$relative_sub_path-$table-search-clause");
 
     // Build up array of updates indexed by record ID.
-    foreach ($post_copy as $key => $value)
-    {
-        if (substr($key,0,7) == 'select_')
-        {
+    foreach ($post_copy as $key => $value) {
+        if (substr($key,0,7) == 'select_') {
             $record_offset = substr($key,7);
-            if (is_numeric($record_offset))
-            {
+            if (is_numeric($record_offset)) {
                 $add_clause = combined_add_clause($where_par,$search_clause,"$sort_clause LIMIT $record_offset,1");
                 $query_result = mysqli_select_query($db,$table,'*','',[],$add_clause);
-                if ($row = mysqli_fetch_assoc($query_result))
-                {
+                if ($row = mysqli_fetch_assoc($query_result)) {
                     $where_clause = 'table_name=? AND is_primary=1';
                     $where_values = ['s',$base_table];
                     $add_clause = 'ORDER by display_order ASC';
                     $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-                    while ($row2 = mysqli_fetch_assoc($query_result2))
-                    {
+                    while ($row2 = mysqli_fetch_assoc($query_result2)) {
                         $field_name = $row2['field_name'];
                         $primary_keys[$field_name] = $row[$field_name];
                     }
@@ -1550,20 +1324,17 @@ function run_copy($table)
     // Check the number of primary key fields being updated
     $primary_key_count = 0;
     $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $field_name = $row['Field'];
         $where_clause = 'table_name=? AND field_name=? AND is_primary=1';
         $where_values = ['s',$base_table,'s',$field_name];
         $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
         if (($row2 = mysqli_fetch_assoc($query_result2)) &&
-            ((isset($_POST["select_$field_name"])) || ($row2['widget_type'] == 'auto-increment')))
-        {
+            ((isset($_POST["select_$field_name"])) || ($row2['widget_type'] == 'auto-increment'))) {
             $primary_key_count++;
         }
     }
-    if ($primary_key_count == 0)
-    {
+    if ($primary_key_count == 0) {
         print("<p class=\"highlight-error\">No primary key field selected<p>\n");
         return false;
     }
@@ -1571,8 +1342,7 @@ function run_copy($table)
     // Main loop to process the updates
     $success_count = 0;
     $failure_count = 0;
-    foreach ($updates as $key => $record_id)
-    {
+    foreach ($updates as $key => $record_id) {
         $record = new db_record;
         $record->action = 'copy';
         $record->table = $table;
@@ -1581,53 +1351,42 @@ function run_copy($table)
         $where_clause = '';
         $where_values = [];
         $primary_keys = fully_decode_record_id($record_id);
-        foreach ($primary_keys as $field => $value)
-        {
+        foreach ($primary_keys as $field => $value) {
             $pk_values .= "$value^";
             $where_clause .= " $field=? AND ";
             $where_values[count($where_values)] = query_field_type($db,$table,$field);
             $where_values[count($where_values)] = $value;
         }
         $where_clause = rtrim($where_clause,' AND');
-        if (isset($_POST['show_progress']))
-        {
+        if (isset($_POST['show_progress'])) {
             set_time_limit(30);
             print("Processing record $pk_values<br />\n");
         }
         $query_result = mysqli_select_query($db,$table,'*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
+        if ($row = mysqli_fetch_assoc($query_result)) {
             // Populate the record fields
             $query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
+            while ($row2 = mysqli_fetch_assoc($query_result2)) {
                 $field_name = $row2['Field'];
                 $where_clause = 'table_name=? AND field_name=?';
                 $where_values = ['s',$base_table,'s',$field_name];
                 $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
-                if ($row3 = mysqli_fetch_assoc($query_result3))
-                {
-                    if (isset($_POST["select_$field_name"]))
-                    {
+                if ($row3 = mysqli_fetch_assoc($query_result3)) {
+                    if (isset($_POST["select_$field_name"])) {
                         // Field is being updated
-                        if ($row3['widget_type'] == 'checkbox')
-                        {
-                            if (isset($_POST["field_$field_name"]))
-                            {
+                        if ($row3['widget_type'] == 'checkbox') {
+                            if (isset($_POST["field_$field_name"])) {
                                 $field_value = 1;
                             }
-                            else
-                            {
+                            else {
                                 $field_value = 0;
                             }
                         }
-                        else
-                        {
+                        else {
                             $field_value = stripslashes($_POST["field_$field_name"]);
                         }
                     }
-                    else
-                    {
+                    else {
                         // Field is not being updated
                         $field_value = $row[$field_name];
                     }
@@ -1639,26 +1398,21 @@ function run_copy($table)
         // Call the save function on the record
         $result = save_record($record,$record_id,$record_id);
         unset($record);
-        if ($result === false)
-        {
+        if ($result === false) {
             $failure_count++;
         }
-        else
-        {
+        else {
             $success_count++;
         }
     }
     $alert_message = "$success_count record(s) copied, $failure_count record(s) not copied.";
-    if ((isset($location)) && ($location == 'local') && (isset($_POST['show_progress'])))
-    {
+    if ((isset($location)) && ($location == 'local') && (isset($_POST['show_progress']))) {
         print("<script>alert(\"$alert_message\")</script>\n");
     }
-    else
-    {
+    else {
         print("<p class=\"highlight-success\">$alert_message</p>\n");
     }
-    if (!empty(get_session_var('save_info')))
-    {
+    if (!empty(get_session_var('save_info'))) {
         delete_session_var('save_info');
     }
     return true;
@@ -1681,16 +1435,13 @@ function renumber_records($table)
     $where_clause = 'table_name=?';
     $where_values = ['s',$table];
     $row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''));
-    if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])) && ($row['renumber_enabled']))
-    {
+    if ((isset($row['seq_no_field'])) && (!empty($row['seq_no_field'])) && ($row['renumber_enabled'])) {
         // Set up basic query string according to sort method
-        if (!empty($row['sort_1_field']))
-        {
+        if (!empty($row['sort_1_field'])) {
             $saved_add_clause = "ORDER BY {$row['sort_1_field']},{$row['seq_no_field']}";
             $level_1_sort = true;
         }
-        else
-        {
+        else {
             $saved_add_clause = "ORDER BY {$row['seq_no_field']}";
             $row['seq_method'] = 'continuous';   // Force continuous method if no first-level sort
             $level_1_sort = false;
@@ -1702,28 +1453,23 @@ function renumber_records($table)
         $record_count = mysqli_num_rows($query_result);
         $add_clause = "ORDER BY {$row['seq_no_field']} DESC LIMIT 1";
         $query_result2 = mysqli_select_query($db,$table,'*','',[],$add_clause);
-        if ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
             $max_rec_id = $row2[$row['seq_no_field']];
         }
-        else
-        {
+        else {
             $max_rec_id = 0;
         }
         $temp_rec_id = $max_rec_id + 10;
         $query_result2 = mysqli_select_query($db,$table,'*','',[],$saved_add_clause);
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
-            if ($level_1_sort)
-            {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
+            if ($level_1_sort) {
                 $set_fields = "{$row['seq_no_field']}";
                 $set_values = ['i',$temp_rec_id];
                 $where_clause = "{$row['sort_1_field']}=? AND {$row['seq_no_field']}=?";
                 $where_values = ['s',$row2[$row['sort_1_field']],'i',$row2[$row['seq_no_field']]];
                 mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
             }
-            else
-            {
+            else {
                 $set_fields = "{$row['seq_no_field']}";
                 $set_values = ['i',$temp_rec_id];
                 $where_clause = "{$row['seq_no_field']}=?";
@@ -1737,14 +1483,11 @@ function renumber_records($table)
         $new_id = 0;
         $first_sort_prev_value = '';
         $query_result2 = mysqli_select_query($db,$table,'*','',[],$saved_add_clause);
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
-            if (($row['seq_method'] == 'repeat') && ($row2[$row['sort_1_field']] != $first_sort_prev_value))
-            {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
+            if (($row['seq_method'] == 'repeat') && ($row2[$row['sort_1_field']] != $first_sort_prev_value)) {
                 $new_id = 10;
             }
-            else
-            {
+            else {
                 $new_id += 10;
             }
             $set_fields = "{$row['seq_no_field']}";
@@ -1752,8 +1495,7 @@ function renumber_records($table)
             $where_clause = "{$row['seq_no_field']}=?";
             $where_values = ['i',$row2[$row['seq_no_field']]];
             mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
-            if ($row['seq_method'] == 'repeat')
-            {
+            if ($row['seq_method'] == 'repeat') {
                 $first_sort_prev_value = $row2[$row['sort_1_field']];
             }
         }

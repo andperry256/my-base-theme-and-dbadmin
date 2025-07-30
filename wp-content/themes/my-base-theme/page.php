@@ -19,26 +19,21 @@ get_header();
     <main id="main" class="site-main" role="main">
 
         <?php
-        if ($my_base_theme_mode == 'full')
-        {
+        if ($my_base_theme_mode == 'full') {
             require($site_path_defs_path);
             $page_uri = trim(get_page_uri(get_the_ID()),'/');
-            if (is_file("$custom_pages_path/$page_uri/_home.php"))
-            {
+            if (is_file("$custom_pages_path/$page_uri/_home.php")) {
                 $custom_script = "$custom_pages_path/$page_uri/_home.php";
             }
-            else
-            {
+            else {
                 $custom_script = "$custom_pages_path/$page_uri.php";
             }
         }
-        if ((isset($custom_script)) && (is_file($custom_script)))
-        {
+        if ((isset($custom_script)) && (is_file($custom_script))) {
             // Display page with custom PHP script
             include($custom_script);
         }
-        else
-        {
+        else {
             // Display page using normal WordPress mechanism
             while ( have_posts() ) : the_post();
 
@@ -60,8 +55,7 @@ get_header();
 
 <?php
 
-if ((isset($page_config['hide_sidebar'])) && ($page_config['hide_sidebar'] === false))
-{
+if ((isset($page_config['hide_sidebar'])) && ($page_config['hide_sidebar'] === false)) {
     get_sidebar();
 }
 get_footer();

@@ -19,12 +19,10 @@ get_header();
         <?php
         //==============================================================================
         // Determine the user access level
-        if (session_var_is_set(SV_ACCESS_LEVEL))
-        {
+        if (session_var_is_set(SV_ACCESS_LEVEL)) {
             $user_access_level = get_session_var(SV_ACCESS_LEVEL);
         }
-        else
-        {
+        else {
             $user_access_level = DEFAULT_ACCESS_LEVEL;
         }
 
@@ -38,22 +36,18 @@ get_header();
                 ];
 
         // Handle the sort order for the posts
-        if (isset($_GET['orderby']))
-        {
+        if (isset($_GET['orderby'])) {
             update_session_var('orderby',$_GET['orderby']);
         }
-        elseif (!session_var_is_set('orderby'))
-        {
+        elseif (!session_var_is_set('orderby')) {
             update_session_var('orderby','date');
         }
-        if (get_session_var('orderby') == 'title')
-        {
+        if (get_session_var('orderby') == 'title') {
             print("<a href=\"$base_url/full-post-archive\?orderby=date\">Sort by Date</a><br />&nbsp;\n");
             $args['orderby'] = 'name';
             $args['order'] = 'ASC';
         }
-        else
-        {
+        else {
             print("<a href=\"$base_url/full-post-archive\?orderby=title\">Sort by Title</a><br />&nbsp;\n");
             $args['orderby'] = 'date';
             $args['order'] = 'DESC';
@@ -65,20 +59,17 @@ get_header();
         $page_count = ceil($post_count/POSTS_PER_ARCHIVE_PAGE_LONG);
 
         // Run the WordPress loop
-        if ( $local_query->have_posts() )
-        {
+        if ( $local_query->have_posts() ) {
             pagination_links($page_count);
             print("<table class=\"post-archive-table\">\n");
-            while ( $local_query->have_posts() )
-            {
+            while ( $local_query->have_posts() ) {
                 $local_query->the_post();
                 output_post_archive_item($post->ID);
             }
             print("</table>\n");
             pagination_links($page_count);
         }
-        else
-        {
+        else {
             get_template_part( 'template-parts/content', 'none' );
         }
         wp_reset_postdata();

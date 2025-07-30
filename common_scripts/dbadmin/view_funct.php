@@ -21,8 +21,7 @@ Function set_temp_view_name
 
 function set_temp_view_name()
 {
-    if ((!session_var_is_set('TEMP_VIEW')) || (empty(get_session_var('TEMP_VIEW'))))
-    {
+    if ((!session_var_is_set('TEMP_VIEW')) || (empty(get_session_var('TEMP_VIEW')))) {
         $temp_str1 = str_replace('.','_',$_SERVER['REMOTE_ADDR']);
         $temp_str2 = date('His');
         update_session_var('TEMP_VIEW',"_view_temp_$temp_str1"."_$temp_str2");
@@ -43,8 +42,7 @@ function create_view_structure($view,$table,$conditions)
     // Create the view and drop any old tables/views that may conflict with the
     // current setup.
     mysqli_query_normal($db,"CREATE OR REPLACE VIEW $view AS SELECT * FROM $table WHERE $conditions");
-    if (substr($view,0,6) == '_view_')
-    {
+    if (substr($view,0,6) == '_view_') {
         mysqli_query_normal($db,"DROP TABLE IF EXISTS $view");
         $old_view = substr($view,6);
         mysqli_query_normal($db,"DROP VIEW IF EXISTS $old_view");
@@ -52,21 +50,17 @@ function create_view_structure($view,$table,$conditions)
 
     // Add new class definition and symbolic link to directory if the directory
     // for the table already exists.
-    if (!is_dir("$custom_pages_path/$relative_path/tables/$table"))
-    {
+    if (!is_dir("$custom_pages_path/$relative_path/tables/$table")) {
         mkdir("$custom_pages_path/$relative_path/tables/$table",0755);
     }
     $file = "$custom_pages_path/$relative_path/tables/$table/$view.php";
-    if (!is_file($file))
-    {
+    if (!is_file($file)) {
         $ofp = fopen($file,'w');
         fprintf($ofp,"<?php\n");
-        if (is_file("$custom_pages_path/$relative_path/tables/$table/$table.php"))
-        {
+        if (is_file("$custom_pages_path/$relative_path/tables/$table/$table.php")) {
             fprintf($ofp,"include(\"\$custom_pages_path/\$relative_path/tables/$table/$table.php\");\n");
         }
-        elseif (is_file("$alt_include_path/tables/$table/$table.php"))
-        {
+        elseif (is_file("$alt_include_path/tables/$table/$table.php")) {
             fprintf($ofp,"include(\"\$alt_include_path/tables/$table/$table.php\");\n");
         }
         fprintf($ofp,"class tables_$view extends tables_$table {}\n");
@@ -74,8 +68,7 @@ function create_view_structure($view,$table,$conditions)
         fclose($ofp);
     }
     $link = "$custom_pages_path/$relative_path/tables/$view";
-    if (!is_link($link))
-    {
+    if (!is_link($link)) {
         symlink("$custom_pages_path/$relative_path/tables/$table","$link");
     }
 
@@ -83,8 +76,7 @@ function create_view_structure($view,$table,$conditions)
     $where_clause = 'table_name=?';
     $where_values = ['s',$view];
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-    if (mysqli_num_rows($query_result) == 0)
-    {
+    if (mysqli_num_rows($query_result) == 0) {
         // New table info record
         $fields = 'table_name,parent_table';
         $values = ['s',$view,'s',$table];
@@ -92,8 +84,7 @@ function create_view_structure($view,$table,$conditions)
         $where_clause = 'table_name=?';
         $where_values = ['s',$table];
         $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-        if ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
             /*
             Copy the access level fields from the table into the view. Only do this for a
             new table info record, thus allowing a view to be subsequently altered from
@@ -111,8 +102,7 @@ function create_view_structure($view,$table,$conditions)
             mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
-    else
-    {
+    else {
         // Update existing table info record
         $set_fields = 'parent_table';
         $set_values = ['s',$table];
@@ -135,13 +125,11 @@ function delete_view_structure($view,$table)
 
     mysqli_query_normal($db,"DROP VIEW IF EXISTS $view");
     $file = "$custom_pages_path/$relative_path/tables/$table/$view.php";
-    if (is_file($file))
-    {
+    if (is_file($file)) {
         unlink($file);
     }
     $link = "$custom_pages_path/$relative_path/tables/$view";
-    if (is_link($link))
-    {
+    if (is_link($link)) {
         unlink($link);
     }
     $where_clause = 'table_name=? AND parent_table=?';
@@ -162,8 +150,7 @@ function create_child_table_structure($child,$parent)
 
     mysqli_query_normal($db,"CREATE TABLE IF NOT EXISTS $child LIKE $parent");
     $file = "$custom_pages_path/$relative_path/tables/$parent/$child.php";
-    if (!is_file($file))
-    {
+    if (!is_file($file)) {
         $ofp = fopen($file,'w');
         fprintf($ofp,"<?php\n");
         fprintf($ofp,"include(\"\$custom_pages_path/\$relative_path/tables/$parent/$parent.php\");\n");
@@ -172,8 +159,7 @@ function create_child_table_structure($child,$parent)
         fclose($ofp);
     }
     $link = "$custom_pages_path/$relative_path/tables/$child";
-    if (!is_link($link))
-    {
+    if (!is_link($link)) {
         symlink("$custom_pages_path/$relative_path/tables/$parent","$link");
     }
 
@@ -181,8 +167,7 @@ function create_child_table_structure($child,$parent)
     $where_clause = 'table_name=?';
     $where_values = ['s',$child];
     $query_result = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-    if (mysqli_num_rows($query_result) == 0)
-    {
+    if (mysqli_num_rows($query_result) == 0) {
         // New table info record
         $fields = 'table_name,parent_table';
         $values = ['s',$child,'s',$parent];
@@ -190,8 +175,7 @@ function create_child_table_structure($child,$parent)
         $where_clause = 'table_name=?';
         $where_values = ['s',$parent];
         $query_result2 = mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'');
-        if ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
             /*
             Copy the access level fields from the table into the child table. Only do
             this for a new table info record, thus allowing a child table to be
@@ -209,8 +193,7 @@ function create_child_table_structure($child,$parent)
             mysqli_update_query($db,'dba_table_info',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
-    else
-    {
+    else {
         // Update existing table info record
         $set_fields = 'parent_table';
         $set_values = ['s',$parent];
@@ -233,13 +216,11 @@ function delete_child_table_structure($child,$parent)
 
     mysqli_query_normal($db,"DROP TABLE $child");
     $file = "$custom_pages_path/$relative_path/tables/$parent/$child.php";
-    if (is_file($file))
-    {
+    if (is_file($file)) {
         unlink($file);
     }
     $link = "$custom_pages_path/$relative_path/tables/$child";
-    if (is_link($link))
-    {
+    if (is_link($link)) {
         unlink($link);
     }
     $where_clause = 'table_name=? AND parent_table=?';

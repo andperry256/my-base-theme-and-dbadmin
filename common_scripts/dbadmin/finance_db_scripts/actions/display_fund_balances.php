@@ -9,12 +9,10 @@ function print_localised_superfund_balance_line($col1_style,$col2_style,$col3_st
     print("<td style=\"$col2_style\">&nbsp;</td>");
     print("<td style=\"$col3_style\">");
     $link = "index.php?-action=display_transaction_report&fund=$fund&start_month=".NO_START_MONTH."&end_month=$end_month&currency=$currency";
-    if ($balance >= 0)
-    {
+    if ($balance >= 0) {
         printf("<a class=\"balance-positive\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
     }
-    else
-    {
+    else {
         printf("<a class=\"balance-negative\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
     }
     print("</td></tr>\n");
@@ -24,24 +22,20 @@ function print_localised_superfund_balance_line($col1_style,$col2_style,$col3_st
 
 function print_global_fund_balance_line($col1_style,$col2_style,$fund,$is_superfund,$balance,$end_month,$currency)
 {
-    if ($is_superfund)
-    {
+    if ($is_superfund) {
         $description = "<span style=\"color:#00c\">Total $fund</span>";
         $fund .= ':%%';
     }
-    else
-    {
+    else {
         $description = $fund;
     }
     printf("<tr><td style=\"$col1_style\" width=\"150px\"><a href=\"index.php?-action=display_transaction_report&fund=$fund&currency=$currency\" target=\"blank\">$description</a></td>\n");
     print("<td style=\"$col2_style\" width=\"100px\">");
     $link = "index.php?-action=display_transaction_report&fund=$fund&start_month=".NO_START_MONTH."&end_month=$end_month&currency=$currency";
-    if ($balance >= 0)
-    {
+    if ($balance >= 0) {
         printf("<a class=\"balance-positive\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
     }
-    else
-    {
+    else {
         printf("<a class=\"balance-negative\" target=\"_blank\" href=\"$link\">%01.2f</a>", $balance);
     }
     print("</td></tr>\n");
@@ -49,8 +43,7 @@ function print_global_fund_balance_line($col1_style,$col2_style,$fund,$is_superf
 
 //==============================================================================
 
-if (!isset($db))
-{
+if (!isset($db)) {
     $db = admin_db_connect();
 }
 $table_style = "border-spacing:0; border-collapse:collapse;";
@@ -61,10 +54,8 @@ $table_filler_line = "line-height:0.7em;";
 $fund_exclusions = select_excluded_funds('name');
 
 $error = false;
-if (isset($_POST['submitted']))
-{
-    switch ($_POST['balance_date'])
-    {
+if (isset($_POST['submitted'])) {
+    switch ($_POST['balance_date']) {
         case 'now':
             $end_month = accounting_month(date('Y-m-d'));
             break;
@@ -74,8 +65,7 @@ if (isset($_POST['submitted']))
             $month_value = (int)substr($current_month,5,2);
             $year_value = (int)substr($current_month,0,4);
             $month_value--;
-            if ($month_value == 0)
-            {
+            if ($month_value == 0) {
                 $month_value = 12;
                 $year_value--;
             }
@@ -89,31 +79,26 @@ if (isset($_POST['submitted']))
             break;
     
         case 'select':
-            if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month'])))
-            {
+            if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month']))) {
                 // Set end year/month to an actual date.
                 $end_month = sprintf("%04d-%02d",$_POST['end_year'],$_POST['end_month']);
             }
-            else
-            {
+            else {
                 $end_month = accounting_month(date('Y-m-d'));
             }
             break;
     }
 }
 
-if ((isset($_POST['submitted'])) && (!$error))
-{
+if ((isset($_POST['submitted'])) && (!$error)) {
     $currency=$_POST['currency'];
     $end_date = month_name((int)substr($end_month,5,2)).' '.substr($end_month,0,4);
     print("<h1>Fund Balances");
-    if (!isset($off_screen))
-    {
+    if (!isset($off_screen)) {
         print(" - $end_date");
     }
     print("</h1>\n");
-    if ($currency != 'GBP')
-    {
+    if ($currency != 'GBP') {
         print("<h2>Currency - $currency</h2>\n");
     }
   
@@ -122,8 +107,7 @@ if ((isset($_POST['submitted'])) && (!$error))
     $balances = [];
     $add_clause = 'ORDER by sort_order ASC';
     $query_result = mysqli_select_query($db,'accounts','*','',[],$add_clause);
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $balances[$row['label']] = 0;
     }
     print("<table style=\"$table_style\">\n");
@@ -131,26 +115,20 @@ if ((isset($_POST['submitted'])) && (!$error))
     $superfund_balance = 0;
     $where_clause = "type='localised' $fund_exclusions";
     $query_result = mysqli_select_query($db,'funds','*',$where_clause,[],'');
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
-        foreach ($balances as $label => $value)
-        {
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        foreach ($balances as $label => $value) {
             $balances[$label] = 0;
         }
         $fund = $row['name'];
         $last_superfund = $superfund;
-        if (strpos($fund,':') !== false)
-        {
+        if (strpos($fund,':') !== false) {
             $superfund = strtok($fund,':');
         }
-        else
-        {
+        else {
             $superfund = '';
         }
-        if ($last_superfund != $superfund)
-        {
-            if ($last_superfund != '')
-            {
+        if ($last_superfund != $superfund) {
+            if ($last_superfund != '') {
                 // Have just completed adding up totals for a given superfund
                 print_localised_superfund_balance_line($table_cell_style,$table_cell_style,$table_cell_style_ra,$last_superfund,$superfund_balance,$end_month,$currency);
                 print("</td></tr><tr><td style=\"$table_filler_line\">&nbsp;</td></tr>\n");
@@ -163,8 +141,7 @@ if ((isset($_POST['submitted'])) && (!$error))
         $where_clause = "currency=? AND fund=? AND acct_month<=? AND sched_freq='#'";
         $where_values = ['s',$currency,'s',$fund,'s',$end_month];
         $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
             // Add transaction amount to account balance
             $balances[$row2['account']] = add_money($balances[$row2['account']],subtract_money($row2['credit_amount'],$row2['debit_amount']));
             $superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
@@ -172,13 +149,11 @@ if ((isset($_POST['submitted'])) && (!$error))
         $where_clause = 'fund=? AND acct_month<=?';
         $where_values = ['s',$fund,'s',$end_month];
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
             $where_clause = 'currency=? AND account=? AND seq_no=? AND acct_month<=?';
             $where_values = ['s',$currency,'s',$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month];
             $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-            if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
-            {
+            if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#')) {
                 // Add split amount to only/source account balance
                 $balances[$row3['account']] = add_money($balances[$row3['account']],subtract_money($row2['credit_amount'],$row2['debit_amount']));
                 $superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
@@ -186,33 +161,27 @@ if ((isset($_POST['submitted'])) && (!$error))
             $where_clause = 'currency=? AND source_account=? AND source_seq_no=? AND acct_month<=?';
             $where_values = ['s',$currency,'s',$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month];
             $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-            if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
-            {
+            if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#')) {
                 // Subtract split amount from target account balance
                 $balances[$row3['account']] = add_money($balances[$row3['account']],subtract_money($row2['debit_amount'],$row2['credit_amount']));
                 $superfund_balance = add_money($superfund_balance,subtract_money($row2['debit_amount'],$row2['credit_amount']));
             }
         }
-        foreach($balances as $label => $value)
-        {
-            if (round($value,2) != 0)
-            {
+        foreach($balances as $label => $value) {
+            if (round($value,2) != 0) {
                 // Output account name and balance
                 $where_clause = 'label=?';
                 $where_values = ['s',$label];
                 $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
-                if ($row2 = mysqli_fetch_assoc($query_result2))
-                {
+                if ($row2 = mysqli_fetch_assoc($query_result2)) {
                     print("<td style=\"$table_cell_style\" width=\"120px\">{$row2['name']}</td>");
                 }
                 print("<td style=\"$table_cell_style_ra\" width=\"50px\">");
                 $link = "index.php?-action=display_transaction_report&account=$label&fund=$fund&start_month=".NO_START_MONTH."&end_month=$end_month&currency=$currency";
-                if ($value >= 0)
-                {
+                if ($value >= 0) {
                     printf("<a class=\"balance-positive\" target=\"_blank\" href=\"$link\">%01.2f</a>", $value);
                 }
-                else
-                {
+                else {
                     printf("<a class=\"balance-negative\" target=\"_blank\" href=\"$link\">%01.2f</a>", $value);
                 }
                 print("</td></tr>\n");
@@ -222,18 +191,15 @@ if ((isset($_POST['submitted'])) && (!$error))
         }
         // Output fund total
         print("<td style=\"$table_cell_style\">Total</td><td style=\"$table_cell_style_total\">\n");
-        if ($total >= 0)
-        {
+        if ($total >= 0) {
             printf("<span class=\"balance-positive\">%01.2f</span>", $total);
         }
-        else
-        {
+        else {
             printf("<span class=\"balance-negative\">%01.2f</span>", $total);
         }
         print("</td></tr><tr><td style=\"$table_filler_line\">&nbsp;</td></tr>\n");
     }
-    if ($last_superfund != '')
-    {
+    if ($last_superfund != '') {
         // Superfund total from last funds in list
         print_localised_superfund_balance_line($table_cell_style,$table_cell_style,$table_cell_style_ra,$last_superfund,$superfund_balance,$end_month,$currency);
         print("</td></tr><tr><td style=\"$table_filler_line\">&nbsp;</td></tr>\n");
@@ -247,22 +213,17 @@ if ((isset($_POST['submitted'])) && (!$error))
     $superfund_balance = 0;
     $where_clause = "type='global' $fund_exclusions";
     $query_result = mysqli_select_query($db,'funds','*',$where_clause,[],'');
-    while ($row = mysqli_fetch_assoc($query_result))
-    {
+    while ($row = mysqli_fetch_assoc($query_result)) {
         $fund = $row['name'];
         $last_superfund = $superfund;
-        if (strpos($fund,':') !== false)
-        {
+        if (strpos($fund,':') !== false) {
             $superfund = strtok($fund,':');
         }
-        else
-        {
+        else {
             $superfund = '';
         }
-        if ($last_superfund != $superfund)
-        {
-            if ($last_superfund != '')
-            {
+        if ($last_superfund != $superfund) {
+            if ($last_superfund != '') {
                 // Have just completed adding up totals for a given superfund
                 print_global_fund_balance_line($table_cell_style,$table_cell_style_ra,$last_superfund,true,$superfund_balance,$end_month,$currency);
             }
@@ -272,8 +233,7 @@ if ((isset($_POST['submitted'])) && (!$error))
         $where_clause = "currency=? AND fund=? AND acct_month<=? AND sched_freq='#'";
         $where_values = ['s',$currency,'s',$fund,'s',$end_month];
         $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
             // Add transaction amount to fund balance
             $balance = add_money($balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
             $superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
@@ -281,13 +241,11 @@ if ((isset($_POST['submitted'])) && (!$error))
         $where_clause = "fund=? AND category<>'-transfer-' AND acct_month<=?";
         $where_values = ['s',$fund,'s',$end_month];
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,'');
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
             $where_clause = 'currency=? AND account=? AND seq_no=? AND acct_month<=?';
             $where_values = ['s',$currency,'s',$row2['account'],'i',$row2['transact_seq_no'],'s',$end_month];
             $query_result3 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-            if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#'))
-            {
+            if (($row3 = mysqli_fetch_assoc($query_result3)) && ($row3['sched_freq'] == '#')) {
                 // Add split amount to fund balance
                 $balance = add_money($balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
                 $superfund_balance = add_money($superfund_balance,subtract_money($row2['credit_amount'],$row2['debit_amount']));
@@ -296,21 +254,18 @@ if ((isset($_POST['submitted'])) && (!$error))
         // Print the line
         print_global_fund_balance_line($table_cell_style,$table_cell_style_ra,$fund,false,$balance,$end_month,$currency);
     }
-    if ($last_superfund != '')
-    {
+    if ($last_superfund != '') {
         // Superfund total from last funds in list
         print_global_fund_balance_line($table_cell_style,$table_cell_style_ra,$last_superfund,true,$superfund_balance,$end_month,$currency);
     }
     print("</table>\n");
     print("<h2>&nbsp;</h2>\n");
 }
-else
-{
+else {
     print("<h1>Fund Balances</h1>\n");
 }
 
-if (!isset($off_screen))
-{
+if (!isset($off_screen)) {
     // Generate form to input balance date
     print("<form method=\"post\">\n");
     print("<table cellpadding=\"5\">\n");
@@ -323,8 +278,7 @@ if (!isset($off_screen))
     print("<tr><td>Month:</td>\n");
     print("<td><select name=\"end_month\">\n");
     print("<option value=\"now\" selected>Now</option>\n");
-    for ($month = 1; $month <= 12; $month++)
-    {
+    for ($month = 1; $month <= 12; $month++) {
         $month_name = month_name($month);
         print("<option value=\"$month\">$month_name</option>\n");
     }
@@ -332,8 +286,7 @@ if (!isset($off_screen))
     print("<td><select name=\"end_year\">\n");
     print("<option value=\"now\" selected>Now</option>\n");
     $this_year = (int)date('Y');
-    for ($year = START_YEAR; $year <= $this_year; $year++)
-    {
+    for ($year = START_YEAR; $year <= $this_year; $year++) {
         print("<option value=\"$year\">$year</option>\n");
     }
     print("</select></td></tr>\n");
@@ -341,12 +294,10 @@ if (!isset($off_screen))
     print("<td colspan=2><select name=\"currency\">\n");
     $add_clause = 'ORDER BY id ASC';
     $query_result = mysqli_select_query($db,'currencies','*','',[],$add_clause);
-    while($row = mysqli_fetch_assoc($query_result))
-    {
+    while($row = mysqli_fetch_assoc($query_result)) {
         $id = $row['id'];
         print("<option value=\"$id\"");
-        if ($id == 'GBP')
-        {
+        if ($id == 'GBP') {
             print(" SELECTED");
         }
         print(">$id</option>\n");

@@ -11,12 +11,10 @@
   $db = db_connect($_POST['dbid']);
 
   if ((!isset($_POST['post_name'])) || (!isset($_POST['content'])) ||
-      (!isset($_POST['keycode'])) || (!isset($_POST['returnurl'])))
-  {
+      (!isset($_POST['keycode'])) || (!isset($_POST['returnurl']))) {
       exit("Invalid referrer");
   }
-  if ($_POST['keycode'] != PAGE_EDIT_KEYCODE)
-  {
+  if ($_POST['keycode'] != PAGE_EDIT_KEYCODE) {
       exit("Authentication failure");
   }
 
@@ -24,8 +22,7 @@
   $where_clause = 'post_name=?';
   $where_values = ['s',$post_name];
   $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
-  if ($row = mysqli_fetch_assoc($query_result))
-  {
+  if ($row = mysqli_fetch_assoc($query_result)) {
       $set_fields = 'post_content';
       $set_values = ['s',$_POST['content']];
       $where_clause = 'post_name=?';

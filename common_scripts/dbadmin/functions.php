@@ -1,8 +1,7 @@
 <?php
 //==============================================================================
 
-if (!defined('RELATIONSHIP_VARIABLE_MATCH_1'))
-{
+if (!defined('RELATIONSHIP_VARIABLE_MATCH_1')) {
     $dummy = '({';  // To avoid false positives in PHP code checker
     define('RELATIONSHIP_VARIABLE_MATCH_1','/[ =<>*+\'\^\)\}]\$[A-Za-z0-9_]+/');
     define('RELATIONSHIP_VARIABLE_MATCH_2',str_replace('\\$','\\$\\$',RELATIONSHIP_VARIABLE_MATCH_1));

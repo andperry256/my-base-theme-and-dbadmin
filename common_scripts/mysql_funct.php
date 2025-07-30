@@ -28,16 +28,13 @@ sn - String/Null (set to null if empty).
 //==============================================================================
 */
 
-if (!defined('NOUPDATE'))
-{
+if (!defined('NOUPDATE')) {
     define('NOUPDATE',2);
 }
-if (!defined('NOINSERT'))
-{
+if (!defined('NOINSERT')) {
     define('NOINSERT',3);
 }
-if (!function_exists('readable_markup'))
-{
+if (!function_exists('readable_markup')) {
     include(__DIR__.'/misc_funct.php');
 }
 global $root_dir,$error_logfile, $home_remote_ip_addr, $display_error_online;
@@ -59,8 +56,7 @@ It is used to perform the 'stripslashes' function on all elements of an array.
 
 function array_deslash (array $data)
 {
-    foreach ($data as $key => $val)
-    {
+    foreach ($data as $key => $val) {
         $data [$key] = is_array($val) ? array_deslash ($val) : stripslashes ($val);
     }
     return $data;
@@ -84,16 +80,13 @@ function print_stack_trace_for_mysqli_error($display_errors)
     debug_print_backtrace();
     $trace = ob_get_contents();
     ob_end_clean();
-    if ($display_errors)
-    {
+    if ($display_errors) {
         print(str_replace("\n",$eol,$trace));
     }
-    else
-    {
+    else {
         $ofp = fopen($error_logfile,'a');
         $content = explode("\n",$trace);
-        foreach ($content as $line)
-        {
+        foreach ($content as $line) {
             $line = str_replace('%','%%',$line);
             fprintf($ofp,"  $line$eol");
         }
@@ -117,15 +110,12 @@ On an online server, errors are output to a log file rather than the screen.
 function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
 {
     global $error_logfile, $display_error_online;
-    if ($debug)
-    {
-        if ($continue)
-        {
+    if ($debug) {
+        if ($continue) {
             print(readable_markup("$query\n"));
             return;
         }
-        else
-        {
+        else {
             exit (readable_markup("$query\n"));
         }
     }
@@ -134,21 +124,17 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
     $date_and_time = date('Y-m-d H:i:s');
     $fatal_error_message = "There has been a fatal error, details of which have been logged.$eol";
     $fatal_error_message .= "Please report this to the webmaster quoting code <strong>$error_id</strong>.$eol";
-    try
-    {
+    try {
         $result = mysqli_query($db,$query);
     }
-    catch (Exception $e)
-    {
-        if (is_file("/Config/linux_pathdefs.php"))
-        {
+    catch (Exception $e) {
+        if (is_file("/Config/linux_pathdefs.php")) {
             // Local server
             print("Error caught on running MySQL query:$eol$query$eol");
             print($e->getMessage().$eol);
             print_stack_trace_for_mysqli_error(true);
         }
-        else
-        {
+        else {
             // Online server
             $ofp = fopen($error_logfile,'a');
             $message = "[$date_and_time] [$error_id] Error caught on running MySQL query:\n  $query\n";
@@ -161,16 +147,13 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
         }
         exit;
     }
-    if ((!$result) && ($strict))
-    {
-        if (is_file("/Config/linux_pathdefs.php"))
-        {
+    if ((!$result) && ($strict)) {
+        if (is_file("/Config/linux_pathdefs.php")) {
             // Local server
             print("Error result returned from MySQL query:$eol$query$eol");
             print_stack_trace_for_mysqli_error(true);
         }
-        else
-        {
+        else {
             // Online server
             $ofp = fopen($error_logfile,'a');
             fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
@@ -209,28 +192,22 @@ comment at the top of this script.
 
 function query_field_type($db,$table,$field_name)
 {
-    if (function_exists('base_table'))
-    {
+    if (function_exists('base_table')) {
         $table = base_table($table);
     }
-    if ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SHOW COLUMNS FROM $table WHERE Field='$field_name'")))
-    {
+    if ($row = mysqli_fetch_assoc(mysqli_query_strict($db,"SHOW COLUMNS FROM $table WHERE Field='$field_name'"))) {
         $type_word = strtok($row['Type'],'(');
-        if (preg_match('/int/',($type_word)))
-        {
+        if (preg_match('/int/',($type_word))) {
             return 'i';
         }
-        elseif (preg_match('/dec/',($type_word)))
-        {
+        elseif (preg_match('/dec/',($type_word))) {
             return 'd';
         }
-        else
-        {
+        else {
             return 's' ;
         }
     }
-    else
-    {
+    else {
         // This should not occur
         return 's';
     }
@@ -263,8 +240,7 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
     $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
     $error_id = substr(md5(date('YmdHis')),0,8);
     $date_and_time = date('Y-m-d H:i:s');
-    if ((is_file("/Config/linux_pathdefs.php")) || ($display_error_online))
-    {
+    if ((is_file("/Config/linux_pathdefs.php")) || ($display_error_online)) {
         // Local server or online server from home
         print("Failed to validate MySQL query:$eol$query$eol");
         $value_count = count($values);
@@ -277,11 +253,9 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
         print("td { border: solid 1px #ccc; padding-left: 0.5em }\n");
         print("</style>\n");
         print("<table>\n");
-        for ($i=0; $i<=$total_count; $i++)
-        {
+        for ($i=0; $i<=$total_count; $i++) {
             print("<tr><td style=\"width:15.0em\">");
-            if (($i%2 == 0) && ($i < $param_count*2))
-            {
+            if (($i%2 == 0) && ($i < $param_count*2)) {
                 $param = strtok($fields,',');
                 $fields = substr($fields,strlen($param)+1);
                 print (empty($param))
@@ -293,8 +267,7 @@ function raise_query_validation_error($query,$param_count,$fields,$values)
         print("</table>\n");
         print_stack_trace_for_mysqli_error(true);
     }
-    else
-    {
+    else {
         // Online server
         $ofp = fopen($error_logfile,'a');
         fprintf($ofp,"[$date_and_time] [$error_id] Failed to validate MySQL query:\n  $query\n");
@@ -332,29 +305,23 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
     $query = "SELECT $fields FROM $table";
     $where_clause_count = substr_count($where_clause,'?');
     $where_values_count = count($where_values);
-    if ($where_values_count != $where_clause_count*2)
-    {
+    if ($where_values_count != $where_clause_count*2) {
         raise_query_validation_error("$query WHERE $where_clause ...",$where_clause_count,'',$where_values);
     }
-    if (!empty($where_clause))
-    {
+    if (!empty($where_clause)) {
         $query .= " WHERE $where_clause";
     }
-    if (!empty($add_clause))
-    {
+    if (!empty($add_clause)) {
         $query .= " $add_clause";
     }
     $pos = 0;
-    for ($i=0; $i<$where_values_count; $i+=2)
-    {
-        if ($where_values[$i] == 's')
-        {
+    for ($i=0; $i<$where_values_count; $i+=2) {
+        if ($where_values[$i] == 's') {
             $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
                 ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                 : "''";
         }
-        else
-        {
+        else {
             $param = $where_values[$i+1];
         }
         $pos = strpos($query,'?',$pos);
@@ -390,39 +357,32 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
 {
     $query = "UPDATE $table SET ";
     $tok = strtok($set_fields,',');
-    while ($tok !== false)
-    {
+    while ($tok !== false) {
         $query .= "$tok=?,";
         $tok = strtok(',');
     }
     $query = rtrim($query,',');
-    if (!empty($where_clause))
-    {
+    if (!empty($where_clause)) {
         $query .= " WHERE $where_clause";
     }
     $param_count = substr_count($set_fields,',') + 1 + substr_count($where_clause,'?');
     $all_values = array_merge($set_values,$where_values);
     $all_values_count = count($all_values);
-    if ($all_values_count != $param_count*2)
-    {
+    if ($all_values_count != $param_count*2) {
         raise_query_validation_error($query,$param_count,$set_fields,$all_values);
     }
     $pos = 0;
-    for ($i=0; $i<$all_values_count; $i+=2)
-    {
+    for ($i=0; $i<$all_values_count; $i+=2) {
         if (($all_values[$i] == 'n') ||
-            (($all_values[$i] == 'sn') && (empty($all_values[$i+1]))))
-        {
+            (($all_values[$i] == 'sn') && (empty($all_values[$i+1])))) {
             $param = 'NULL';
         }
-        elseif (($all_values[$i] == 's') || ($all_values[$i] == 'sn'))
-        {
+        elseif (($all_values[$i] == 's') || ($all_values[$i] == 'sn')) {
             $param = ((is_string($all_values[$i+1])) && ($all_values[$i+1] != ''))
                 ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
                 : "''";
         }
-        else
-        {
+        else {
             $param = $all_values[$i+1];
         }
         $pos = strpos($query,'?',$pos);
@@ -451,12 +411,10 @@ using the '===' operator.
 
 function mysqli_conditional_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict=false,$debug=false,$continue=false)
 {
-    if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) == 0)
-    {
+    if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) == 0) {
         return NOUPDATE;
     }
-    else
-    {
+    else {
         return mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values,$strict,$debug,$continue);
     }
 }
@@ -486,26 +444,21 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
         ? mysqli_num_rows(mysqli_query_normal($db,"SHOW COLUMNS FROM $table"))
         : substr_count($fields,',') + 1;
     $values_count = count($values);
-    if ($values_count != $field_count*2)
-    {
+    if ($values_count != $field_count*2) {
         raise_query_validation_error("INSERT INTO $table ...",$field_count,$fields,$values);
     }
     $values_list = '';
-    for ($i=0; $i<$values_count; $i+=2)
-    {
+    for ($i=0; $i<$values_count; $i+=2) {
         if (($values[$i] == 'n') ||
-            (($values[$i] == 'sn') && (empty($values[$i+1]))))
-        {
+            (($values[$i] == 'sn') && (empty($values[$i+1])))) {
             $param = 'NULL';
         }
-        elseif (($values[$i] == 's') || ($values[$i] == 'sn'))
-        {
+        elseif (($values[$i] == 's') || ($values[$i] == 'sn')) {
             $param = ((is_string($values[$i+1])) && (!empty($values[$i+1])))
                 ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
                 : "''";
         }
-        else
-        {
+        else {
             $param = $values[$i+1];
         }
         $values_list .= $param.',';
@@ -536,12 +489,10 @@ using the '===' operator.
 
 function mysqli_conditional_insert_query($db,$table,$fields,$values,$where_clause,$where_values,$strict=false,$debug=false,$continue=false)
 {
-    if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) > 0)
-    {
+    if (mysqli_num_rows(mysqli_select_query($db,$table,'*',$where_clause,$where_values,'')) > 0) {
         return NOINSERT;
     }
-    else
-    {
+    else {
         return mysqli_insert_query($db,$table,$fields,$values,$strict,$debug,$continue);
     }
 }
@@ -570,25 +521,20 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
     $query = "DELETE FROM $table";
     $where_clause_count = substr_count($where_clause,'?');
     $where_values_count = count($where_values);
-    if ($where_values_count != $where_clause_count*2)
-    {
+    if ($where_values_count != $where_clause_count*2) {
         raise_query_validation_error($query,$where_clause_count,'',$where_values);
     }
-    if (!empty($where_clause))
-    {
+    if (!empty($where_clause)) {
         $query .= " WHERE $where_clause";
     }
     $pos = 0;
-    for ($i=0; $i<$where_values_count; $i+=2)
-    {
-        if ($where_values[$i] == 's')
-        {
+    for ($i=0; $i<$where_values_count; $i+=2) {
+        if ($where_values[$i] == 's') {
             $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
                 ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                 : "''";
         }
-        else
-        {
+        else {
             $param = $where_values[$i+1];
         }
         $pos = strpos($query,'?',$pos);
@@ -623,23 +569,18 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
 {
     $where_clause_count = substr_count($query,'?');
     $where_values_count = count($where_values);
-    if ($where_values_count != $where_clause_count*2)
-    {
+    if ($where_values_count != $where_clause_count*2) {
         raise_query_validation_error($query,$where_clause_count,'',$where_values);
     }
-    for ($i=0; $i<$where_values_count; $i+=2)
-    {
+    for ($i=0; $i<$where_values_count; $i+=2) {
         $pos = 0;
-        for ($i=0; $i<$where_values_count; $i+=2)
-        {
-            if ($where_values[$i] == 's')
-            {
+        for ($i=0; $i<$where_values_count; $i+=2) {
+            if ($where_values[$i] == 's') {
                 $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
                     ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                     : "''";
             }
-            else
-            {
+            else {
                 $param = $where_values[$i+1];
             }
             $pos = strpos($query,'?',$pos);

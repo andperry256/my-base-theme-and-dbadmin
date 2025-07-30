@@ -2,41 +2,32 @@
 //==============================================================================
 
 $today_date = date('ymd');
-if (isset($_GET['site']))
-{
+if (isset($_GET['site'])) {
     $local_site_dir = $_GET['site'];
 }
-elseif (is_dir('/media/Data'))
-{
+elseif (is_dir('/media/Data')) {
     exit("Site not specified");
 }
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-if (!is_dir($base_dir))
-{
+if (!is_dir($base_dir)) {
     exit("Site directory not found\n");
 }
-if (is_file("$base_dir/last_preset_link_version.php"))
-{
+if (is_file("$base_dir/last_preset_link_version.php")) {
     include("$base_dir/last_preset_link_version.php");
 }
-if (!isset($last_preset_link_version))
-{
+if (!isset($last_preset_link_version)) {
     $last_preset_link_version = $today_date;
 }
-else
-{
+else {
     $link_version_date = strtok($last_preset_link_version,'-');
     $link_version_seq = strtok('-');
-    if ($link_version_date != $today_date)
-    {
+    if ($link_version_date != $today_date) {
         // Update version to today's date.
         $last_preset_link_version = $today_date;
     }
-    else
-    {
+    else {
         // Update version to next in sequence for today's date.
-        if ((empty($link_version_seq)) || (!is_numeric($link_version_seq)))
-        {
+        if ((empty($link_version_seq)) || (!is_numeric($link_version_seq))) {
             $link_version_seq = 0;
         }
         $link_version_seq = (int)$link_version_seq+1;

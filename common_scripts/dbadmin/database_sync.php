@@ -8,8 +8,7 @@ function sync_databases($local_db_name)
     global $location, $custom_pages_path, $relative_path, $local_site_dir, $local_site_dir2,
     $localhost_id, $db_admin_url, $db_master_location, $server_station_id,
     $table_export_dir;
-    if (isset($local_site_dir2))
-    {
+    if (isset($local_site_dir2)) {
         // Override the global setting of $local_site_dir
         $local_site_dir = $local_site_dir2;
     }
@@ -20,25 +19,20 @@ function sync_databases($local_db_name)
     $relationships_script_file = "$custom_pages_path/$relative_path/relationships.sql";
     $db = admin_db_connect();
 
-    if ($location == 'local')
-    {
+    if ($location == 'local') {
         $sync_direction = 'in';  // Default direction
         $db_sites = itservices_db_connect();
         $where_clause = 'dbname=? AND domname=?';
         $where_values = ['s',$local_db_name,'s',$server_station_id];
         $query_result = mysqli_select_query($db_sites,'dbases','*',$where_clause,$where_values,'');
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
-            switch ($row['mode'])
-            {
+        if ($row = mysqli_fetch_assoc($query_result)) {
+            switch ($row['mode']) {
                 case 'auto':
                     $db_sub_path = str_replace('dbadmin/','',$relative_path);
-                    if ($location == $db_master_location[$db_sub_path])
-                    {
+                    if ($location == $db_master_location[$db_sub_path]) {
                         $sync_direction = 'out';
                     }
-                    else
-                    {
+                    else {
                         $sync_direction = 'in';
                     }
                     break;
@@ -52,16 +46,12 @@ function sync_databases($local_db_name)
                     break;
             }
     
-            if (isset($_POST['submitted']))
-            {
-                switch ($_POST['sync_mode'])
-                {
+            if (isset($_POST['submitted'])) {
+                switch ($_POST['sync_mode']) {
                     case ('save-rlshps'):
-                        if ((!isset($_POST['force-save-rlshps'])) && (is_file($relationships_script_file)))
-                        {
+                        if ((!isset($_POST['force-save-rlshps'])) && (is_file($relationships_script_file))) {
                             $contents = file($relationships_script_file);
-                            if (substr($contents[0],0,12) == '## LOCKED ##')
-                            {
+                            if (substr($contents[0],0,12) == '## LOCKED ##') {
                                 print("<p>ERROR - Script file is locked (please refresh page to try again).</p>\n");
                                 break;
                             }
@@ -71,8 +61,7 @@ function sync_databases($local_db_name)
                         $count = 0;
                         $where_clause = "table_name NOT LIKE '%dba_%'";
                         $query_result2 = mysqli_select_query($db,'dba_relationships','*',$where_clause,[],'');
-                        while ($row2 = mysqli_fetch_assoc($query_result2))
-                        {
+                        while ($row2 = mysqli_fetch_assoc($query_result2)) {
                             $relationship_name_par = mysqli_real_escape_string($db,$row2['relationship_name']);
                             $line = "INSERT INTO dba_relationships VALUES ('{$row2['table_name']}','$relationship_name_par',\"{$row2['query']}\");";
                             $line = str_replace('%','%%',$line);
@@ -80,36 +69,29 @@ function sync_databases($local_db_name)
                             $count++;
                         }
                         fclose($ofp);
-                        if ($count == 1)
-                        {
+                        if ($count == 1) {
                             print("<p>$count Query saved to relationships.sql.</p>\n");
                         }
-                        else
-                        {
+                        else {
                             print("<p>$count Queries saved to relationships.sql.</p>\n");
                         }
                         break;
         
                     default:
                         $cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
-                        if ($_POST['sync_mode'] == 'backup')
-                        {
+                        if ($_POST['sync_mode'] == 'backup') {
                             $cmd .= " -b -host=$localhost_id";
                         }
-                        elseif ($_POST['sync_mode'] == 'restore')
-                        {
+                        elseif ($_POST['sync_mode'] == 'restore') {
                             $cmd .= " -r -host=$localhost_id";
                         }
-                        elseif ($_POST['sync_mode'] == 'table_dump')
-                        {
+                        elseif ($_POST['sync_mode'] == 'table_dump') {
                             $cmd = '';
-                            if (empty($_POST['table']))
-                            {
+                            if (empty($_POST['table'])) {
                                 $cmd = '';
                                 print("<p>ERROR - no table selected (please refresh page to try again).</p>");
                             }
-                            else
-                            {
+                            else {
                                 $table = str_replace('V#','',$_POST['table']);
                                 $pk_fields = '';
                                 $field_added = false;
@@ -117,15 +99,12 @@ function sync_databases($local_db_name)
                                 $where_values = ['s',$table];
                                 $add_clause = 'ORDER BY display_order ASC';
                                 $query_result = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,$add_clause);
-                                if (mysqli_num_rows($query_result) == 0)
-                                {
+                                if (mysqli_num_rows($query_result) == 0) {
                                     print("<p>ERROR - table <em>$table</em> not found (please refresh page to try again).</p>\n");
                                     return;
                                 }
-                                while ($row = mysqli_fetch_assoc($query_result))
-                                {
-                                    if ($field_added)
-                                    {
+                                while ($row = mysqli_fetch_assoc($query_result)) {
+                                    if ($field_added) {
                                         $pk_fields .= ',';
                                     }
                                     $pk_fields .= ($row['field_name']);
@@ -136,42 +115,33 @@ function sync_databases($local_db_name)
                                 print("Table $table exported to CSV");
                             }
                         }
-                        elseif (substr($_POST['sync_mode'],0,6) == 'table_')
-                        {
-                            if (empty($_POST['table']))
-                            {
+                        elseif (substr($_POST['sync_mode'],0,6) == 'table_') {
+                            if (empty($_POST['table'])) {
                                 $cmd = '';
                                 print("<p>ERROR - no table selected (please refresh page to try again).<p>");
                             }
-                            elseif (substr($_POST['table'],0,2) == 'V#')
-                            {
+                            elseif (substr($_POST['table'],0,2) == 'V#') {
                                 $cmd = '';
                                 print("<p>ERROR - sync operations not valid for views.<p>");
                             }
-                            elseif (substr($_POST['sync_mode'],6) == $sync_direction)
-                            {
+                            elseif (substr($_POST['sync_mode'],6) == $sync_direction) {
                                 $cmd .= " -st={$_POST['table']}";
                             }
-                            else
-                            {
+                            else {
                                 $cmd .= " -rst={$_POST['table']}";
                             }
                         }
-                        elseif ($_POST['sync_mode'] == $sync_direction)
-                        {
+                        elseif ($_POST['sync_mode'] == $sync_direction) {
                             $cmd .= " -s -force";
                         }
-                        else
-                        {
+                        else {
                             $cmd .= " -rs=yes -force";
                         }
-                        if (isset($_POST['noadd']))
-                        {
+                        if (isset($_POST['noadd'])) {
                             $cmd .= " -noadd";
                         }
                         print("<p><em>$cmd</em></p>\n");
-                        if (!empty($cmd))
-                        {
+                        if (!empty($cmd)) {
                             $start_time = time();
                             exec("$cmd > '__temp_.txt'");
                             $duration = time() - $start_time;
@@ -184,21 +154,18 @@ function sync_databases($local_db_name)
                         break;
                 }
             }
-            else
-            {
+            else {
                 print("<p>This facility is used to synchronise the local and online copies of the database. It may take a minute or so to complete, so please be patient.<br /><br />==== Please use with caution!! ====</p>\n");
                 print("<form method=\"post\">\n");
                 print("<table cellpadding=\"8\">\n");
                 print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"in\"");
-                if ($sync_direction == 'in')
-                {
+                if ($sync_direction == 'in') {
                     print(" checked");
                 }
                 print("></td><td>Download online DB to local DB</td></tr>\n");
         
                 print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"out\"");
-                if ($sync_direction == 'out')
-                {
+                if ($sync_direction == 'out') {
                     print(" checked");
                 }
                 print("></td><td>Upload local DB to online DB</td></tr>\n");
@@ -214,13 +181,11 @@ function sync_databases($local_db_name)
                 print("<option value=\"\">Please select...</option>\n");
                 $dbname = admin_db_name();
                 $query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
-                while ($row = mysqli_fetch_assoc($query_result))
-                {
+                while ($row = mysqli_fetch_assoc($query_result)) {
                     print("<option value=\"{$row["Tables_in_$dbname"]}\">{$row["Tables_in_$dbname"]}</option>\n");
                 }
                 $query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='VIEW'");
-                while ($row = mysqli_fetch_assoc($query_result))
-                {
+                while ($row = mysqli_fetch_assoc($query_result)) {
                     print("<option value=\"V#{$row["Tables_in_$dbname"]}\">[v] {$row["Tables_in_$dbname"]}</option>\n");
                 }
                 print("</select><br />");
@@ -231,13 +196,11 @@ function sync_databases($local_db_name)
                 print("</form>\n");
             }
         }
-        else
-        {
+        else {
             print("<p>Unable to locate database record in sites database.</p>\n");
         }
     }
-    else
-    {
+    else {
         print("<p>This facility is currently only supported on the local server.</p>\n");
     }
 }

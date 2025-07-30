@@ -2,8 +2,7 @@
 //==============================================================================
 
 $db = admin_db_connect();
-if (!isset($record_id))
-{
+if (!isset($record_id)) {
     exit("Record ID not specified - this should not occur");
 }
 $primary_keys = decode_record_id($record_id);
@@ -13,27 +12,22 @@ rationalise_transaction($account,$seq_no);
 $where_clause = ' account=? AND seq_no=?';
 $where_values = ['s',$account,'i',$seq_no];
 $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-if ($row = mysqli_fetch_assoc($query_result))
-{
-    if (!isset($_GET['summary']))
-    {
+if ($row = mysqli_fetch_assoc($query_result)) {
+    if (!isset($_GET['summary'])) {
         // Display record edit screen
         $params = [];
         $params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=edit&-table=$table&-recordid=$record_id&summary\">Summary&nbsp;&amp;&nbsp;Splits</a></div>\n";
-        if (get_table_access_level('transactions') != 'read-only')
-        {
+        if (get_table_access_level('transactions') != 'read-only') {
             $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
         }
-        if (!empty($row['target_account']))
-        {
+        if (!empty($row['target_account'])) {
             $primary_keys2 = [];
             $primary_keys2['account'] = $row['target_account'];
             $primary_keys2['seq_no'] = $row['target_seq_no'];
             $record_id2 = encode_record_id($primary_keys2);
             $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=edit&-table=_view_account_{$row['target_account']}&-recordid=$record_id2\">Target&nbsp;Transaction</a></div>\n";
         }
-        if (!empty($row['source_account']))
-        {
+        if (!empty($row['source_account'])) {
             $primary_keys2 = [];
             $primary_keys2['account'] = $row['source_account'];
             $primary_keys2['seq_no'] = $row['source_seq_no'];
@@ -42,33 +36,28 @@ if ($row = mysqli_fetch_assoc($query_result))
         }
         handle_record('edit',$params);
     }
-    else
-    {
+    else {
         // Display summary & splits screen
     
         $save_info = get_session_var('save_info');
-        if (!empty($save_info))
-        {
+        if (!empty($save_info)) {
             print($save_info);
             delete_session_var('save_info');
         }
         $sched_freq = $row['sched_freq'];
-        if ($sched_freq == '#')
-        {
+        if ($sched_freq == '#') {
             print("<h1>Transaction Record (Account)</h1>\n");
             print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=list&-table=_view_account_$account\">Show All</a></div>");
             print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=_view_account_$account\">New Record</a></div>");
             print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=reconcile_account&-account=$account\">Reconcile</a></div>");
-            if (!empty($row['target_account']))
-            {
+            if (!empty($row['target_account'])) {
                 $primary_keys2 = [];
                 $primary_keys2['account'] = $row['target_account'];
                 $primary_keys2['seq_no'] = $row['target_seq_no'];
                 $record_id2 = encode_record_id($primary_keys2);
                 print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=edit&-table=_view_account_{$row['target_account']}&-recordid=$record_id2&summary\">Target Transaction</a></div>");
             }
-            if (!empty($row['source_account']))
-            {
+            if (!empty($row['source_account'])) {
                 $primary_keys2 = [];
                 $primary_keys2['account'] = $row['source_account'];
                 $primary_keys2['seq_no'] = $row['source_seq_no'];
@@ -78,8 +67,7 @@ if ($row = mysqli_fetch_assoc($query_result))
             print("<div style=\"clear:both\"></div>\n");
             $view = "_view_account_$account";
         }
-        else
-        {
+        else {
             print("<h1>Transaction Record (Scheduled)</h1>\n");
             $view = "_view_scheduled_transactions";
         }
@@ -88,16 +76,13 @@ if ($row = mysqli_fetch_assoc($query_result))
         $where_values = ['s',$account,'i',$seq_no];
         $add_clause = 'ORDER BY split_no ASC';
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
-        if (mysqli_num_rows($query_result2) > 0)
-        {
+        if (mysqli_num_rows($query_result2) > 0) {
             // Splits found - clear the main fund and category
             $fund = '-split-';
-            if ($row['category'] == '-transfer-')
-            {
+            if ($row['category'] == '-transfer-') {
                 $category = '-transfer-';
             }
-            else
-            {
+            else {
                 $category = '-split-';
             }
             $set_fields = 'fund,category';
@@ -106,16 +91,14 @@ if ($row = mysqli_fetch_assoc($query_result))
             $where_values = ['s',$account,'i',$seq_no];
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-        else
-        {
+        else {
             $fund = $row['fund'];
             $category = $row['category'];
         }
     
         // Print main transaction detail
         $splits_discrepancy = $row['splits_discrepancy'];
-        if ($splits_discrepancy != 0)
-        {
+        if ($splits_discrepancy != 0) {
             print("<p><b>WARNING</b> - There is a split discrepancy of {$row['splits_discrepancy']}</p>\n");
         }
         print("<table>\n");
@@ -124,25 +107,21 @@ if ($row = mysqli_fetch_assoc($query_result))
         $where_clause = 'label=?';
         $where_values = ['s',$account];
         $query_result2 = mysqli_select_query($db,'accounts','*',$where_clause,$where_values,'');
-        if ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
             print("<tr><td>Account:</td><td>{$row2['name']}</td>");
             $use_quoted_balance = $row2['use_quoted_balance'];
         }
-        else
-        {
+        else {
             print("<tr><td>&nbsp;</td><td>&nbsp;</td>");
             $use_quoted_balance = 0;
         }
         print("</tr>\n");
     
         // Row 2 - Date
-        if ($sched_freq == '#')
-        {
+        if ($sched_freq == '#') {
             print("<tr><td>Date:</td><td>{$row['date']}</td></tr>\n");
         }
-        else
-        {
+        else {
             print("<tr><td>Date:</td><td>{$row['date']}</td></tr>\n");
         }
     
@@ -150,18 +129,15 @@ if ($row = mysqli_fetch_assoc($query_result))
         print("<tr><td>Payee:</td><td>{$row['payee']}</td></tr>\n");
     
         // Row 4 (optional) - Cheque Number
-        if (!empty($row['chq_no']))
-        {
+        if (!empty($row['chq_no'])) {
             print("<tr><td>Cheque No:</td><td>{$row['chq_no']}</td></tr>\n");
         }
     
         // Row 5 - Credit/Debit Amount
-        if ($row['debit_amount'] != 0)
-        {
+        if ($row['debit_amount'] != 0) {
             print("<tr><td>Debit:</td><td>{$row['debit_amount']}</td></tr>\n");
         }
-        else
-        {
+        else {
             print("<tr><td>Credit:</td><td>{$row['credit_amount']}</td></tr>\n");
         }
     
@@ -179,24 +155,20 @@ if ($row = mysqli_fetch_assoc($query_result))
     
         // Row 10 - Reconciled Status
         print("<tr><td>Reconciled:</td><td>");
-        if ($row['reconciled'])
-        {
+        if ($row['reconciled']) {
             print("YES");
         }
-        else
-        {
+        else {
             print("NO");
         }
         print("</td></tr>\n");
     
         // Row 11 (optional) - Target/Source Account
-        if (!empty($row['target_account']))
-        {
+        if (!empty($row['target_account'])) {
             $target_account_name = str_replace('_',' ',$row['target_account']);
             print("<tr><td>Target Account:</td><td>$target_account_name</td></tr>\n");
         }
-        elseif (!empty($row['source_account']))
-        {
+        elseif (!empty($row['source_account'])) {
             $source_account_name = str_replace('_',' ',$row['source_account']);
             print("<tr><td>Source Account:</td><td>$source_account_name</td></tr>\n");
         }
@@ -208,34 +180,28 @@ if ($row = mysqli_fetch_assoc($query_result))
         print("<tr><td>Reconciled Balance:</td><td>{$row['reconciled_balance']}</td></tr>\n");
     
         // Row 14 - Quoted Balance
-        if ($use_quoted_balance)
-        {
+        if ($use_quoted_balance) {
             print("<tr><td>Quoted Balance:</td><td>{$row['quoted_balance']}</td></tr>\n");
         }
     
         // Row 15 (optional) - Scheduling Frequency
-        if ($sched_freq != '#')
-        {
+        if ($sched_freq != '#') {
             print("<tr><td>Schedule:</td><td>$sched_freq</td></tr>\n");
         }
     
         // Row 16 - 'Edit Transaction' Button
-        if ($sched_freq == '#')
-        {
+        if ($sched_freq == '#') {
             print("<tr><td><a href=\"$base_url/$relative_path/index.php?-action=edit&-table=_view_account_$account&-recordid=$record_id\"><button>Edit Transaction</button></a></td></tr>\n");
         }
-        else
-        {
+        else {
             print("<tr><td><a href=\"$base_url/$relative_path/index.php?-action=edit&-table=_view_scheduled_transactions&-recordid=$record_id\"><button>Edit Transaction</button></a></td></tr>\n");
         }
     
         // Row 17 (optional) - 'Go to Transfer' Button
-        if ((!empty($row['target_account'])) && (!empty($row['target_seq_no'])))
-        {
+        if ((!empty($row['target_account'])) && (!empty($row['target_seq_no']))) {
             print("<tr><td><a href=\"$base_url/$relative_path/index.php?-action=edit&-table=transactions&-recordid=$record_id2&summary\"><button>Go to Transfer</button></a></td></tr>\n");
         }
-        elseif ((!empty($row['source_account'])) && (!empty($row['source_seq_no'])))
-        {
+        elseif ((!empty($row['source_account'])) && (!empty($row['source_seq_no']))) {
             print("<tr><td><a href=\"$base_url/$relative_path/index.php?-action=edit&-table=transactions&-recordid=$record_id2&summary\"><button>Go to Transfer</button></a></td></tr>\n");
         }
     
@@ -260,8 +226,7 @@ if ($row = mysqli_fetch_assoc($query_result))
         $where_values = ['s',$account,'i',$seq_no];
         $add_clause = 'ORDER BY split_no ASC';
         $query_result2 = mysqli_select_query($db,'splits','*',$where_clause,$where_values,$add_clause);
-        while ($row2 = mysqli_fetch_assoc($query_result2))
-        {
+        while ($row2 = mysqli_fetch_assoc($query_result2)) {
             $split_pks = [];
             $split_pks['account'] = $account;
             $split_pks['transact_seq_no'] = $seq_no;
@@ -270,13 +235,11 @@ if ($row = mysqli_fetch_assoc($query_result))
             print("<li><a href=\"$base_url/$relative_path/index.php?-action=edit&-table=splits&-recordid=$record_id&-returnurl=$return_url\">");
             print("Fund: {$row2['fund']} | ");
             print("Cat: {$row2['category']} | ");
-            if ($row2['credit_amount'] > 0)
-            {
+            if ($row2['credit_amount'] > 0) {
                 $split_total = add_money($split_total,$row2['credit_amount']);
                 print("Credit: {$row2['credit_amount']}");
             }
-            elseif ($row2['debit_amount'] > 0)
-            {
+            elseif ($row2['debit_amount'] > 0) {
                 $split_total = subtract_money($split_total,$row2['debit_amount']);
                 print("Debit: {$row2['debit_amount']}");
             }
@@ -286,26 +249,21 @@ if ($row = mysqli_fetch_assoc($query_result))
             print("</a></li>\n");
             $split_count++;
         }
-        if (($split_count != 0) && ($splits_discrepancy != 0))
-        {
+        if (($split_count != 0) && ($splits_discrepancy != 0)) {
             print("<li>Discrepancy: $splits_discrepancy</li>\n");
         }
         print("</ul>\n");
-        if ($split_count == 0)
-        {
-            if (($fund == '-split-') && ($category == '-transfer-'))
-            {
+        if ($split_count == 0) {
+            if (($fund == '-split-') && ($category == '-transfer-')) {
                 print("<p>See other side of transfer.</p>\n");
             }
-            else
-            {
+            else {
                 print("<p>NONE</p>\n");
             }
         }
     }
 }
-else
-{
+else {
     print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=list&-table=_view_account_$account\">Show All</a></div>");
     print("<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=new&-table=_view_account_$account\">New Record</a></div>");
     print("<div style=\"clear:both\"></div>\n");

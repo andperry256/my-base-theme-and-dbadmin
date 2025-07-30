@@ -1,8 +1,7 @@
 <?php
 //==============================================================================
 
-if (!function_exists('db_connect'))
-{
+if (!function_exists('db_connect')) {
     require_once("$base_dir/mysql_connect.php");
 }
 require_once("$db_admin_dir/common_funct.php");
@@ -10,21 +9,17 @@ $db = db_connect($auth_dbid);
 
 // Determine whether access is internal to the local network
 $remote_ip = $_SERVER['REMOTE_ADDR'];
-if (($location == 'local') && (isset($ip_subnet_addr)) && (substr($_SERVER['REMOTE_ADDR'],0,strlen($ip_subnet_addr)) == $ip_subnet_addr))
-{
+if (($location == 'local') && (isset($ip_subnet_addr)) && (substr($_SERVER['REMOTE_ADDR'],0,strlen($ip_subnet_addr)) == $ip_subnet_addr)) {
     $local_access = true;
 }
-elseif (($location == 'local') && (isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr))
-{
+elseif (($location == 'local') && (isset($home_remote_ip_addr)) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr)) {
     $local_access = true;
 }
-else
-{
+else {
     $local_access = false;
 }
 
-if (($location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
-{
+if (($location == 'local') && ($local_access) && (!session_var_is_set(SV_USER))) {
     /*
     Access is internal to the local network and there is no logged on user
     but with no active logout (i.e. where $_SESSION[SV_USER] is set but empty).
@@ -34,19 +29,16 @@ if (($location == 'local') && ($local_access) && (!session_var_is_set(SV_USER)))
     update_session_var(SV_ACCESS_LEVEL,SUPER_ACCESS_LEVEL);
 }
 
-if ((session_var_is_set(SV_USER)) && (!empty(get_session_var(SV_USER))))
-{
+if ((session_var_is_set(SV_USER)) && (!empty(get_session_var(SV_USER)))) {
     // User is logged on
     $user_authenticated = true;
 }
-else
-{
+else {
     $user_authenticated = false;
 }
 
 // Process result of login form
-if (isset($_GET['noauth']))
-{
+if (isset($_GET['noauth'])) {
     print("<p><b>Invalid login - please try again.</b></p>");
 }
 

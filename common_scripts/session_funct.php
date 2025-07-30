@@ -19,38 +19,31 @@ function run_session()
     global $wpdb;
     global $global_session_vars;
     global $global_session_id;
-    if ((!session_id()) && (!headers_sent()))
-    {
+    if ((!session_id()) && (!headers_sent())) {
         session_start();
     }
-    if (!session_id())
-    {
+    if (!session_id()) {
         // This should not occur
         exit ("ERROR - Unable to start session");
     }
     $global_session_id = session_id();
 
     $db_wp = wp_db_connect();
-    if (!$db_wp)
-    {
+    if (!$db_wp) {
         // This should not occur
         exit("ERROR - Unable to connect to the WP database.");
     }
-    if ((isset($wpdb)) && (function_exists('have_posts')))
-    {
+    if ((isset($wpdb)) && (function_exists('have_posts'))) {
         // Running inside the WP environment
-        if (is_file('/var/www/html/user_authentication.php'))
-        {
+        if (is_file('/var/www/html/user_authentication.php')) {
             include('/var/www/html/user_authentication.php');
         }
-        if (!isset($_SESSION['theme_mode']))
-        {
+        if (!isset($_SESSION['theme_mode'])) {
             $_SESSION['theme_mode'] = 'light';
         }
         $env = 'wp';
     }
-    elseif (function_exists('wp_db_connect'))
-    {
+    elseif (function_exists('wp_db_connect')) {
         // Running outside the WP environment
         $env = 'non-wp';
     }
@@ -63,81 +56,62 @@ function run_session()
     left permanently open (not recommended).
     */
     $query_result = mysqli_select_query($db_wp,'wp_session_updates','*','',[],'');
-    if ($query_result !== false)
-    {
+    if ($query_result !== false) {
         // Transfer all updates for the current session from the database to the
         // appropriate $_SESSION variables.
-        if ($env == 'wp')
-        {
+        if ($env == 'wp') {
             // Inside the WordPress environment
             $where_clause = 'session_id=?';
             $where_values = ['s',$global_session_id];
             $query_result2 = mysqli_select_query($db_wp,'wp_session_updates','*',$where_clause,$where_values,'');
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
-                if ($row2['type'] == 'update')
-                {
+            while ($row2 = mysqli_fetch_assoc($query_result2)) {
+                if ($row2['type'] == 'update') {
                     // Update is a variable assignment
-                    if ($row2['name2'] == '#')
-                    {
+                    if ($row2['name2'] == '#') {
                         $_SESSION[$row2['name']] = $row2['value'];
                     }
-                    else
-                    {
-                        if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']])))
-                        {
+                    else {
+                        if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']]))) {
                             $_SESSION[$row2['name']] = [];
                         }
                         $_SESSION[$row2['name']][$row2['name2']] = $row2['value'];
                     }
                 }
-                elseif (($row2['type'] == 'delete') && (isset($_SESSION[$row2['name']])))
-                {
+                elseif (($row2['type'] == 'delete') && (isset($_SESSION[$row2['name']]))) {
                     // Update is a variable deletion (unset)
-                    if ($row2['name2'] == '#')
-                    {
+                    if ($row2['name2'] == '#') {
                         unset($_SESSION[$row2['name']]);
                     }
-                    else
-                    {
+                    else {
                         unset($_SESSION[$row2['name']][$row2['name2']]);
                     }
                 }
             }
         }
-        else
-        {
+        else {
             // Outside the WordPress environment
             $where_clause = 'session_id=?';
             $where_values = ['s',$global_session_id];
             $query_result2 = mysqli_select_query($db_wp,'wp_session_updates','*',$where_clause,$where_values,'');
-            while ($row2 = mysqli_fetch_assoc($query_result2))
-            {
-                if ($row2['type'] == 'update')
-                {
+            while ($row2 = mysqli_fetch_assoc($query_result2)) {
+                if ($row2['type'] == 'update') {
                     // Update is a variable assignment
-                    if ($row2['name2'] == '#')
-                    {
+                    if ($row2['name2'] == '#') {
                         $_SESSION[$row2['name']] = $row2['value'];
                     }
-                    else
-                    {
-                        if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']])))
-                        {
+                    else {
+                        if ((!isset($_SESSION[$row2['name']])) || (!is_array($_SESSION[$row2['name']]))) {
                             $_SESSION[$row2['name']] = [];
                         }
                         $_SESSION[$row2['name']][$row2['name2']] = $row2['value'];
                     }
                 }
-                elseif (($row2['type'] == 'delete') && (isset($_SESSION[$row2['name']])))
-                {
+                elseif (($row2['type'] == 'delete') && (isset($_SESSION[$row2['name']]))) {
                     // Update is a variable deletion (unset)
-                    if ($row2['name2'] == '#')
-                    {
+                    if ($row2['name2'] == '#') {
                         unset($_SESSION[$row2['name']]);
                     }
-                    else
-                    {
+                    else {
                         unset($_SESSION[$row2['name']][$row2['name2']]);
                     }
                 }
@@ -149,18 +123,14 @@ function run_session()
 
         // Transfer all $_SESSION variables into the $global_session_vars array.
         $global_session_vars = [];
-        foreach($_SESSION as $name => $value)
-        {
-            if (is_array($_SESSION[$name]))
-            {
+        foreach($_SESSION as $name => $value) {
+            if (is_array($_SESSION[$name])) {
                 $global_session_vars[$name] = [];
-                foreach($_SESSION[$name] as $name2 => $value2)
-                {
+                foreach($_SESSION[$name] as $name2 => $value2) {
                     $global_session_vars[$name][$name2] = $value2;
                 }
             }
-            else
-            {
+            else {
                 $global_session_vars[$name] = $value;
             }
         }
@@ -173,8 +143,7 @@ function run_session()
       Run the 'post_run_session' function if present. It should be in the
       functions.php script for the associated child theme.
     */
-    if (function_exists('post_run_session'))
-    {
+    if (function_exists('post_run_session')) {
         post_run_session();
     }
 }
@@ -202,32 +171,25 @@ function run_session()
 function session_var_is_set($name)
 {
     global $global_session_vars;
-    if (!is_array($name))
-    {
+    if (!is_array($name)) {
         $name = [$name,''];
     }
 
-    if (count($name) != 2)
-    {
+    if (count($name) != 2) {
         return false;
     }
-    elseif (isset($global_session_vars))
-    {
-        if (empty($name[1]))
-        {
+    elseif (isset($global_session_vars)) {
+        if (empty($name[1])) {
             return isset($global_session_vars[$name[0]]);
         }
-        else
-        {
+        else {
             return isset($global_session_vars[$name[0]][$name[1]]);
         }
     }
-    elseif (empty($name[1]))
-    {
+    elseif (empty($name[1])) {
         return isset($_SESSION[$name[0]]);
     }
-    else
-    {
+    else {
         return isset($_SESSION[$name[0]][$name[1]]);
     }
 }
@@ -237,32 +199,25 @@ function session_var_is_set($name)
 function get_session_var($name)
 {
     global $global_session_vars;
-    if (!is_array($name))
-    {
+    if (!is_array($name)) {
         $name = [$name,''];
     }
 
-    if (count($name) != 2)
-    {
+    if (count($name) != 2) {
         return false;
     }
-    elseif (isset($global_session_vars))
-    {
-        if (empty($name[1]))
-        {
+    elseif (isset($global_session_vars)) {
+        if (empty($name[1])) {
             return $global_session_vars[$name[0]] ?? false;
         }
-        else
-        {
+        else {
             return $global_session_vars[$name[0]][$name[1]] ?? false;
         }
     }
-    elseif (empty($name[1]))
-    {
+    elseif (empty($name[1])) {
         return $_SESSION[$name[0]] ?? false;
     }
-    else
-    {
+    else {
         return $_SESSION[$name[0]][$name[1]] ?? false;
     }
 }
@@ -275,39 +230,32 @@ function update_session_var($name,$value)
     global $global_session_vars;
     global $global_session_id;
     $db_wp = wp_db_connect();
-    if (!$db_wp)
-    {
+    if (!$db_wp) {
         // This should not occur
         exit("ERROR - Unable to connect to the WP database.");
     }
-    if (!is_array($name))
-    {
+    if (!is_array($name)) {
         $name = [$name,''];
     }
 
-    if (count($name) != 2)
-    {
+    if (count($name) != 2) {
         return false;
     }
-    elseif (isset($global_session_vars))
-    {
+    elseif (isset($global_session_vars)) {
         $timestamp = time();
         $old_timestamp = $timestamp - 86400;  // 24 hours ago
         $where_clause = 'timestamp<?';
         $where_values = ['i',$old_timestamp];
         mysqli_delete_query($db_wp,'wp_session_updates',$where_clause,$where_values);
-        if (empty($name[1]))
-        {
+        if (empty($name[1])) {
             $global_session_vars[$name[0]] = $value;
             $fields = 'session_id,name,value,type,timestamp';
             $values = ['s',$global_session_id,'s',$name[0],'s',$value,'s','update','i',$timestamp];
             $where_clause = 'session_id=? AND name=?';
             $where_values = ['s',$global_session_id,'s',$name[0]];
         }
-        else
-        {
-            if ((!isset($global_session_vars[$name[0]])) || (!is_array($global_session_vars[$name[0]])))
-            {
+        else {
+            if ((!isset($global_session_vars[$name[0]])) || (!is_array($global_session_vars[$name[0]]))) {
                 $global_session_vars[$name[0]] = [];
             }
             $global_session_vars[$name[0]][$name[1]] = $value;
@@ -316,21 +264,17 @@ function update_session_var($name,$value)
             $where_clause = 'session_id=? AND name=? AND name2=?';
             $where_values = ['s',$global_session_id,'s',$name[0],'s',$name[1]];
         }
-        if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
-        {
+        if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT) {
             $set_fields = 'value,type';
             $set_values = ['s',$value,'s','update'];
             mysqli_update_query($db_wp,'wp_session_updates',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
-    elseif (empty($name[1]))
-    {
+    elseif (empty($name[1])) {
         $_SESSION[$name[0]] = $value;
     }
-    else
-    {
-        if (!isset($_SESSION[$name[0]]))
-        {
+    else {
+        if (!isset($_SESSION[$name[0]])) {
             $_SESSION[$name[0]] = [];
         }
         $_SESSION[$name[0]][$name[1]] = $value;
@@ -344,27 +288,21 @@ function delete_session_var($name)
     global $global_session_vars;
     global $global_session_id;
     $db_wp = wp_db_connect();
-    if (!$db_wp)
-    {
+    if (!$db_wp) {
         // This should not occur
         exit("ERROR - Unable to connect to the WP database.");
     }
-    if (!is_array($name))
-    {
+    if (!is_array($name)) {
         $name = [$name,''];
     }
 
-    if (count($name) != 2)
-    {
+    if (count($name) != 2) {
         return false;
     }
-    elseif (isset($global_session_vars))
-    {
+    elseif (isset($global_session_vars)) {
         $timestamp = time();
-        if (empty($name[1]))
-        {
-            if (isset($global_session_vars[$name[0]]))
-            {
+        if (empty($name[1])) {
+            if (isset($global_session_vars[$name[0]])) {
                 unset($global_session_vars[$name[0]]);
             }
             $fields = 'session_id,name,type,timestamp';
@@ -372,10 +310,8 @@ function delete_session_var($name)
             $where_clause = 'session_id=? AND name=?';
             $where_values = ['s',$global_session_id,'s',$name[0]];
         }
-        else
-        {
-            if (isset($global_session_vars[$name[0]][$name[1]]))
-            {
+        else {
+            if (isset($global_session_vars[$name[0]][$name[1]])) {
                 unset($global_session_vars[$name[0]][$name[1]]);
             }
             $fields = 'session_id,name,name2,type,timestamp';
@@ -383,19 +319,16 @@ function delete_session_var($name)
             $where_clause = 'session_id=? AND name=? AND name2=?';
             $where_values = ['s',$global_session_id,'s',$name[0],'s',$name[1]];
         }
-        if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT)
-        {
+        if (mysqli_conditional_insert_query($db_wp,'wp_session_updates',$fields,$values,$where_clause,$where_values) === NOINSERT) {
             $set_fields = 'type';
             $set_values = ['s','update'];
             mysqli_update_query($db_wp,'wp_session_updates',$set_fields,$set_values,$where_clause,$where_values);
         }
     }
-    elseif ((empty($name[1])) && (isset($_SESSION[$name[0]])))
-    {
+    elseif ((empty($name[1])) && (isset($_SESSION[$name[0]]))) {
         unset($_SESSION[$name[0]]);
     }
-    elseif ((!empty($name[1])) && (isset($_SESSION[$name[0]][$name[1]])))
-    {
+    elseif ((!empty($name[1])) && (isset($_SESSION[$name[0]][$name[1]]))) {
         unset($_SESSION[$name[0]][$name[1]]);
     }
 }
@@ -407,27 +340,22 @@ function clear_session_update_records($name)
     global $global_session_vars;
     global $global_session_id;
     $db_wp = wp_db_connect();
-    if (!$db_wp)
-    {
+    if (!$db_wp) {
         // This should not occur
         exit("ERROR - Unable to connect to the WP database.");
     }
-    if (!is_array($name))
-    {
+    if (!is_array($name)) {
         $name = [$name,null];
     }
 
-    if (count($name) != 2)
-    {
+    if (count($name) != 2) {
         return false;
     }
-    if ($name[1] === null)
-    {
+    if ($name[1] === null) {
         $where_clause = 'session_id=? AND name=?';
         $where_values = ['s',$global_session_id,'s',$name[0]];
     }
-    else
-    {
+    else {
         $where_clause = 'session_id=? AND name=? AND name2=?';
         $where_values = ['s',$global_session_id,'s',$name[0],'s',$name[1]];
     }

@@ -32,8 +32,7 @@ add_action( 'after_setup_theme', 'my_base_theme_jetpack_setup' );
   */
 function my_base_theme_infinite_scroll_render()
 {
-    while ( have_posts() )
-    {
+    while ( have_posts() ) {
         the_post();
         if ( is_search() ) :
             get_template_part( 'template-parts/content', 'search' );

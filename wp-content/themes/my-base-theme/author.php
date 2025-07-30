@@ -20,17 +20,14 @@ get_header();
 
         $db = db_connect(WP_DBID);
         $query_result = mysqli_query($db,"SELECT * FROM wp_users WHERE ID=$author");
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
+        if ($row = mysqli_fetch_assoc($query_result)) {
             print("<h1>Author: {$row['display_name']}</h1>\n");
             
             // Determine the user access level
-            if (session_var_is_set(SV_ACCESS_LEVEL))
-            {
+            if (session_var_is_set(SV_ACCESS_LEVEL)) {
                 $user_access_level = get_session_var(SV_ACCESS_LEVEL);
             }
-            else
-            {
+            else {
                 $user_access_level = DEFAULT_ACCESS_LEVEL;
             }
             
@@ -48,18 +45,15 @@ get_header();
 
             // Run the WordPress loop
             $local_query = new WP_Query($args);
-            if ( $local_query->have_posts() )
-            {
-                while ( $local_query->have_posts() )
-                {
+            if ( $local_query->have_posts() ) {
+                while ( $local_query->have_posts() ) {
                     $local_query->the_post();
                     display_post_summary(2,200,200);
                     print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
                 }
                 navigation_links('multi','author',$row['user_nicename']);
             }
-            else
-            {
+            else {
                 get_template_part( 'template-parts/content', 'none' );
             }
             wp_reset_postdata();

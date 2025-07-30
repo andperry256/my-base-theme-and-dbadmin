@@ -22,24 +22,20 @@ class db_record
 
     function FieldVal($field_name)
     {
-        if (isset($this->fields[$field_name]))
-        {
+        if (isset($this->fields[$field_name])) {
             return $this->fields[$field_name][0];
         }
-        else
-        {
+        else {
             return false;
         }
     }
 
     function FieldType($field_name)
     {
-        if (isset($this->fields[$field_name]))
-        {
+        if (isset($this->fields[$field_name])) {
             return $this->fields[$field_name][1];
         }
-        else
-        {
+        else {
             return false;
         }
     }
@@ -51,20 +47,17 @@ class db_record
 
     function SaveOldPKs($primary_keys)
     {
-        foreach ($primary_keys as $key => $val)
-        {
+        foreach ($primary_keys as $key => $val) {
             $this->old_primary_keys[$key] = $val;
         }
     }
 
     function OldPKVal($field_name)
     {
-        if (isset($this->old_primary_keys[$field_name]))
-        {
+        if (isset($this->old_primary_keys[$field_name])) {
             return $this->old_primary_keys[$field_name];
         }
-        else
-        {
+        else {
             return false;
         }
     }
@@ -76,12 +69,10 @@ class db_record
 
     function CustomVarVal($key)
     {
-        if (isset($this->$custom_vars[$key]))
-        {
+        if (isset($this->$custom_vars[$key])) {
             return $this->$custom_vars[$key];
         }
-        else
-        {
+        else {
             return false;
         }
     }
@@ -94,8 +85,7 @@ class tables_dba_table_info
     function sort_1_field__validate($record,$value)
     {
         $seq_no_field = $record->FieldVal('seq_no_field');
-        if ((!empty($value)) && (empty($seq_no_field)))
-        {
+        if ((!empty($value)) && (empty($seq_no_field))) {
             return report_error("Sort 1 field set without sequence number field");
         }
     }
@@ -103,8 +93,7 @@ class tables_dba_table_info
     function renumber_enabled__validate($record,$value)
     {
         $seq_no_field = $record->FieldVal('seq_no_field');
-        if ((!empty($value)) && (empty($seq_no_field)))
-        {
+        if ((!empty($value)) && (empty($seq_no_field))) {
             return report_error("Renumber set to enabled without sequence number field");
         }
     }
@@ -114,8 +103,7 @@ class tables_dba_table_info
           $charset = $record->FieldVal('character_set');
           $collation = $record->FieldVal('collation');
           $len = strlen($charset);
-          if (substr($collation,0,$len) != $charset)
-          {
+          if (substr($collation,0,$len) != $charset) {
               return report_error("Collation does not match the character set");
           }
     }
@@ -142,60 +130,49 @@ class tables_dba_table_fields
         $field = $record->FieldVal('field_name');
         $db = admin_db_connect();
         $query_result = mysqli_query_normal($db,"SHOW COLUMNS FROM $table WHERE Field='$field'");
-        if ($row = mysqli_fetch_assoc($query_result))
-        {
+        if ($row = mysqli_fetch_assoc($query_result)) {
             $field_type = strtok($row['Type'],'(');
             $field_size = strtok(')');
 
             // Ensure that the widget type is set to 'date' for any date field
-            if (($field_type == 'date') && ($value != 'date') && ($value != 'static-date'))
-            {
+            if (($field_type == 'date') && ($value != 'date') && ($value != 'static-date')) {
                 return report_error("Attempt to set non <em>date</em> widget type on date field <em>$field</em>");
             }
 
             // Ensure that the widget type is not set to 'date' for a non date field
-            if (($field_type != 'date') && (($value == 'date') || ($value == 'static-date')))
-            {
+            if (($field_type != 'date') && (($value == 'date') || ($value == 'static-date'))) {
                 return report_error("Attempt to set <em>date</em> widget type on non date field <em>$field</em>");
             }
 
             // Ensure that the widget type is set to 'enum' for any enum field
-            if (($field_type == 'enum') && ($value != 'enum'))
-            {
+            if (($field_type == 'enum') && ($value != 'enum')) {
                 return report_error("Attempt to set non <em>enum</em> widget type on enum field <em>$field</em>");
             }
 
             // Ensure that the widget type is not set to 'enum' for a non enum field
-            if (($field_type != 'enum') && ($value == 'enum'))
-            {
+            if (($field_type != 'enum') && ($value == 'enum')) {
                 return report_error("Attempt to set <em>enum</em> widget type on non enum field <em>$field</em>");
             }
 
             // Only allow a 'checkbox' widget for an int(1) field
-            if ($value == 'checkbox')
-            {
-                if ((($field_type != 'int') && ($field_type != 'tinyint')) || ($field_size > 1))
-                {
+            if ($value == 'checkbox') {
+                if ((($field_type != 'int') && ($field_type != 'tinyint')) || ($field_size > 1)) {
                     return report_error("Attempt to set <em>checkbox</em> widget type on non int(1) field <em>$field</em>");
                 }
             }
 
             // Ensure that a select widget has a valid vocabulary
-            if ($value == 'select')
-            {
+            if ($value == 'select') {
                 $vocab_table = $record->FieldVal('vocab_table');
                 $vocab_field = $record->FieldVal('vocab_field');
                 $valid_select = false;
-                if ((!empty($vocab_table)) && (!empty($vocab_field)))
-                {
+                if ((!empty($vocab_table)) && (!empty($vocab_field))) {
 
-                    if (mysqli_select_query($db,$vocab_table,$vocab_field,'',[],'',false))
-                    {
+                    if (mysqli_select_query($db,$vocab_table,$vocab_field,'',[],'',false)) {
                         $valid_select = true;
                     }
                 }
-                if (!$valid_select)
-                {
+                if (!$valid_select) {
                     return report_error("Attempt to set <em>select</em> widget type for field <em>$field</em> with no valid vocabulary.");
                 }
             }
@@ -209,8 +186,7 @@ class tables_dba_table_fields
         record is being copied.
         */
         if (($record->FieldVal('table_name') != $record->OldPKVal('table_name')) &&
-            ($record->action != 'copy') && (!isset($_POST['save_as_new'])))
-        {
+            ($record->action != 'copy') && (!isset($_POST['save_as_new']))) {
             return report_error("<p class=\"highlight-error\">Table name field can only be modified when creating a copy of the record.</p>\n");
         }
     }
@@ -234,16 +210,13 @@ class tables_dba_sidebar_config
         $db = admin_db_connect();
         $display_order = $record->FieldVal('display_order');
         $default_seq_no = DEFAULT_SEQ_NO;
-        if ($display_order == $default_seq_no)
-        {
+        if ($display_order == $default_seq_no) {
             $add_clause = 'ORDER BY display_order DESC LIMIT 1';
             $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',[],$add_clause);
-            if ($row = mysqli_fetch_assoc($query_result))
-            {
+            if ($row = mysqli_fetch_assoc($query_result)) {
                 $new_display_order = $row['display_order'] + 10;
             }
-            else
-            {
+            else {
                 $new_display_order = 10;
             }
             $set_fields = 'display_order';
@@ -263,8 +236,7 @@ class tables_dba_change_log
     function afterSave($record)
     {
         $delete_record = $record->FieldVal('delete_record');
-        if ($delete_record)
-        {
+        if ($delete_record) {
             // Delete flag is set
             delete_record_on_save($record);
         }
@@ -279,8 +251,7 @@ class tables_admin_passwords
     {
         $new_passwd = $record->FieldVal('new_passwd');
         $conf_new_passwd = $record->FieldVal('conf_new_passwd');
-        if ($conf_new_passwd != $new_passwd)
-        {
+        if ($conf_new_passwd != $new_passwd) {
             return report_error("Passwords do not match");
         }
     }
@@ -290,8 +261,7 @@ class tables_admin_passwords
         $db = admin_db_connect();
         $username = $record->FieldVal('username');
         $new_passwd = $record->FieldVal('new_passwd');
-        if (!empty($new_passwd))
-        {
+        if (!empty($new_passwd)) {
             $enc_passwd = password_hash($new_passwd,PASSWORD_DEFAULT);
             $set_fields = 'new_passwd,conf_new_passwd,enc_passwd';
             $set_values = ['s','','s','','s',$enc_passwd];

@@ -42,8 +42,7 @@ function db_connect($dbid,$mode='p',$alt_user='')
     $online_host = (!empty($tok)) ? $tok : 'localhost';
     $remote_host = (!empty($tok)) ? $tok : REMOTE_DB_HOST;
 
-    switch ($db_mode)
-    {
+    switch ($db_mode) {
         case 'normal':
             $connect_params = ($location == 'local')
               ? [ $local_host, $main_user, REAL_DB_PASSWD, $local_db ]
@@ -57,46 +56,37 @@ function db_connect($dbid,$mode='p',$alt_user='')
             break;
     }
     $connect_error = false;
-    switch ($mode)
-    {
+    switch ($mode) {
         case 'o':
             // Object orientated style
             $link = new mysqli( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
-            if ($link->connect_errno)
-            {
+            if ($link->connect_errno) {
                 $connect_error = true;
             }
-            elseif (!empty($dbinfo[$dbid][2]))
-            {
+            elseif (!empty($dbinfo[$dbid][2])) {
                 $link->set_charset($dbinfo[$dbid][2]);
             }
             break;
         case 'p':
             // Procedural style
             $link = mysqli_connect( $connect_params[0], $connect_params[1], $connect_params[2], $connect_params[3] );
-            if (mysqli_connect_errno())
-            {
+            if (mysqli_connect_errno()) {
                 $connect_error = true;
             }
-            elseif (!empty($dbinfo[$dbid][2]))
-            {
+            elseif (!empty($dbinfo[$dbid][2])) {
                 mysqli_set_charset($link,$dbinfo[$dbid][2]);
             }
             break;
     }
-    if ($connect_error)
-    {
-        if (($location == 'local') && (function_exists('print_stack_trace_for_mysqli_error')))
-        {
+    if ($connect_error) {
+        if (($location == 'local') && (function_exists('print_stack_trace_for_mysqli_error'))) {
             print_stack_trace_for_mysqli_error();
         }
-        else
-        {
+        else {
             exit("Unable to establish a database connection\n");
         }
     }
-    else
-    {
+    else {
         return $link;
     }
 }
@@ -127,15 +117,12 @@ defined in the $dbinfo array for the site.
 function db_name($dbid)
 {
     global $dbinfo, $db_mode, $location;
-    switch ($db_mode)
-    {
+    switch ($db_mode) {
         case 'normal':
-              if ($location == 'local')
-              {
+              if ($location == 'local') {
                   return $dbinfo[$dbid][0];
               }
-              else
-              {
+              else {
                   return $dbinfo[$dbid][1];
               }
               break;
@@ -154,22 +141,18 @@ Function itservices_db_connect
 */
 //==============================================================================
 
-if (!function_exists('itservices_db_connect'))
-{
+if (!function_exists('itservices_db_connect')) {
     function itservices_db_connect($mode='p')
     {
         global $location, $www_root_dir;
-        if (($location == 'local') && (function_exists('local_itservices_db_connect')))
-        {
+        if (($location == 'local') && (function_exists('local_itservices_db_connect'))) {
             // Local host with a function 'local_itservices_db_connect' for the given web site.
             return local_itservices_db_connect($mode);
         }
-        elseif (($location == 'local') && (is_dir("$www_root_dir/Sites/andperry.com/private_scripts")))
-        {
+        elseif (($location == 'local') && (is_dir("$www_root_dir/Sites/andperry.com/private_scripts"))) {
             // Local host with no function 'local_itservices_db_connect' for the given web site.
             // Connect by default to the IT Services database for andperry.com.
-            switch ($mode)
-            {
+            switch ($mode) {
                 case 'o':
                     return new mysqli( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
                     break;
@@ -181,13 +164,11 @@ if (!function_exists('itservices_db_connect'))
                     break;
             }
         }
-        elseif (($location == 'real') && (function_exists('online_itservices_db_connect')))
-        {
+        elseif (($location == 'real') && (function_exists('online_itservices_db_connect'))) {
             // Online host with a function 'online_itservices_db_connect' for the given web site.
             return online_itservices_db_connect($mode);
         }
-        else
-        {
+        else {
             return false;
         }
     }

@@ -15,12 +15,10 @@
 //==============================================================================
 
 // Handle main parameters
-if (!isset($argc))
-{
+if (!isset($argc)) {
     exit("script only allowed in command mode\n");
 }
-if (count($argv) < 4)
-{
+if (count($argv) < 4) {
     exit("ERROR - Missing parameter(s)\n");
 }
 $cpuser = $argv[1];
@@ -31,19 +29,16 @@ $root_dir = (is_dir($online_root_dir))
     ? $online_root_dir
     : "/media/Data/Users/Common/Documents/WebSite/Sites/$local_site_dir";
 
-if (is_file("/Config/linux_pathdefs.php"))
-{
+if (is_file("/Config/linux_pathdefs.php")) {
     // Local Server
     require_once("/Config/linux_pathdefs.php");
     require_once("$www_root_dir/Sites/$local_site_dir/public_html/path_defs.php");
 }
-elseif (is_file("$online_root_dir/public_html/path_defs.php"))
-{
+elseif (is_file("$online_root_dir/public_html/path_defs.php")) {
     // Online Server
     require_once("$online_root_dir/public_html/path_defs.php");
 }
-else
-{
+else {
     exit("Path definitions file not found\n");
 }
 
@@ -51,18 +46,14 @@ else
 $update_charsets = false;
 $optimise = false;
 $purge = false;
-foreach($argv as $key => $value)
-{
-    if ($value == '-ucs')
-    {
+foreach($argv as $key => $value) {
+    if ($value == '-ucs') {
         $update_charsets = true;
     }
-    elseif ($value == '-opt')
-    {
+    elseif ($value == '-opt') {
         $optimise = true;
     }
-    elseif ($value == '-pur')
-    {
+    elseif ($value == '-pur') {
         $purge = true;
     }
 }
@@ -74,13 +65,11 @@ require("$base_dir/common_scripts/dbadmin/table_funct.php");
 require("$base_dir/common_scripts/dbadmin/record_funct.php");
 require("$base_dir/common_scripts/dbadmin/view_funct.php");
 require("$base_dir/common_scripts/dbadmin/update_table_data.php");
-if (is_file("$custom_pages_path/$relative_path/db_funct.php"))
-{
+if (is_file("$custom_pages_path/$relative_path/db_funct.php")) {
     require("$custom_pages_path/$relative_path/db_funct.php");
     update_table_data($update_charsets,$optimise,$purge);
 }
-else
-{
+else {
     exit("File $custom_pages_path/$relative_path/db_funct.php not found.\n");
 }
 

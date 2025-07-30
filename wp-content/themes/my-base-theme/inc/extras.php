@@ -16,14 +16,12 @@
 function my_base_theme_body_classes( $classes )
 {
     // Adds a class of group-blog to blogs with more than 1 published author.
-    if ( is_multi_author() )
-    {
+    if ( is_multi_author() ) {
         $classes[] = 'group-blog';
     }
 
     // Adds a class of hfeed to non-singular pages.
-    if ( ! is_singular() )
-    {
+    if ( ! is_singular() ) {
         $classes[] = 'hfeed';
     }
 
@@ -36,8 +34,7 @@ add_filter( 'body_class', 'my_base_theme_body_classes' );
  */
 function my_base_theme_pingback_header()
 {
-  if ( is_singular() && pings_open() )
-  {
+  if ( is_singular() && pings_open() ) {
       echo '<link rel="pingback" href="', esc_url( get_bloginfo( 'pingback_url' ) ), '">';
   }
 }

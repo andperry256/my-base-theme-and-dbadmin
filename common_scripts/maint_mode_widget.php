@@ -1,7 +1,6 @@
 <html>
     <?php
-    if ((!isset($title)) || (!isset($base_dir)) || (!isset($base_url)))
-    {
+    if ((!isset($title)) || (!isset($base_dir)) || (!isset($base_url))) {
         exit("One or more variables not preset.");
     }
     print("<title>$title</title>\n");
@@ -18,34 +17,28 @@
 //==============================================================================
 
 require("$base_dir/common_scripts/allowed_hosts.php");
-if (!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']]))
-{
+if (!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) {
     exit("Authentication failure.");
 }
-if (isset($_POST['submitted']))
-{
+if (isset($_POST['submitted'])) {
     file_put_contents("$base_dir/maint_mode.php","<?php\n\$maint_mode = {$_POST['maint_mode']};\n?>\n");
 }
 
-if (is_file("$base_dir/maint_mode.php"))
-{
+if (is_file("$base_dir/maint_mode.php")) {
     include("$base_dir/maint_mode.php");
 }
-else
-{
+else {
     $maint_mode = false;
 }
 
 print("<form method=\"post\">");
 print("<input type=\"radio\" name=\"maint_mode\" value=\"false\"");
-if (!$maint_mode)
-{
+if (!$maint_mode) {
     print(" checked");
 }
 print(">&nbsp;Disabled&nbsp; ");
 print("<input type=\"radio\" name=\"maint_mode\" value=\"true\"");
-if ($maint_mode)
-{
+if ($maint_mode) {
     print(" checked");
 }
 print(">&nbsp;");

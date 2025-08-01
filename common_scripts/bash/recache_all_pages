@@ -1,8 +1,7 @@
 #!/bin/bash
 # This script must be invoked from the calling script using the 'source'
 # directive and with the variable $root_dir preset.
-if [ -d "$root_dir" ]
-then
+if [ -d "$root_dir" ]; then
     echo "Re-caching pages ..."
     php $root_dir/public_html/common_scripts/recache_all_pages.php
 fi

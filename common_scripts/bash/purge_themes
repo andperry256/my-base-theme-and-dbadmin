@@ -1,11 +1,9 @@
 #!/bin/bash
-if [ "$root_dir" == "" ]
-then
+if [ "$root_dir" == "" ]; then
     echo "Root directory not set"
     exit
 fi
-if [ -d "$sub_root_dir/public_html/wp-content/themes" ]
-then
+if [ -d "$sub_root_dir/public_html/wp-content/themes" ]; then
     themes_dir="$sub_root_dir/public_html/wp-content/themes"
 else
     themes_dir="$root_dir/public_html/wp-content/themes"
@@ -13,19 +11,15 @@ fi
 source "$root_dir/public_html/common_scripts/bash/set_default_theme"
 echo "Default theme = $default_theme"
 
-if [ -d "$themes_dir" ]
-then
+if [ -d "$themes_dir" ]; then
     cd $themes_dir
     for theme in twenty*
     do
-        if [ "$theme" != "$default_theme" ]
-        then
-            if [ -d  "$themes_dir/$theme" ]
-            then
+        if [ "$theme" != "$default_theme" ]; then
+            if [ -d  "$themes_dir/$theme" ]; then
                 echo "  Removing theme $theme"
                 rm -rf "$themes_dir/$theme"
-            elif [ -L  "$themes_dir/$theme" ]
-            then
+            elif [ -L  "$themes_dir/$theme" ]; then
                 echo "  Unlinking theme $theme"
                 rm "$themes_dir/$theme"
             fi

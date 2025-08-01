@@ -142,6 +142,9 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
             fprintf($ofp,$message);
             fprintf($ofp,'  '.$e->getMessage()."\n");
             fclose($ofp);
+            if ($display_error_online) {
+                print("Error result returned from MySQL query:$eol$query$eol");
+            }
             print_stack_trace_for_mysqli_error($display_error_online);
             print($fatal_error_message);
         }
@@ -158,6 +161,9 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
             $ofp = fopen($error_logfile,'a');
             fprintf($ofp,"[$date_and_time] [$error_id] Error result returned from MySQL query:\n  $query\n");
             fclose($ofp);
+            if ($display_error_online) {
+                print("Error result returned from MySQL query:$eol$query$eol");
+            }
             print_stack_trace_for_mysqli_error($display_error_online);
             print($fatal_error_message);
         }

@@ -7,11 +7,8 @@ possible DHCP servers.
 On a local server, it is normally called as part of the procedure performed by
 the 'update_local_hosts' cron job.
 
-On an online server, it would normally be called with the 'php' command as a
-standalone cron job.
-
-A single command line parameter (local server only) specifies the local site
-directory for the main server site:
+A single command line parameter specifies the local site directory for the main
+server site:
     andperry.com on Server1
     longcroft on LC-Server1
 */
@@ -20,18 +17,22 @@ directory for the main server site:
 if (is_file("/Config/linux_pathdefs.php")) {
     // Local Server
     $local_site_dir = $argv[1];
-    require_once("/Config/linux_pathdefs.php");
+    include_once("/Config/linux_pathdefs.php");
     if (!is_dir("$www_root_dir/Sites/$local_site_dir/public_html")) {
         exit("Local site directory not found.\n");
     }
-    require_once("$www_root_dir/Sites/$local_site_dir/public_html/path_defs.php");
+    include_once("$www_root_dir/Sites/$local_site_dir/public_html/path_defs.php");
     $source_dir = "/media/Data/Links/Linux_Config/";
     $target_dir = "/home/andrew/Linux_Config/dhcp";
 }
 else {
-    require_once(__DIR__."/../path_defs.php");
+    // Online server - DEPRECATED
+    exit;
+    /*
+    include_once(__DIR__."/../path_defs.php");
     $source_dir = "$root_dir/dhcp";
     $target_dir = "$root_dir/dhcp";
+    */
 }
 $db = itservices_db_connect();
 

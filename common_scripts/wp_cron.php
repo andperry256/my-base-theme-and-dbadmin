@@ -6,9 +6,6 @@ if (is_dir('/media/Data/www')) {
     $local_site_dir = strtok(ltrim($_SERVER['REQUEST_URI'],'/'),'/');
 }
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-$site_url = $wp_url ?? $base_url;
-print("Accessing $site_url<br />\n");
-$dummy = file_get_contents($site_url);
 if (is_file("$root_dir/maintenance/wp_cron_additions.php")) {
     print("Running WP cron additions for $base_url");
     include("$root_dir/maintenance/wp_cron_additions.php");

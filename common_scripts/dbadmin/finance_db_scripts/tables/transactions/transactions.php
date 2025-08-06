@@ -12,7 +12,7 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function date__validate($record, $value)
     {
         if (!date_is_valid($value)) {
@@ -22,7 +22,7 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function seq_no__validate($record, $value)
     {
         $action = $record->action;
@@ -44,10 +44,10 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function acct_month__validate($record, $value)
     {
-        if (empty($value))# {
+        if (empty($value)) {
             return true;
         }
         $year = (int)substr($value,0,4);
@@ -60,7 +60,7 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function credit_amount__validate($record, $value)
     {
         if (((!is_numeric($value)) && (!empty($value))) || ($value > MAX_TRANSACTION_VALUE) || ($value < -MAX_TRANSACTION_VALUE)) {
@@ -70,7 +70,7 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function debit_amount__validate($record, $value)
     {
         if (((!is_numeric($value)) && (!empty($value))) || ($value > MAX_TRANSACTION_VALUE) || ($value < -MAX_TRANSACTION_VALUE)) {
@@ -80,7 +80,7 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function target_account__validate($record, $value)
     {
         if (!empty($value)) {
@@ -129,7 +129,7 @@ class tables_transactions
             }
         }
     }
-  
+
     function beforeDelete($record)
     {
         $reconciled = $record->FieldVal('reconciled');
@@ -137,7 +137,7 @@ class tables_transactions
             return report_error("Cannot delete record while reconciled status is set.");
         }
     }
-  
+
     function delete_record__validate($record, $value)
     {
         $reconciled = $record->FieldVal('reconciled');
@@ -153,11 +153,11 @@ class tables_transactions
             return true;
         }
     }
-  
+
     function afterDelete($record)
     {
         $db = admin_db_connect();
-    
+
         $account = $record->FieldVal('account');
         $seq_no = $record->FieldVal('seq_no');
         $date = $record->FieldVal('date');
@@ -168,7 +168,7 @@ class tables_transactions
         }
         update_account_balances($account,$date);
     }
-  
+
     function beforeSave($record)
     {
         $db = admin_db_connect();
@@ -180,7 +180,7 @@ class tables_transactions
         $debit_amount = $record->FieldVal('debit_amount');
         $target_account = $record->FieldVal('target_account');
         $copy_to_date = $record->FieldVal('copy_to_date');
-    
+
         $where_clause = 'account=? AND seq_no=?';
         $where_values = ['s',$account,'i',$seq_no];
         if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,''))) {
@@ -197,7 +197,7 @@ class tables_transactions
         if ((empty($target_account)) && (!empty($target_seq_no))) {
             return report_error("Target sequence number set without an account.");
         }
-    
+
         // Check for various error conditions
         if ((!empty($target_account)) && (!empty($target_seq_no))) {
             $where_clause = 'account=? AND seq_no=?';
@@ -233,21 +233,21 @@ class tables_transactions
         elseif ((!empty($source_account)) && (!empty($copy_to_date))) {
             return report_error("Attempt to copy transaction that is at the target end of a transfer.");
         }
-    
+
         // All error checks passed - OK to make permanent changes
         if ((!empty($old_target_account)) && (empty($target_account))) {
             unlink_transaction($old_target_account,$old_target_seq_no);
         }
     }
-  
+
     function afterSave($record)
     {
         global $base_url, $relative_path;
-    
+
         $db = admin_db_connect();
         $action = $record->action;
         $table = $record->table;
-    
+
         $account = $record->FieldVal('account');
         $date = $record->FieldVal('date');
         $chq_no = $record->FieldVal('chq_no');
@@ -284,11 +284,11 @@ class tables_transactions
             $date = $row['date'];
             $payee = $row['payee'];
         }
-    
+
         $primary_keys = [];
         $primary_keys['account'] = $account;
         $primary_keys['seq_no'] = $seq_no;
-    
+
         if ($delete_record) {
             // Delete record
             delete_record_on_save($record);
@@ -296,7 +296,7 @@ class tables_transactions
         }
         $old_account = $record->OldPKVal('account');
         $old_seq_no = $record->OldPKVal('seq_no');
-    
+
         // Re-link any splits if the transaction primary keys have changed.
         // Can leave the split sequence numbers intact as they are specific to the individual transaction.
         if ((!empty($old_account)) && (($account != $old_account) || ($seq_no != $old_seq_no))) {
@@ -306,7 +306,7 @@ class tables_transactions
             $where_values = ['s',$old_account,'i',$old_seq_no];
             mysqli_update_query($db,'splits',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Get account currency
         $where_clause = 'label=?';
         $where_values = ['s',$account];
@@ -317,14 +317,14 @@ class tables_transactions
         else {
             exit("This should not occur");
         }
-    
+
         // Add payee to payees table
         $fields = 'name';
         $values = ['s',$payee];
         $where_clause = 'name=?';
         $where_values = ['s',$payee];
         mysqli_conditional_insert_query($db,'payees',$fields,$values,$where_clause,$where_values);
-    
+
         // Adjust credit/debit amounts as necessary.
         if ($auto_total) {
             $total = 0;
@@ -355,7 +355,7 @@ class tables_transactions
         else {
             // Comment both zero - no action.
         }
-    
+
         // Set/clear transfer category as required.
         if ((!empty($source_account)) || (!empty($target_account))) {
             $category = '-transfer-';
@@ -363,7 +363,7 @@ class tables_transactions
         elseif ((empty($source_account)) && (empty($target_account)) && ($category == '-transfer-')) {
             $category = '-none-';
         }
-    
+
         // Select default category for fund or vice versa where appropriate.
         if (($fund != '-default-') && ($category == '-default-')) {
             $where_clause = 'name=?';
@@ -386,7 +386,7 @@ class tables_transactions
                 $fund = $row['default_fund'];
             }
         }
-    
+
         // For each of the fund and category, check if it indicates default at this
         // point. If so then check if there is a default value for the given payee,
         // otherwise use the global default value.
@@ -416,7 +416,7 @@ class tables_transactions
                 $category = '-none-';
             }
         }
-    
+
         // Save default fund and/or category for payee where 'save defaults' option
         // has been selected.
         if (($save_defaults) && (substr($fund,0,1) != '-')) {
@@ -433,11 +433,11 @@ class tables_transactions
             $where_values = ['s',$payee];
             mysqli_update_query($db,'payees',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         if ((empty($acct_month)) || ($change_acct_month == 0)) {
             $acct_month = accounting_month($date);
         }
-    
+
         // Re-update record with any modified fields
         $set_fields = 'seq_no,acct_month,currency,credit_amount,debit_amount,auto_total,fund,category,save_defaults';
         $set_values = ['i',$seq_no,'s',$acct_month,'s',$account_currency,'d',$credit_amount,'d',$debit_amount,'i',0,'s',$fund,'s',$category,'i',0];
@@ -451,7 +451,7 @@ class tables_transactions
             $where_values = ['s',$account,'i',$seq_no];
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Handle auto-reconciliation if record has been created via the reconcile screen
         if ($bank_import_id != 0 ) {
             $where_clause = 'rec_id=?';
@@ -476,10 +476,10 @@ class tables_transactions
             $where_values = ['s',$account,'i',$seq_no];
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
         }
-    
+
         // Update account balances
         update_account_balances($account,$date);
-    
+
         // Update appropriate fields on other side of transfer
         if ((!empty($target_account)) && (!empty($target_seq_no))) {
             $set_fields = 'date,credit_amount,debit_amount,fund,acct_month';
@@ -497,12 +497,12 @@ class tables_transactions
             mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
             update_account_balances($source_account,$date);
         }
-    
+
         if (!empty($copy_to_date)) {
             // Make copy of transaction
             copy_transaction($account,$seq_no,$copy_to_date);
         }
-    
+
         if ($sched_freq == '#') {
             // Normal transaction
             if (($table == "_view_account_$account") && (!empty($target_account)) && (empty($target_seq_no))) {

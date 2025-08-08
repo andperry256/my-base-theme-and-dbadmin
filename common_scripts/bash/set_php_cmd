@@ -2,5 +2,5 @@
 if [ -e "/Config/php_pars" ]; then
     source /Config/php_pars
 else
-    phpcmd="php"
+    phpcmd="php -d error_reporting=E_ERROR"
 fi

@@ -7,7 +7,7 @@ if (is_dir('/media/Data/www')) {
 }
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 if (is_file("$root_dir/maintenance/wp_cron_additions.php")) {
-    print("Running WP cron additions for $base_url\n");
+    print("\nRunning WP cron additions for $base_url\n");
     include("$root_dir/maintenance/wp_cron_additions.php");
 }
 

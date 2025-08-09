@@ -126,7 +126,7 @@ else {
     }
     ?>
 </p>
-<p><input type="submit" value="Update/Reload"</p>
+<p><input type="submit" value="Update/Reload"></p>
 <input type="hidden" name="submitted" />
 </form>
 </fieldset>

@@ -144,8 +144,8 @@ add_action( 'wp_enqueue_scripts', 'my_base_theme_scripts' );
 
 //================================================================================
 /*
-  * Remove login shake
-  */
+ * Remove login shake
+ */
 function wpb_remove_loginshake()
 {
 remove_action('login_head', 'wp_shake_js', 12);
@@ -1088,9 +1088,8 @@ add_action( 'widgets_init', 'blog_home_load_widget' );
 
 //================================================================================
 
-if (is_file("{$_SERVER['DOCUMENT_ROOT']}/wp-content/themes/auto_include.php")) {
-    include("{$_SERVER['DOCUMENT_ROOT']}/wp-content/themes/auto_include.php");
-}
+// Auto update all plugins
+add_filter( 'auto_update_plugin', '__return_true' );
 
 //================================================================================
 endif;

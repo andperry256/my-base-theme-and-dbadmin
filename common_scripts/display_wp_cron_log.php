@@ -51,6 +51,8 @@ if (((isset($_POST['clear'])) || (isset($_GET['clear']))) && (is_file($log_file_
 <?php
 $files_found = false;
 print("<br />\n");
+print("==================== $log_file_path ====================<br />\n");
+print("<br />\n");
 if (is_file($log_file_path)) {
     $content = file($log_file_path);
     foreach ($content as $line) {

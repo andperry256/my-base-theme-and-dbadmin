@@ -233,7 +233,7 @@ function get_top_level_category_for_post()
 
 function display_category_summary($category_name,$category_info,$image_max_width,$image_max_height)
 {
-    global $base_url;
+    global $base_url, $link_version;
     $category_url = "$base_url/category/{$category_info[0]}";
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
@@ -1090,6 +1090,11 @@ add_action( 'widgets_init', 'blog_home_load_widget' );
 
 // Auto update all plugins
 add_filter( 'auto_update_plugin', '__return_true' );
+
+/** Disable Curly Quotes */
+remove_filter('the_content', 'wptexturize');
+remove_filter('the_title', 'wptexturize');
+remove_filter('the_excerpt', 'wptexturize');
 
 //================================================================================
 endif;

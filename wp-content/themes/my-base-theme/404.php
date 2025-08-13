@@ -9,7 +9,7 @@
 
 get_header();
 $page = get_page_by_path("404-not-found");
-$content = $page->post_content;
+$content = $page->post_content ?? '';
 $content = apply_filters( 'the_content', $content );
 ?>
 

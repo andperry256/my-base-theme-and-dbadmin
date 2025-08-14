@@ -116,6 +116,32 @@ class tables_dba_table_info
         $where_values = ['s',$table];
         mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
     }
+
+    function afterSave($record)
+    {
+        if ($record->FieldVal('reorder_fields')) {
+
+            // Re-order all fields in increments of 10 according to natural order of fields in table.
+            $db = admin_db_connect();
+            $table = $record->FieldVal('table_name');
+            $seq = 0;
+            $fields = 'display_group,display_order';
+            $query_result = mysqli_query_strict($db,"SHOW COLUMNS FROM $table");
+            while ($row = mysqli_fetch_assoc($query_result)) {
+                $values = ['s','-default-','i',$seq+=10];
+                $where_clause = 'table_name=? AND field_name=?';
+                $where_values = ['s',$table,'s',$row['Field']];
+                mysqli_update_query($db,'dba_table_fields',$fields,$values,$where_clause,$where_values);
+            }
+
+            // Clear 'reorder_fields' flag.
+            $fields = 'reorder_fields';
+            $values = ['i',0];
+            $where_clause = 'table_name=?';
+            $where_values = ['s',$table];
+            mysqli_update_query($db,'dba_table_info',$fields,$values,$where_clause,$where_values);
+        }
+    }
 }
 
 class tables__view_orphan_table_info_records extends tables_dba_table_info {}

@@ -198,6 +198,9 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     if (!isset($fieldlist['orphan'])) {
         mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `replicate_enabled`");
     }
+    if (!isset($fieldlist['reorder_fields'])) {
+        mysqli_query_normal($db,"ALTER TABLE `dba_table_info` ADD `reorder_fields` TINYINT( 1 ) NOT NULL DEFAULT '0' AFTER `orphan`");
+    }
     mysqli_query_normal($db,"ALTER TABLE `dba_table_info` CHANGE `orphan` `orphan` TINYINT( 1 ) NOT NULL DEFAULT '0'");
     if ($new_installation) {
         print("This is a first time installation - please return to the main page (to do any auto view creation) and then repeat this operation.$eol");
@@ -675,6 +678,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     mysqli_query_normal($db,"UPDATE dba_table_fields SET description='Collation to be applied to the table. Set to <i>-auto-</i> to use default.' WHERE table_name='dba_table_info' AND field_name='collation'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET description='CSS grid column widths for mobile mode. Do NOT use the <em>repeat</em> construct.' WHERE table_name='dba_table_info' AND field_name='grid_columns'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET description='0 = can be null; 1 = can be empty; 2 = value required.' WHERE table_name='dba_table_fields' AND field_name='required'");
+    mysqli_query_normal($db,"UPDATE dba_table_fields SET description='Set flag to reset display order of fields in increments of 10, according to the native order of fields in a record.' WHERE table_name='dba_table_info' AND field_name='reorder_fields'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET alt_label='Grid Co-ordinates' WHERE table_name='dba_table_fields' AND field_name='grid_coords'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET alt_label='Date & Time' WHERE table_name='dba_change_log' AND field_name='date_and_time'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET alt_label='Record ID' WHERE table_name='dba_change_log' AND field_name='record_id'");

@@ -557,8 +557,8 @@ function check_uncategorised_post()
 {
     global $base_url;
     $post = get_post();
-    $id = $post->ID;
-    if ($post->post_type == 'post') {
+    $id = $post->ID ?? null;
+    if ((!empty($id)) && ($post->post_type == 'post')) {
         $uncategorised = true;
         $categories = get_the_category($post->ID);
         foreach ($categories as $key => $dummy) {

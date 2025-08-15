@@ -407,6 +407,18 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin)) {
 
 // Main content
 print("<div id=\"dbadmin-content\">\n");
+if (is_file("$custom_pages_path/$relative_path/key_actions.php")) {
+    include("$custom_pages_path/$relative_path/key_actions.php");
+    print("<div id=\"section-selector\">\n");
+    foreach ($key_actions as $action => $description) {
+        print("<div class=\"top-navigation-item");
+        if (get_session_var(['dba_key_action',$relative_path]) == $action) {
+            print(" current-selection");
+        }
+        print("\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=$action\">$description</a></div>");
+    }
+    print("</div>\n");
+}
 
 // Display button to select desktop or mobile mode
 $mode = get_viewing_mode();

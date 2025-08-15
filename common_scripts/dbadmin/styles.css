@@ -111,6 +111,13 @@ td {
     padding-top: 0;
     vertical-align: top;
 }
+#section-selector {
+    width: 100%;
+    padding: 0.2em;
+}
+.current-selection {
+    background-color: #ffd;
+}
 
 /* ============ Styles for sidebar ============ */
 

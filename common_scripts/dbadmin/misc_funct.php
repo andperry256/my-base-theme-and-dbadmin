@@ -130,7 +130,7 @@ function update_seq_number($table,$sort_1_value,$seq_no,$interval=10)
         $sort_1_name = $row['sort_1_field'];
         $seq_no_name =  $row['seq_no_field'];
         $primary_keys = [];
-    
+
         $set_fields = "$seq_no_name";
         $set_values = ['i',$new_seq_no];
         $where_clause = "$seq_no_name=?";
@@ -196,6 +196,28 @@ function get_viewing_mode()
     else {
         return 'desktop';
     }
+}
+
+//==============================================================================
+/*
+Function subsection_links
+*/
+//==============================================================================
+
+function subsection_links()
+{
+    global $key_actions, $base_url, $relative_path;
+    $result = '';
+    if (isset($key_actions)) {
+        $result .= "<ul>\n";
+        foreach ($key_actions as $action => $description) {
+            if ($action != 'main') {
+                $result .= "<li><a href=\"$base_url/$relative_path/?-action=$action\">$description</a></li>\n";
+            }
+        }
+        $result .= "</ul>\n";
+    }
+    return $result;
 }
 
 //==============================================================================

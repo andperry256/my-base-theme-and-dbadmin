@@ -23,4 +23,3 @@ if (is_file("$custom_pages_path/$relative_path/relationships.sql")) {
 print("<p>$count Entries added to relationships table</p>\n");
 
 //==============================================================================
-?>

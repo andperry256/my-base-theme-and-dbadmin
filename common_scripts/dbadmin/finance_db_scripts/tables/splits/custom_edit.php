@@ -19,4 +19,3 @@ $params['additional_links'] = "<div class=\"top-navigation-item\"><a class=\"adm
 handle_record('edit',$params);
 
 //==============================================================================
-?>

@@ -8,4 +8,3 @@ header("Location: $base_url/$relative_path/?-action=display_transaction_report&c
 exit;
 
 //==============================================================================
-?>

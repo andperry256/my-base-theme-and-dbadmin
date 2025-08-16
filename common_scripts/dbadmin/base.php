@@ -464,4 +464,3 @@ print("<script type=\"text/javascript\" src=\"$db_admin_url/no_resubmit.js\"></s
 //include_inline_javascript("$db_admin_url/no_resubmit.js");
 
 //==============================================================================
-?>

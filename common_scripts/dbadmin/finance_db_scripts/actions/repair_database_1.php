@@ -9,4 +9,3 @@ print("<p><a href=\"index.php?-action=repair_database_2&dry-run\"><button>Dry Ru
 print("<a href=\"index.php?-action=repair_database_2\"><button>Live Run</button></a></p>\n");
 
 //==============================================================================
-?>

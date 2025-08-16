@@ -26,4 +26,3 @@ print("</ul>\n");
 print("<p><a href=\"index.php?-action=delete_unused_payees_2\"><button>Continue</button></a></p>\n");
 
 //==============================================================================
-?>

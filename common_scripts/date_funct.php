@@ -780,4 +780,3 @@ function gregorian_dow($day,$month,$year)
 define('DATE_FUNCT_DEFINED',true);
 endif;
 //==============================================================================
-?>

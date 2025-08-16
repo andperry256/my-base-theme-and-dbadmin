@@ -997,4 +997,3 @@ function output_font_stylesheet_links()
 define('SHARED_FUNCT_DEFINED',true);
 endif;
 //==============================================================================
-?>

@@ -119,4 +119,3 @@ foreach ($content1 as $line) {
 file_put_contents("$target_dir/dnsmasq.conf",$content2);
 
 //==============================================================================
-?>

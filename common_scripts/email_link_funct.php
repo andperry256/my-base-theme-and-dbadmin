@@ -51,4 +51,3 @@ function display_email_list_copy_button($list_id,$address_list,$include_mail_cli
 }
 
 //==============================================================================
-?>

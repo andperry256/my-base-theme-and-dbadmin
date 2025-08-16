@@ -65,4 +65,3 @@
       print("<input type=\"hidden\" name=\"returnurl\" value=\"$return_url\" />\n");
       print("</form>\n");
   }
-?>

@@ -31,4 +31,3 @@
   }
   header("Location: {$_POST['returnurl']}");
   exit;
-?>

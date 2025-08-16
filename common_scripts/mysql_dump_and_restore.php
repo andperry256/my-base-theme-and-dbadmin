@@ -206,4 +206,3 @@ foreach ($dbinfo as $dbid => $info) {
 exit("Database [{$_GET['dbname']}] not found for site [$local_site_dir]\n");
 
 //==============================================================================
-?>

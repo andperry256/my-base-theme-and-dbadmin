@@ -11,4 +11,3 @@ else {
     print("ERROR - Return URL not specified");
     exit;
 }
-?>

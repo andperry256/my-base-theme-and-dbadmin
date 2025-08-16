@@ -15,4 +15,3 @@ mysqli_delete_query($db,'payees',$where_clause,$where_values);
 print("<p>Operation completed.</p>\n");
 
 //==============================================================================
-?>

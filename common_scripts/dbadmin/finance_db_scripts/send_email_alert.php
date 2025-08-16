@@ -23,4 +23,3 @@
       $message_info['to_addr'] = $row['to_address'];
       output_mail($message_info,$mail_host);
   }
-?>

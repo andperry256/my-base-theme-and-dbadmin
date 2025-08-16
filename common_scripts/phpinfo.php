@@ -12,4 +12,3 @@ if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER[
 phpinfo();
 
 //==============================================================================
-?>

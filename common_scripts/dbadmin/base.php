@@ -71,6 +71,13 @@ function display_sidebar_content()
         if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']]))) {
             update_session_var(['dba_key_action',$relative_path],$_GET['-action']);
         }
+        elseif ((isset($_GET['-action'])) && (!empty($key_action_mappings[$_GET['-action']])) && (isset($key_actions[$key_action_mappings[$_GET['-action']]]))) {
+            update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$_GET['-action']]);
+        }
+        elseif ((isset($_GET['-table'])) && ($base_table = get_base_table($_GET['-table'])) &&
+                (!empty($key_action_mappings[$base_table])) && (isset($key_actions[$key_action_mappings[$base_table]]))) {
+            update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$base_table]);
+        }
         elseif ((count($_GET) == 0) && (!empty($key_actions['main']))) {
             update_session_var(['dba_key_action',$relative_path],'main');
         }

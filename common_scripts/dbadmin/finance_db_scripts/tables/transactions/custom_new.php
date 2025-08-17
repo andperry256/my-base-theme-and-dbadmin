@@ -22,6 +22,6 @@ if (substr($table,0,14) == '_view_account_') {
         $params['additional_links'] .= "<div class=\"top-navigation-item\"><a class=\"admin-link\" href=\"$base_url/$relative_path/?-action=reconcile_account&-account=$account\">Reconcile</a></div>\n";
     }
 }
-handle_record('new',$params)
+handle_record('new',$params);
 
 //==============================================================================

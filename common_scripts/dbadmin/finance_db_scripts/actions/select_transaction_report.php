@@ -98,6 +98,6 @@ print("</select></td>\n");
 
 print("<tr><td></td><td><input type=\"submit\" name=\"submitted\" value=\"Continue\"></td></tr>\n");
 print("</table>\n");
-print("</form>\n")
+print("</form>\n");
 
 //==============================================================================

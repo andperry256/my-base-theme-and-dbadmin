@@ -69,13 +69,24 @@ function display_sidebar_content()
     else {
         $action_filter = '';
         if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']]))) {
+            // Action is itself a key action
             update_session_var(['dba_key_action',$relative_path],$_GET['-action']);
         }
-        elseif ((isset($_GET['-action'])) && (!empty($key_action_mappings[$_GET['-action']])) && (isset($key_actions[$key_action_mappings[$_GET['-action']]]))) {
+        elseif ((isset($_GET['-keyact'])) && (!empty($key_actions[$_GET['-keyact']]))) {
+            // Sidebar link has an associated key action
+            update_session_var(['dba_key_action',$relative_path],$_GET['-keyact']);
+        }
+        elseif ((isset($_GET['-action'])) &&
+                (!empty($key_action_mappings[$_GET['-action']])) &&
+                (isset($key_actions[$key_action_mappings[$_GET['-action']]]))) {
+            // Action is mapped to a key action  [** maybe not be keeping this option **]
             update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$_GET['-action']]);
         }
-        elseif ((isset($_GET['-table'])) && ($base_table = get_base_table($_GET['-table'])) &&
-                (!empty($key_action_mappings[$base_table])) && (isset($key_actions[$key_action_mappings[$base_table]]))) {
+        elseif ((isset($_GET['-table'])) &&
+                ($base_table = get_base_table($_GET['-table'])) &&
+                (!empty($key_action_mappings[$base_table])) &&
+                (isset($key_actions[$key_action_mappings[$base_table]]))) {
+            // Table is mapped to a key action  [** maybe not be keeping this option **]
             update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$base_table]);
         }
         elseif ((count($_GET) == 0) && (!empty($key_actions['main']))) {
@@ -89,6 +100,7 @@ function display_sidebar_content()
             $label = $row['label'];
             $action_name = $row['action_name'];
             $table_name = $row['table_name'];
+            $key_action = $row['key_action'];
             $link = $row['link'];
             if($label == '@@') {
                 // End of action specific section
@@ -111,16 +123,18 @@ function display_sidebar_content()
                 elseif ((!empty($action_name)) || (!empty($table_name))) {
                     // Sidebar item is an action and/or table reference
                     print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?");
+                    $pars = '';
                     if (!empty($action_name)) {
-                        print("-action=$action_name");
+                        $pars .= "-action=$action_name&";
                     }
                     if (!empty($table_name)) {
-                        if (!empty($action_name)) {
-                            print("&");
-                        }
-                        print("-table=$table_name");
+                        $pars .= "-table=$table_name&";
                     }
-                    print("\"");
+                    if (!empty($key_action)) {
+                        $pars .= "-keyact=$key_action";
+                    }
+                    $pars = rtrim($pars,'&');
+                    print("$pars\"");
                     if ($row['new_window']) {
                         print(" target=\"_blank\"");
                     }

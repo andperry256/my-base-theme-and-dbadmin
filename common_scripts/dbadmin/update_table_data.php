@@ -313,8 +313,12 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
         mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `table_name` VARCHAR( 63 ) NULL AFTER `action_name`");
     }
     mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `table_name` `table_name` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
+    if (!isset($fieldlist['key_action'])) {
+        mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `key_action` VARCHAR( 63 ) NULL AFTER `table_name`");
+    }
+    mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `key_action` `key_action` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
     if (!isset($fieldlist['link'])) {
-        mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `link` VARCHAR( 63 ) NULL AFTER `table_name`");
+        mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` ADD `link` VARCHAR( 63 ) NULL AFTER `key_action`");
     }
     mysqli_query_normal($db,"ALTER TABLE `dba_sidebar_config` CHANGE `link` `link` VARCHAR( 63 ) CHARACTER SET $default_charset COLLATE $default_collation NULL");
     if (!isset($fieldlist['new_window'])) {

@@ -1,5 +1,7 @@
 <?php
 //==============================================================================
+if (!defined('MYSQL_FUNCT_DEFINED')):
+//==============================================================================
 /*
 N.B. The option for running with prepared statements has been removed in favour
 of the alternative mechanism. If this needs to be reinstated, then please refer
@@ -41,8 +43,6 @@ global $root_dir,$error_logfile, $home_remote_ip_addr, $display_error_online;
 $error_logfile = "$root_dir/logs/php_error.log";
 $display_error_online = ((isset($home_remote_ip_addr)) && (isset($_SERVER['REMOTE_ADDR'])) && ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr));
 
-//==============================================================================
-if (!function_exists('array_deslash')):
 //==============================================================================
 /*
 Function array_deslash
@@ -598,5 +598,6 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
 }
 
 //==============================================================================
+define('MYSQL_FUNCT_DEFINED',true);
 endif;
 //==============================================================================

@@ -67,6 +67,25 @@ function display_sidebar_content()
         require("$custom_pages_path/$relative_path/custom_sidebar.php");
     }
     else {
+        if (isset($key_actions)) {
+            // Set key action for standard footer links to 'main'
+            if (!isset($key_action_mappings)) {
+                $key_action_mappings = [];
+            }
+            $key_action_mappings = array_merge($key_action_mappings,
+                [
+                    'dba_sidebar_config' => 'main',
+                    'dba_table_info' => 'main',
+                    'dba_table_fields' => 'main',
+                    'dba_relationships' => 'main',
+                    'dba_change_log' => 'main',
+                    'update_table_data1' => 'main',
+                    'renumber_records1' => 'main',
+                    'dbsync' => 'main',
+                    'search_and_replace' => 'main',
+                ]
+            );
+        }
         $action_filter = '';
         if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']]))) {
             // Action is itself a key action
@@ -79,14 +98,14 @@ function display_sidebar_content()
         elseif ((isset($_GET['-action'])) &&
                 (!empty($key_action_mappings[$_GET['-action']])) &&
                 (isset($key_actions[$key_action_mappings[$_GET['-action']]]))) {
-            // Action is mapped to a key action  [** maybe not be keeping this option **]
+            // Action is mapped to a key action
             update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$_GET['-action']]);
         }
         elseif ((isset($_GET['-table'])) &&
                 ($base_table = get_base_table($_GET['-table'])) &&
                 (!empty($key_action_mappings[$base_table])) &&
                 (isset($key_actions[$key_action_mappings[$base_table]]))) {
-            // Table is mapped to a key action  [** maybe not be keeping this option **]
+            // Table is mapped to a key action
             update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$base_table]);
         }
         elseif ((count($_GET) == 0) && (!empty($key_actions['main']))) {

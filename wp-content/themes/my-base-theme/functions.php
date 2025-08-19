@@ -747,7 +747,7 @@ Function check_local_home_favicon
 
 function check_local_home_favicon()
 {
-    global $location, $mainwp_remote_ip_addr, $base_url, $link_version;
+    global $location, $base_url, $link_version;
     if (($location == 'local') && (is_front_page())) {
         print("<link rel=\"icon\" href=\"$base_url/wp-content/themes/my-base-theme/local_home_favicon.png?v=$link_version\" type=\"image/x-icon\" />\n");
         return true;

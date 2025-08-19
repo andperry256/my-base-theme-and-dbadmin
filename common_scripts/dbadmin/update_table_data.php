@@ -661,6 +661,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     // Make a number of standard settings to enable certain non primary key fields
     // to be displayed by default in a table listing.
     mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_sidebar_config' AND field_name='label'");
+    mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=0 WHERE table_name='dba_sidebar_config' AND field_name='key_action'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='parent_table'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_info' AND field_name='grid_columns'");
     mysqli_query_normal($db,"UPDATE dba_table_fields SET list_desktop=1,list_mobile=1 WHERE table_name='dba_table_fields' AND field_name='display_group'");

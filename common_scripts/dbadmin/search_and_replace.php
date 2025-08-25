@@ -29,10 +29,10 @@ function search_and_replace($local_db_name)
             $dumpfile = "$maintenance_dir/temp.sql";
             if (isset($_POST['submitted1'])) {
                 if ($_POST['table'] == '#all#') {
-                    $command = "mysqldump --host=localhost --user=$user --password=$password $dbname 1>\"$dumpfile\"";
+                    $command = "mysqldump --host localhost --user=$user --password=$password $dbname 1>\"$dumpfile\"";
                 }
                 elseif(!empty($_POST['table'])) {
-                    $command = "mysqldump --host=localhost --user=$user --password=$password $dbname {$_POST['table']} 1>\"$dumpfile\"";
+                    $command = "mysqldump --host localhost --user=$user --password=$password $dbname {$_POST['table']} 1>\"$dumpfile\"";
                 }
                 else {
                     $command = '';
@@ -78,7 +78,7 @@ function search_and_replace($local_db_name)
                     fprintf($ofp,$line);
                 }
                 fclose($ofp);
-                $command = "mysql --host=localhost --user=$user --password=$password -D $dbname < \"$dumpfile\"";
+                $command = "mysql --host localhost --user=$user --password=$password -D $dbname < \"$dumpfile\"";
                 exec($command);
                 unlink($dumpfile);
                 print("<p>Operation completed - $count instance(s) replaced.</p>\n");

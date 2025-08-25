@@ -36,16 +36,16 @@ function sync_databases($local_db_name)
                         $sync_direction = 'in';
                     }
                     break;
-        
+
                 case 'master':
                     $sync_direction = 'out';
                     break;
-        
+
                 case 'sub-master':
                     $sync_direction = 'in';
                     break;
             }
-    
+
             if (isset($_POST['submitted'])) {
                 switch ($_POST['sync_mode']) {
                     case ('save-rlshps'):
@@ -76,14 +76,14 @@ function sync_databases($local_db_name)
                             print("<p>$count Queries saved to relationships.sql.</p>\n");
                         }
                         break;
-        
+
                     default:
                         $cmd = "/Utilities/php_script mysql_sync $local_site_dir {$row['sub_path']}";
                         if ($_POST['sync_mode'] == 'backup') {
-                            $cmd .= " -b -host=$localhost_id";
+                            $cmd .= " -b -host $localhost_id";
                         }
                         elseif ($_POST['sync_mode'] == 'restore') {
-                            $cmd .= " -r -host=$localhost_id";
+                            $cmd .= " -r -host $localhost_id";
                         }
                         elseif ($_POST['sync_mode'] == 'table_dump') {
                             $cmd = '';
@@ -125,17 +125,17 @@ function sync_databases($local_db_name)
                                 print("<p>ERROR - sync operations not valid for views.<p>");
                             }
                             elseif (substr($_POST['sync_mode'],6) == $sync_direction) {
-                                $cmd .= " -st={$_POST['table']}";
+                                $cmd .= " -st {$_POST['table']}";
                             }
                             else {
-                                $cmd .= " -rst={$_POST['table']}";
+                                $cmd .= " -rst {$_POST['table']}";
                             }
                         }
                         elseif ($_POST['sync_mode'] == $sync_direction) {
                             $cmd .= " -s -force";
                         }
                         else {
-                            $cmd .= " -rs=yes -force";
+                            $cmd .= " -rs yes -force";
                         }
                         if (isset($_POST['noadd'])) {
                             $cmd .= " -noadd";
@@ -163,7 +163,7 @@ function sync_databases($local_db_name)
                     print(" checked");
                 }
                 print("></td><td>Download online DB to local DB</td></tr>\n");
-        
+
                 print("<tr><td><input type=\"radio\" name=\"sync_mode\" value=\"out\"");
                 if ($sync_direction == 'out') {
                     print(" checked");

@@ -14,6 +14,7 @@ get_header();
     <?php output_header_links(); ?>
     <main id="main-no-background" class="site-main" role="main">
         <?php
+        $image_type_3 = (defined('IMAGE_TYPE_3')) ? 'IMAGE_TYPE_1' : 'webp300';
         $category = get_queried_object();
         $own_id = $category->term_id;
         $own_slug = $category->slug;
@@ -41,12 +42,7 @@ get_header();
                 print("<div class=\"post-image-holder\">");
                 if (!empty($image_id)) {
                     $image_info = wp_get_attachment_image_src($image_id,[480,320]);
-                    if (function_exists('url_to_static')) {
-                        $image_url = url_to_static($image_info[0]);
-                    }
-                    else {
-                        $image_url = $image_info[0];
-                    }
+                    $image_url = get_modified_image_url($image_info[0],$image_type_3);
                     print("<img src=\"$image_url\"/>\n");
                 }
                 print("</div>\n");

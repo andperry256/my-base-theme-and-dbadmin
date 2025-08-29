@@ -154,9 +154,31 @@ add_action('login_head', 'wpb_remove_loginshake');
 
 //==============================================================================
 
+$image_type_1 = (defined('IMAGE_TYPE_1')) ? 'IMAGE_TYPE_1' : 'webp90';
+$image_type_3 = (defined('IMAGE_TYPE_3')) ? 'IMAGE_TYPE_1' : 'webp300';
+
+function get_modified_image_url($image_url,$type='webp300')
+{
+    global $base_dir, $base_url;
+    $image_path = str_replace($base_url,$base_dir,$image_url);
+    $file_ext = pathinfo($image_path,PATHINFO_EXTENSION);
+    $alt_image_path = str_replace('/uploads/',"/uploads/$type/",$image_path);
+    $alt_image_path = str_replace(".$file_ext",'.webp',$alt_image_path);
+    if (is_file($alt_image_path)) {
+        $image_url = str_replace($base_dir,$base_url,$alt_image_path);
+    }
+    if (function_exists('url_to_static')) {
+        $image_url = url_to_static($image_url);
+    }
+    return $image_url;
+}
+
+//==============================================================================
+
 function output_header_links()
 {
     global $base_url;
+    global $image_type_1;
     $category_list = [];
     $categories = get_categories();
     foreach ($categories as $cat) {
@@ -180,14 +202,7 @@ function output_header_links()
         print("<div class=\"category-icon-link\">");
         print("<a href=\"$category_url\">");
         $image_info = wp_get_attachment_image_src($info[1],[480,320]);
-        if (function_exists('url_to_static')) {
-            $image_url = url_to_static($image_info[0]);
-        }
-        else {
-            $image_url = $image_info[0];
-        }
-        $image_url = str_replace('.jpg','-80px.jpg',$image_url);
-        $image_url = str_replace('.png','-80px.png',$image_url);
+        $image_url = get_modified_image_url($image_info[0],$image_type_1);
         print("<img src=\"$image_url\" class=\"category-icon-link-image\" /><br />");
         print("$name</a></div>");
     }
@@ -233,15 +248,13 @@ function get_top_level_category_for_post()
 
 function display_category_summary($category_name,$category_info,$image_max_width,$image_max_height)
 {
-    global $base_url, $link_version;
+    global $base_url, $link_version, $image_type_3;
     $category_url = "$base_url/category/{$category_info[0]}";
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
     if (!empty($category_info[1])) {
         $image_info = wp_get_attachment_image_src($category_info[1],[$image_max_width,$image_max_height]);
-        $image_url = (function_exists('url_to_static'))
-            ? url_to_static($image_info[0])
-            : $image_info[0];
+        $image_url = get_modified_image_url($image_info[0],$image_type_3);
         print("<a href=\"$category_url\"><img src=\"$image_url?v=$link_version\"/></a>\n");
     }
     print("</div>\n");
@@ -258,6 +271,7 @@ function display_category_summary($category_name,$category_info,$image_max_width
 function display_post_summary($header_level,$image_max_width,$image_max_height)
 {
     global $wpdb;
+    global $base_dir;
     global $base_url;
     global $home_ip_addr;
     global $show_author_in_post_summary;
@@ -269,9 +283,9 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     $slug = $row->post_name;
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
-    $featured_image = get_the_post_thumbnail();
-    if (!empty($featured_image)) {
-        print("<div>$featured_image</div>\n");
+    $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$image_type_3);
+    if (!empty($image_url)) {
+        print("<div><img src=\"$image_url\" /></div>\n");
     }
     print("</div>\n");
     print("<div class=\"post-text-holder\">");
@@ -297,7 +311,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
 
 //==============================================================================
 
-function display_post_content($header_level=1,$image_max_width=400,$image_max_height=400)
+function display_post_content($header_level=1,$show_image=true)
 {
     global $wpdb;
     $id = get_the_ID();
@@ -306,61 +320,13 @@ function display_post_content($header_level=1,$image_max_width=400,$image_max_he
     $post_date = date("d F Y", strtotime($post_date));
     echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
     print("<p>[Posted on: $post_date]</p>\n");
-    if (($image_max_width * $image_max_height) != 0) {
-        $featured_image = get_the_post_thumbnail();
-        $featured_image = adjust_featured_image_size($featured_image,$image_max_width,$image_max_height);
-        if (!empty($featured_image)) {
-            $featured_image = adjust_featured_image_size($featured_image,$image_max_width,$image_max_height);
-            print("<div class=\"right-aligned-image\">$featured_image</div>\n");
+    if ($show_image) {
+        $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$image_type_3);
+        if (!empty($image_url)) {
+            print("<div class=\"right-aligned-image\"><img src=\"$image_url\"></div>\n");
         }
     }
     echo get_content_part(0);
-}
-
-//==============================================================================
-
-function adjust_featured_image_size($image_spec,$max_width=200,$max_height=200)
-{
-    $matches = [];
-    if (preg_match('/width="[0-9]+"/',$image_spec,$matches)) {
-        $width_spec = $matches[0];
-        $tok = strtok($width_spec,'"');
-        $width = (int)strtok('"');
-    }
-    if (preg_match('/height="[0-9]+"/',$image_spec,$matches)) {
-        $height_spec = $matches[0];
-        $tok = strtok($height_spec,'"');
-        $height = (int)strtok('"');
-    }
-    if ((isset($width_spec)) && (isset($height_spec))) {
-        if ($width > $height) {
-            // Landscape
-            if ($width < $max_width) {
-                $new_width = $width;
-            }
-            else {
-                $new_width = $max_width;
-            }
-            $new_height = (int)($height * $new_width / $width);
-        }
-        else {
-            // Portrait
-            if ($height < $max_height) {
-                $new_height = $height;
-            }
-            else {
-                $new_height = $max_height;
-            }
-            $new_width = (int)($width * $new_height/ $height);
-        }
-        if ((isset($new_width)) && (isset($new_height))) {
-            $new_width_spec = "width=\"$new_width\"";
-            $new_height_spec = "height=\"$new_height\"";
-            $image_spec = str_replace($width_spec,$new_width_spec,$image_spec);
-            $image_spec = str_replace($height_spec,$new_height_spec,$image_spec);
-        }
-    }
-    return $image_spec;
 }
 
 //==============================================================================
@@ -851,7 +817,8 @@ class custom_categories_widget extends WP_Widget
         );
     }
 
-    public function widget( $args, $instance ) {
+    public function widget( $args, $instance )
+    {
         global $base_url;
         if (is_category()) {
             $category = get_queried_object();
@@ -905,7 +872,8 @@ class custom_categories_widget extends WP_Widget
         }
     }
 
-    public function form( $instance ) {
+    public function form( $instance )
+    {
         if ( isset( $instance[ 'title' ] ) ) {
             $title = $instance[ 'title' ];
         }
@@ -915,7 +883,8 @@ class custom_categories_widget extends WP_Widget
         // Functionality goes here
     }
 
-    public function update( $new_instance, $old_instance ) {
+    public function update( $new_instance, $old_instance )
+    {
         $instance = array();
         $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
         return $instance;
@@ -951,8 +920,9 @@ class custom_posts_widget extends WP_Widget
         );
     }
 
-    public function widget( $args, $instance ) {
-        global $base_url, $base_dir, $link_version, $local_site_dir, $theme_url;
+    public function widget( $args, $instance )
+    {
+        global $base_url, $base_dir, $link_version, $local_site_dir, $theme_url, $image_type_1;
         require_once("$base_dir/common_scripts/date_funct.php");
         $thumbnail_size = RECENT_POSTS_THUMBNAIL_SIZE;
         $title = 'Latest Posts';
@@ -991,12 +961,7 @@ class custom_posts_widget extends WP_Widget
             foreach ($templist as $post_name => $info) {
                 print("<table class=\"sidebar-post-link\"><tr>\n");
                 print("<td class=\"sidebar-post-link-col1\" width=\"$thumbnail_size"."px\">\n");
-                if (function_exists('url_to_static')) {
-                    $image_url = url_to_static($info[2]);
-                }
-                else {
-                    $image_url = $info[2];
-                }
+                $image_url = get_modified_image_url($info[2],$image_type_1);
                 print("<a href=\"$base_url/$post_name\"><img src=\"$image_url?v=$link_version\" width=\"$thumbnail_size"."px\" height=\"auto\" /></a><br />\n");
                 print("</td>\n");
                 print("<td class=\"sidebar-post-link-col2\">\n");
@@ -1013,7 +978,8 @@ class custom_posts_widget extends WP_Widget
         echo $args['after_widget'];
     }
 
-    public function form( $instance ) {
+    public function form( $instance )
+    {
         if ( isset( $instance[ 'title' ] ) ) {
             $title = $instance[ 'title' ];
         }
@@ -1023,7 +989,8 @@ class custom_posts_widget extends WP_Widget
         // Functionality goes here
     }
 
-    public function update( $new_instance, $old_instance ) {
+    public function update( $new_instance, $old_instance )
+    {
         $instance = array();
         $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
         return $instance;
@@ -1056,14 +1023,16 @@ class blog_home_widget extends WP_Widget
         );
     }
 
-    public function widget( $args, $instance ) {
+    public function widget( $args, $instance )
+    {
         global $base_url;
         echo $args['before_widget'];
         echo "<a href=\"$base_url/blog\"><button>Blog Home</button></a>";
         echo $args['after_widget'];
     }
 
-    public function form( $instance ) {
+    public function form( $instance )
+    {
         if ( isset( $instance[ 'title' ] ) ) {
             $title = $instance[ 'title' ];
         }
@@ -1073,7 +1042,8 @@ class blog_home_widget extends WP_Widget
         // Functionality goes here
     }
 
-    public function update( $new_instance, $old_instance ) {
+    public function update( $new_instance, $old_instance )
+    {
         $instance = array();
         $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
         return $instance;

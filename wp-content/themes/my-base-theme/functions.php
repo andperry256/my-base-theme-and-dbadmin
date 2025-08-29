@@ -275,6 +275,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     global $base_url;
     global $home_ip_addr;
     global $show_author_in_post_summary;
+    global $image_type_3;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_content = $row->post_content;
@@ -314,6 +315,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
 function display_post_content($header_level=1,$show_image=true)
 {
     global $wpdb;
+    global $image_type_3;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_date = substr($row->post_date,0,10);

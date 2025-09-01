@@ -804,6 +804,35 @@ function copyright_notice($owner,$start_year)
 
 //================================================================================
 /*
+Function get_modified_image_url
+
+This function is called to determine whether an image in the WP uploads directory
+has an equivalent image in a given subdirectory, and returns the URL of this in
+place of the original image URL.
+*/
+//================================================================================
+
+$image_type_1 = (defined('IMAGE_TYPE_1')) ? 'IMAGE_TYPE_1' : 'webp90';
+$image_type_3 = (defined('IMAGE_TYPE_3')) ? 'IMAGE_TYPE_3' : 'webp300';
+
+function get_modified_image_url($image_url,$type='webp300',$image_type='webp')
+{
+    global $base_dir, $base_url;
+    $image_path = str_replace($base_url,$base_dir,$image_url);
+    $file_ext = pathinfo($image_path,PATHINFO_EXTENSION);
+    $alt_image_path = str_replace('/uploads/',"/uploads/$type/",$image_path);
+    $alt_image_path = str_replace(".$file_ext",".$image_type",$alt_image_path);
+    if (is_file($alt_image_path)) {
+        $image_url = str_replace($base_dir,$base_url,$alt_image_path);
+    }
+    if (function_exists('url_to_static')) {
+        $image_url = url_to_static($image_url);
+    }
+    return $image_url;
+}
+
+//================================================================================
+/*
 Function load_codemirror
 
 This function is called to include the links for the CodeMirror library, if they

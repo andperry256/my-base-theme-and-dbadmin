@@ -154,27 +154,6 @@ add_action('login_head', 'wpb_remove_loginshake');
 
 //==============================================================================
 
-$image_type_1 = (defined('IMAGE_TYPE_1')) ? 'IMAGE_TYPE_1' : 'webp90';
-$image_type_3 = (defined('IMAGE_TYPE_3')) ? 'IMAGE_TYPE_1' : 'webp300';
-
-function get_modified_image_url($image_url,$type='webp300')
-{
-    global $base_dir, $base_url;
-    $image_path = str_replace($base_url,$base_dir,$image_url);
-    $file_ext = pathinfo($image_path,PATHINFO_EXTENSION);
-    $alt_image_path = str_replace('/uploads/',"/uploads/$type/",$image_path);
-    $alt_image_path = str_replace(".$file_ext",'.webp',$alt_image_path);
-    if (is_file($alt_image_path)) {
-        $image_url = str_replace($base_dir,$base_url,$alt_image_path);
-    }
-    if (function_exists('url_to_static')) {
-        $image_url = url_to_static($image_url);
-    }
-    return $image_url;
-}
-
-//==============================================================================
-
 function output_header_links()
 {
     global $base_url;

@@ -3,9 +3,9 @@
 if (!defined('IMAGE_FUNCT_DEFINED')):
 //================================================================================
 /*
-Function resize_image_to_webp
+Function resize_image
 
-This function converts an image file to webp with the option to resize the image.
+This function converts an image file to another format and/or resizes it.
 
 This function makes use of an external array $image_dimensions, which must be
 defined by the calling software. Each element is of the format:
@@ -18,7 +18,7 @@ size, then the image will be saved with no change in size.
 */
 //================================================================================
 
-function resize_image_to_webp($source_path, $destination_path, $type)
+function resize_image($source_path, $destination_path, $type, $image_type='webp')
 {
     global $image_dimensions;
 
@@ -71,11 +71,40 @@ function resize_image_to_webp($source_path, $destination_path, $type)
     }
     imagecopyresampled($new_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
 
-    // Save new image as a WebP file and free up memory
-    $result = imagewebp($new_image, $destination_path, 80);
+    // Save new image and free up memory
+    switch ($image_type) {
+        case 'jpg':
+            $result = imagejpeg($new_image, $destination_path, 80);
+            break;
+        case 'png':
+            $result = imagepng($new_image, $destination_path, -1);
+            break;
+        case 'webp':
+            $result = imagewebp($new_image, $destination_path, 80);
+            break;
+        default:
+            return false;
+    }
     imagedestroy($source_image);
     imagedestroy($new_image);
     return $result;
+}
+
+//================================================================================
+
+function resize_image_to_jpg($source_path, $destination_path, $type)
+{
+    return resize_image($source_path, $destination_path, $type,'jpg');
+}
+
+function resize_image_to_png($source_path, $destination_path, $type)
+{
+    return resize_image($source_path, $destination_path, $type,'png');
+}
+
+function resize_image_to_webp($source_path, $destination_path, $type)
+{
+    return resize_image($source_path, $destination_path, $type,'webp');
 }
 
 //================================================================================
@@ -87,8 +116,8 @@ site. It is responsible for maintaining sub-directories within the main WP uploa
 directory, each of which contains copies of all the image uploads, scaled to a
 specific dimension.
 
-The $image_dimensions array (see above description of resize_image_to_webp) must
-be defined by the calling software.
+The $image_dimensions array (see above description of resize_image) must be
+defined by the calling software.
 */
 //================================================================================
 
@@ -98,16 +127,37 @@ function update_wp_web_images()
     if (is_dir("$base_dir/wp-content/uploads") && (isset($image_dimensions))) {
         $exts = ['jpg'=>true, 'png'=>true, 'webp'=>true];
 
-        // Loop through entries in $image_dimensions.
-        //foreach ($image_dimensions as $type => $size) print("$type => $size\n");
+        /*
+        Loop through entries in $image_dimensions.
+        1. In the simplest case, $type will equate to the name of the required
+           subdirectory, and all images will be converted and copied there in
+           webp format.
+        2. The $type variable can have the suffix '__XXX' to apply a filter where
+           only files with name starting 'XXX_' are copied. This suffix will be
+           included in the created subdirectory name.
+        3. The $type variable can have the suffix '/<image-type>' to specify an
+           an alternative image type for the destination file. This suffix will
+           not be included in the created subdirectory name.
+        4. If 2 and 3 above both apply, then the suffix defined in 2 will precede
+           that defined in 3.
+        */
         foreach ($image_dimensions as $type => $size)  {
-            $pos = strpos($type,'__');
-            $filename_prefix = ($pos !== false) ? substr($type,$pos+2) : '';
+            $pos = strpos($type,'/');
+            if ($pos !== false) {
+                $image_type = substr($type,$pos+1);
+                $subdir = substr($type,0,$pos);
+            }
+            else {
+                $image_type = 'webp';
+                $subdir = $type;
+            }
+            $pos = strpos($subdir,'__');
+            $filename_prefix = ($pos !== false) ? substr($subdir,$pos+2) : '';
             $prefix_length = strlen($filename_prefix);
 
             // Create uploads sub-directory if not present.
-            if (!is_dir("$base_dir/wp-content/uploads/$type")) {
-                mkdir("$base_dir/wp-content/uploads/$type",0775);
+            if (!is_dir("$base_dir/wp-content/uploads/$subdir")) {
+                mkdir("$base_dir/wp-content/uploads/$subdir",0775);
             }
 
             /*
@@ -125,18 +175,18 @@ function update_wp_web_images()
                         ((empty($prefix_length)) || (substr($file_root,0,$prefix_length+1) == $filename_prefix.'_'))) {
 
                         // Create destination image if not present or source image is newer.
-                        $dest_path = "$base_dir/wp-content/uploads/$type/$file_root.webp";
+                        $dest_path = "$base_dir/wp-content/uploads/$subdir/$file_root.$image_type";
                         if ((!is_file($dest_path)) || (filemtime($source_path) > filemtime($dest_path))) {
-                            resize_image_to_webp($source_path, $dest_path, $type);
+                            resize_image($source_path, $dest_path, $type, $image_type);
                         }
                     }
                 }
             }
 
             // Delete any orphan files in the destination directory.
-            $dirlist = scandir("$base_dir/wp-content/uploads/$type");
+            $dirlist = scandir("$base_dir/wp-content/uploads/$subdir");
             foreach ($dirlist as $file) {
-                $dest_path = "$base_dir/wp-content/uploads/$type/$file";
+                $dest_path = "$base_dir/wp-content/uploads/$subdir/$file";
                 if (is_file($dest_path)) {
                     $source_found = false;
                     $file_root = pathinfo($dest_path,PATHINFO_FILENAME);

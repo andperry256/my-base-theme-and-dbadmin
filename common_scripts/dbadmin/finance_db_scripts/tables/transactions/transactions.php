@@ -456,7 +456,7 @@ class tables_transactions
         if ($bank_import_id != 0 ) {
             $where_clause = 'rec_id=?';
             $where_values = ['i',$bank_import_id];
-            $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'');
+            $query_result = mysqli_select_query($db,"_ctab_bank_import_$account",'*',$where_clause,$where_values,'');
             if (($row = mysqli_fetch_assoc($query_result)) &&
                 (($row['amount'] = $credit_amount) || ($row['amount'] = -$debit_amount))) {
                 $set_fields = 'reconciled';
@@ -468,7 +468,7 @@ class tables_transactions
                 $set_values = ['i',1];
                 $where_clause = 'rec_id=?';
                 $where_values = ['i',$bank_import_id];
-                mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
+                mysqli_update_query($db,"_ctab_bank_import_$account",$set_fields,$set_values,$where_clause,$where_values);
             }
             $set_fields = 'bank_import_id';
             $set_values = ['i',0];

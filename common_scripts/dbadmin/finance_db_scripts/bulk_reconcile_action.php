@@ -17,7 +17,7 @@ foreach ($_POST as $key => $dummy) {
         $bank_rec_id = (int)substr($key,4);
         $where_clause = 'rec_id=?';
         $where_values = ['i',$bank_rec_id];
-        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,''))) {
+        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,"_ctab_bank_import_$account",'*',$where_clause,$where_values,''))) {
             $match = find_matching_transaction($account,$row['date'],$row['amount']);
             if ($match > 0) {
                 $where_clause = 'account=? AND seq_no=?';
@@ -28,7 +28,7 @@ foreach ($_POST as $key => $dummy) {
                     $set_values = ['i',1];
                     $where_clause = 'rec_id=?';
                     $where_values = ['i',$bank_rec_id];
-                    mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
+                    mysqli_update_query($db,"_ctab_bank_import_$account",$set_fields,$set_values,$where_clause,$where_values);
                     $set_fields = 'reconciled';
                     $set_values = ['i',1];
                     $where_clause = 'account=? AND seq_no=?';

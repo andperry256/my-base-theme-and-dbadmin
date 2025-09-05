@@ -22,6 +22,17 @@ $query_result = mysqli_select_query($db,'accounts','*',$where_clause,$where_valu
 if ($row = mysqli_fetch_assoc($query_result)) {
     $account_type = $row['type'];
     $account_name = $row['name'];
+    $account_label = $row['label'];
+
+    // Create import table for the account if not present
+    $import_table = "_ctab_bank_import_$account_label";
+    $import_table_view = "_view_bank_import_$account_label";
+    $where_clause = 'table_name=?';
+    $where_values = ['s',$import_table];
+    if (mysqli_num_rows(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,'')) == 0) {
+        create_child_table_structure($import_table,'bank_import');
+        create_view_structure($import_table_view,$import_table,"rec_id IS NOT NULL ORDER BY rec_id DESC");
+    }
 }
 else {
     $account_name = '';  // This should not occur
@@ -45,46 +56,14 @@ if ((isset($_GET['message'])) && (!empty($_GET['message']))) {
     print($_GET['message']);
 }
 
-print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/reconcile_account_action.php\">\n");
+print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/reconcile_account_action.php\" enctype=\"multipart/form-data\">\n");
 print("<table cellpadding=\"10\">\n");
+print("<tr><td>Import transactions:</td><td><input type=\"file\" name=\"import_file\" id=\"import_file\" accept=\".csv\"></td></tr>\n");
 
 // Build select list for bank transactions
 print("<tr><td>Bank Transaction:</td><td>\n");
 print("<select name=\"bank_transaction\" onchange=\"selectTransaction('$account',this)\">\n");
 print("<option value=\"null\">Please select ...</option>\n");
-
-$dirlist = scandir($bank_import_dir);
-$csvlist = [];
-foreach ($dirlist as $file) {
-    if ((preg_match("/^Account_$account/",$file)) && (pathinfo($file,PATHINFO_EXTENSION) == 'csv')) {
-        $statement_date = substr(pathinfo($file,PATHINFO_FILENAME),strlen($account)+9);
-        $csvlist["#$statement_date"] = true;
-        krsort($csvlist);
-    }
-}
-$count = 0;
-foreach ($csvlist as $key => $value) {
-    if ($key == '#') {
-        // Single (continuous) CSV file
-        print("<option value=\"IMPORT\"");
-        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT")) {
-            print(" selected");
-        }
-        print(">Re-Import CSV</option>\n");
-    }
-    else {
-        // Separate (dated) CSV files
-        $date = substr($key,1);
-        print("<option value=\"IMPORT-$date\"");
-        if ((isset($_GET['selection'])) && ($_GET['selection'] == "IMPORT-$date")) {
-            print(" selected");
-        }
-        print(">Re-Import CSV [$date]</option>\n");
-    }
-    if (++$count >= 4) {
-        break;
-    }
-}
 print("<option value=\"BULK\"");
 if ((isset($_GET['selection'])) && ($_GET['selection'] == "BULK")) {
     print(" selected");
@@ -92,8 +71,8 @@ if ((isset($_GET['selection'])) && ($_GET['selection'] == "BULK")) {
 print(">Bulk Reconcile</option>\n");
 
 $where_clause = 'reconciled=0';
-$add_clause = 'ORDER BY rec_id DESC';
-$query_result = mysqli_select_query($db,'bank_import','*',$where_clause,[],$add_clause);
+$add_clause = 'ORDER BY rec_id ASC';
+$query_result = mysqli_select_query($db,$import_table,'*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result)) {
     $text = $row['date'].' | '.$row['description'].' | ';
     $amount = $row['amount'];
@@ -120,7 +99,6 @@ while ($row = mysqli_fetch_assoc($query_result)) {
     print(">$text</option>\n");
 }
 print("</select>\n");
-print("<br /><span class=\"small\">(N.B. To re-import CSV file, select this option on BOTH lists)</span></td></tr>\n");
 
 // Build select list for account transactions
 print("<tr><td>Account Transaction:</td><td>\n");
@@ -189,6 +167,7 @@ print("<tr><td>Update schedule:<br />&nbsp;</td><td><input type=\"checkbox\" nam
 print("<tr><td></td><td><input type=\"submit\" name=\"submitted\" value=\"Reconcile\"</td></tr>\n");
 print("</table>\n");
 print("<input type=\"hidden\" name=\"account\" value=\"$account\">\n");
+print("<input type=\"hidden\" name=\"account_label\" value=\"$account_label\">\n");
 print("<input type=\"hidden\" name=\"account_type\" value=\"$account_type\">\n");
 print("<input type=\"hidden\" name=\"site\" value=\"$local_site_dir\">\n");
 print("<input type=\"hidden\" name=\"relpath\" value=\"$relative_path\">\n");

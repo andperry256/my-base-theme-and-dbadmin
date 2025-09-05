@@ -3,14 +3,17 @@
 
 $local_site_dir = $_POST['site'];
 $account = $_POST['account'];
+$account_label = $_POST['account_label'];
 $account_type = $_POST['account_type'];
 $relative_path = $_POST['relpath'];
 $bank_transaction = $_POST['bank_transaction'];
 $account_transaction = $_POST['account_transaction'];
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+ini_set('display_errors','1');
 require("$base_dir/mysql_connect.php");
 require("$base_dir/common_scripts/date_funct.php");
 require("$db_admin_dir/common_funct.php");
+require("$db_admin_dir/view_funct.php");
 require("$custom_pages_path/$relative_path/db_funct.php");
 require("finance_funct.php");
 $db = finance_db_connect();
@@ -30,54 +33,60 @@ else {
 }
 $account_seq_no = strtok($account_transaction,'[');
 $account_amount = strtok(']');
-if ((substr($bank_transaction,0,6) == 'IMPORT') && ($account_transaction == 'IMPORT')) {
-    // Populate bank import table from CSV file
-    mysqli_delete_query($db,'bank_import','1',[]);
-    $statement_date = substr($bank_transaction,7);
-    $import_data = [];
-    $import_data = empty($statement_date)
-        ? file("$bank_import_dir/Account_$account.csv")
-        : file("$bank_import_dir/Account_$account"."_$statement_date.csv");
-    $first_line_skipped = false;
-    foreach ($import_data as $line) {
-        if (!$first_line_skipped) {
-            $first_line_skipped = true;
-        }
-        else {
-            $line_elements = [];
-            $line_elements = str_getcsv($line,',','"');
-            $date = $line_elements[0];
-            $day = substr($date,0,2);
-            $month = substr($date,3,2);
-            $year = substr($date,6,4);
-            $mysql_date = "$year-$month-$day";
-            if ($account_type == 'bank') {
-                $description = $line_elements[4];
-                $debit_amount = $line_elements[5];
-                $credit_amount = $line_elements[6];
-                if (!empty($debit_amount)) {
-                    $amount = -$debit_amount;
+$import_table = "_ctab_bank_import_$account_label";
+
+$source_file = basename($_FILES['import_file']['name']);
+if (!empty($source_file)) {
+
+    // Add to bank import table from CSV file
+    if (strtolower(pathinfo($source_file,PATHINFO_EXTENSION)) == 'csv') {
+        $target_file = "$base_dir/admin_data/finances/bank_import_$account_label.csv";
+        if (move_uploaded_file($_FILES['import_file']['tmp_name'], $target_file)) {
+
+            // Load CSV into array, remove header line and sort into ascending chronological order.
+            $import_data = file($target_file);
+            unset($import_data[0]);
+            krsort($import_data);
+
+            foreach ($import_data as $line) {
+
+                // Extract fields from line.
+                $raw_data = trim($line);
+                $line_elements = str_getcsv($line,',','"');
+                $date = $line_elements[0];
+                $day = substr($date,0,2);
+                $month = substr($date,3,2);
+                $year = substr($date,6,4);
+                $mysql_date = "$year-$month-$day";
+                if ($account_type == 'bank') {
+                    $description = $line_elements[4];
+                    $debit_amount = $line_elements[5];
+                    $credit_amount = $line_elements[6];
+                    if (!empty($debit_amount)) {
+                        $amount = -$debit_amount;
+                    }
+                    elseif (!empty($credit_amount)) {
+                        $amount = $credit_amount;
+                    }
+                    $balance = $line_elements[7];
                 }
-                elseif (!empty($credit_amount)) {
-                    $amount = $credit_amount;
+                elseif ($account_type == 'credit-card') {
+                    $description = $line_elements[3];
+                    $amount = $line_elements[4];
+                    $amount = - $amount;
+                    $balance = 0;
                 }
-                $balance = $line_elements[7];
+                $description = substr($description,0,31);
+
+                //Add record to import table if not already present.
+                $fields = 'raw_data,date,description,amount,balance';
+                $values = ['s',$raw_data,'s',$mysql_date,'s',$description,'d',$amount,'d',$balance];
+                $where_clause = 'raw_data=?';
+                $where_values = ['s',$raw_data];
+                mysqli_conditional_insert_query($db,$import_table,$fields,$values,$where_clause,$where_values);
             }
-            elseif ($account_type == 'credit-card') {
-                $description = $line_elements[3];
-                $amount = $line_elements[4];
-                $amount = - $amount;
-                $balance = 0;
-            }
-            $description = substr($description,0,31);
-            $fields = 'date,description,amount,balance';
-            $values = ['s',$mysql_date,'s',$description,'d',$amount,'d',$balance];
-            mysqli_insert_query($db,'bank_import',$fields,$values);
         }
     }
-}
-elseif ((substr($bank_transaction,0,6) == 'IMPORT') || ($account_transaction == 'IMPORT')) {
-    // No action
 }
 elseif($bank_transaction == 'BULK') {
     header("Location: $base_url/$relative_path/?-action=bulk_reconcile&site=$local_site_dir&account=$account");
@@ -89,13 +98,13 @@ elseif ($account_transaction == 'NONE') {
     $set_values = ['i',1];
     $where_clause = 'rec_id=?';
     $where_values = ['i',$bank_rec_id];
-    mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
+    mysqli_update_query($db,$import_table,$set_fields,$set_values,$where_clause,$where_values);
     $user_message = "<p>Bank transaction discarded.</p>\n";
 }
 elseif ($account_transaction == 'NEW') {
     $where_clause = 'rec_id=?';
     $where_values = ['i',$bank_rec_id];
-    $query_result = mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'');
+    $query_result = mysqli_select_query($db,$import_table,'*',$where_clause,$where_values,'');
     if ($row = mysqli_fetch_assoc($query_result)) {
         // Create new transaction. Update payee if regex match is found.
         // N.B. Multiple matches can be made against a given payee by creating additional table entries
@@ -138,12 +147,12 @@ else {
         $where_clause = 'rec_id=?';
         $where_values = ['i',$bank_rec_id];
         if ((is_numeric($bank_rec_id)) &&
-            ($row = mysqli_fetch_assoc(mysqli_select_query($db,'bank_import','*',$where_clause,$where_values,'')))) {
+            ($row = mysqli_fetch_assoc(mysqli_select_query($db,$import_table,'*',$where_clause,$where_values,'')))) {
             $set_fields = 'reconciled';
             $set_values = ['i',1];
             $where_clause = 'rec_id=?';
             $where_values = ['i',$bank_rec_id];
-            mysqli_update_query($db,'bank_import',$set_fields,$set_values,$where_clause,$where_values);
+            mysqli_update_query($db,$import_table,$set_fields,$set_values,$where_clause,$where_values);
             $set_fields = 'reconciled';
             $set_values = ['i',1];
             $where_clause = 'seq_no=?';

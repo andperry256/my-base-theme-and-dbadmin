@@ -34,6 +34,7 @@ foreach ($_POST as $key => $dummy) {
                     $where_clause = 'account=? AND seq_no=?';
                     $where_values = ['s',$account,'i',$match];
                     mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
+                    update_account_balances($account,$row2['date']);
                 }
             }
             else {

@@ -9,7 +9,6 @@ $relative_path = $_POST['relpath'];
 $bank_transaction = $_POST['bank_transaction'];
 $account_transaction = $_POST['account_transaction'];
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-ini_set('display_errors','1');
 require("$base_dir/mysql_connect.php");
 require("$base_dir/common_scripts/date_funct.php");
 require("$db_admin_dir/common_funct.php");
@@ -34,6 +33,8 @@ else {
 $account_seq_no = strtok($account_transaction,'[');
 $account_amount = strtok(']');
 $import_table = "_ctab_bank_import_$account_label";
+
+// ==================== Transaction Import ====================
 
 $source_file = basename($_FILES['import_file']['name']);
 if (!empty($source_file)) {
@@ -62,18 +63,22 @@ if (!empty($source_file)) {
                     $description = $line_elements[4];
                     $debit_amount = $line_elements[5];
                     $credit_amount = $line_elements[6];
-                    if (!empty($debit_amount)) {
+                    if ((is_numeric($debit_amount)) && (!empty($debit_amount))) {
                         $amount = -$debit_amount;
                     }
-                    elseif (!empty($credit_amount)) {
+                    elseif ((is_numeric($credit_amount)) && (!empty($credit_amount))) {
                         $amount = $credit_amount;
+                    }
+                    else {
+                        // This should not occur
+                        $amount = 0;
                     }
                     $balance = $line_elements[7];
                 }
                 elseif ($account_type == 'credit-card') {
                     $description = $line_elements[3];
                     $amount = $line_elements[4];
-                    $amount = - $amount;
+                    $amount = (is_numeric($amount)) ? - $amount : 0;
                     $balance = 0;
                 }
                 $description = substr($description,0,31);
@@ -88,10 +93,17 @@ if (!empty($source_file)) {
         }
     }
 }
-elseif($bank_transaction == 'BULK') {
+
+// ==================== Bulk Reconcile ====================
+
+elseif ($bank_transaction == 'BULK') {
+    // Load action screen for bulk reconcile.
     header("Location: $base_url/$relative_path/?-action=bulk_reconcile&site=$local_site_dir&account=$account");
     exit;
 }
+
+// ==================== Discard Bank Transaction ====================
+
 elseif ($account_transaction == 'NONE') {
     // Bank transaction not to be matched
     $set_fields = 'reconciled';
@@ -101,6 +113,9 @@ elseif ($account_transaction == 'NONE') {
     mysqli_update_query($db,$import_table,$set_fields,$set_values,$where_clause,$where_values);
     $user_message = "<p>Bank transaction discarded.</p>\n";
 }
+
+// ==================== New Transaction ====================
+
 elseif ($account_transaction == 'NEW') {
     $where_clause = 'rec_id=?';
     $where_values = ['i',$bank_rec_id];
@@ -134,66 +149,76 @@ elseif ($account_transaction == 'NEW') {
         exit;
     }
 }
-else {
-    if (($bank_transaction == 'null') || ($account_transaction == 'null')) {
+
+// ==================== No Action ====================
+
+elseif (($bank_transaction == 'null') || ($account_transaction == 'null')) {
         $user_message = "<p>No action specified.</p>\n";
-    }
-    elseif ((round($bank_amount,2) != round($account_amount,2)) && (!isset($_POST['auto_adjust'])) && (!isset($_POST['update_schedule']))) {
-        // Non-matching amounts
-        $user_message = "<p class=\"error-text\"><b>ERROR</b> - Attempt to reconcile non-matching amounts.</p>\n";
-    }
-    else {
-        // Transaction to be reconciled
+}
+
+// ==================== Non-matching Amounts ====================
+
+elseif ((round($bank_amount,2) != round($account_amount,2)) && (!isset($_POST['auto_adjust'])) && (!isset($_POST['update_schedule']))) {
+    $user_message = "<p class=\"error-text\"><b>ERROR</b> - Attempt to reconcile non-matching amounts.</p>\n";
+}
+
+// ==================== Reconcile Transaction ====================
+
+else {
+    // Transaction to be reconciled
+    $where_clause = 'rec_id=?';
+    $where_values = ['i',$bank_rec_id];
+    if ((is_numeric($bank_rec_id)) &&
+        ($row = mysqli_fetch_assoc(mysqli_select_query($db,$import_table,'*',$where_clause,$where_values,'')))) {
+        $set_fields = 'reconciled';
+        $set_values = ['i',1];
         $where_clause = 'rec_id=?';
         $where_values = ['i',$bank_rec_id];
-        if ((is_numeric($bank_rec_id)) &&
-            ($row = mysqli_fetch_assoc(mysqli_select_query($db,$import_table,'*',$where_clause,$where_values,'')))) {
-            $set_fields = 'reconciled';
-            $set_values = ['i',1];
-            $where_clause = 'rec_id=?';
-            $where_values = ['i',$bank_rec_id];
-            mysqli_update_query($db,$import_table,$set_fields,$set_values,$where_clause,$where_values);
-            $set_fields = 'reconciled';
-            $set_values = ['i',1];
+        mysqli_update_query($db,$import_table,$set_fields,$set_values,$where_clause,$where_values);
+        $set_fields = 'reconciled';
+        $set_values = ['i',1];
+        $where_clause = 'seq_no=?';
+        $where_values = ['i',$account_seq_no];
+        mysqli_update_query($db,"_view_account_$account",$set_fields,$set_values,$where_clause,$where_values);
+        if ((isset($_POST['auto_adjust'])) || (isset($_POST['update_schedule']))) {
+            // Change register amount to match bank transaction
+            $set_fields = 'credit_amount,debit_amount';
+            $set_values = ['d',$credit_amount,'d',$debit_amount];
             $where_clause = 'seq_no=?';
             $where_values = ['i',$account_seq_no];
             mysqli_update_query($db,"_view_account_$account",$set_fields,$set_values,$where_clause,$where_values);
-            if ((isset($_POST['auto_adjust'])) || (isset($_POST['update_schedule']))) {
-                // Change register amount to match bank transaction
-                $set_fields = 'credit_amount,debit_amount';
-                $set_values = ['d',$credit_amount,'d',$debit_amount];
+            if (isset($_POST['update_schedule'])) {
+                // Update associated scheduled transaction
                 $where_clause = 'seq_no=?';
                 $where_values = ['i',$account_seq_no];
-                mysqli_update_query($db,"_view_account_$account",$set_fields,$set_values,$where_clause,$where_values);
-                if (isset($_POST['update_schedule'])) {
-                    // Update associated scheduled transaction
-                    $where_clause = 'seq_no=?';
-                    $where_values = ['i',$account_seq_no];
-                    $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
-                    if ($row2 = mysqli_fetch_assoc($query_result2)) {
-                        $payee = $row2['payee'];
-                        $set_fields = 'credit_amount,debit_amount';
-                        $set_values = ['d',$credit_amount,'d',$debit_amount];
-                        $where_clause = "account=? AND payee=? AND sched_freq<>'#'";
-                        $where_values = ['s',$account,'s',$payee];
-                        mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
-                    }
+                $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
+                if ($row2 = mysqli_fetch_assoc($query_result2)) {
+                    $payee = $row2['payee'];
+                    $set_fields = 'credit_amount,debit_amount';
+                    $set_values = ['d',$credit_amount,'d',$debit_amount];
+                    $where_clause = "account=? AND payee=? AND sched_freq<>'#'";
+                    $where_values = ['s',$account,'s',$payee];
+                    mysqli_update_query($db,'transactions',$set_fields,$set_values,$where_clause,$where_values);
                 }
             }
-            $where_clause = 'seq_no=?';
-            $where_values = ['i',$account_seq_no];
-            $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
-            if ($row2 = mysqli_fetch_assoc($query_result2)) {
-                update_account_balances($account,$row2['date']);
-            }
-            $add_clause = 'ORDER BY date DESC, seq_no DESC LIMIT 1';
-            $query_result2 = mysqli_select_query($db,"_view_account_$account",'*','',[],$add_clause);
-            if ($row2 = mysqli_fetch_assoc($query_result2)) {
-                $user_message = "<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['reconciled_balance']}</p>\n";
-            }
+        }
+        $where_clause = 'seq_no=?';
+        $where_values = ['i',$account_seq_no];
+        $query_result2 = mysqli_select_query($db,"_view_account_$account",'*',$where_clause,$where_values,'');
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
+            update_account_balances($account,$row2['date']);
+        }
+        $add_clause = 'ORDER BY date DESC, seq_no DESC LIMIT 1';
+        $query_result2 = mysqli_select_query($db,"_view_account_$account",'*','',[],$add_clause);
+        if ($row2 = mysqli_fetch_assoc($query_result2)) {
+            $user_message = "<p>Transaction reconciled. Bank balance = $bank_balance. Register balance = {$row2['reconciled_balance']}</p>\n";
         }
     }
 }
+
+// ==================== End of Main Options ====================
+
+// Reload main reconcile screen.
 $message = urlencode($user_message);
 header("Location: $base_url/$relative_path/?-action=reconcile_account&-account=$account&message=$message");
 exit;

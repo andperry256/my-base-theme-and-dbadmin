@@ -1094,10 +1094,9 @@ blog-nav-table {
     text-align: center;
 }
 .blog-nav-col2 {
-    width: 30%;
-}
-.blog-nav-col3 {
+    width: 10.0em;
     text-align: center;
+    background-color: #f4f4f4;
 }
 a.cat-nav-link {
     text-decoration: none;

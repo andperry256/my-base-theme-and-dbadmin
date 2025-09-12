@@ -201,6 +201,67 @@ function authenticate_post($slug,$use_overriding_access_level=false)
 
 //==============================================================================
 
+function get_category_links($post_id)
+{
+    $post_categories = get_the_category($post_id);
+    if (empty($post_categories)) {
+        return '';
+    }
+
+    /*
+    Build array of categories associated with the post. This includes an element
+    '#' which acts as the main entry point to the hierarchy. Initialise the parent
+    for each element to '#'. This will be overwritten later as required.
+    */
+    $categories = ['#' => []];
+    foreach ($post_categories as $category) {
+        $slug = $category->slug;
+        $categories[$slug] = [];
+        $categories[$slug]['id'] = $category->term_id;
+        $categories[$slug]['name'] = $category->name;
+        $categories[$slug]['parent'] = '#';
+        $categories[$slug]['children'] = [];
+    }
+
+    // Loop through array and create parent-child links.
+    foreach ($categories as $slug => $data ) {
+        if (!empty($data['id'])) {
+            $hierarchy = explode('/',get_category_parents($data['id'], false, '/', true));
+            if (!empty($hierarchy)) {
+                $parent = isset($hierarchy[count($hierarchy)-3]) ? $hierarchy[count($hierarchy)-3] : '#';
+                if (isset($categories[$parent])) {
+                    $categories[$slug]['parent'] = $parent;
+                    $categories[$parent]['children'][$slug] = true;
+                }
+            }
+        }
+    }
+
+    return list_categories_from_hierarchy('#',$categories);
+}
+
+function list_categories_from_hierarchy($slug,$categories)
+{
+    global $base_url;
+    $result = '';
+    if ($slug != '#') {
+        // Add category link to list
+        $name = str_replace(' ','&nbsp;',$categories[$slug]['name']);
+        $result .= "[<a href=\"$base_url/category/$slug\">$name</a>]&nbsp; ";
+    }
+
+    // Process child categories
+    if (!empty($categories[$slug]['children'])) {
+        ksort($categories[$slug]['children']);
+        foreach ($categories[$slug]['children'] as $slug2 => $dummy) {
+            $result .= list_categories_from_hierarchy($slug2,$categories);
+        }
+    }
+    return trim($result);
+}
+
+//==============================================================================
+
 function get_top_level_category_for_post()
 {
     global $base_url;
@@ -270,14 +331,15 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     print("</div>\n");
     print("<div class=\"post-text-holder\">");
     echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
-    print("<p>[Posted on: $post_date");
+    print("<p>Posted on: $post_date");
     if (!empty($show_author_in_post_summary)) {
         $author = $row->post_author;
         if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
             print(" by {$row2->display_name}");
         }
     }
-    print("]</p>\n");
+    print("<br /.>\n");
+    print("Posted in: ".get_category_links($id)."</p>\n");
     the_content();
     if (strpos($post_content,'<!--more-->') === false) {
         print("<a href=\"$base_url/$slug\">Go to Post</a>\n");
@@ -295,12 +357,19 @@ function display_post_content($header_level=1,$show_image=true)
 {
     global $wpdb;
     global $image_type_3;
+    global $show_author_in_post_summary;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_date = substr($row->post_date,0,10);
     $post_date = date("d F Y", strtotime($post_date));
     echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
-    print("<p>[Posted on: $post_date]</p>\n");
+    print("<p>Posted on: $post_date");
+    $author = $row->post_author;
+    if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
+        print(" by {$row2->display_name}");
+    }
+    print("<br /.>\n");
+    print("Posted in: ".get_category_links($id)."</p>\n");
     if ($show_image) {
         $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$image_type_3);
         if (!empty($image_url)) {
@@ -363,27 +432,7 @@ function navigation_links($option,$filter='category',$filtered_name='')
         print("<td class=blog-nav-col1><img align=\"absmiddle\" src=\"$theme_url/blog_nav_backward_greyed.svg\" class=\"blog-nav-button\"></td>");
         print("<td class=blog-nav-col2></td>");
     }
-    print("<td class=blog-nav-col3>");
-    switch ($filter) {
-        case 'category':
-            $cat_name_list = '';
-            $categories = get_the_category();
-            foreach ($categories as $category) {
-                $cat_name_list .= "<a href=\"$base_url/category/{$category->slug}\" class=\"cat-nav-link\">{$category->name}</a> |";
-                $cat_list_array[$category->name] = true;
-            }
-            $cat_name_list = rtrim($cat_name_list,'| ');
-            print("$cat_name_list");
-            break;
-
-        case 'author':
-            $row = $wpdb->get_row("SELECT * FROM wp_users WHERE user_nicename='$filtered_name'");
-            $display_name = $row->display_name;
-            print("<a href=\"$base_url/author/$filtered_name\" class=\"cat-nav-link\">$display_name</a>");
-            break;
-
-    }
-    print("</td>");
+    print("<td class=blog-nav-col3>&nbsp;</td>");
     if (!empty($nav_info[1][1])) {
         print("<td class=blog-nav-col2><a class=blog-nav-link href=\"{$nav_info[1][1]}\">{$nav_info[1][2]}</a></td>");
         print("<td class=blog-nav-col1><a href=\"{$nav_info[1][1]}\"><img align=\"absmiddle\" src=\"$theme_url/blog_nav_forward.svg\" class=\"blog-nav-button\"></a></td>");

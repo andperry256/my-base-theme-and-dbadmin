@@ -22,7 +22,7 @@ get_header();
         $query_result = mysqli_query($db,"SELECT * FROM wp_users WHERE ID=$author");
         if ($row = mysqli_fetch_assoc($query_result)) {
             print("<h1>Author: {$row['display_name']}</h1>\n");
-            
+
             // Determine the user access level
             if (session_var_is_set(SV_ACCESS_LEVEL)) {
                 $user_access_level = get_session_var(SV_ACCESS_LEVEL);
@@ -30,9 +30,8 @@ get_header();
             else {
                 $user_access_level = DEFAULT_ACCESS_LEVEL;
             }
-            
 
-            navigation_links('multi','author',$row['user_nicename']);
+            navigation_links('multi');
             // Set up the parameters for the main loop query
             $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
             $args = [ 'author' => $author,
@@ -51,7 +50,7 @@ get_header();
                     display_post_summary(2,200,200);
                     print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
                 }
-                navigation_links('multi','author',$row['user_nicename']);
+                navigation_links('multi');
             }
             else {
                 get_template_part( 'template-parts/content', 'none' );

@@ -29,9 +29,8 @@ get_header();
         else {
             $user_access_level = DEFAULT_ACCESS_LEVEL;
         }
-        
 
-        navigation_links('multi','');
+        navigation_links('multi');
         // Set up the parameters for the main loop query
         $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
         $args = [ 'paged' => $paged,
@@ -49,7 +48,7 @@ get_header();
                 display_post_summary(2,200,200);
                 print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
             }
-            navigation_links('multi','');
+            navigation_links('multi');
         }
         else {
             get_template_part( 'template-parts/content', 'none' );

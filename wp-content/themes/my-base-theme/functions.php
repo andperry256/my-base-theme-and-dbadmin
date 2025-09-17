@@ -23,6 +23,21 @@
 if ( ! function_exists( 'my_base_theme_setup' ) ) :
 //================================================================================
 
+$default_thumbnail_image_types = [
+    'small' => 'webp90',
+    'medium' => 'webp128',
+    'large' => 'webp192',
+    'full' => 'webp300',
+];
+$default_thumbnail_image_widths = [
+    'small' => 90,
+    'medium' => 128,
+    'large' => 192,
+    'full' => 300,
+];
+
+//================================================================================
+
 function my_base_theme_setup()
 {
     /*
@@ -157,7 +172,7 @@ add_action('login_head', 'wpb_remove_loginshake');
 function output_header_links()
 {
     global $base_url;
-    global $image_type_1;
+    global $small_thumbnail_image_type;
     $category_list = [];
     $categories = get_categories();
     foreach ($categories as $cat) {
@@ -181,7 +196,7 @@ function output_header_links()
         print("<div class=\"category-icon-link\">");
         print("<a href=\"$category_url\">");
         $image_info = wp_get_attachment_image_src($info[1],[480,320]);
-        $image_url = get_modified_image_url($image_info[0],$image_type_1);
+        $image_url = get_modified_image_url($image_info[0],$small_thumbnail_image_type);
         print("<img src=\"$image_url\" class=\"category-icon-link-image\" /><br />");
         print("$name</a></div>");
     }
@@ -288,13 +303,13 @@ function get_top_level_category_for_post()
 
 function display_category_summary($category_name,$category_info,$image_max_width,$image_max_height)
 {
-    global $base_url, $link_version, $image_type_3;
+    global $base_url, $link_version, $full_thumbnail_image_type;
     $category_url = "$base_url/category/{$category_info[0]}";
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
     if (!empty($category_info[1])) {
         $image_info = wp_get_attachment_image_src($category_info[1],[$image_max_width,$image_max_height]);
-        $image_url = get_modified_image_url($image_info[0],$image_type_3);
+        $image_url = get_modified_image_url($image_info[0],$full_thumbnail_image_type);
         print("<a href=\"$category_url\"><img src=\"$image_url?v=$link_version\"/></a>\n");
     }
     print("</div>\n");
@@ -315,7 +330,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     global $base_url;
     global $home_ip_addr;
     global $show_author_in_post_summary;
-    global $image_type_3;
+    global $full_thumbnail_image_type;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_content = $row->post_content;
@@ -324,7 +339,7 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     $slug = $row->post_name;
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
-    $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$image_type_3);
+    $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$full_thumbnail_image_type);
     if (!empty($image_url)) {
         print("<div><img src=\"$image_url\" /></div>\n");
     }
@@ -353,10 +368,49 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
 
 //==============================================================================
 
+function display_short_post_summary($image_max_width,$image_max_height)
+{
+    global $wpdb;
+    global $base_dir;
+    global $base_url;
+    global $home_ip_addr;
+    global $show_author_in_post_summary;
+    global $medium_thumbnail_image_type;
+    $id = get_the_ID();
+    $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
+    $post_date = substr($row->post_date,0,10);
+    $post_date = date("d F Y", strtotime($post_date));
+    $slug = $row->post_name;
+    print("<div class=\"post-list-item\">\n");
+    print("<div class=\"post-image-holder\">");
+    $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$medium_thumbnail_image_type);
+    if (!empty($image_url)) {
+        print("<div><img src=\"$image_url\" /></div>\n");
+    }
+    print("</div>\n");
+    print("<div class=\"post-text-holder\">");
+    echo "<strong>"; the_title(); echo "</strong>\n";
+    echo("<div class=\"halfspace\">&nbsp;</div>");
+    print("Posted on: $post_date");
+    if (!empty($show_author_in_post_summary)) {
+        $author = $row->post_author;
+        if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
+            print(" by {$row2->display_name}");
+        }
+    }
+    print("<br />Posted in: ".get_category_links($id)."<br />\n");
+    echo("<div class=\"halfspace\">&nbsp;</div>");
+    print("<a href=\"$base_url/$slug\">View Post</a>\n");
+    print("</div>\n");
+    print("</div>\n");
+}
+
+//==============================================================================
+
 function display_post_content($header_level=1,$show_image=true)
 {
     global $wpdb;
-    global $image_type_3;
+    global $full_thumbnail_image_type;
     global $show_author_in_post_summary;
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
@@ -371,7 +425,7 @@ function display_post_content($header_level=1,$show_image=true)
     print("<br /.>\n");
     print("Posted in: ".get_category_links($id)."</p>\n");
     if ($show_image) {
-        $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$image_type_3);
+        $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$full_thumbnail_image_type);
         if (!empty($image_url)) {
             print("<div class=\"right-aligned-image\"><img src=\"$image_url\"></div>\n");
         }
@@ -410,7 +464,6 @@ function navigation_links($option,$filter='category',$filtered_name='')
         ['nav-previous','',''],
         ['nav-next','','']
     ];
-    $cat_list_array = [];
     foreach ([0,1] as $i) {
         $pos1 = strpos($navigation,"<div class=\"{$nav_info[$i][0]}\">");
         if ($pos1 !== false) {
@@ -447,6 +500,7 @@ function navigation_links($option,$filter='category',$filtered_name='')
 
 //==============================================================================
 
+//========== THIS FUNCTION IS DEPRECATED ==========
 function pagination_links($page_count)
 {
     if (function_exists('wp_paginate')) {
@@ -952,7 +1006,7 @@ class custom_posts_widget extends WP_Widget
 
     public function widget( $args, $instance )
     {
-        global $base_url, $base_dir, $link_version, $local_site_dir, $theme_url, $image_type_1;
+        global $base_url, $base_dir, $link_version, $local_site_dir, $theme_url, $small_thumbnail_image_type;
         require_once("$base_dir/common_scripts/date_funct.php");
         $thumbnail_size = RECENT_POSTS_THUMBNAIL_SIZE;
         $title = 'Latest Posts';
@@ -991,7 +1045,7 @@ class custom_posts_widget extends WP_Widget
             foreach ($templist as $post_name => $info) {
                 print("<table class=\"sidebar-post-link\"><tr>\n");
                 print("<td class=\"sidebar-post-link-col1\" width=\"$thumbnail_size"."px\">\n");
-                $image_url = get_modified_image_url($info[2],$image_type_1);
+                $image_url = get_modified_image_url($info[2],$small_thumbnail_image_type);
                 print("<a href=\"$base_url/$post_name\"><img src=\"$image_url?v=$link_version\" width=\"$thumbnail_size"."px\" height=\"auto\" /></a><br />\n");
                 print("</td>\n");
                 print("<td class=\"sidebar-post-link-col2\">\n");

@@ -812,9 +812,6 @@ place of the original image URL.
 */
 //================================================================================
 
-$image_type_1 = (defined('IMAGE_TYPE_1')) ? 'IMAGE_TYPE_1' : 'webp90';
-$image_type_3 = (defined('IMAGE_TYPE_3')) ? 'IMAGE_TYPE_3' : 'webp300';
-
 function get_modified_image_url($image_url,$type='webp300',$image_type='webp')
 {
     global $base_dir, $base_url;

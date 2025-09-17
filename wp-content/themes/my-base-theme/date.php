@@ -33,8 +33,9 @@ get_header();
         navigation_links('multi');
         // Set up the parameters for the main loop query
         $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+        $posts_per_page = $_GET['paginate'] ?? POSTS_PER_ARCHIVE_PAGE_STANDARD;
         $args = [ 'paged' => $paged,
-                  'posts_per_page' => POSTS_PER_ARCHIVE_PAGE_STANDARD,
+                  'posts_per_page' => $posts_per_page,
                   'meta_key' => 'access_level',
                   'meta_value' => $user_access_level,
                   'meta_compare' => '<=',
@@ -45,7 +46,12 @@ get_header();
         if ( $local_query->have_posts() ) {
             while ( $local_query->have_posts() ) {
                 $local_query->the_post();
-                display_post_summary(2,200,200);
+                if  ($use_short_post_summary_for_date) {
+                    display_short_post_summary(128,128);
+                }
+                else {
+                    display_post_summary(2,200,200);
+                }
                 print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
             }
             navigation_links('multi');

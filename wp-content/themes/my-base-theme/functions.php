@@ -22,19 +22,42 @@
 //================================================================================
 if ( ! function_exists( 'my_base_theme_setup' ) ) :
 //================================================================================
+/*
+The following variable/array declarations will not override any existing site
+specific declarations, but may themselves be overridden by any alternative
+declarations that are made on a per site basis. The declarations here therefore
+act as default settings.
+*/
+//================================================================================
 
-$default_thumbnail_image_types = [
-    'small' => 'webp90',
-    'medium' => 'webp128',
-    'large' => 'webp192',
-    'full' => 'webp300',
-];
-$default_thumbnail_image_widths = [
-    'small' => 90,
-    'medium' => 128,
-    'large' => 192,
-    'full' => 300,
-];
+if (!isset($thumnail_image_types)) {
+    $thumbnail_image_types = [
+        'small' => 'webp90',
+        'medium' => 'webp128',
+        'large' => 'webp192',
+        'full' => 'webp300',
+    ];
+}
+if (!isset($thumbnail_image_widths)) {
+    $thumbnail_image_widths = [
+        'small' => 90,
+        'medium' => 128,
+        'large' => 192,
+        'full' => 300,
+    ];
+}
+if (!isset($use_short_post_summary_for_category)) {
+    $use_short_post_summary_for_category = false;
+}
+if (!isset($use_short_post_summary_for_home)) {
+    $use_short_post_summary_for_home = true;
+}
+if (!isset($use_short_post_summary_for_author)) {
+    $use_short_post_summary_for_author = true;
+}
+if (!isset($use_short_post_summary_for_date)) {
+    $use_short_post_summary_for_date = true;
+}
 
 //================================================================================
 

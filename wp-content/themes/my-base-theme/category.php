@@ -14,7 +14,7 @@ get_header();
     <?php output_header_links(); ?>
     <main id="main-no-background" class="site-main" role="main">
         <?php
-        $full_thumbnail_image_type = $thumbnail_image_types['full'] ?? $default_thumbnail_image_types['full'];
+        $full_thumbnail_image_type = $thumbnail_image_types['full'];
         $category = get_queried_object();
         $own_id = $category->term_id;
         $own_slug = $category->slug;
@@ -75,9 +75,11 @@ get_header();
 
             // Set up the parameters for the main loop query
             $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+            $posts_per_page = $_GET['paginate'] ?? POSTS_PER_ARCHIVE_PAGE_STANDARD;
             $args = [
                 'cat' => $own_id,
                 'paged' => $paged,
+                'posts_per_page' => $posts_per_page,
                 [
                     'key' => 'access_level',
                     'value' => $user_access_level,
@@ -91,7 +93,12 @@ get_header();
             if ( $local_query->have_posts() ) {
                 while ( $local_query->have_posts() ) {
                     $local_query->the_post();
-                    display_post_summary(2,200,200);
+                    if  ($use_short_post_summary_for_category) {
+                        display_short_post_summary(128,128);
+                    }
+                    else {
+                        display_post_summary(2,200,200);
+                    }
                     print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
                 }
                 navigation_links('multi');

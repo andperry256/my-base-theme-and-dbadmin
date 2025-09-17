@@ -16,8 +16,8 @@ get_header();
 <div id="primary" class="content-area">
     <main id="main" class="blog-main" role="main">
         <?php
-        $medium_thumbnail_image_type = $thumbnail_image_types['medium'] ?? $default_thumbnail_image_types['medium'];
-        $medium_thumbnail_image_width = $thumbnail_image_widths['medium'] ?? $default_thumbnail_image_widths['medium'];
+        $medium_thumbnail_image_type = $thumbnail_image_types['medium'];
+        $medium_thumbnail_image_width = $thumbnail_image_widths['medium'];
         print("<style>\n");
         print("@media screen and (min-width: 45.01em) {\n");
         print(".post-list-item { grid-template-columns: {$medium_thumbnail_image_width}px 1fr; }\n");
@@ -49,7 +49,7 @@ get_header();
         if ( $local_query->have_posts() ) {
             while ( $local_query->have_posts() ) {
                 $local_query->the_post();
-                if ($posts_per_page > POSTS_PER_ARCHIVE_PAGE_STANDARD) {
+                if  ($use_short_post_summary_for_home) {
                     display_short_post_summary(128,128);
                 }
                 else {

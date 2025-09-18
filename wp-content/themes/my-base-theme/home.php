@@ -49,12 +49,7 @@ get_header();
         if ( $local_query->have_posts() ) {
             while ( $local_query->have_posts() ) {
                 $local_query->the_post();
-                if  ($use_short_post_summary_for_home) {
-                    display_short_post_summary(128,128);
-                }
-                else {
-                    display_post_summary(2,200,200);
-                }
+                display_post_summary($use_compact_post_summary_for_home);
                 print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
             }
             navigation_links('multi');

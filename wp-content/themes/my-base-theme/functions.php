@@ -46,17 +46,17 @@ if (!isset($thumbnail_image_widths)) {
         'full' => 300,
     ];
 }
-if (!isset($use_short_post_summary_for_category)) {
-    $use_short_post_summary_for_category = false;
+if (!isset($use_compact_post_summary_for_category)) {
+    $use_compact_post_summary_for_category = false;
 }
-if (!isset($use_short_post_summary_for_home)) {
-    $use_short_post_summary_for_home = true;
+if (!isset($use_compact_post_summary_for_home)) {
+    $use_compact_post_summary_for_home = true;
 }
-if (!isset($use_short_post_summary_for_author)) {
-    $use_short_post_summary_for_author = true;
+if (!isset($use_compact_post_summary_for_author)) {
+    $use_compact_post_summary_for_author = true;
 }
-if (!isset($use_short_post_summary_for_date)) {
-    $use_short_post_summary_for_date = true;
+if (!isset($use_compact_post_summary_for_date)) {
+    $use_compact_post_summary_for_date = true;
 }
 
 //================================================================================
@@ -346,7 +346,7 @@ function display_category_summary($category_name,$category_info,$image_max_width
 
 //==============================================================================
 
-function display_post_summary($header_level,$image_max_width,$image_max_height)
+function display_post_summary($use_compact_format)
 {
     global $wpdb;
     global $base_dir;
@@ -354,51 +354,17 @@ function display_post_summary($header_level,$image_max_width,$image_max_height)
     global $home_ip_addr;
     global $show_author_in_post_summary;
     global $full_thumbnail_image_type;
-    $id = get_the_ID();
-    $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
-    $post_content = $row->post_content;
-    $post_date = substr($row->post_date,0,10);
-    $post_date = date("d F Y", strtotime($post_date));
-    $slug = $row->post_name;
-    print("<div class=\"post-list-item\">\n");
-    print("<div class=\"post-image-holder\">");
-    $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$full_thumbnail_image_type);
-    if (!empty($image_url)) {
-        print("<div><img src=\"$image_url\" /></div>\n");
-    }
-    print("</div>\n");
-    print("<div class=\"post-text-holder\">");
-    echo "<h$header_level>"; the_title(); echo "</h$header_level>\n";
-    print("<p>Posted on: $post_date");
-    if (!empty($show_author_in_post_summary)) {
-        $author = $row->post_author;
-        if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
-            print(" by {$row2->display_name}");
-        }
-    }
-    print("<br /.>\n");
-    print("Posted in: ".get_category_links($id)."</p>\n");
-    the_content();
-    if (strpos($post_content,'<!--more-->') === false) {
-        print("<a href=\"$base_url/$slug\">Go to Post</a>\n");
-    }
-    if ($_SERVER['REMOTE_ADDR'] == $home_ip_addr) {
-        print("<a href=\"$base_url/post-to-social?slug=$slug\" target=\"_blank\">Post to Social</a>");
-    }
-    print("</div>\n");
-    print("</div>\n");
-}
-
-//==============================================================================
-
-function display_short_post_summary($image_max_width,$image_max_height)
-{
-    global $wpdb;
-    global $base_dir;
-    global $base_url;
-    global $home_ip_addr;
-    global $show_author_in_post_summary;
     global $medium_thumbnail_image_type;
+    global $full_thumbnail_image_type;
+
+    // Override full/compact format setting if URL parameter dictates.
+    if (isset($_GET['full'])) {
+        $use_compact_format = false;
+    }
+    elseif (isset($_GET['compact'])) {
+        $use_compact_format = true;
+    }
+
     $id = get_the_ID();
     $row = $wpdb->get_row("SELECT * FROM wp_posts WHERE ID=$id");
     $post_date = substr($row->post_date,0,10);
@@ -406,24 +372,56 @@ function display_short_post_summary($image_max_width,$image_max_height)
     $slug = $row->post_name;
     print("<div class=\"post-list-item\">\n");
     print("<div class=\"post-image-holder\">");
-    $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$medium_thumbnail_image_type);
-    if (!empty($image_url)) {
-        print("<div><img src=\"$image_url\" /></div>\n");
+    if ($use_compact_format) {
+
+        // Compact format
+        $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$medium_thumbnail_image_type);
+        if (!empty($image_url)) {
+            print("<div><img src=\"$image_url\" /></div>\n");
+        }
+        print("</div>\n");
+        print("<div class=\"post-text-holder\">");
+        echo "<strong>"; the_title(); echo "</strong>\n";
+        echo("<div class=\"halfspace\">&nbsp;</div>");
+        print("Posted on: $post_date");
+        if (!empty($show_author_in_post_summary)) {
+            $author = $row->post_author;
+            if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
+                print(" by {$row2->display_name}");
+            }
+        }
+        print("<br />Posted in: ".get_category_links($id)."<br />\n");
+        echo("<div class=\"halfspace\">&nbsp;</div>");
+        print("<a href=\"$base_url/$slug\">View Post</a>\n");
     }
-    print("</div>\n");
-    print("<div class=\"post-text-holder\">");
-    echo "<strong>"; the_title(); echo "</strong>\n";
-    echo("<div class=\"halfspace\">&nbsp;</div>");
-    print("Posted on: $post_date");
-    if (!empty($show_author_in_post_summary)) {
-        $author = $row->post_author;
-        if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
-            print(" by {$row2->display_name}");
+    else {
+
+        // Full format
+        $post_content = $row->post_content;
+        $image_url = get_modified_image_url(get_the_post_thumbnail_url(),$full_thumbnail_image_type);
+        if (!empty($image_url)) {
+            print("<div><img src=\"$image_url\" /></div>\n");
+        }
+        print("</div>\n");
+        print("<div class=\"post-text-holder\">");
+        echo "<h2>"; the_title(); echo "</h2>";
+        print("<p>Posted on: $post_date");
+        if (!empty($show_author_in_post_summary)) {
+            $author = $row->post_author;
+            if ($row2 = $wpdb->get_row("SELECT * FROM wp_users WHERE ID=$author")) {
+                print(" by {$row2->display_name}");
+            }
+        }
+        print("<br /.>\n");
+        print("Posted in: ".get_category_links($id)."</p>\n");
+        the_content();
+        if (strpos($post_content,'<!--more-->') === false) {
+            print("<a href=\"$base_url/$slug\">Go to Post</a>\n");
+        }
+        if ($_SERVER['REMOTE_ADDR'] == $home_ip_addr) {
+            print("<a href=\"$base_url/post-to-social?slug=$slug\" target=\"_blank\">Post to Social</a>");
         }
     }
-    print("<br />Posted in: ".get_category_links($id)."<br />\n");
-    echo("<div class=\"halfspace\">&nbsp;</div>");
-    print("<a href=\"$base_url/$slug\">View Post</a>\n");
     print("</div>\n");
     print("</div>\n");
 }

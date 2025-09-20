@@ -21,6 +21,9 @@ get_header();
         $access_level = get_category_access_level($own_id);
         $hierarchy = get_category_parents($own_id, false, '/', true);
         $image_id = get_term_meta($own_id,'featured_image',true);
+        apply_post_summary_styles($use_compact_post_summary_for_category);
+
+        // Determine the user access level
         if (session_var_is_set(SV_ACCESS_LEVEL)) {
             $user_access_level = get_session_var(SV_ACCESS_LEVEL);
         }

@@ -22,6 +22,8 @@ get_header();
         <?php
         //==============================================================================
 
+        apply_post_summary_styles($use_compact_post_summary_for_date);
+
         // Determine the user access level
         if (session_var_is_set(SV_ACCESS_LEVEL)) {
             $user_access_level = get_session_var(SV_ACCESS_LEVEL);

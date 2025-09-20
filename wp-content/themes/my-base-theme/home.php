@@ -16,13 +16,7 @@ get_header();
 <div id="primary" class="content-area">
     <main id="main" class="blog-main" role="main">
         <?php
-        $medium_thumbnail_image_type = $thumbnail_image_types['medium'];
-        $medium_thumbnail_image_width = $thumbnail_image_widths['medium'];
-        print("<style>\n");
-        print("@media screen and (min-width: 45.01em) {\n");
-        print(".post-list-item { grid-template-columns: {$medium_thumbnail_image_width}px 1fr; }\n");
-        print("}\n");
-        print("</style>\n");
+        apply_post_summary_styles($use_compact_post_summary_for_home);
 
         // Determine the user access level
         if (session_var_is_set(SV_ACCESS_LEVEL)) {

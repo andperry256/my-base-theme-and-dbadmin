@@ -43,7 +43,7 @@ foreach ($_POST as $key => $dummy) {
         }
     }
 }
-header("Location: $base_url/$relative_path/?-action=reconcile_account&-account=$account&message=$message");
+header("Location: $base_url/$relative_path/?-action=reconcile_account&-account=$account");
 exit;
 
 //==============================================================================

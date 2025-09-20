@@ -353,9 +353,10 @@ function display_post_summary($use_compact_format)
     global $base_url;
     global $home_ip_addr;
     global $show_author_in_post_summary;
-    global $full_thumbnail_image_type;
-    global $medium_thumbnail_image_type;
-    global $full_thumbnail_image_type;
+    global $thumbnail_image_types;
+    global $thumbnail_image_widths;
+    $medium_thumbnail_image_type= $thumbnail_image_types['medium'];
+    $full_thumbnail_image_type = $thumbnail_image_types['full'];
 
     // Override full/compact format setting if URL parameter dictates.
     if (isset($_GET['full'])) {
@@ -424,6 +425,32 @@ function display_post_summary($use_compact_format)
     }
     print("</div>\n");
     print("</div>\n");
+}
+
+//==============================================================================
+
+function apply_post_summary_styles($use_compact_format)
+{
+    global $thumbnail_image_widths;
+
+    // Override full/compact format setting if URL parameter dictates.
+    if (isset($_GET['full'])) {
+        $use_compact_format = false;
+    }
+    elseif (isset($_GET['compact'])) {
+        $use_compact_format = true;
+    }
+
+    if ($use_compact_format) {
+
+        // Update style to accommodate compact format
+        $medium_thumbnail_image_width = $thumbnail_image_widths['medium'];
+        print("<style>\n");
+        print("@media screen and (min-width: 45.01em) {\n");
+        print(".post-list-item { grid-template-columns: {$medium_thumbnail_image_width}px 1fr; }\n");
+        print("}\n");
+        print("</style>\n");
+    }
 }
 
 //==============================================================================

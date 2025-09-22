@@ -123,13 +123,20 @@ else {
                 // Select menu
                 include("$custom_pages_path/$uri_sub_path/select_menu.php");
             }
-            if (is_file("$custom_pages_path/$uri_sub_path/styles.css")) {
-                // Add linked stylesheet
-                output_stylesheet_link($custom_pages_url,$uri_sub_path);
+            if (is_file("$custom_pages_path/$uri_sub_path/custom_stylesheets.php")) {
+                // Add stylesheets from custom list
+                include("$custom_pages_path/$uri_sub_path/custom_stylesheets.php");
             }
-            if (is_file("$custom_pages_path/$uri_sub_path/inline-styles.css")) {
-                // Add inline stylesheet
-                include_inline_stylesheet("$custom_pages_path/$uri_sub_path/inline-styles.css");
+            else {
+                // Look for standard stylesheets
+                if (is_file("$custom_pages_path/$uri_sub_path/styles.css")) {
+                    // Add linked stylesheet
+                    output_stylesheet_link($custom_pages_url,$uri_sub_path);
+                }
+                if (is_file("$custom_pages_path/$uri_sub_path/inline-styles.css")) {
+                    // Add inline stylesheet
+                    include_inline_stylesheet("$custom_pages_path/$uri_sub_path/inline-styles.css");
+                }
             }
             if (is_file("$custom_pages_path/$uri_sub_path/authentication.php")) {
                 // Set access level for user authentication

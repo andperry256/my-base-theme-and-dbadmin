@@ -30,13 +30,14 @@ Functions decode_record_id / fully_decode_record_id
 function decode_record_id($record_id)
 {
     $result = [];
-    $tok = strtok($record_id,'=');
-    while ($tok !== false) {
-        $field_name = urldecode($tok);
-        $tok = strtok('/');
-        $field_value = urldecode($tok);
-        $result[$field_name] = $field_value;
-        $tok = strtok('=');
+    $array1 = explode('/',$record_id);
+    foreach ($array1 as $data) {
+        $array2 = explode('=',$data);
+        $field_name = $array2[0] ?? '';
+        $field_value = $array2[1] ?? '';
+        if (!empty($field_name)) {
+            $result[$field_name] = $field_value;
+        }
     }
     return $result;
 }

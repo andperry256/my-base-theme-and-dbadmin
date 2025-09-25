@@ -779,8 +779,8 @@ function save_record($record,$old_record_id,$new_record_id)
     global $custom_pages_path, $relative_path;
     $db = admin_db_connect();
     $base_table = get_base_table($table);
-    $old_primary_keys = fully_decode_record_id($old_record_id);
-    $new_primary_keys = fully_decode_record_id($new_record_id);
+    $old_primary_keys = double_decode_record_id($old_record_id);
+    $new_primary_keys = double_decode_record_id($new_record_id);
     foreach($new_primary_keys as $key => $value) {
         if (!isset($old_primary_keys[$key])) {
             $old_primary_keys[$key] = '';
@@ -956,7 +956,7 @@ function save_record($record,$old_record_id,$new_record_id)
             $sort_1_value = $record->FieldVal($row['sort_1_field']);
             $seq_no = update_seq_number($base_table,$sort_1_value,$seq_no);
             $record->SetField($row['seq_no_field'],$seq_no,query_field_type($db,$table,$row['seq_no_field']));
-            $primary_keys = fully_decode_record_id($new_record_id);
+            $primary_keys = double_decode_record_id($new_record_id);
             $primary_keys[$row['seq_no_field']] = $seq_no;
             $new_record_id = encode_record_id($primary_keys);
         }
@@ -1045,7 +1045,7 @@ function handle_record($action,$params)
 
     $presets = [];
     if (isset($params['presets'])) {
-        $presets = fully_decode_record_id($params['presets']);
+        $presets = double_decode_record_id($params['presets']);
     }
 
     // Create query to select this record (used more than once)
@@ -1390,7 +1390,7 @@ function delete_record($record,$record_id)
         // Delete the record
         $where_clause = '';
         $where_values = [];
-        $primary_keys = fully_decode_record_id($record_id);
+        $primary_keys = double_decode_record_id($record_id);
         foreach ($primary_keys as $field => $value) {
             $where_clause .= "$field=? AND ";
             $where_values[count($where_values)] = $record->FieldType($field);

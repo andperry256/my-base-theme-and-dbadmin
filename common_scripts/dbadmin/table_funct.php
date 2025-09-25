@@ -874,7 +874,7 @@ function delete_record_set($table)
 
         $where_clause = '';
         $where_values = [];
-        $primary_keys = fully_decode_record_id($record_id);
+        $primary_keys = double_decode_record_id($record_id);
         foreach ($primary_keys as $field => $value) {
             $where_clause .= " $field=? AND";
             $where_values[count($where_values)] = query_field_type($db,$table,$field);
@@ -1104,7 +1104,7 @@ function run_update($table,$option)
         $pk_values = '^';
         $where_clause = '';
         $where_values = [];
-        $primary_keys = fully_decode_record_id($record_id);
+        $primary_keys = double_decode_record_id($record_id);
         foreach ($primary_keys as $field => $value) {
             $pk_values .= "$value^";
             $where_clause .= " $field=? AND";
@@ -1350,7 +1350,7 @@ function run_copy($table)
         $pk_values = '^';
         $where_clause = '';
         $where_values = [];
-        $primary_keys = fully_decode_record_id($record_id);
+        $primary_keys = double_decode_record_id($record_id);
         foreach ($primary_keys as $field => $value) {
             $pk_values .= "$value^";
             $where_clause .= " $field=? AND ";

@@ -23,13 +23,14 @@ function encode_record_id($fields)
 
 //==============================================================================
 /*
-Functions decode_record_id / fully_decode_record_id
+Functions decode_record_id / double_decode_record_id
 */
 //==============================================================================
 
 function decode_record_id($record_id)
 {
     $result = [];
+    $record_id = urldecode($record_id);
     $array1 = explode('/',$record_id);
     foreach ($array1 as $data) {
         $array2 = explode('=',$data);
@@ -42,7 +43,7 @@ function decode_record_id($record_id)
     return $result;
 }
 
-function fully_decode_record_id($record_id)
+function double_decode_record_id($record_id)
 {
     $record_id = urldecode($record_id);
     return decode_record_id($record_id);

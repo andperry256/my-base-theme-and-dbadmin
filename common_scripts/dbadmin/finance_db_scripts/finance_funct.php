@@ -667,7 +667,7 @@ function record_new_scheduled_transactions($verbose=false)
 function find_matching_transaction($account,$date,$amount)
 {
     $db = admin_db_connect();
-    $start_date = add_days($date,-4);
+    $start_date = add_days($date,-7);
     $end_date = add_days($date,1);
     $credit_amount = ($amount > 0) ? $amount : 0;
     $debit_amount = ($amount < 0) ? -$amount : 0;

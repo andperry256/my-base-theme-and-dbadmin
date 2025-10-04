@@ -73,7 +73,7 @@ if (isset($_POST['new_start_date'])) {
             }
         }
     }
-  
+
     // Calculate the sequence number for the new 'Balance B/F' transaction
     // for each account.
     $bbf_seq_no = [];
@@ -98,13 +98,13 @@ if (isset($_POST['new_start_date'])) {
         $where_clause = 'account=? AND seq_no=?';
         $where_values = ['s',$account,'i',$bbf_seq_no[$account]];
         if (( $bbf_seq_no[$account] <= 0 ) ||
-            (mysqli_num_rows(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'') != 0))) {
+            (mysqli_num_rows(mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'')) != 0)) {
             print("ERROR - Unable to set record number for 'Balance B/F' in account {$row['name']}<br />\n");
             $error = true;
             break;
         }
     }
-  
+
     // Delete any zero balances
     foreach ($balances as $account => $a) {
         foreach ($a as $fund => $balance) {
@@ -113,10 +113,10 @@ if (isset($_POST['new_start_date'])) {
             }
         }
     }
-  
+
     if (!$error) {
         // Perform the update
-    
+
         // Copy transaction data to archive tables
         print("Creating archive tables and copying transactions<br />\n");
         $year = substr($archive_end_date,0,4);
@@ -131,7 +131,7 @@ if (isset($_POST['new_start_date'])) {
             $where_values = ['s',$row['account'],'i',$row['seq_no']];
             mysqli_free_format_query($db,$query,$where_values);
         }
-    
+
         // Delete archived transactions from main tables
         print("Deleting old transactions<br />\n");
         $where_clause = 'date<?';
@@ -145,7 +145,7 @@ if (isset($_POST['new_start_date'])) {
         $where_clause = 'date<?';
         $where_values = ['s',$new_start_date];
         mysqli_delete_query($db,'transactions',$where_clause,$where_values);
-    
+
         // Add new 'Balance B/F' transactions
         $query_result = mysqli_select_query($db,'accounts','*','',[],'');
         while ($row = mysqli_fetch_assoc($query_result)) {

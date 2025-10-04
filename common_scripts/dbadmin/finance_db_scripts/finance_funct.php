@@ -723,6 +723,29 @@ function delete_uncleared_cheques()
 
 //==============================================================================
 /*
+  Function count_payee_instances
+*/
+//==============================================================================
+
+function count_payee_instances()
+{
+    $db = admin_db_connect();
+    $query_result = mysqli_select_query($db,'payees','*','',[],'');
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        $where_clause = "payee=? AND (source_account='' OR source_account IS NULL)";
+        $where_values = ['s',$row['name']];
+        $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+        $count = mysqli_num_rows($query_result);
+        $set_fields = 'instances';
+        $set_values = ['i',$count];
+        $where_clause = 'name=?';
+        $where_values = ['s',$row['name']];
+        mysqli_update_query($db,'payees',$set_fields,$set_values,$where_clause,$where_values);
+    }
+}
+
+    //==============================================================================
+/*
   Function select_excluded_accounts
 
   This function generates the clause to be inserted into a MySQL query in order

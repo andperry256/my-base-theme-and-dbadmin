@@ -194,6 +194,7 @@ if (isset($_POST['new_start_date'])) {
                 update_account_balances($account,$new_start_date);
             }
         }
+        mysqli_query($db,"UPDATE transactions SET seq_no=seq_no-5 WHERE payee='Balance B/F' AND (seq_no%10)=5");
         print("Operation completed.</p>\n");
     }
 }

@@ -734,8 +734,8 @@ function count_payee_instances()
     while ($row = mysqli_fetch_assoc($query_result)) {
         $where_clause = "payee=? AND (source_account='' OR source_account IS NULL)";
         $where_values = ['s',$row['name']];
-        $query_result = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
-        $count = mysqli_num_rows($query_result);
+        $query_result2 = mysqli_select_query($db,'transactions','*',$where_clause,$where_values,'');
+        $count = mysqli_num_rows($query_result2);
         $set_fields = 'instances';
         $set_values = ['i',$count];
         $where_clause = 'name=?';
@@ -817,53 +817,48 @@ function initialise_archive_table_data($db)
     global $custom_pages_path;
     global $relative_path;
     $dbname = admin_db_name();
-    $directory_created = false;
+    mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_table_info SELECT * FROM dba_table_info WHERE table_name='transactions' OR table_name='splits'");
+    mysqli_query_normal($db,"CREATE TEMPORARY TABLE temp_table_fields SELECT * FROM dba_table_fields WHERE table_name='transactions' OR table_name='splits'");
     $query_result = mysqli_query_normal($db,"SHOW FULL TABLES FROM `$dbname`");
     while ($row = mysqli_fetch_assoc($query_result)) {
         $table = $row["Tables_in_$dbname"];
         if (substr($table,0,9) == 'archived_') {
             if (!is_dir("$custom_pages_path/$relative_path/tables/$table")) {
+
                 // Create directory and class script for the table.
                 mkdir("$custom_pages_path/$relative_path/tables/$table",0755);
                 $ofp = fopen("$custom_pages_path/$relative_path/tables/$table/$table.php",'w');
                 fprintf($ofp,"<?php class tables_$table {} ?>\n");
                 fclose($ofp);
-                $directory_created = true;
             }
-            if (substr($table,9,5) == 'trans') {
-                // Create view and splits relationship for archived transactions.
+            if (substr($table,9,12) == 'transactions') {
+
+                // Create/re-create table data & view.
+                mysqli_query_normal($db,"DELETE FROM dba_table_info WHERE table_name'$table'");
+                mysqli_query_normal($db,"UPDATE temp_table_info SET table_name='$table' WHERE table_name LIKE '%transactions%'");
+                mysqli_query_normal($db,"INSERT INTO dba_table_info SELECT * FROM temp_table_info WHERE table_name='$table'");
+                mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name'$table'");
+                mysqli_query_normal($db,"UPDATE temp_table_fields SET table_name='$table' WHERE table_name LIKE '%transactions%'");
+                mysqli_query_normal($db,"INSERT INTO dba_table_fields SELECT * FROM temp_table_fields WHERE table_name='$table'");
                 create_view_structure("_view_$table",$table,"account IS NOT NULL ORDER BY account ASC, date DESC, seq_no DESC");
-                set_primary_key_on_view("$table",'account');
-                set_primary_key_on_view("$table",'seq_no');
-                $where_clause = "table_name='transactions'";
-                $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,[],'');
-                while ($row2 = mysqli_fetch_assoc($query_result2)) {
-                    $set_fields = 'list_desktop,list_mobile';
-                    $set_values = ['i',$row2['list_desktop'],'i',$row2['list_mobile']];
-                    $where_clause = 'table_name=? AND field_name=?';
-                    $where_values = ['s',$table,'s',$row2['field_name']];
-                    mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
-                }
+
+                // Create/re-create relationship.
+                mysqli_query_normal($db,"DELETE from dba_relationships WHERE table_name='$table' AND relationship='splits'");
                 $splits_table = str_replace('transactions','splits',$table);
                 $fields = 'table_name,relationship_name,query';
-                $values = ['s',$table,'s','Splits','s','SELECT * FROM $splits_table WHERE transact_seq_no=$seq_no'];
+                $values = ['s',$table,'s','splits','s',"SELECT * FROM $splits_table WHERE transact_seq_no=\$seq_no"];
                 mysqli_insert_query($db,'dba_relationships',$fields,$values);
             }
-            elseif (substr($table,9,5) == 'split') {
-                // Create view for archived splits.
+            elseif (substr($table,9,6) == 'splits') {
+
+                // Create/re-create table data & view.
+                mysqli_query_normal($db,"DELETE FROM dba_table_info WHERE table_name'$table'");
+                mysqli_query_normal($db,"UPDATE temp_table_info SET table_name='$table' WHERE table_name LIKE '%splits%'");
+                mysqli_query_normal($db,"INSERT INTO dba_table_info SELECT * FROM temp_table_info WHERE table_name='$table'");
+                mysqli_query_normal($db,"DELETE FROM dba_table_fields WHERE table_name'$table'");
+                mysqli_query_normal($db,"UPDATE temp_table_fields SET table_name='$table' WHERE table_name LIKE '%splits%'");
+                mysqli_query_normal($db,"INSERT INTO dba_table_fields SELECT * FROM temp_table_fields WHERE table_name='$table'");
                 create_view_structure("_view_$table",$table,"account IS NOT NULL ORDER BY account ASC, transact_seq_no DESC, split_no ASC");
-                set_primary_key_on_view("$table",'account');
-                set_primary_key_on_view("$table",'transact_seq_no');
-                set_primary_key_on_view("$table",'split_no');
-                $where_clause = "table_name='splits'";
-                $query_result2 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,[],'');
-                while ($row2 = mysqli_fetch_assoc($query_result2)) {
-                    $set_fields = 'list_desktop,list_mobile';
-                    $set_values = ['i',$row2['list_desktop'],'i',$row2['list_mobile']];
-                    $where_clause = 'table_name=? AND field_name=?';
-                    $where_values = ['s',$table,'s',$row2['field_name']];
-                    mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
-                }
             }
         }
     }
@@ -873,11 +868,6 @@ function initialise_archive_table_data($db)
     $where_clause = "table_name LIKE 'archived_%'";
     $where_values = [];
     mysqli_update_query($db,'dba_table_fields',$set_fields,$set_values,$where_clause,$where_values);
-
-    // Output warning if new tables have been added.
-    if ($directory_created) {
-        print("<p><strong>NOTE</strong> - Please update table data for the database.</p>\n");
-    }
 }
 
 //==============================================================================

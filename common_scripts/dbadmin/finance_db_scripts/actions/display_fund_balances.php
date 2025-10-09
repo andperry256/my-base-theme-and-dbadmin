@@ -52,6 +52,11 @@ $table_cell_style_ra = $table_cell_style. "text-align:right;";
 $table_cell_style_total = $table_cell_style_ra. "border-color:steelblue";
 $table_filler_line = "line-height:0.7em;";
 $fund_exclusions = select_excluded_funds('name');
+if (isset($_GET['auto'])) {
+    $_POST['balance_date'] = 'now';
+    $_POST['currency'] = 'GBP';
+    $_POST['submitted'] = true;
+}
 
 $error = false;
 if (isset($_POST['submitted'])) {
@@ -59,7 +64,7 @@ if (isset($_POST['submitted'])) {
         case 'now':
             $end_month = accounting_month(date('Y-m-d'));
             break;
-    
+
         case 'last_month':
             $current_month = accounting_month(date('Y-m-d'));
             $month_value = (int)substr($current_month,5,2);
@@ -71,13 +76,13 @@ if (isset($_POST['submitted'])) {
             }
             $end_month = sprintf("%04d-%02d",$year_value,$month_value);
             break;
-    
+
         case 'last_year':
             $year = (int)date('Y') - 1;
             $month = date('m');
             $end_month = year_end("$year-$month-01");
             break;
-    
+
         case 'select':
             if ((is_numeric($_POST['end_year'])) && (is_numeric($_POST['end_month']))) {
                 // Set end year/month to an actual date.
@@ -101,7 +106,7 @@ if ((isset($_POST['submitted'])) && (!$error)) {
     if ($currency != 'GBP') {
         print("<h2>Currency - $currency</h2>\n");
     }
-  
+
     // Process localised funds
     print("<h2>Localised Funds</h2>\n");
     $balances = [];
@@ -135,7 +140,7 @@ if ((isset($_POST['submitted'])) && (!$error)) {
             }
             $superfund_balance = 0;
         }
-    
+
         print("<tr><td style=\"$table_cell_style\" width=\"100px\"><a href=\"index.php?-action=display_transaction_report&fund=$fund&currency=$currency\" target=\"blank\">$fund</a></td>\n");
         $total = 0;
         $where_clause = "currency=? AND fund=? AND acct_month<=? AND sched_freq='#'";
@@ -205,7 +210,7 @@ if ((isset($_POST['submitted'])) && (!$error)) {
         print("</td></tr><tr><td style=\"$table_filler_line\">&nbsp;</td></tr>\n");
     }
     print("</table>\n");
-  
+
     // Process global funds
     print("<h2>Global Funds</h2>\n");
     print("<table style=\"$table_style\">\n");
@@ -304,7 +309,7 @@ if (!isset($off_screen)) {
     }
     print("</select></td>\n");
     print("<tr><td>&nbsp;</td><td colspan=\"2\"><input type=\"submit\" name=\"submitted\" value=\"Show\"></td></tr>\n");
-  
+
     print("</table>\n");
     print("</form>\n");
 }

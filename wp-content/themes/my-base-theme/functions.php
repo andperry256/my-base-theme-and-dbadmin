@@ -1079,7 +1079,7 @@ class custom_posts_widget extends WP_Widget
             if (authenticate_post($post->post_name)) {
                 $url = get_the_post_thumbnail_url($post);
                 if ($url == false) {
-                    $url = "$$theme_url/empty_thumbnail.jpg";
+                    $url = "$theme_url/empty_thumbnail.jpg";
                 }
                 else {
                     $url = str_replace('.jpg','-150x150.jpg',$url);

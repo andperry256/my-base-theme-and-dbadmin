@@ -34,7 +34,12 @@ function update_blog_feed($title,$description)
     $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,[],$add_clause);
     $count = 0;
     while ($row = mysqli_fetch_assoc($query_result)) {
-        $post_access_level = get_post_meta($row['ID'],'access_level',true);
+        $where_clause = 'post_id=? AND meta_key=?';
+        $where_values = ['i',$row['ID'],'s','access_level'];
+        $post_access_level = ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'wp_postmeta','*',$where_clause,$where_values,'')))
+            ? $row2['meta_value']
+            : '';
+
         if (($post_access_level !== '') && (defined('DEFAULT_ACCESS_LEVEL')) && ($post_access_level > DEFAULT_ACCESS_LEVEL)) {
             // Omit post above default access level.
         }

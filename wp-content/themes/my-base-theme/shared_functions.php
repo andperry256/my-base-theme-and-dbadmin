@@ -487,7 +487,7 @@ function recache_page($page_path,$run_count=1)
         }
 
         // Activate page to regenerate cache.
-        $dummy = file_get_contents("$base_url/$uri_subpath");
+        $dummy = get_url_content("$base_url/$uri_subpath");
     }
 }
 

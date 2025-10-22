@@ -42,6 +42,6 @@ foreach ($content as $line) {
 }
 $commands = urlencode($commands);
 $schedules = urlencode($schedules);
-print(file_get_contents("https://remote.andperry.com/store_crontab.php?site_path=$local_site_dir&commands=$commands&schedules=$schedules&datetime=$date_and_time"));
+print(get_url_content("https://remote.andperry.com/store_crontab.php?site_path=$local_site_dir&commands=$commands&schedules=$schedules&datetime=$date_and_time"));
 
 //==============================================================================

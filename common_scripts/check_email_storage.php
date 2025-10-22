@@ -30,7 +30,7 @@ while ($mailbox !== false) {
 }
 $mailbox_data = rtrim($mailbox_data,'+');
 $date_and_time = date('YmdHis');
-$temp = file_get_contents("http://remote.andperry.com/report_email_storage.php?domain=$domain&mailbox_data=$mailbox_data&datetime=$date_and_time");
+$temp = get_url_content("https://remote.andperry.com/report_email_storage.php?domain=$domain&mailbox_data=$mailbox_data&datetime=$date_and_time");
 print($temp);
 
 //==============================================================================

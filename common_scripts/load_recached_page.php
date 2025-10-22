@@ -11,7 +11,7 @@ if ($tok3 != 'public_html') {
 }
 require("$root_dir/public_html/path_defs.php");
 require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
-$dummy = file_get_contents("$base_url/common_scripts/force_cache_reload.php");
+$dummy = get_url_content("$base_url/common_scripts/force_cache_reload.php");
 $uri_path = $_GET['uripath'];
 recache_page($uri_path);
 header("Location: $base_url/$uri_path/");

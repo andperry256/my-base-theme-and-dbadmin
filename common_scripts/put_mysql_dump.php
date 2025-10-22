@@ -33,7 +33,7 @@ $dbname = $_GET['dbname'];
 $sqlfile = $_GET['sqlfile'];
 $domname = $_GET['domname'];
 
-$content = file_get_contents("http://{$_SERVER['REMOTE_ADDR']}/$local_site_dir/common_scripts/get_mysql_dump.php?site=$local_site_dir&domname=$domname&dbname=$dbname&sqlfile=$sqlfile");
+$content = get_url_content("http://{$_SERVER['REMOTE_ADDR']}/$local_site_dir/common_scripts/get_mysql_dump.php?site=$local_site_dir&domname=$domname&dbname=$dbname&sqlfile=$sqlfile");
 if (!empty($content)) {
     if (!is_dir("$site_mysql_backup_dir/$dbname")) {
         mkdir("$site_mysql_backup_dir/$dbname,0775");

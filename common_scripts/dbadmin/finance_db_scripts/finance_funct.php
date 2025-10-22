@@ -623,10 +623,10 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
             $url = "$db_admin_url/finance_db_scripts/send_email_alert.php";
             $url .= "?site=$local_site_dir&recid={$row['email_alert_id']}&dt={$row['date']}";
             if ($row['debit_amount'] > 0) {
-                $dummy = file_get_contents("$url&amt=$debit_amount");
+                $dummy = get_url_content("$url&amt=$debit_amount");
             }
             else {
-                $dummy = file_get_contents("$url&amt=$credit_amount");
+                $dummy = get_url_content("$url&amt=$credit_amount");
             }
         }
     }

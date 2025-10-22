@@ -505,10 +505,11 @@ class tables_transactions
 
         if ($sched_freq == '#') {
             // Normal transaction
-            if (($table == "_view_account_$account") && (!empty($target_account)) && (empty($target_seq_no))) {
+            //////// if (($table == "_view_account_$account") && (!empty($target_account)) && (empty($target_seq_no))) {
+            if ((!empty($target_account)) && (empty($target_seq_no))) {
                 // Create transfer
                 $target_seq_no = next_seq_no($target_account);
-                update_account_balances($target_account,$date);
+                //////// update_account_balances($target_account,$date);
                 $fields = 'account,seq_no,date,currency,payee,credit_amount,debit_amount,fund,category,memo,acct_month,source_account,source_seq_no';
                 $values = ['s',$target_account,'i',$target_seq_no,'s',$date,'s',$account_currency,'s',$payee,'d',$debit_amount,'d',$credit_amount,'s',$fund,'s','-transfer-','s',$memo,'s',$acct_month,'s',$account,'i',$seq_no];
                 mysqli_insert_query($db,'transactions',$fields,$values);

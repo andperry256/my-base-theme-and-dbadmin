@@ -12,7 +12,7 @@ function dump_db_table($dbid,$table)
     while ($row = mysqli_fetch_assoc($query_result)) {
         $field_types[count($field_types)] = query_field_type($db,$table,$row['Field']);
     }
-    
+
     $sql_script = "--\n-- Table structure for table `$table`\n--\n";
     $sql_script .= "DROP TABLE IF EXISTS `$table`;\n";
     $row = mysqli_fetch_row(mysqli_query($db,"SHOW CREATE TABLE $table"));
@@ -22,7 +22,7 @@ function dump_db_table($dbid,$table)
         $create_statement = preg_replace('/CHARSET=[A-Za-z0-9]* /',"CHARSET=$charset ",$create_statement);
         $create_statement = preg_replace('/COLLATE=[A-Za-z0-9_]*/',"COLLATE=$charset".'_general_ci',$create_statement);
     }
-    $sql_script .= "$create_statement;\n"; 
+    $sql_script .= "$create_statement;\n";
     if (mysqli_num_rows(mysqli_query_strict($db,"SELECT * FROM $table")) == 0) {
         // Table is empty
         return $sql_script;
@@ -31,7 +31,7 @@ function dump_db_table($dbid,$table)
     $sql_script .= "--\n-- Dumping data for table `$table`\n--\n";
     $sql_script .= "LOCK TABLES `$table` WRITE;\n";
     $sql_script .= "/*!40000 ALTER TABLE `$table` DISABLE KEYS */;\n";
-    
+
     $query_result = mysqli_query($db,"SELECT * FROM $table");
     $column_count = mysqli_num_fields($query_result);
     $sql_script .= "INSERT INTO `$table` VALUES\n";
@@ -87,7 +87,7 @@ function mysql_db_dump($dbid,$full_backup=false)
     // Compile lists of normal tables and noSync tables
     $normal_tables = [];
     $nosync_tables = [];
-    $nosync_table_list = file_get_contents("https://remote.andperry.com/nosync_tables.php?dbname=$dbname");
+    $nosync_table_list = get_url_content("https://remote.andperry.com/nosync_tables.php?dbname=$dbname");
     $query_result = mysqli_query($db,"SHOW FULL TABLES FROM `$dbname` WHERE Table_type='BASE TABLE'");
     while ($row = mysqli_fetch_assoc($query_result)) {
         if ((!$full_backup) && (strpos($nosync_table_list,"^{$row["Tables_in_$dbname"]}^") !== false)) {

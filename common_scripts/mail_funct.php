@@ -28,172 +28,6 @@ else {
     require_once("$php_mailer_dir/src/Exception.php");
 }
 
-//================================================================================
-/*
-Function get_imap_message (and sub-function get_message_part)
-
-This function is for the processing of a message read from a mailbox via IMAP.
-
-The function returns an array with the following elements:-
-  header (structure as returned by imap_headerinfo)
-  plain_content (as UTF-8)
-  html_content (as UTF-8)
-  charset
-
-In order to handle attachments, the following global variables need to be
-declared and used by the calling software:-
-  $attachments_dir
-  $total_attachment_size
-*/
-//================================================================================
-
-function get_imap_message($mbox,$mid,$noattach=false)
-{
-    global $total_attachment_size;
-    global $htmlmsg,$plainmsg,$charset,$attachments;
-    $htmlmsg = $plainmsg = $charset = '';
-    $attachments = [];
-    $total_attachment_size = 0;
-  
-    // Header
-    $header = imap_headerinfo($mbox,$mid);
-  
-    // Body
-    $struct = imap_fetchstructure($mbox,$mid);
-    if ((!isset($struct->parts)) || (!$struct->parts)) {
-        // Not multipart
-        get_message_part($mbox,$mid,$struct,0,$noattach);
-    }
-    else {
-        // Multipart: iterate through each part
-        foreach ($struct->parts as $partno0=>$part) {
-            get_message_part($mbox,$mid,$part,$partno0+1,$noattach);
-        }
-    }
-  
-    $return_info = [];
-    $return_info['header'] = $header;
-    if (strtolower($charset) == 'iso-8859-1') {
-        $plainmsg = utf8_encode($plainmsg);
-        $htmlmsg = utf8_encode($htmlmsg);
-    }
-    $return_info['html_content'] = $htmlmsg;
-    $return_info['plain_content'] = $plainmsg;
-    $return_info['charset'] = $charset;
-    return $return_info;
-}
-
-function get_message_part($mbox,$mid,$part,$partno,$noattach=false)
-{
-    global $attachments_dir;
-    global $total_attachment_size;
-    global $htmlmsg,$plainmsg,$charset,$attachments;
-  
-    // Extract decode data
-    if($partno) {
-        $data = imap_fetchbody($mbox,$mid,$partno);  // Multipart
-    }
-    else {
-        $data = imap_body($mbox,$mid);  // Not multipart
-    }
-  
-    // Any part may be encoded, even plain text messages, so check everything.
-    // No need to decode 7-bit, 8-bit, or binary.
-    if ($part->encoding==4) {
-        $data = quoted_printable_decode($data);
-    }
-    elseif ($part->encoding==3) {
-        $data = base64_decode($data);
-    }
-  
-    // Get all parameters, like charset, filenames of attachments, etc.
-    $params = [];
-    if ((isset($part->parameters)) && ($part->parameters)) {
-        foreach ($part->parameters as $x) {
-            $params[ strtolower( $x->attribute ) ] = $x->value;
-        }
-    }
-    if ((isset($part->dparameters)) && ($part->dparameters)) {
-        foreach ($part->dparameters as $x) {
-            $params[ strtolower( $x->attribute ) ] = $x->value;
-        }
-    }
-  
-    // Check for attachment
-    if ((!$noattach) &&
-        (((isset($params['filename'])) && ($params['filename'])) ||
-         ((isset($params['name'])) && ($params['name'])))) {
-        // Filename may be given as 'filename', 'name' or both.
-        if ($params['filename']) {
-            $filename = $params['filename'];
-        }
-        else {
-            $filename = $params['name'];
-        }
-    
-        // Deal with the possibility of two files having the same name
-        $path_parts = pathinfo($filename);
-        $ext = $path_parts['extension'];
-        $filename_base = substr($filename,0,strlen($filename)-strlen($ext)-1);
-        $fileno = 0;
-        while (isset($attachments[$filename])) {
-            $fileno++;
-            $filename = $filename_base.'-'."$fileno.$ext";
-        }
-    
-        // filename may be encoded, so see imap_mime_header_decode()
-        set_time_limit(300);
-        $attachments[$filename] = $data;
-        $ofp = fopen("$attachments_dir/$filename","w");
-        fwrite($ofp,$data);
-    
-        // Add missing file extensions to image files where possible
-        if (empty($ext)) {
-            $image_type = exif_imagetype("$attachments_dir/$filename");
-             if ($image_type == IMAGETYPE_JPEG) {
-                rename("$attachments_dir/$filename","$attachments_dir/$filename.jpg");
-            }
-            elseif ($image_type == IMAGETYPE_PNG) {
-                rename("$attachments_dir/$filename","$attachments_dir/$filename.png");
-            }
-            elseif ($image_type == IMAGETYPE_GIF) {
-                rename("$attachments_dir/$filename","$attachments_dir/$filename.gif");
-            }
-            elseif ($image_type == IMAGETYPE_BMP) {
-                rename("$attachments_dir/$filename","$attachments_dir/$filename.bmp");
-            }
-        }
-        $total_attachment_size += filesize("$attachments_dir/$filename");
-        fclose($ofp);
-    }
-  
-    // Check for text.
-    elseif ($part->type==0 && $data) {
-        // Messages may be split in different parts because of inline attachments,
-        // so append parts together with blank row.
-        if (strtolower($part->subtype)=='plain') {
-            $plainmsg .= trim($data) ."\n\n";
-        }
-        else {
-            $htmlmsg .= $data ."<br><br>";
-        }
-        $charset = $params['charset'];  // assume all parts are same charset
-    }
-  
-    // Check for embedded message.
-    elseif ($part->type==2 && $data) {
-        // Append raw source to main message.
-        $plainmsg .= trim($data) ."\n\n";
-    }
-  
-    // Subpart recursion
-    if ((isset($part->parts)) && ($part->parts)) {
-        foreach ($part->parts as $partno0=>$subpart) {
-            get_message_part($mbox,$mid,$subpart,$partno.'.'.($partno0+1));
-        }
-    }
-}
-
 //==============================================================================
 /*
 Function output_mail
@@ -246,7 +80,7 @@ function output_mail($mail_info,$host,$attachments=[])
     foreach ($mail_info as $key => $value) {
         $mail_info[$key] = trim($value);
     }
-  
+
     // Check for mandatory data
     if ((!isset($mail_info['from_name'])) || (empty($mail_info['from_name']))) {
         // No originator name
@@ -269,7 +103,7 @@ function output_mail($mail_info,$host,$attachments=[])
         // No content
         return [16,''];
     }
-  
+
     // Process any default values
     if ((!isset($mail_info['to_name'])) || (empty($mail_info['to_name']))) {
         $mail_info['to_name'] = $mail_info['to_addr'];
@@ -280,7 +114,7 @@ function output_mail($mail_info,$host,$attachments=[])
     if (!isset($mail_info['message_id'])) {
         $mail_info['message_id'] = 0;
     }
-  
+
     // Connect to database and request routing information
     if ($db = mail_db_connect()) {
         $where_clause = 'orig_domain=?';
@@ -289,7 +123,7 @@ function output_mail($mail_info,$host,$attachments=[])
             // Create PHPMailer object
             $mail = new PHPMailer();
             $mail->CharSet = 'UTF-8';
-      
+
             // Process message content
             if ((isset($mail_info['html_content'])) && (!empty($mail_info['html_content']))) {
                 // HTML content present
@@ -307,12 +141,12 @@ function output_mail($mail_info,$host,$attachments=[])
                 $mail->IsHTML(false);
                 $mail->Body = $mail_info['plain_content'];
             }
-      
+
             // Process any attachments
             foreach($attachments as $key => $value) {
                 $mail->AddAttachment($key);
             }
-      
+
             // Process remaining info
             $mail->Subject = $mail_info['subject'];
             if (!empty($mail_info['reply_addr'])) {
@@ -329,7 +163,7 @@ function output_mail($mail_info,$host,$attachments=[])
             $mail->Username = $row['username'];
             $mail->Password = $row['passwd'];
             $mail->Port = $row['port_no'];
-      
+
             // Send message and process result
             $send_retval = $mail->Send();
             $error_info = '';
@@ -341,7 +175,7 @@ function output_mail($mail_info,$host,$attachments=[])
                     log_message_info_to_file(0,$mail->Host,$mail_info,$error_info);
                     return [0,''];
                 }
-        
+
                 // Send failure
                 if (isset($mail->ErrorInfo)) {
                     $error_info = $mail->ErrorInfo;
@@ -380,7 +214,7 @@ Function log_message_info_to_file
 function log_message_info_to_file($error_code,$host,$mail_info,$error_info)
 {
     global $mail_log_dir;
-  
+
     if (!is_dir("$mail_log_dir")) {
         return;
     }

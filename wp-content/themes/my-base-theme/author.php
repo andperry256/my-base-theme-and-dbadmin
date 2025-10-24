@@ -22,7 +22,7 @@ get_header();
         $query_result = mysqli_query($db,"SELECT * FROM wp_users WHERE ID=$author");
         if ($row = mysqli_fetch_assoc($query_result)) {
             print("<h1>Author: {$row['display_name']}</h1>\n");
-            apply_post_summary_styles($use_compact_post_summary_for_authory);
+            apply_post_summary_styles($use_compact_post_summary_for_author);
 
             // Determine the user access level
             if (session_var_is_set(SV_ACCESS_LEVEL)) {

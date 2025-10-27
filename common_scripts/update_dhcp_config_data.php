@@ -25,15 +25,6 @@ if (is_file("/Config/linux_pathdefs.php")) {
     $source_dir = "/media/Data/Links/Linux_Config/";
     $target_dir = "/home/andrew/Linux_Config/dhcp";
 }
-else {
-    // Online server - DEPRECATED
-    exit;
-    /*
-    include_once(__DIR__."/../path_defs.php");
-    $source_dir = "$root_dir/dhcp";
-    $target_dir = "$root_dir/dhcp";
-    */
-}
 $db = itservices_db_connect();
 
 // ###### Configuration for ISC DHCP Server ######

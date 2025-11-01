@@ -131,6 +131,7 @@ else {
 </form>
 </fieldset>
 <?php
+print("<span style=\"font-family: monospace; font-size: 115%\">\n");
 $files_found = false;
 foreach($debug_file_path as $file) {
     if (is_file($file)) {
@@ -148,5 +149,6 @@ print("<br />\n");
 if (!$files_found) {
     print("No debug logs found\n");
 }
+print("</span>\n");
 
 //==============================================================================

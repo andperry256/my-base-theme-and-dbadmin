@@ -33,7 +33,8 @@ function day_name($day,$language='en')
             'en' => [
                 "Sunday","Monday","Tuesday","Wednesday",
                 "Thursday","Friday","Saturday"
-        ]];
+            ]
+        ];
         return $name[$language][$day] ?? '';
     }
 }
@@ -66,12 +67,14 @@ function day_number($day,$language='en',$length='')
             'en' => [
                 "sun" => 0, "mon" => 1, "tue" => 2, "wed" => 3,
                 "thu" => 4, "fri" => 5, "sat" => 6
-        ]];
+            ]
+        ];
         $long_name = [
             'en' => [
                 "sunday" => 0, "monday" => 1, "tuesday" => 2, "wednesday" => 3,
                 "thursday" => 4, "friday" => 5, "saturday" => 6
-        ]];
+            ]
+        ];
         if ((isset($short_name[$language][$day])) && ($length != 'long')) {
             return $short_name[$language][$day];
         }
@@ -96,7 +99,8 @@ function month_name($month,$language='en')
             'en' => [
                 "","January","February","March","April", "May","June",
                 "July","August","September", "October","November","December"
-        ]];
+            ]
+        ];
         return $name[$language][$month] ?? '';
     }
 }
@@ -113,7 +117,8 @@ function short_month_name($month,$language='en')
             'en' => [
                 "","Jan","Feb","Mar","Apr","May","Jun",
                 "Jul","Aug","Sep","Oct","Nov","Dec"
-        ]];
+            ]
+        ];
         return $name[$language][$month] ?? '';
     }
 }
@@ -132,13 +137,15 @@ function month_number($month,$language='en',$length='')
                 "jan" => 1, "feb" => 2, "mar" => 3, "apr" => 4,
                 "may" => 5, "jun" => 6, "jul" => 7, "aug" => 8,
                 "sep" => 9, "oct" => 10, "nov" => 11, "dec" => 12
-        ]];
+            ]
+        ];
         $long_name = [
             'en' => [
                 "january" => 1, "february" => 2, "march" => 3, "april" => 4,
                 "may" => 5, "june" => 6, "july" => 7, "august" => 8,
                 "september" => 9, "october" => 10, "november" => 11, "december" => 12
-        ]];
+            ]
+        ];
         if ((isset($short_name[$language][$month])) && ($length != 'long')) {
             return $short_name[$language][$month];
         }
@@ -492,65 +499,65 @@ function date_of_easter($year)
 function church_calendar ($day,$month,$year)
 {
     $epiphany_sundays = [
-  "1st Sunday after Epiphany",
-  "2nd Sunday after Epiphany",
-  "3rd Sunday after Epiphany",
-  "4th Sunday after Epiphany",
-  "5th Sunday after Epiphany",
-  "6th Sunday after Epiphany"
+        "1st Sunday after Epiphany",
+        "2nd Sunday after Epiphany",
+        "3rd Sunday after Epiphany",
+        "4th Sunday after Epiphany",
+        "5th Sunday after Epiphany",
+        "6th Sunday after Epiphany"
     ];
     $moveable_sundays = [
-  "Septuagesima",
-  "Sexagesima",
-  "Quinquagesima",
-  "1st Sunday in Lent",
-  "2nd Sunday in Lent",
-  "3rd Sunday in Lent",
-  "4th Sunday in Lent",
-  "5th Sunday in Lent",
-  "Palm Sunday",
-  "Easter Sunday",
-  "1st Sunday after Easter",
-  "2nd Sunday after Easter",
-  "3rd Sunday after Easter",
-  "4th Sunday after Easter",
-  "5th Sunday after Easter",
-  "Sunday after Ascension",
-  "Whit Sunday",
-  "Trinity Sunday",
-  "1st Sunday after Trinity",
-  "2nd Sunday after Trinity",
-  "3rd Sunday after Trinity",
-  "4th Sunday after Trinity",
-  "5th Sunday after Trinity",
-  "6th Sunday after Trinity",
-  "7th Sunday after Trinity",
-  "8th Sunday after Trinity",
-  "9th Sunday after Trinity",
-  "10th Sunday after Trinity",
-  "11th Sunday after Trinity",
-  "12th Sunday after Trinity",
-  "13th Sunday after Trinity",
-  "14th Sunday after Trinity",
-  "15th Sunday after Trinity",
-  "16th Sunday after Trinity",
-  "17th Sunday after Trinity",
-  "18th Sunday after Trinity",
-  "19th Sunday after Trinity",
-  "20th Sunday after Trinity",
-  "21st Sunday after Trinity",
-  "22nd Sunday after Trinity",
-  "23rd Sunday after Trinity",
-  "24th Sunday after Trinity",
-  "25th Sunday after Trinity",
-  "26th Sunday after Trinity",
-  "27th Sunday after Trinity"
+        "Septuagesima",
+        "Sexagesima",
+        "Quinquagesima",
+        "1st Sunday in Lent",
+        "2nd Sunday in Lent",
+        "3rd Sunday in Lent",
+        "4th Sunday in Lent",
+        "5th Sunday in Lent",
+        "Palm Sunday",
+        "Easter Sunday",
+        "1st Sunday after Easter",
+        "2nd Sunday after Easter",
+        "3rd Sunday after Easter",
+        "4th Sunday after Easter",
+        "5th Sunday after Easter",
+        "Sunday after Ascension",
+        "Whit Sunday",
+        "Trinity Sunday",
+        "1st Sunday after Trinity",
+        "2nd Sunday after Trinity",
+        "3rd Sunday after Trinity",
+        "4th Sunday after Trinity",
+        "5th Sunday after Trinity",
+        "6th Sunday after Trinity",
+        "7th Sunday after Trinity",
+        "8th Sunday after Trinity",
+        "9th Sunday after Trinity",
+        "10th Sunday after Trinity",
+        "11th Sunday after Trinity",
+        "12th Sunday after Trinity",
+        "13th Sunday after Trinity",
+        "14th Sunday after Trinity",
+        "15th Sunday after Trinity",
+        "16th Sunday after Trinity",
+        "17th Sunday after Trinity",
+        "18th Sunday after Trinity",
+        "19th Sunday after Trinity",
+        "20th Sunday after Trinity",
+        "21st Sunday after Trinity",
+        "22nd Sunday after Trinity",
+        "23rd Sunday after Trinity",
+        "24th Sunday after Trinity",
+        "25th Sunday after Trinity",
+        "26th Sunday after Trinity",
+        "27th Sunday after Trinity"
     ];
     $advent_sundays = [
-  "Advent Sunday",
-  "2nd Sunday in Advent",
-  "3rd Sunday in Advent",
-  "4th Sunday in Advent"
+        "Advent Sunday",
+        "2nd Sunday in Advent",
+        "3rd Sunday in Advent",
+        "4th Sunday in Advent"
     ];
 
     if (dmy_to_dow($day,$month,$year) != 0) {

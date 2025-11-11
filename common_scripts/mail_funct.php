@@ -77,6 +77,7 @@ function output_mail($mail_info,$host,$attachments=[])
 {
     global $default_sender_email;
     global $alt_sender_email;
+    global $base_dir;
     foreach ($mail_info as $key => $value) {
         $mail_info[$key] = trim($value);
     }
@@ -126,8 +127,30 @@ function output_mail($mail_info,$host,$attachments=[])
 
             // Process message content
             if ((isset($mail_info['html_content'])) && (!empty($mail_info['html_content']))) {
-                // HTML content present
+
+                // Message has HTML content
                 $mail->IsHTML(true);
+                if (!empty($mail_info['embed_images'])) {
+
+                    // Process any embedded images
+                    $pos1 = strpos($mail_info['html_content'],'<img-embed');
+                    while ($pos1 !== false) {
+                        $pos2 = strpos($mail_info['html_content'],'>',$pos1);
+                        if ($pos2 !== false) {
+                            $embed_tag = substr($mail_info['html_content'],$pos1,$pos2+1-$pos1);
+                            $img_path = trim(substr($embed_tag,10),' >');
+                            $filename = pathinfo($img_path,PATHINFO_FILENAME);
+                            $ext = pathinfo($img_path,PATHINFO_EXTENSION);
+                            $mail->addEmbeddedImage("$base_dir/$img_path", $filename, "$filename.$ext");
+                            $mail_info['html_content'] = str_replace($embed_tag,"<img src=\"cid:$filename\"  style=\"max-width:100%;\"/>",$mail_info['html_content']);
+                            $pos1 = strpos($mail_info['html_content'],'<img-embed');
+                        }
+                        else {
+                            // This should not occur
+                            break;
+                        }
+                    }
+                }
                 $mail->Body = $mail_info['html_content'];
                 if ((isset($mail_info['plain_content'])) && (!empty($mail_info['plain_content']))) {
                     $mail->AltBody = $mail_info['plain_content'];

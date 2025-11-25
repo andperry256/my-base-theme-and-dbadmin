@@ -44,6 +44,54 @@ function display_sidebar_content()
     global $custom_pages_path,$custom_pages_url,$base_url,$relative_path;
     $db = admin_db_connect();
 
+    if (is_file("$custom_pages_path/$relative_path/key_actions.php")) {
+        include("$custom_pages_path/$relative_path/key_actions.php");
+
+        // Set key action for standard footer links to 'main'
+        if (!isset($key_action_mappings)) {
+            $key_action_mappings = [];
+        }
+        $key_action_mappings = array_merge($key_action_mappings,
+            [
+                'dba_sidebar_config' => 'main',
+                'dba_table_info' => 'main',
+                'dba_table_fields' => 'main',
+                'dba_relationships' => 'main',
+                'dba_change_log' => 'main',
+                'update_table_data1' => 'main',
+                'renumber_records1' => 'main',
+                'dbsync' => 'main',
+                'search_and_replace' => 'main',
+            ]
+        );
+    }
+    $action_filter = '';
+    if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']]))) {
+        // Action is itself a key action
+        update_session_var(['dba_key_action',$relative_path],$_GET['-action']);
+    }
+    elseif ((isset($_GET['-keyact'])) && (!empty($key_actions[$_GET['-keyact']]))) {
+        // Sidebar link has an associated key action
+        update_session_var(['dba_key_action',$relative_path],$_GET['-keyact']);
+    }
+    elseif ((isset($_GET['-action'])) &&
+            (!empty($key_action_mappings[$_GET['-action']])) &&
+            (isset($key_actions[$key_action_mappings[$_GET['-action']]]))) {
+        // Action is mapped to a key action
+        update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$_GET['-action']]);
+    }
+    elseif ((isset($_GET['-table'])) &&
+            ($base_table = get_base_table($_GET['-table'])) &&
+            (!empty($key_action_mappings[$base_table])) &&
+            (isset($key_actions[$key_action_mappings[$base_table]]))) {
+        // Table is mapped to a key action
+        update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$base_table]);
+    }
+    elseif ((count($_GET) == 0) && (!empty($key_actions['main']))) {
+        update_session_var(['dba_key_action',$relative_path],'main');
+    }
+    $latest_action = get_session_var(['dba_key_action',$relative_path]);
+
     if (is_file("$custom_pages_path/$relative_path/page_logo.php")) {
         include("$custom_pages_path/$relative_path/page_logo.php");
     }
@@ -52,9 +100,6 @@ function display_sidebar_content()
     }
     elseif (is_file("$custom_pages_path/$relative_path/page_logo.jpg")) {
         print("<a href=\"$base_url/$relative_path\"><img src=\"$custom_pages_url/$relative_path/page_logo.jpg\" /></a>\n");
-    }
-    if (is_file("$custom_pages_path/$relative_path/key_actions.php")) {
-        include("$custom_pages_path/$relative_path/key_actions.php");
     }
     print("<div class=\"halfspace\">&nbsp</div>\n");
     print("<table class=\"sidebar-table\">\n");
@@ -67,51 +112,6 @@ function display_sidebar_content()
         require("$custom_pages_path/$relative_path/custom_sidebar.php");
     }
     else {
-        if (isset($key_actions)) {
-            // Set key action for standard footer links to 'main'
-            if (!isset($key_action_mappings)) {
-                $key_action_mappings = [];
-            }
-            $key_action_mappings = array_merge($key_action_mappings,
-                [
-                    'dba_sidebar_config' => 'main',
-                    'dba_table_info' => 'main',
-                    'dba_table_fields' => 'main',
-                    'dba_relationships' => 'main',
-                    'dba_change_log' => 'main',
-                    'update_table_data1' => 'main',
-                    'renumber_records1' => 'main',
-                    'dbsync' => 'main',
-                    'search_and_replace' => 'main',
-                ]
-            );
-        }
-        $action_filter = '';
-        if ((isset($_GET['-action'])) && (!empty($key_actions[$_GET['-action']]))) {
-            // Action is itself a key action
-            update_session_var(['dba_key_action',$relative_path],$_GET['-action']);
-        }
-        elseif ((isset($_GET['-keyact'])) && (!empty($key_actions[$_GET['-keyact']]))) {
-            // Sidebar link has an associated key action
-            update_session_var(['dba_key_action',$relative_path],$_GET['-keyact']);
-        }
-        elseif ((isset($_GET['-action'])) &&
-                (!empty($key_action_mappings[$_GET['-action']])) &&
-                (isset($key_actions[$key_action_mappings[$_GET['-action']]]))) {
-            // Action is mapped to a key action
-            update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$_GET['-action']]);
-        }
-        elseif ((isset($_GET['-table'])) &&
-                ($base_table = get_base_table($_GET['-table'])) &&
-                (!empty($key_action_mappings[$base_table])) &&
-                (isset($key_actions[$key_action_mappings[$base_table]]))) {
-            // Table is mapped to a key action
-            update_session_var(['dba_key_action',$relative_path],$key_action_mappings[$base_table]);
-        }
-        elseif ((count($_GET) == 0) && (!empty($key_actions['main']))) {
-            update_session_var(['dba_key_action',$relative_path],'main');
-        }
-        $latest_action = get_session_var(['dba_key_action',$relative_path]);
         print("<table class=\"sidebar-table\">");
         $add_clause = 'ORDER BY display_order ASC';
         $query_result = mysqli_select_query($db,'dba_sidebar_config','*','',[],$add_clause);

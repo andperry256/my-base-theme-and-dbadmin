@@ -708,6 +708,46 @@ function log_user_out($db)
 }
 
 //==============================================================================
+/*
+Function authenticate_user_in_path
+
+This function scans the directory hierarchy for the current URI, looking for
+an 'authenticaion.php' script at each level, invoking it if found. Each such
+script has the option to set the variable $user_authenticated true or false
+according to its own local criteria. If authentication fails at any level,
+then no further checks are made.
+*/
+//==============================================================================
+
+function authenticate_user_in_path()
+{
+    global $location;
+    global $custom_pages_path;
+    $hierarchy = explode('/',ltrim($_SERVER['REQUEST_URI'],'/'));
+    if ($location == 'local') {
+        unset($hierarchy[0]);
+    }
+    $user_authenticated = true;
+    $path = $custom_pages_path;
+    foreach ($hierarchy as $element) {
+        $path .= "/$element";
+        if (is_dir($path)) {
+            if (is_file("$path/authentication.php")) {
+                include("$path/authentication.php");
+            }
+            if (!$user_authenticated) {
+                break;
+            }
+        }
+        else {
+            // Element not a directory - presumably a file and/or parameter string
+            break;
+        }
+    }
+    return $user_authenticated;
+}
+
+//==============================================================================
 
 function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$option,$category='')
 {

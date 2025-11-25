@@ -26,6 +26,7 @@ function run_session()
         // This should not occur
         exit ("ERROR - Unable to start session");
     }
+
     $global_session_id = session_id();
 
     $db_wp = wp_db_connect();
@@ -35,8 +36,8 @@ function run_session()
     }
     if ((isset($wpdb)) && (function_exists('have_posts'))) {
         // Running inside the WP environment
-        if (is_file('/var/www/html/user_authentication.php')) {
-            include('/var/www/html/user_authentication.php');
+        if (is_file("{$_SERVER['DOCUMENT_ROOT']}/user_authentication.php")) {
+            include("{$_SERVER['DOCUMENT_ROOT']}/user_authentication.php");
         }
         if (!isset($_SESSION['theme_mode'])) {
             $_SESSION['theme_mode'] = 'light';

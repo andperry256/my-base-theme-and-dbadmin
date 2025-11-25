@@ -3,5 +3,6 @@
 if [ -d "/home/$cpuser" ]; then
     wget -q -O - https://$domain/common_scripts/optimise_databases.php
 else
-    wget -q -O - http://home.andperry.com/$site_path/common_scripts/optimise_databases.php?site=$site_path
+    source /Utilities/localhost_url
+    wget -q -O - $localhost_url/$site_path/common_scripts/optimise_databases.php?site=$site_path
 fi

@@ -711,11 +711,12 @@ function log_user_out($db)
 /*
 Function authenticate_user_in_path
 
-This function scans the directory hierarchy for the current URI, looking for
-an 'authenticaion.php' script at each level, invoking it if found. Each such
-script has the option to set the variable $user_authenticated true or false
-according to its own local criteria. If authentication fails at any level,
-then no further checks are made.
+This function checks whether the user is authenicated for access to the post or
+page referenced by the current URL.
+
+Posts - A check is made against the 'access level' post meta value if present.
+Pages - The directory hierarchy is checked, running the authentication.php
+        script if found at any level.
 */
 //==============================================================================
 
@@ -723,15 +724,37 @@ function authenticate_user_in_path()
 {
     global $location;
     global $custom_pages_path;
+    $db = db_connect(WP_DBID);
     $hierarchy = explode('/',ltrim($_SERVER['REQUEST_URI'],'/'));
     if ($location == 'local') {
         unset($hierarchy[0]);
     }
-    $user_authenticated = true;
+    $user_authenticated = true;  // Default setting - can be overridden.
     $path = $custom_pages_path;
     foreach ($hierarchy as $element) {
         $path .= "/$element";
-        if (is_dir($path)) {
+        $where_clause = "post_name=? AND post_type='post'";
+        $where_values = ['s',$element];
+        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) {
+            /*
+            Element is a post name, which means that the current URI refers to a post. Check for the
+            presence of a post access level, and if found, check this against the current user access
+            level. Always break out of the loop here, as it is a final result.
+            */
+            $where_clause = 'post_id=? AND meta_key=?';
+            $where_values = ['i',$row['ID'],'s','access_level'];
+            $post_access_level = ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'wp_postmeta','*',$where_clause,$where_values,'')))
+                ? $row2['meta_value']
+                : null;
+            $user_authenticated = ($_SESSION[SV_ACCESS_LEVEL] >= $post_access_level);
+            break;
+        }
+        elseif (is_dir($path)) {
+            /*
+            Element is directory on a page path. Run the authentication.php script in the given
+            directory (if found), which is expected to set the $user_authenticated variable according
+            to its local criteria. Break out of the loop if authentication has failed at this point.
+            */
             if (is_file("$path/authentication.php")) {
                 include("$path/authentication.php");
             }
@@ -740,7 +763,10 @@ function authenticate_user_in_path()
             }
         }
         else {
-            // Element not a directory - presumably a file and/or parameter string
+            /*
+            Element not a directory or post name - presumably a filename and/or parameter string at
+            the end of the URI.
+            */
             break;
         }
     }

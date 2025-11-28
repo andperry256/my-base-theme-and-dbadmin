@@ -229,10 +229,10 @@ function output_header_links()
 
 //==============================================================================
 
-function authenticate_post($slug,$use_overriding_access_level=false)
+function authenticate_post($slug)
 {
     if (function_exists('custom_authenticate_post')) {
-        return custom_authenticate_post($slug,$use_overriding_access_level);
+        return custom_authenticate_post($slug);
     }
     else {
         return true;

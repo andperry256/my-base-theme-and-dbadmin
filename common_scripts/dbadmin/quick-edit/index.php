@@ -3,7 +3,7 @@
     This script is used to edit a page or post 'on the fly' without having to
     log on to the WordPress interface. It needs to be included from a custom
     page script for which there needs to be an associated authentication.php
-    script to ensure that this can only be executed if an appropriate used is
+    script to ensure that this can only be executed if an appropriate user is
     logged in.
 
     The following variables/constants need to be set prior to invoking this

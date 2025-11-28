@@ -103,16 +103,10 @@ else {
         }
 
         // Move down the page hierarchy to the given address, matching various items along the way.
-        $page_uri .= '/';
-        $hierarchy = [];
-        $tok = strtok($page_uri,'/');
-        while ($tok !== false) {
-            $hierarchy[$tok] = true;
-            $tok = strtok('/');
-        }
+        $hierarchy = explode('/',ltrim($page_uri,'/'));
         $uri_sub_path = '';
-        foreach ($hierarchy as $key => $val) {
-            $uri_sub_path .= "/$key";
+        foreach ($hierarchy as $element) {
+            $uri_sub_path .= "/$element";
             $subpath = ltrim($uri_sub_path,'/');
             set_header_image_paths($subpath,'page');
             if (is_file("$custom_pages_path/$uri_sub_path/footer.php")) {
@@ -137,10 +131,6 @@ else {
                     // Add inline stylesheet
                     include_inline_stylesheet("$custom_pages_path/$uri_sub_path/inline-styles.css");
                 }
-            }
-            if (is_file("$custom_pages_path/$uri_sub_path/authentication.php")) {
-                // Set access level for user authentication
-                include("$custom_pages_path/$uri_sub_path/authentication.php");
             }
             if (is_file("$custom_pages_path/$uri_sub_path/metadata.php")) {
                 // Include any meta tag variables
@@ -235,15 +225,6 @@ else {
     elseif (is_archive()) {
         set_header_image_paths('','archive');
     }
-
-  //================================================================================
-
-
-  //================================================================================
-
-  if ((function_exists('GetAccessLevel')) && (isset($minimum_access_level)) && (GetAccessLevel() < $minimum_access_level)) {
-      exit("<p>User authentication failed. Please return to the <a href=\"$base_url\">main site home page</a> and log back into the required facility.</p>");
-  }
 
 //================================================================================
 }  // Endif for simple/full mode

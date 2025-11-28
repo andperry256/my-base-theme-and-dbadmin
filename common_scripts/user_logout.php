@@ -6,7 +6,7 @@ if (session_status() ==  PHP_SESSION_NONE) {
 }
 if (is_file('/Config/linux_pathdefs.php')) {
     // Local server
-    $subdir = strtok(ltrim($_SERVER['REQUEST_URI'],'/'));
+    $subdir = strtok(ltrim($_SERVER['REQUEST_URI'],'/'),'/');
     include("{$_SERVER['DOCUMENT_ROOT']}/{$subdir}/path_defs.php");
 }
 else {

@@ -7,7 +7,6 @@ require("datepicker_include.php");
 require("widget_types.php");
 require("$root_dir/maintenance/db_master_location.php");
 $return_url = cur_url_par();
-$dummy = '{';  // To remove false positive from syntax checker
 //print("<script type=\"text/javascript\" src=\"$db_admin_url/form_funct.js\"></script>\n");
 include_inline_javascript("$db_admin_dir/form_funct.js");
 

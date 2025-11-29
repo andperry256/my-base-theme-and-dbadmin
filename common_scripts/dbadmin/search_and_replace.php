@@ -6,7 +6,6 @@ if (!function_exists('search_and_replace')) :
 function search_and_replace($local_db_name)
 {
     global $location, $server_station_id, $maintenance_dir;
-    $dummy = '))';  // To prevent false positive in syntax checker
 
     print("<h1>Search and Replace</h1>\n");
     $db = admin_db_connect();

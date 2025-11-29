@@ -735,7 +735,7 @@ function authenticate_user_in_path()
         $path .= "/$element";
         $where_clause = "post_name=? AND post_type='post'";
         $where_values = ['s',$element];
-        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) {
+        if ((!empty($element)) && ($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'')))) {
             /*
             Element is a post name, which means that the current URI refers to a post. Check for the
             presence of a post access level, and if found, check this against the current user access
@@ -746,7 +746,8 @@ function authenticate_user_in_path()
             $post_access_level = ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'wp_postmeta','*',$where_clause,$where_values,'')))
                 ? $row2['meta_value']
                 : null;
-            $user_authenticated = ($_SESSION[SV_ACCESS_LEVEL] >= $post_access_level);
+	        $user_access_level = $_SESSION[SV_ACCESS_LEVEL] ?? DEFAULT_ACCESS_LEVEL;
+            $user_authenticated = ($user_access_level >= $post_access_level);
             break;
         }
         elseif (is_dir($path)) {

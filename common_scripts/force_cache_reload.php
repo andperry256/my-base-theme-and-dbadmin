@@ -5,11 +5,11 @@ $today_date = date('ymd');
 if (isset($_GET['site'])) {
     $local_site_dir = $_GET['site'];
 }
-elseif (is_dir('/media/Data')) {
-    exit("Site not specified");
-}
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-if (!is_dir($base_dir)) {
+if (!isset($local_site_dir)) {
+    exit("Site not specified\n");
+}
+elseif (!is_dir($base_dir)) {
     exit("Site directory not found\n");
 }
 if (is_file("$base_dir/last_preset_link_version.php")) {

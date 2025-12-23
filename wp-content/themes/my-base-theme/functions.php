@@ -812,29 +812,24 @@ function check_more_directive()
 Function check_blog_template
 
 This function checks for the presence of a template number in the meta data field
-'use_template'. If a number is set and a matching template file found, the post
-if initialised with the contents of the template. The meta data field is reset
-to zero at the end.
+'use_template'. If a number is set and a matching template found, the post is
+initialised with the contents of the template. The meta data field is reset to
+zero at the end.
 */
 //================================================================================
 
 function check_blog_template()
 {
-    global $custom_theme_path;
     $post = get_post();
     if ($post->post_type != 'post') {
         return;
     }
     $db = db_connect(WP_DBID);
     $post_id = $post->ID;
-     $template_no = get_post_meta($post_id,'use_template',true);
-    if ((int)$template_no > 0) {
-        $template_path = "$custom_theme_path/blog_template_$template_no.txt";
-        if (is_file($template_path)) {
-            // Load content from template file
-            $new_content = file_get_contents($template_path);
-            mysqli_query($db,"UPDATE wp_posts SET post_content='$new_content' WHERE ID=$post_id");
-        }
+    $template_no = get_post_meta($post_id,'use_template',true);
+    if (!empty($template_no) && ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM post_templates WHERE id=$template_no")))) {
+        $content = addslashes($row['content']);
+        mysqli_query($db,"UPDATE wp_posts SET post_content='$content' WHERE ID=$post_id");
     }
     update_post_meta($post_id,'use_template',0);
 }

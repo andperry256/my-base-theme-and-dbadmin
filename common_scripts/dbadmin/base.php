@@ -104,7 +104,7 @@ function display_sidebar_content()
     print("<table class=\"sidebar-table\">\n");
     print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=main\">Main Page</td></tr>\n");
     if (is_file("$custom_pages_path/$relative_path/actions/run_cron.php")) {
-        print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=run_cron\">Run Cron</td></tr>\n");
+        print("<tr><td class=\"sidebar-item\"><a href=\"$base_url/$relative_path/?-action=run_cron&liveoutput\">Run Cron</td></tr>\n");
     }
     print("</table>");
     if (is_file("$custom_pages_path/$relative_path/custom_sidebar.php")) {

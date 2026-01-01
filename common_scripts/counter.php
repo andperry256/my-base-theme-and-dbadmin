@@ -130,7 +130,7 @@ if ($counter_enabled) {
         $today_count = mysqli_num_rows($query_result);
         print("<table cellpadding=5>\n");
         print("<tr><td>Count:</td><td>$counter_val</td></tr>\n");
-        print(sprintf("<tr><td>Since:</td><td>%02d %s $start_year</td></tr>\n",$start_day, short_month_name($start_month,'en')));
+        print(sprintf("<tr><td>Since:</td><td>%02d&nbsp;%s&nbsp;$start_year</td></tr>\n",$start_day, short_month_name($start_month,'en')));
         print(sprintf("<tr><td>Daily:</td><td>%01.1f</td></tr>\n",$counter_val/$days_counting));
         print("<tr><td>Today:</td><td>$today_count</td></tr>\n");
         print("</table>\n");

@@ -23,6 +23,7 @@ function get_url_content($url,$debug=false)
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     $content = curl_exec($ch);
     if (curl_errno($ch)) {
         $content = 'cURL Error: '.curl_error($ch);

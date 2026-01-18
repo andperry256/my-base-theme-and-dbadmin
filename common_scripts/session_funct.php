@@ -14,11 +14,12 @@ if (!defined('SESSION_FUNCT_DEFINED')):
 */
 //================================================================================
 
-function run_session()
+function run_session($noclose=false)
 {
     global $wpdb;
     global $global_session_vars;
     global $global_session_id;
+    global $saved_form_data;
     if ((!session_id()) && (!headers_sent())) {
         session_start();
     }
@@ -28,6 +29,10 @@ function run_session()
     }
 
     $global_session_id = session_id();
+    if (isset($_SESSION['form_data'])) {
+        $saved_form_data = $_SESSION['form_data'];
+        unset($_SESSION['form_data']);
+    }
 
     $db_wp = wp_db_connect();
     if (!$db_wp) {
@@ -137,7 +142,9 @@ function run_session()
         }
 
         // Close the session.
-        session_write_close();
+        if (!$noclose) {
+            session_write_close();
+        }
     }
 
     /*

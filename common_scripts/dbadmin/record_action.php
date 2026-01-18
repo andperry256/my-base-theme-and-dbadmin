@@ -15,6 +15,10 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 if ((!session_id()) && (!headers_sent())) {
     session_start();
 }
+if (!session_id()) {
+    // This should not occur
+    exit ("ERROR - Unable to start session");
+}
 
 // Interpret the URL parameters
 if (isset($_GET['-action'])) {
@@ -70,7 +74,7 @@ if (($action == 'edit') && (isset($_POST['save_as_new']))) {
     update_session_var(['dba_action',$relative_path],$action);
     $record_id = '';
 }
-run_session();
+run_session(true);
 
 // Save all the $_GET and $_POST variables for use by the next script
 if (session_var_is_set('get_vars')) {
@@ -192,6 +196,8 @@ if (save_record($record,$old_record_id,$new_record_id)) {
 }
 else {
     // An error condition has occurred
+    $_SESSION['form_data'] = $_POST;
+    session_write_close();
     header("Location: $base_url/$relative_path/?-action=$action&-table=$table&-recordid=$old_record_id&-saveresult=0");
     exit;
 }

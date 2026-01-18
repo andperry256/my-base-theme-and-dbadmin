@@ -1019,6 +1019,7 @@ function handle_record($action,$params)
 {
     global $base_url, $base_dir, $db_admin_url, $relative_path, $location, $presets;
     global $select_this_record;
+    global $saved_form_data;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
 
@@ -1076,7 +1077,6 @@ function handle_record($action,$params)
         }
         else {
             print("<p class=\"highlight-error\">".get_session_var('error_message'));
-            print("&nbsp; <a href=\"javascript:history.go(-1)\"><button>Go Back</button></a></p>\n");
             delete_session_var('error_message');
         }
         if (!empty(get_session_var('save_info'))) {
@@ -1209,26 +1209,37 @@ function handle_record($action,$params)
                 */
                 if (isset($_GET['-saveresult'])) {
                     $widget_type = $row3['widget_type'];
-                    if ($_GET['-saveresult'] == 1) {
-                        /*
-                        Condition indicates that record has been successfully saved.
-                        The query to select the record (see above) should therefore
-                        have executed successfully with a result.
-                        */
-                        $value = $row[$field_name];
-                    }
-                    elseif ($widget_type == 'checkbox') {
-                        $value = (session_var_is_set(['post_vars',"field_$field_name"]))
-                            ? 1
-                            : 0;
-                    }
-                    else {
-                        $value = get_session_var(['post_vars',"field_$field_name"]);
-                        if (empty($value)) {
-                            $value = (query_field_type($db,$base_table,$field_name) == 's')
-                                ? ''
-                                : 0;
-                        }
+                    switch ($_GET['-saveresult']) {
+                        case 1:
+                            // Record successfully saved - load fields from updated record
+                            $value = $row[$field_name];
+                            break;
+
+                        case 0:
+                            // Error in saving record - load saved form fields
+                            if (isset($saved_form_data)) {
+                                if ($widget_type == 'checkbox') {
+                                    $value = (isset($saved_form_data["field_$field_name"]))
+                                        ? 1
+                                        : 0;
+                                }
+                                else {
+                                    $value = $saved_form_data["field_$field_name"] ?? null; // Should be set anyway
+                                    if (empty($value)) {
+                                        $value = (query_field_type($db,$base_table,$field_name) == 's')
+                                            ? ''
+                                            : 0;
+                                    }
+                                }
+                            }
+                            else {
+                                // This should not occur
+                            }
+                            break;
+
+                        default:
+                            // This should not occur
+                            break;
                     }
                 }
                 elseif (($action == 'edit') || ($action == 'update')) {

@@ -494,7 +494,9 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin)) {
         print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=dbsync\">Sync&nbsp;Databases</a>");
         print("&nbsp;&nbsp; <a href=\"$base_url/$relative_path/?-action=search_and_replace\">Search&nbsp;&amp;&nbsp;Replace</a>");
     }
-    print("&nbsp;&nbsp; <a href=\"$base_url/common_scripts/user_logout.php\">Logout</a>");
+    if (empty($no_logout_link_at_foot)) {
+        print("&nbsp;&nbsp; <a href=\"$base_url/common_scripts/user_logout.php\">Logout</a>");
+    }
     print("</p>\n");
 }
 print("<script type=\"text/javascript\" src=\"$db_admin_url/no_resubmit.js\"></script>\n");

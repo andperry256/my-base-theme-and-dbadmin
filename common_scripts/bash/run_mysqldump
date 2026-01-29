@@ -1,0 +1,13 @@
+#!/bin/bash
+host=$1
+user=$2
+password=$3
+dbname=$4
+sql_script=$5
+shift 5
+options=$@
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+base_url="$(php $script_dir/../base_url.php)"
+root_dir="$(php $script_dir/../root_dir.php)"
+exclusions=$(wget -q -O - "$base_url/common_scripts/mysqldump_exclusions.php?dbname=$dbname");
+mysqldump --host=$host --user=$user --password=$password $options $exclusions $dbname > $root_dir/mysql_backup/$dbname/$sql_script.sql

@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ~
+if [ ! -e "common_bash" ]; then
+    ln -s ./public_html/common_scripts/bash common_bash
+fi

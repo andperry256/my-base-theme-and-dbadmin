@@ -31,7 +31,6 @@ function run_session($noclose=false)
     $global_session_id = session_id();
     if (isset($_SESSION['form_data'])) {
         $saved_form_data = $_SESSION['form_data'];
-        unset($_SESSION['form_data']);
     }
 
     $db_wp = wp_db_connect();

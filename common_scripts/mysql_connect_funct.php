@@ -175,3 +175,46 @@ if (!function_exists('itservices_db_connect')) {
 }
 
 //==============================================================================
+
+function db_debug_db_name($db)
+{
+    $query_result = mysqli_query($db, "SELECT DATABASE()");
+    if ($query_result) {
+        if (($row = mysqli_fetch_row($query_result)) && ($row[0])) {
+            print("DB Name: {$row[0]}<br />");
+        }
+        else {
+            print("DB name not available<br />");
+        }
+    }
+}
+
+//==============================================================================
+
+function db_debug_affected_rows($db)
+{
+    print("Affected rows: ".mysqli_affected_rows($db)."<br />");
+}
+
+//==============================================================================
+
+function db_debug_connection_profile($db)
+{
+    echo "<b>Connection Profile:</b><br />";
+    echo "<b>Host Info:</b> " . mysqli_get_host_info($db) . "<br>";
+    $resUser = mysqli_query($db, "SELECT USER(), CURRENT_USER()");
+    $rowUser = mysqli_fetch_row($resUser);
+    echo "<b>Logged in as:</b> {$rowUser[0]}<br>";
+    echo "<b>Matched User Rule:</b> {$rowUser[1]}<br>";
+    $resRO = mysqli_query($db, "SHOW VARIABLES LIKE 'read_only'");
+    $rowRO = mysqli_fetch_assoc($resRO);
+    echo "<b>Server Read-Only Mode:</b> " . ($rowRO['Value'] ?? 'OFF') . "<br>";
+    $resPriv = mysqli_query($db, "SHOW GRANTS FOR CURRENT_USER()");
+    echo "<b>Your Permissions:</b><br><ul>";
+    while ($rowPriv = mysqli_fetch_row($resPriv)) {
+        echo "<li>{$rowPriv[0]}</li>";
+    }
+    echo "</ul>";
+}
+
+//==============================================================================

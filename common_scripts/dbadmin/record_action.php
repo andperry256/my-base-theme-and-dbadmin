@@ -197,7 +197,6 @@ if (save_record($record,$old_record_id,$new_record_id)) {
 else {
     // An error condition has occurred
     $_SESSION['form_data'] = $_POST;
-    session_write_close();
     header("Location: $base_url/$relative_path/?-action=$action&-table=$table&-recordid=$old_record_id&-saveresult=0");
     exit;
 }

@@ -7,15 +7,13 @@ function run_db_sync_command($command,$message='',$verbose=false)
 {
     global $eol;
     global $mysql_error_log;
+    global $password2;
     if ($verbose) {
-        print(str_replace(REAL_DB_PASSWD,'****',$command).$eol);
+        print(str_replace($password2,'****',$command).$eol);
     }
     exec($command);
     if (strpos($command,'2>') !== false) {
         output_mysql_error_log();
-    }
-    if (is_file($mysql_error_log)) {
-        unlink($mysql_error_log);
     }
     if (!empty($message)) {
         print("$message.$eol");
@@ -39,6 +37,7 @@ function output_mysql_error_log()
                 print("$line$eol");
             }
         }
+        unlink($mysql_error_log);
     }
 }
 
@@ -53,9 +52,11 @@ function run_single_db_sync($dbid,$user,$password,$direction,$verbose=false)
     global $main_domain;
     global $mysql_error_log;
     global $online_port;
+    global $password2;
     global $private_key_path;
     global $server_station_id;
 
+    $password2 = $password;
     $eol = isset($_SERVER['REMOTE_ADDR']) ? "<br />\n" : "\n";
     $local_mysql_backup_dir = "/media/Data/Users/Common/Documents/MySQL_Backup/$server_station_id";
     $rsync_command = "rsync -r -e \"ssh -p $online_port -l $cpanel_user -i $private_key_path\"";

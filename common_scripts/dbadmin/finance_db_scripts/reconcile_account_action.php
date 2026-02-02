@@ -153,7 +153,7 @@ elseif ($account_transaction == 'NEW') {
 // ==================== No Action ====================
 
 elseif (!empty($source_file)) {
-    $user_message = "<p>Invalid import file.</p>\n";
+    $user_message = "<p>Invalid import file (name must begin with account label).</p>\n";
 }
 elseif (($bank_transaction == 'null') || ($account_transaction == 'null')) {
     $user_message = "<p>No action specified.</p>\n";

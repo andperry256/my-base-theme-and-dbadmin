@@ -1,4 +1,16 @@
 #!/bin/bash
+# This script is called (normally via SSH to a remote server) to run the mysql
+# command on a given database.
+#
+# The following parameters are mandatory:
+# 1 - Hostname
+# 2 - Username
+# 3 - Password
+# 4 - Database
+# 5 - Source script file (without the .sql extension)
+#
+# Any further parameters will go directly as options in the mysqldump command.
+#
 host=$1
 user=$2
 password=$3

@@ -37,7 +37,7 @@ $import_table = "_ctab_bank_import_$account_label";
 // ==================== Transaction Import ====================
 
 $source_file = basename($_FILES['import_file']['name']);
-if (!empty($source_file)) {
+if ((!empty($source_file)) && (substr($source_file,0,strlen($account_label)) == $account_label)) {
 
     // Add to bank import table from CSV file
     if (strtolower(pathinfo($source_file,PATHINFO_EXTENSION)) == 'csv') {
@@ -152,8 +152,11 @@ elseif ($account_transaction == 'NEW') {
 
 // ==================== No Action ====================
 
+elseif (!empty($source_file)) {
+    $user_message = "<p>Invalid import file.</p>\n";
+}
 elseif (($bank_transaction == 'null') || ($account_transaction == 'null')) {
-        $user_message = "<p>No action specified.</p>\n";
+    $user_message = "<p>No action specified.</p>\n";
 }
 
 // ==================== Non-matching Amounts ====================

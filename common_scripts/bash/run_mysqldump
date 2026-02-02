@@ -1,13 +1,37 @@
 #!/bin/bash
+# This script is called (normally via SSH to a remote server) to run the mysqldump
+# command on a given database.
+#
+# The following parameters are mandatory:
+# 1 - Hostname
+# 2 - Username
+# 3 - Password
+# 4 - Database
+# 5 - Destination script file (without the .sql extension)
+#
+# The following parameters may optionally be passed:
+# 6 - Set to '-full' to include designated nosync tables in a full database dump.
+# 6&7 - Set to '-t <table name>' to perform a dump on a single table only.
+# Any further parameters will go directly as options in the mysqldump command.
+#
 host=$1
 user=$2
 password=$3
 dbname=$4
 sql_script=$5
 shift 5
-options=$@
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 base_url="$(php $script_dir/../base_url.php)"
 root_dir="$(php $script_dir/../root_dir.php)"
-exclusions=$(wget -q -O - "$base_url/common_scripts/mysqldump_exclusions.php?dbname=$dbname");
-mysqldump --host=$host --user=$user --password=$password $options $exclusions $dbname > $root_dir/mysql_backup/$dbname/$sql_script.sql
+exclusions_url="$base_url/common_scripts/mysqldump_exclusions.php?dbname=$dbname"
+table=""
+if [ "$1" == "-full" ]; then
+    exclusions_url="$exclusions_url?nonst"
+    shift
+elif [ "$1" == "-t" ]; then
+    $table="$2"
+    shift 2
+fi
+exclusions=$(wget -q -O - "$exclusions_url");
+options=$@
+mysqldump --host=$host --user=$user --password=$password $options $exclusions $dbname $table > $root_dir/mysql_backup/$dbname/$sql_script.sql

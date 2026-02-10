@@ -28,6 +28,23 @@ function run_session($noclose=false)
         exit ("ERROR - Unable to start session");
     }
 
+    //============================================================================
+    // Set following condition true for debugging
+    //============================================================================
+    if (false) {
+        $ofp = fopen("{$_SERVER['DOCUMENT_ROOT']}/sessiondata.txt",'w');
+        $uri = str_replace('%','%%',$_SERVER['REQUEST_URI']);
+        fprintf($ofp,"$uri\n");
+        foreach ($_SESSION as $key => $value) {
+            if (!is_array($value)) {
+                $value = str_replace('%','%%',$value);
+                fprintf($ofp,"$key => $value\n");
+            }
+        }
+        fclose($ofp);
+    }
+    //============================================================================
+
     $global_session_id = session_id();
     if (isset($_SESSION['form_data'])) {
         $saved_form_data = $_SESSION['form_data'];

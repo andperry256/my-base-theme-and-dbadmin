@@ -4,14 +4,14 @@ if (!defined('DATE_FUNCT_DEFINED')):
 //==============================================================================
 
 if (!defined('TODAY_DATE')) {
-define('TODAY_DATE',date('Y-m-d'));
+    define('TODAY_DATE',date('Y-m-d'));
 }
 
 if (is_file(__DIR__."../alt_date_funct.php")) {
-require(__DIR__."../alt_date_funct.php");
+    include(__DIR__."../alt_date_funct.php");
 }
 elseif( (isset($base_dir)) &&  (is_file("$base_dir/alt_date_funct.php"))) {
-require("$base_dir/alt_date_funct.php");
+    include("$base_dir/alt_date_funct.php");
 }
 
 //==============================================================================

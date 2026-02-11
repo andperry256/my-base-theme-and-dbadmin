@@ -621,7 +621,7 @@ function record_scheduled_transaction($account,$seq_no,$verbose=false)
         // Send e-mail alert if required
         if (!empty($row['email_alert_id'])) {
             $url = "$db_admin_url/finance_db_scripts/send_email_alert.php";
-            $url .= "?site=$local_site_dir&recid={$row['email_alert_id']}&dt={$row['date']}";
+            $url .= "?&recid={$row['email_alert_id']}&dt={$row['date']}";
             if ($row['debit_amount'] > 0) {
                 $dummy = get_url_content("$url&amt=$debit_amount");
             }

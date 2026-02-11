@@ -3,14 +3,8 @@
 
 ini_set('error_reporting','E_ALL');
 require("functions.php");
-if (isset($_GET['site'])) {
-    $local_site_dir = $_GET['site'];
-    require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-    require("$base_dir/mysql_connect.php");
-}
-else {
-    exit("Site parameter not specified");
-}
+require(__DIR__.'/get_local_site_dir.php');
+require("$base_dir/mysql_connect.php");
 if (isset($_GET['table'])) {
     $table = $_GET['table'];
 }

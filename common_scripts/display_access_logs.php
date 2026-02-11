@@ -29,20 +29,9 @@
 
 print("<script type=\"text/javascript\" src=\"$base_url/common_scripts/js_for_display_access_logs.js\"></script>\n");
 require("allowed_hosts.php");
-if (isset($_GET['site'])) {
-    $local_site_dir = $_GET['site'];
-}
-if (is_file("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php")) {
-    require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-}
-else {
-    exit("Path definitions script not found");
-}
+require(__DIR__.'/get_local_site_dir.php');
 if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER['REMOTE_ADDR']))) {
     exit("Authentication failure");
-}
-if (!isset($local_site_dir)) {
-    exit("Site not specified");
 }
 if ((!isset($access_logs_dir)) || (!is_dir($access_logs_dir))) {
     exit("Access log directory not found");
@@ -102,15 +91,15 @@ $select2 = str_replace('$file1','$file2',$select1);
 $select2 = str_replace('count_summary','full_log',$select2);
 print("<table>\n");
 print("<tr><td>Count Summary:</td><td>$select1</td>");
-print("<td><a href=\"$base_url/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
+print("<td><a href=\"$base_url/common_scripts/display_access_logs.php?file=$current_file&mode=count_summary\">Select</a></td></tr>\n");
 print("<tr><td>Full Log:</td><td>$select2</td>");
-print("<td><a href=\"$base_url/common_scripts/display_access_logs.php?site=$local_site_dir&file=$current_file&mode=full_log\">Select</a></td></tr>\n");
+print("<td><a href=\"$base_url/common_scripts/display_access_logs.php?file=$current_file&mode=full_log\">Select</a></td></tr>\n");
 print("<tr><td colspan=3>");
 if ($incexc =='exclude-me') {
-    print("<a href=\"./display_access_logs.php?site=$local_site_dir&file=$current_file&mode=$display_mode&include-me\">Include Me</a>");
+    print("<a href=\"./display_access_logs.php?file=$current_file&mode=$display_mode&include-me\">Include Me</a>");
 }
 else {
-    print("<a href=\"./display_access_logs.php?site=$local_site_dir&file=$current_file&mode=$display_mode&exclude-me\">Exclude Me</a>");
+    print("<a href=\"./display_access_logs.php?file=$current_file&mode=$display_mode&exclude-me\">Exclude Me</a>");
 }
 print("</td></tr>");
 print("</table>\n");

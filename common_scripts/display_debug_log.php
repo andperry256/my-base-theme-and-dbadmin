@@ -2,26 +2,12 @@
 //==============================================================================
 
 require("allowed_hosts.php");
-if (isset($_GET['site'])) {
-    $local_site_dir = $_GET['site'];
-}
-if (is_file("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php")) {
-    require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-}
-else {
-    exit("Path definitions script not found");
-}
+require(__DIR__.'/get_local_site_dir.php');
 print("<style>\n");
 print("html { font-size: 100%; font-family: Arial, Helvetica, sans-serif; }\n");
 print("</style>\n");
 if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER['REMOTE_ADDR']))) {
     exit("Authentication failure");
-}
-if (!isset($local_site_dir)) {
-    exit("Site not specified");
-}
-if (!isset($base_dir)) {
-    exit("Site structure not present");
 }
 
 // Set up debug file paths

@@ -2,16 +2,7 @@
 //==============================================================================
 
 $today_date = date('ymd');
-if (isset($_GET['site'])) {
-    $local_site_dir = $_GET['site'];
-}
-require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
-if (!isset($local_site_dir)) {
-    exit("Site not specified\n");
-}
-elseif (!is_dir($base_dir)) {
-    exit("Site directory not found\n");
-}
+require(__DIR__.'/get_local_site_dir.php');
 if (is_file("$base_dir/last_preset_link_version.php")) {
     include("$base_dir/last_preset_link_version.php");
 }

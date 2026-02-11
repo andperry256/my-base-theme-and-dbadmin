@@ -2,17 +2,12 @@
 //==============================================================================
 
 if (!isset($argc)) {
-    exit("Script allowed in command line mode only\n");
+    exit("Script valid in command line mode only\n");
 }
-$tok1 = strtok(__DIR__,'/');
-$tok2 = strtok('/');
-$tok3 = strtok('/');
-$root_dir = "/$tok1/$tok2";
-if ($tok3 != 'public_html') {
-    // Extra directory level in special cases
-    $root_dir .= "/$tok3";
+elseif (substr(__DIR__,0,5) != '/home') {
+    exit("Script valid on online server only\n");
 }
-require("$root_dir/public_html/path_defs.php");
+require(__DIR__.'/get_local_site_dir.php');
 $content = file("$root_dir/maintenance/disc_storage.txt");
 if (empty($content)) {
     exit("Disc storage data not found\n");

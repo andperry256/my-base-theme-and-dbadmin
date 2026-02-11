@@ -2,15 +2,7 @@
 //==============================================================================
 
 require("allowed_hosts.php");
-if (is_file("/Config/linux_pathdefs.php")) {
-    if (!isset($_GET['site'])) {
-        exit("Site not specified");
-    }
-    else {
-        $local_site_dir = $_GET['site'];
-    }
-}
-require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+require(__DIR__.'/get_local_site_dir.php');
 if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER['REMOTE_ADDR']))) {
     exit("Authentication Failure");
 }

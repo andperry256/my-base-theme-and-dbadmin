@@ -2,7 +2,7 @@
 //==============================================================================
 
 $dt = date("YmdHis");
-header("Location: ./display_debug_log.php?site={$_GET['site']}&dt=$dt");
+header("Location: ./display_debug_log.php?dt=$dt");
 exit;
 
 //==============================================================================

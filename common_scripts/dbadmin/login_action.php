@@ -4,9 +4,7 @@
 if (session_status() ==  PHP_SESSION_NONE) {
     session_start();
 }
-
-$local_site_dir = $_GET['site'];
-require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+require(__DIR__.'/get_local_site_dir.php');
 require_once("$base_dir/mysql_connect.php");
 $db = db_connect($auth_dbid);
 $username = $_POST['username'];

@@ -98,7 +98,7 @@ if ((!empty($source_file)) && (substr($source_file,0,strlen($account_label)) == 
 
 elseif ($bank_transaction == 'BULK') {
     // Load action screen for bulk reconcile.
-    header("Location: $base_url/$relative_path/?-action=bulk_reconcile&site=$local_site_dir&account=$account");
+    header("Location: $base_url/$relative_path/?-action=bulk_reconcile&account=$account");
     exit;
 }
 

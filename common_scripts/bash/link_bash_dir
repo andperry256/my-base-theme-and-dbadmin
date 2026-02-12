@@ -1,9 +1,7 @@
 #!/bin/bash
-# Because this script is for the online server only, it is safe to
-# determine the setting of $root_dir from the local script path.
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-root_dir="$(php $script_dir/../root_dir.php)"
-if [ -d "$root_dir" ] && [ "${root_dir:0:5}" == "/home" ]; then
+source $script_dir/set_path_vars
+if [ "$location" == "real" ]; then
     if [ ! -e "$root_dir/common_bash" ]; then
         ln -s $root_dir/public_html/common_scripts/bash $root_dir/common_bash
     fi

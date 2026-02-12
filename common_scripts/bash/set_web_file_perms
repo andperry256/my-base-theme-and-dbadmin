@@ -1,6 +1,6 @@
 #!/bin/bash
-# This script must be invoked via the 'source' directive
-# with all required variables preset.
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $script_dir/set_path_vars
 if [ -d "$root_dir/public_html" ]; then
     echo "Processing [public_html]"
     cd $root_dir/public_html

@@ -9,12 +9,7 @@ if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER[
 require("$base_dir/mysql_connect.php");
 $add_tags = ((isset($_SERVER['HTTP_USER_AGENT'])) && (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'wget') === false));
 foreach ($dbinfo as $dbid => $info) {
-    if ($location == 'local') {
-        $dbname = $info[0];
-    }
-    else {
-        $dbname = $info[1];
-    }
+    $dbname = ($location == 'local') ? $info[0] : $info[1];
     print("\n");
     if ($add_tags) {
         print('<h1>');

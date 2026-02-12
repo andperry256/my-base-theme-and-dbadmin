@@ -1,11 +1,17 @@
 #!/bin/bash
-# This script must be invoked from the calling script using the 'source'
-# directive and with the variables $root_dir and $site_path preset.
-# The variable $action is optionally set by the calling script.
-if [ -d "$root_dir" ]; then
+# Because this script is for the online server only, it is safe to
+# determine the settings of $root_dir and $site_path from the local
+# script path.
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+root_dir="$(php $script_dir/../root_dir.php)"
+site_path="$(php $script_dir/../local_site_dir.php)"
+if [ -d "$root_dir" ] && [ "${root_dir:0:5}" == "/home" ]; then
     if [ "$action" == "" ]; then
         action=`wget -q -O - https://remote.andperry.com/crontab_action.php`
     fi
+
+    # The variable $action is optional, but to use it, the script must be invoked
+    # by a 'source' directive with the variable preset.
     if [ "$action" == "save" ]; then
         echo "Saving crontab ..."
         crontab -l > $root_dir/maintenance/crontab.txt

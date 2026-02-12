@@ -1,7 +1,9 @@
 #!/bin/bash
-# This script must be invoked from the calling script using the 'source'
-# directive and with the variable $root_dir preset.
-if [ -d "$root_dir" ]; then
+# Because this script is for the online server only, it is safe to
+# determine the setting of $root_dir from the local script path.
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+root_dir="$(php $script_dir/../root_dir.php)"
+if [ -d "$root_dir" ] && [ "${root_dir:0:5}" == "/home" ]; then
     echo "Re-caching pages ..."
     php $root_dir/public_html/common_scripts/recache_all_pages.php
 fi

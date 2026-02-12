@@ -1,8 +1,9 @@
 #!/bin/bash
-# This file must be invoked via the 'source' directive with all required variables preset
-if [ -d "/home/$cpuser" ]; then
-    wget -q -O - https://$domain/common_scripts/optimise_databases.php
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $script_dir/set_path_vars
+if [ "$location" == "real" ]; then
+    wget -q -O - https://$online_domain/common_scripts/optimise_databases.php
 else
     source /Utilities/localhost_url
-    wget -q -O - $localhost_url/$site_path/common_scripts/optimise_databases.php
+    wget -q -O - $localhost_root_url/$site_path/common_scripts/optimise_databases.php
 fi

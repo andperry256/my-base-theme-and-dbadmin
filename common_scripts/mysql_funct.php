@@ -124,6 +124,7 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
     $date_and_time = date('Y-m-d H:i:s');
     $fatal_error_message = "There has been a fatal error, details of which have been logged.$eol";
     $fatal_error_message .= "Please report this to the webmaster quoting code <strong>$error_id</strong>.$eol";
+    while (mysqli_more_results($db)) mysqli_next_result($db);
     try {
         $result = mysqli_query($db,$query);
     }

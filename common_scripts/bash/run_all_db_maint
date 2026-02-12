@@ -1,0 +1,9 @@
+#!/bin/bash
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $script_dir/set_path_vars
+cd $root_dir/public_html/wp-custom-scripts/pages/dbadmin
+for dir in *; do
+    if [ -d "./$dir/tables" ]; then
+        $phpcmd $root_dir/public_html/common_scripts/run_db_maint.php $cpuser $site_path dbadmin/$dir $1 $2 $3
+    fi
+done

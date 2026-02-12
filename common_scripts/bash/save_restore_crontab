@@ -1,13 +1,14 @@
 #!/bin/bash
+action=$1
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
-
-    # The variable $action is optional on entry to the script, but to use a specific
-    # value, the script must be invoked by a 'source' directive with the variable preset.
     if [ "$action" == "" ]; then
+        # The variable $action is optional on calling the script, but can be
+        # updated here if not yeat set.
         action=`wget -q -O - https://remote.andperry.com/crontab_action.php`
     fi
+
     if [ "$action" == "save" ]; then
         echo "Saving crontab ..."
         crontab -l > $root_dir/maintenance/crontab.txt

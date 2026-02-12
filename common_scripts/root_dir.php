@@ -1,6 +1,6 @@
 <?php
 if (isset($argc)) {
-    require(__DIR__."/../path_defs.php");
+    include(__DIR__.'/include_pathdefs.php');
     exit($root_dir);
 }
 else {

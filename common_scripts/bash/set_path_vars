@@ -30,3 +30,4 @@ else
     online_domain="$(php $script_dir/../main_domain.php $site_path)"
     source /Config/php_pars
 fi
+script_dir=''

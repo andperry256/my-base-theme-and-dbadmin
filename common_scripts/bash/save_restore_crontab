@@ -5,7 +5,7 @@ source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
     if [ "$action" == "" ]; then
         # The variable $action is optional on calling the script, but can be
-        # updated here if not yeat set.
+        # updated here if not yet set.
         action=`wget -q -O - https://remote.andperry.com/crontab_action.php`
     fi
 

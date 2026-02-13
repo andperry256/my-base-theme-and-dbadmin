@@ -7,12 +7,7 @@ while [ "$1" != "" ]; do
     cd $domain_path
     echo ""
     echo $(date)." - $domain_path"
-    cmd="$phpcmd ./common_scripts/wp-cli/wp-cli.phar cron event run --due-now"
-    if [ -f "/Config/localhost.php" ]; then
-        # Allow root access on local host
-        cmd="$cmd --allow-root"
-    fi
-    $cmd
+    $phpcmd "$domain_path/common_scripts/wp-cli/wp-cli.phar" cron event run --due-now $( [ "$location" == "local" ] && echo "--allow-root" )
 done
 wget -q -O - https://$online_domain/common_scripts/wp_cron.php
 update_cron=$(wget -q -O - https://remote.andperry.com/get_crontab_update_status.php?sitepath=$site_path)

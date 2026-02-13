@@ -1,13 +1,7 @@
 #!/bin/bash
-if [ "$root_dir" == "" ]; then
-    echo "Root directory not set"
-    exit
-fi
-if [ -d "$sub_root_dir/public_html/wp-content/themes" ]; then
-    themes_dir="$sub_root_dir/public_html/wp-content/themes"
-else
-    themes_dir="$root_dir/public_html/wp-content/themes"
-fi
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $script_dir/set_path_vars
+themes_dir="$root_dir/public_html/wp-content/themes"
 source "$root_dir/public_html/common_scripts/bash/set_default_theme"
 echo "Default theme = $default_theme"
 

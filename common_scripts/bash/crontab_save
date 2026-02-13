@@ -2,5 +2,8 @@
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
-    $script_dir/crontab_save_restore save
+    echo "Saving crontab ..."
+    crontab -l > $root_dir/maintenance/crontab.txt
+    php $root_dir/public_html/common_scripts/crontab_save.php $site_path
+    rm $root_dir/maintenance/crontab.txt
 fi

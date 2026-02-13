@@ -12,7 +12,7 @@ if [ "$location" == "real" ]; then
     if [ "$action" == "save" ]; then
         echo "Saving crontab ..."
         crontab -l > $root_dir/maintenance/crontab.txt
-        php $root_dir/public_html/common_scripts/save_crontab.php $site_path
+        php $root_dir/public_html/common_scripts/crontab_save.php $site_path
         rm $root_dir/maintenance/crontab.txt
     elif [ "$action" == "restore" ]; then
         echo "Restoring crontab ..."

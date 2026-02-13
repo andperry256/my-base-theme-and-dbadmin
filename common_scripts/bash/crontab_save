@@ -2,5 +2,5 @@
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
-    $script_dir/save_restore_crontab save
+    $script_dir/crontab_save_restore save
 fi

@@ -5,6 +5,7 @@
 # for a local server, where a single 'common_scripts' directory is shared by
 # all sites.
 #
+saved_script_dir=$script_dir
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 if [ "${script_dir:0:5}" == "/home" ]; then
     # Online Server
@@ -30,4 +31,4 @@ else
     online_domain="$(php $script_dir/../main_domain.php $site_path)"
     source /Config/php_pars
 fi
-script_dir=''
+script_dir=$saved_script_dir

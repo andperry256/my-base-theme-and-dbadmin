@@ -1,6 +1,14 @@
 #!/bin/bash
+# This script runs the WP cron function on one or more domains within a given
+# website. Each command line parameter specifies a particular domain, as a
+# directory sub-path in relation to the root. Typically, there is just one
+# parameter 'public_html' for the main site domain, but in some cases, there
+# can be a need to process a subdomain.
+#
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $script_dir/set_path_vars
+
+# Main loop on domains/subdomains.
 while [ "$1" != "" ]; do
     domain_path="$root_dir/$1"
     shift
@@ -9,7 +17,11 @@ while [ "$1" != "" ]; do
     echo $(date)." - $domain_path"
     $phpcmd "$domain_path/common_scripts/wp-cli/wp-cli.phar" cron event run --due-now $( [ "$location" == "local" ] && echo "--allow-root" )
 done
+
+# Invoke wp_cron.php, which will run any additional site-specific functionality.
 wget -q -O - https://$online_domain/common_scripts/wp_cron.php
+
+# Check if site is marked for crontab restore.
 update_cron=$(wget -q -O - https://remote.andperry.com/get_crontab_update_status.php?sitepath=$site_path)
 if [ "$update_cron" == '1' ]; then
     $root_dir/common_bash/crontab_restore

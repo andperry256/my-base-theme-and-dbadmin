@@ -10,7 +10,7 @@ script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 if [ "${script_dir:0:5}" == "/home" ]; then
     # Online Server
     location="real"
-    phpcmd="/opt/cpanel/ea-php83/root/usr/bin/php"
+    phpcmd="/opt/cpanel/ea-php84/root/usr/bin/php -d error_reporting=E_ERROR"
     site_path="$($phpcmd $script_dir/../local_site_dir.php)"
     root_dir="$($phpcmd $script_dir/../root_dir.php)"
     cpuser="$($phpcmd $script_dir/../cpanel_user.php)"

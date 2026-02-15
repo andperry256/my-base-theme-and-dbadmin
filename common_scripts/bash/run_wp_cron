@@ -26,3 +26,9 @@ update_cron=$(wget -q -O - https://remote.andperry.com/get_crontab_update_status
 if [ "$update_cron" == '1' ]; then
     $root_dir/common_bash/crontab_restore
 fi
+
+# Check if site is marked to purge error logs.
+purge_error_logs=$(wget -q -O - https://remote.andperry.com/get_purge_error_log_status.php?sitepath=$site_path)
+if [ "$purge_error_logs" == '1' ]; then
+    find $root_dir -name error_log -exec rm {} \;
+fi

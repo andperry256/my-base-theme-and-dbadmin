@@ -2,7 +2,6 @@
 //==============================================================================
 
 $db = admin_db_connect();
-require(__DIR__.'/get_local_site_dir.php');
 $account = $_GET['account'];
 
 print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/bulk_reconcile_action.php\">\n");

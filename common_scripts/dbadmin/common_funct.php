@@ -33,8 +33,8 @@ function decode_record_id($record_id)
     $array1 = explode('/',$record_id);
     foreach ($array1 as $data) {
         $array2 = explode('=',$data);
-        $field_name = urldecode($array2[0]) ?? '';
-        $field_value = urldecode($array2[1]) ?? '';
+        $field_name = (isset($array2[0])) ? urldecode($array2[0]) : '';
+        $field_value = (isset($array2[1])) ? urldecode($array2[1]) : '';
         if (!empty($field_name)) {
             $result[$field_name] = $field_value;
         }

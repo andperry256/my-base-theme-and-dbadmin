@@ -1,5 +1,7 @@
 #!/bin/bash
+# N.B. parameter $1 contains the siet path on the local server.
+# It will be empty and effectively ignored on the online server.
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $script_dir/set_path_vars
+source $script_dir/set_path_vars $1
 find $root_dir -name error_log -exec rm {} \;
 wget -q -O - $base_url/common_scripts/display_debug_log.php?clear > /dev/null

@@ -15,6 +15,7 @@ if [ "${script_dir:0:5}" == "/home" ]; then
     root_dir="$($phpcmd $script_dir/../root_dir.php)"
     cpuser="$($phpcmd $script_dir/../cpanel_user.php)"
     online_domain="$($phpcmd $script_dir/../main_domain.php)"
+    base_url="$($phpcmd $script_dir/../base_url.php)"
 else
     # Local Server
     location="local"
@@ -30,5 +31,6 @@ else
     root_dir="$($phpcmd $script_dir/../root_dir.php $site_path)"
     cpuser="$($phpcmd $script_dir/../cpanel_user.php $site_path)"
     online_domain="$($phpcmd $script_dir/../main_domain.php $site_path)"
+    base_url="$($phpcmd $script_dir/../base_url.php $site_path)"
 fi
 script_dir=$saved_script_dir

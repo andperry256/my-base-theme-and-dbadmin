@@ -27,8 +27,8 @@ if [ "$update_cron" == '1' ]; then
     $root_dir/common_bash/crontab_restore
 fi
 
-# Check if site is marked to purge error logs.
-purge_error_logs=$(wget -q -O - https://remote.andperry.com/get_purge_error_log_status.php?sitepath=$site_path)
-if [ "$purge_error_logs" == '1' ]; then
-    find $root_dir -name error_log -exec rm {} \;
+# Check if site is marked to clear debug logs.
+clear_debug_logs=$(wget -q -O - https://remote.andperry.com/get_clear_debug_log_status.php?sitepath=$site_path)
+if [ "$clear_debug_logs" == '1' ]; then
+    $root_dir/common_bash/clear_debug_logs
 fi

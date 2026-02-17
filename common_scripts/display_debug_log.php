@@ -12,17 +12,9 @@ if ((!isset($allowed_hosts[$_SERVER['REMOTE_ADDR']])) && (!is_local_ip($_SERVER[
 
 // Set up debug file paths
 $debug_file_path = [];
-if (is_file("/Config/localhost.php")) {
-    // Local server
-    $debug_file_path[0] = "$root_dir/logs/php_error.log";
-    $debug_file_path[1] = "$root_dir/logs/wp_debug.log";
-}
-else {
-    // Online site
-    $debug_file_path[0] = "$root_dir/logs/php_error.log";
-    $debug_file_path[1] = "$root_dir/logs/wp_debug.log";
-    $debug_file_path[2] = "$base_dir/error_log";
-}
+$debug_file_path[0] = "$root_dir/logs/php_error.log";
+$debug_file_path[1] = "$root_dir/logs/wp_debug.log";
+$debug_file_path[2] = "$base_dir/error_log";
 
 // Clear logs if required
 $clear_time_file_path = "$root_dir/logs/debug_log_clear_time.txt";

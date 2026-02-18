@@ -744,68 +744,6 @@ function count_payee_instances()
     }
 }
 
-    //==============================================================================
-/*
-  Function select_excluded_accounts
-
-  This function generates the clause to be inserted into a MySQL query in order
-  to exclude those accounts that are above the current user access level. The
-  parameter $field_name indicates the field containing the account name in the
-  query which is to be applied.
-*/
-//==============================================================================
-
-function select_excluded_accounts($field_name)
-{
-    $db1 = main_admin_db_connect();
-    $db2 = admin_db_connect();
-    $user = get_session_var(SV_USER);
-    $result = '';
-    $where_clause = ' username=?';
-    $where_values = ['s',$user];
-    $query_result = mysqli_select_query($db1,'admin_passwords','*',$where_clause,$where_values,'');
-    if ($row = mysqli_fetch_assoc($query_result)) {
-        $query_result2 = mysqli_select_query($db2,'accounts','*','',[],'');
-        while ($row2 = mysqli_fetch_assoc($query_result2)) {
-            if ($row2['access_level'] > $row['access_level']) {
-                  $result .= " AND $field_name<>'{$row2['label']}'";
-            }
-        }
-    }
-    return $result;
-}
-
-//==============================================================================
-/*
-  Function select_excluded_funds
-
-  This function generates the clause to be inserted into a MySQL query in order
-  to exclude those funds that are above the current user access level. The
-  parameter $field_name indicates the field containing the fund name in the
-  query which is to be applied.
-*/
-//==============================================================================
-
-function select_excluded_funds($field_name)
-{
-    $db1 = main_admin_db_connect();
-    $db2 = admin_db_connect();
-    $user = get_session_var(SV_USER);
-    $result = '';
-    $where_clause = 'username=?';
-    $where_values = ['s',$user];
-    $query_result = mysqli_select_query($db1,'admin_passwords','*',$where_clause,$where_values,'');
-    if ($row = mysqli_fetch_assoc($query_result)) {
-        $query_result2 = mysqli_select_query($db2,'funds','*','',[],'');
-        while ($row2 = mysqli_fetch_assoc($query_result2)) {
-            if ($row2['access_level'] > $row['access_level']) {
-                  $result .= " AND $field_name<>'{$row2['name']}'";
-            }
-        }
-    }
-    return $result;
-}
-
 //==============================================================================
 /*
   Function initialise_archive_table_data

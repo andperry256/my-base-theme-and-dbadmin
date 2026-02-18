@@ -21,14 +21,17 @@ done
 # Invoke wp_cron.php, which will run any additional site-specific functionality.
 wget -q -O - https://$online_domain/common_scripts/wp_cron.php
 
-# Check if site is marked for crontab restore.
-update_cron=$(wget -q -O - https://remote.andperry.com/get_crontab_update_status.php?sitepath=$site_path)
-if [ "$update_cron" == '1' ]; then
-    $root_dir/common_bash/crontab_restore
-fi
+if [ "$location" == "real" ]; then
 
-# Check if site is marked to clear debug logs.
-clear_debug_logs=$(wget -q -O - https://remote.andperry.com/get_clear_debug_log_status.php?sitepath=$site_path)
-if [ "$clear_debug_logs" == '1' ]; then
-    $root_dir/common_bash/clear_debug_logs
+    # Check if site is marked for crontab restore.
+    update_cron=$(wget -q -O - https://remote.andperry.com/get_crontab_update_status.php?sitepath=$site_path)
+    if [ "$update_cron" == '1' ]; then
+        $root_dir/common_bash/crontab_restore
+    fi
+
+    # Check if site is marked to clear debug logs.
+    clear_debug_logs=$(wget -q -O - https://remote.andperry.com/get_clear_debug_log_status.php?sitepath=$site_path)
+    if [ "$clear_debug_logs" == '1' ]; then
+        $root_dir/common_bash/clear_debug_logs
+    fi
 fi

@@ -3,7 +3,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
     echo "Restoring crontab ..."
-    wget -q -O - https://remote.andperry.com/get_crontab.php?site_path=$site_path > $root_dir/maintenance/crontab.txt
+    ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/get_crontab $site_path" > $root_dir/maintenance/crontab.txt
     if [ -e "$root_dir/maintenance/crontab.txt" ]; then
         crontab $root_dir/maintenance/crontab.txt
         rm $root_dir/maintenance/crontab.txt

@@ -24,13 +24,13 @@ wget -q -O - https://$online_domain/common_scripts/wp_cron.php
 if [ "$location" == "real" ]; then
 
     # Check if site is marked for crontab restore.
-    update_cron=$(wget -q -O - https://remote.andperry.com/get_crontab_update_status.php?sitepath=$site_path)
+    update_cron=$(ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/get_crontab_update_status $site_path")
     if [ "$update_cron" == '1' ]; then
         $root_dir/common_bash/crontab_restore
     fi
 
     # Check if site is marked to clear debug logs.
-    clear_debug_logs=$(wget -q -O - https://remote.andperry.com/get_clear_debug_log_status.php?sitepath=$site_path)
+    clear_debug_logs=$(ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/get_clear_debug_log_status $site_path")
     if [ "$clear_debug_logs" == '1' ]; then
         $root_dir/common_bash/clear_debug_logs
     fi

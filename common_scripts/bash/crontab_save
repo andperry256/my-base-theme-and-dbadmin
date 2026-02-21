@@ -4,6 +4,8 @@ source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
     echo "Saving crontab ..."
     crontab -l > $root_dir/maintenance/crontab.txt
-    php $root_dir/public_html/common_scripts/crontab_save.php $site_path
+    $params = $($phpcmd $script_dir/php/crontab_save_pars.php)
+    ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/crontab_store $params"
+    php $base_dir/common_scripts/crontab_save.php $site_path
     rm $root_dir/maintenance/crontab.txt
 fi

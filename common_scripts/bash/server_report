@@ -1,4 +1,4 @@
 #!/bin/bash
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 source $script_dir/set_path_vars
-$phpcmd $root_dir/public_html/common_scripts/server_report.php $@
+$phpcmd $script_dir/php/server_report.php $@

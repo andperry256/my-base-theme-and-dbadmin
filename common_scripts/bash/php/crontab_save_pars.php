@@ -1,21 +1,7 @@
 <?php
 //==============================================================================
 
-if (isset($argv[1])) {
-    $local_site_dir = $argv[1];
-}
-else {
-    exit("Local site directory not specified\n");
-}
-$tok1 = strtok(__DIR__,'/');
-$tok2 = strtok('/');
-$tok3 = strtok('/');
-$root_dir = "/$tok1/$tok2";
-if ($tok3 != 'public_html') {
-    // Extra directory level in special cases
-    $root_dir .= "/$tok3";
-}
-require("$root_dir/public_html/path_defs.php");
+require(__DIR__."/../../../path_defs.php");
 $content = file("$root_dir/maintenance/crontab.txt");
 if (empty($content)) {
     exit("Crontab data not found\n");
@@ -42,6 +28,6 @@ foreach ($content as $line) {
 }
 $commands = urlencode($commands);
 $schedules = urlencode($schedules);
-print(get_url_content("https://remote.andperry.com/store_crontab.php?site_path=$local_site_dir&commands=$commands&schedules=$schedules&datetime=$date_and_time"));
+print("$site_path $commands $schedules");
 
 //==============================================================================

@@ -21,17 +21,19 @@ dbname=$4
 sql_script=$5
 shift 5
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-base_url="$(php $script_dir/../base_url.php)"
-root_dir="$(php $script_dir/../root_dir.php)"
-exclusions_url="$base_url/common_scripts/mysqldump_exclusions.php?dbname=$dbname"
-table=""
+source $script_dir/set_path_vars
 if [ "$1" == "-full" ]; then
-    exclusions_url="$exclusions_url?nonst"
+    nosync_tables=""
     shift
-elif [ "$1" == "-t" ]; then
+else
+    nosync_tables=$(ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/nosync_tables $dbname")
+fi
+if [ "$1" == "-t" ]; then
     $table="$2"
     shift 2
+else
+    table=""
 fi
-exclusions=$(wget -q -O - "$exclusions_url");
+exclusions=$($phpcmd $script_dir/php/mysqldump_exclusions.php $dbname $nosync_tables);
 options=$@
 mysqldump --host=$host --user=$user --password=$password $options $exclusions $dbname $table > $root_dir/mysql_backup/$dbname/$sql_script.sql

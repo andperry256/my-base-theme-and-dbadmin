@@ -20,7 +20,7 @@ global $mail_host;
 if (!isset($argc)) {
     exit("Script valid in command line mode only\n");
 }
-require(__DIR__."/../path_defs.php");
+require(__DIR__."/../../../path_defs.php");
 if ($location == 'local') {
     exit("Script valid on online server only\n");
 }

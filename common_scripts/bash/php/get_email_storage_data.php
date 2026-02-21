@@ -7,11 +7,11 @@ if (!isset($argc)) {
 elseif (substr(__DIR__,0,5) != '/home') {
     exit("Script valid on online server only\n");
 }
-require(__DIR__.'/get_local_site_dir.php');
+require(__DIR__."/../../../path_defs.php");
 $domain = $argv[1];
+$mailbox_list = explode('+',$argv[2]);
 $mailbox_data = '';
-$mailbox = strtok($argv[2],'+');
-while ($mailbox !== false) {
+foreach ($mailbox_list as $mailbox) {
     $content = file("$root_dir/mail/$domain/$mailbox/dovecot-quota");
     if (empty($content)) {
         print("Email account $mailbox@$domain not found\n");
@@ -21,11 +21,8 @@ while ($mailbox !== false) {
         $used_storage = trim($last_line);
         $mailbox_data .= $mailbox.'+'.$used_storage.'+';
     }
-    $mailbox = strtok('+');
 }
 $mailbox_data = rtrim($mailbox_data,'+');
-$date_and_time = date('YmdHis');
-$temp = get_url_content("https://remote.andperry.com/report_email_storage.php?domain=$domain&mailbox_data=$mailbox_data&datetime=$date_and_time");
-print($temp);
+exit($mailbox_data);
 
 //==============================================================================

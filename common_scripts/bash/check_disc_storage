@@ -2,7 +2,6 @@
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
-    du $root_dir > $root_dir/maintenance/disc_storage.txt 2>/dev/null
     used_storage=$(du -k $root_dir | tail -n 1 | awk '{print $1}')
     ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/report_disc_storage $site_path $used_storage"
 

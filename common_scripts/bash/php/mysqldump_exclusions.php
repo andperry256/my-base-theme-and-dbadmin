@@ -3,6 +3,7 @@
 
 $dbname = $argv[1] ?? '-';
 $nosync_table_list = $argv[2] ?? null;
+// Parent directory hierarchy: bash => common_scripts => public_html
 require(__DIR__."/../../../path_defs.php");
 require("$base_dir/mysql_connect.php");
 foreach ($dbinfo as $dbid => $info) {

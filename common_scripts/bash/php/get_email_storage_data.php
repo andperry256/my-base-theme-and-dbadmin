@@ -7,6 +7,7 @@ if (!isset($argc)) {
 elseif (substr(__DIR__,0,5) != '/home') {
     exit("Script valid on online server only\n");
 }
+// Parent directory hierarchy: bash => common_scripts => public_html
 require(__DIR__."/../../../path_defs.php");
 $domain = $argv[1];
 $mailbox_list = explode('+',$argv[2]);

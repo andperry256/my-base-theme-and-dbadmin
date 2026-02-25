@@ -1,6 +1,7 @@
 <?php
 //==============================================================================
 
+// Parent directory hierarchy: bash => common_scripts => public_html
 require(__DIR__."/../../../path_defs.php");
 $content = file("$root_dir/maintenance/crontab.txt");
 if (empty($content)) {

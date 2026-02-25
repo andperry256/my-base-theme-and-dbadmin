@@ -19,5 +19,5 @@ sql_script=$5
 shift 5
 options=$@
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-root_dir="$(php $script_dir/../root_dir.php)"
+root_dir="$(php $script_dir/php/root_dir.php)"
 mysql --host=$host --user=$user --password=$password $options -D $dbname < $root_dir/mysql_backup/$dbname/$sql_script.sql

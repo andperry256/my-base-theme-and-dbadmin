@@ -23,6 +23,9 @@ wget -q -O - https://$online_domain/common_scripts/wp_cron.php
 
 if [ "$location" == "real" ]; then
 
+    # Record site access time.
+    ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/record_site_access $site_path"
+
     # Check if site is marked for crontab restore.
     update_cron=$(ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/get_crontab_update_status $site_path")
     if [ "$update_cron" == '1' ]; then

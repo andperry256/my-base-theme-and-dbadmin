@@ -11,12 +11,12 @@ if [ "${script_dir:0:5}" == "/home" ]; then
     # Online Server
     location="real"
     phpcmd="/opt/cpanel/ea-php84/root/usr/bin/php -d error_reporting=E_ERROR"
-    site_path="$($phpcmd $script_dir/../local_site_dir.php)"
-    root_dir="$($phpcmd $script_dir/../root_dir.php)"
-    cpuser="$($phpcmd $script_dir/../cpanel_user.php)"
-    online_domain="$($phpcmd $script_dir/../main_domain.php)"
-    base_dir="$($phpcmd $script_dir/../base_dir.php)"
-    base_url="$($phpcmd $script_dir/../base_url.php)"
+    site_path="$($phpcmd $script_dir/php/local_site_dir.php)"
+    root_dir="$($phpcmd $script_dir/php/root_dir.php)"
+    cpuser="$($phpcmd $script_dir/php/cpanel_user.php)"
+    online_domain="$($phpcmd $script_dir/php/main_domain.php)"
+    base_dir="$($phpcmd $script_dir/php/base_dir.php)"
+    base_url="$($phpcmd $script_dir/php/base_url.php)"
 else
     # Local Server
     location="local"
@@ -29,10 +29,10 @@ else
     site_path=${temp/\/public_html\/common_scripts\/bash/}
 
     source /Config/php_pars
-    root_dir="$($phpcmd $script_dir/../root_dir.php $site_path)"
-    cpuser="$($phpcmd $script_dir/../cpanel_user.php $site_path)"
-    online_domain="$($phpcmd $script_dir/../main_domain.php $site_path)"
-    base_dir="$($phpcmd $script_dir/../base_dir.php $site_path)"
-    base_url="$($phpcmd $script_dir/../base_url.php $site_path)"
+    root_dir="$($phpcmd $script_dir/php/root_dir.php $site_path)"
+    cpuser="$($phpcmd $script_dir/php/cpanel_user.php $site_path)"
+    online_domain="$($phpcmd $script_dir/php/main_domain.php $site_path)"
+    base_dir="$($phpcmd $script_dir/php/base_dir.php $site_path)"
+    base_url="$($phpcmd $script_dir/php/base_url.php $site_path)"
 fi
 script_dir=$saved_script_dir

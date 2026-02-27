@@ -12,6 +12,7 @@ $standalone_counter (optional) - Indicates that the counter is being
 */
 //==============================================================================
 
+global $base_dir;
 if (!function_exists('day_name')) {
     require("$base_dir/common_scripts/date_funct.php");
 }

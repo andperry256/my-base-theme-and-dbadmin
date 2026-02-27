@@ -10,6 +10,8 @@ if (is_file('/Config/linux_pathdefs.php')) {
     $local_site_dir = $elements[0];
 }
 require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
+require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
+$db = db_connect(ADMIN_DBID);
 if (isset($_POST['submitted'])) {
     require_once("$base_dir/mysql_connect.php");
     $db = db_connect($auth_dbid);
@@ -22,10 +24,22 @@ if (isset($_POST['submitted'])) {
         ($row = mysqli_fetch_assoc(mysqli_select_query($db,$auth_db_table,'*',$where_clause,$where_values,'')))) {
         if ((!empty($password)) && (crypt($password,$row['enc_passwd']) == $row['enc_passwd'])) {
             // User authenticated
-            $_SESSION[SV_USER] = $username;
-            if ((isset($row['access_level'])) && (defined('SV_ACCESS_LEVEL'))) {
-                $_SESSION[SV_ACCESS_LEVEL] = $row['access_level'];
+            if (isset($_COOKIE[LOGIN_COOKIE_ID])) {
+                $where_clause = 'id=?';
+                $where_values = ['s',$_COOKIE[LOGIN_COOKIE_ID]];
+                if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'login_sessions','*',$where_clause,$where_values,''))) {
+                    $where_clause = 'username=?';
+                    $where_values = ['s',$username];
+                    if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'admin_passwords','*',$where_clause,$where_values,''))) {
+                        $fields = 'username,access_level';
+                        $values = ['s',$row2['username'],'s',$row2['access_level']];
+                        $where_clause = 'id=?';
+                        $where_values = ['s',$row['id']];
+                        mysqli_update_query($db,'login_sessions',$fields,$values,$where_clause,$where_values);
+                    }
+                }
             }
+            put_user($username);
             header("Location: $base_url{$_POST['return_path']}");
             exit;
         }

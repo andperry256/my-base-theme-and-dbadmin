@@ -29,5 +29,31 @@ function is_home_local_ip($ip_addr)
 }
 
 //==============================================================================
+
+function get_local_server_ip($hostname)
+{
+    if (is_file('/Config/location.php')) {
+        include('/Config/location.php');
+    }
+    else {
+        return null;
+    }
+    $db = itservices_db_connect();
+    $where_clause = 'source=?';
+    $where_values = ['s',$hostname];
+    if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'server_aliases','*',$where_clause,$where_values,''))) {
+        $hostname = $row['target'];
+    }
+    $where_clause = 'location=? AND computer_name=?';
+    $where_values = ['s',$my_location,'s',$hostname];
+    if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'computer_addresses','*',$where_clause,$where_values,''))) {
+        return ($row['address']);
+    }
+    else {
+        return null;
+    }
+}
+
+//==============================================================================
 endif;
 //==============================================================================

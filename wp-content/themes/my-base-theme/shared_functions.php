@@ -673,22 +673,16 @@ function check_login_status($db)
         if ((!empty($login_id)) && ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM login_sessions WHERE id='$login_id'")))) {
             // Update user, login cookie and DB record
             put_user($row['username']);
-            mysqli_query($db,"UPDATE login_sessions SET update_time=$current_time,date_and_time='$date_and_time' WHERE id='$login_id'");
-            if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR)) {
-                mysqli_query($db,"UPDATE login_sessions SET remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
-            }
+            mysqli_query($db,"UPDATE login_sessions SET update_time=$current_time,date_and_time='$date_and_time',remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
             setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
         }
     }
     elseif ((!empty($username)) && (!empty($access_level))) {
         // New login - create cookie and associated login session record
         $login_id = md5($username.date('YmdHis'));
-        $query = "INSERT INTO login_sessions (id,username,access_level,update_time,date_and_time)";
-        $query .= " VALUES ('$login_id','$username','$access_level',$current_time,'$date_and_time')";
+        $query = "INSERT INTO login_sessions (id,username,access_level,update_time,date_and_time,remote_addr)";
+        $query .= " VALUES ('$login_id','$username','$access_level',$current_time,'$date_and_time','{$_SERVER['REMOTE_ADDR']}')";
         mysqli_query($db,$query);
-        if ((defined('SAVE_REMOTE_LOGIN_ADDR')) && (SAVE_REMOTE_LOGIN_ADDR)) {
-            mysqli_query($db,"UPDATE login_sessions SET remote_addr='{$_SERVER['REMOTE_ADDR']}' WHERE id='$login_id'");
-        }
         setcookie(LOGIN_COOKIE_ID,$login_id,$expiry_time,LOGIN_COOKIE_PATH);
     }
 }

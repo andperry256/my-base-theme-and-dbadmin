@@ -31,8 +31,8 @@ if (isset($_POST['submitted'])) {
                     $where_clause = 'username=?';
                     $where_values = ['s',$username];
                     if ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'admin_passwords','*',$where_clause,$where_values,''))) {
-                        $fields = 'username,access_level';
-                        $values = ['s',$row2['username'],'s',$row2['access_level']];
+                        $fields = 'username,access_level,remote_addr';
+                        $values = ['s',$row2['username'],'s',$row2['access_level'],'s',$_SERVER['REMOTE_ADDR']];
                         $where_clause = 'id=?';
                         $where_values = ['s',$row['id']];
                         mysqli_update_query($db,'login_sessions',$fields,$values,$where_clause,$where_values);

@@ -1,6 +1,13 @@
 <?php
 //==============================================================================
-if (!function_exists('is_local_ip')):
+if (!defined('LOCAL_IP_FUNCT_DEFINED')):
+//==============================================================================
+/*
+Function is_local_ip
+
+This function is used to determine whether the remote IP address is on the same
+local network as the site.
+*/
 //==============================================================================
 
 function is_local_ip($ip_addr)
@@ -20,6 +27,15 @@ function is_local_ip($ip_addr)
 }
 
 //==============================================================================
+/*
+Function is_home_local_ip
+
+This function is similar to 'is_local_ip', except that it also allows for the
+remote IP address to be the external IP of the 'Home' network. This is useful
+for allowing access from mobile devices on the local network, which would appear
+on the external IP if access is made via an internet-based domain name.
+*/
+//==============================================================================
 
 function is_home_local_ip($ip_addr)
 {
@@ -28,6 +44,13 @@ function is_home_local_ip($ip_addr)
         : false;
 }
 
+//==============================================================================
+/*
+Function get_local_server_ip
+
+This function is used to obtain a local IP address for a local server, given a
+domain name or host name.
+*/
 //==============================================================================
 
 function get_local_server_ip($hostname)
@@ -55,5 +78,24 @@ function get_local_server_ip($hostname)
 }
 
 //==============================================================================
+/*
+Function is_ip_authorised
+
+This function determines whether there is an active authorised connection from
+a given remote IP address, even if it is not within the current session. This
+is useful when embedding scripts inside an <iframe>.
+*/
+//==============================================================================
+
+function is_ip_authorised($ip_addr,$access_level=1)
+{
+    $db = dbconnect(ADMIN_DBID);
+    $where_clause = 'remote_addr=? AND access_level>=?';
+    $where_values = ['s',$ip_addr,'i',$access_level];
+    return (mysqli_num_rows(mysqli_select_query($db,'login_sessions','*',$where_clause,$where_values,'')) > 0);
+}
+
+//==============================================================================
+define( 'LOCAL_IP_FUNCT_DEFINED', true );
 endif;
 //==============================================================================

@@ -53,12 +53,29 @@ if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'server_live_updates','*',
 }
 
 /*
-Check for inactive stations and sites that fail to load.
+Update live counts and check for inactive stations.
 Do this when the script is being run for station 'andperry.com' as the cron
 for this is running on the same server as this script itself and can therefore
 be reasonably assumed as operational.
 */
 if ($station_id == 'andperry.com') {
+
+    // Update live counts.
+    $query_result = mysqli_select_query($db,'server_live_updates','*','',[],'');
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        $total_count = $row['total_count'] + 1;
+        $base_time = time() - 600;
+        $where_clause = 'station_id=? AND last_access_time>?';
+        $where_values = ['s',$row['station_id'],'i',$base_time];
+        $live_count = $row['live_count'] +
+            (int)(mysqli_num_rows(mysqli_select_query($db,'server_live_updates','*',$where_clause,$where_values,'')) > 0);
+        $fields = 'total_count,live_count';
+        $values = ['i',$total_count,'i',$live_count];
+        $where_clause = 'station_id=?';
+        $where_values = ['s',$row['station_id']];
+        mysqli_update_query($db,'server_live_updates',$fields,$values,$where_clause,$where_values);
+    }
+
     // Check for inactive stations
     $where_clause = 'reported=0';
     $where_values = [];
@@ -66,6 +83,7 @@ if ($station_id == 'andperry.com') {
     while ($row = mysqli_fetch_assoc($query_result)) {
         $station_id = $row['station_id'];
         if ((!empty($row['last_access_time'])) && ((time() - $row['last_access_time']) > $row['access_timeout'])) {
+
             // Generate email alert
             $message_info = [];
             $message_info['subject'] = "No remote IP update for $station_id";

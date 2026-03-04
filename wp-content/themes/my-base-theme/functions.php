@@ -240,6 +240,32 @@ function authenticate_post($slug)
 }
 
 //==============================================================================
+/*
+Function filter_authenticated_posts
+
+For this function to work, the child theme must:
+
+1. Ensure that the function get_access_level is accessible.
+2. Include the following line in its functions.php script:
+   add_action('pre_get_posts', 'filter_authenticated_posts');
+*/
+//==============================================================================
+
+function filter_authenticated_posts($query)
+{
+    if (($query->is_main_query()) && (!is_page())) {
+        $meta_query = array(
+            array(
+                'key'     => 'access_level',
+                'value'   => get_access_level(),
+                'compare' => '<=',
+            ),
+        );
+        $query->set('meta_query', $meta_query);
+    }
+}
+
+//==============================================================================
 
 function get_category_links($post_id)
 {

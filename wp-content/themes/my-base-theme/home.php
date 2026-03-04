@@ -39,10 +39,9 @@ get_header();
               ];
 
         // Run the WordPress loop
-        $local_query = new WP_Query($args);
-        if ( $local_query->have_posts() ) {
-            while ( $local_query->have_posts() ) {
-                $local_query->the_post();
+        if ( have_posts() ) {
+            while ( have_posts() ) {
+                the_post();
                 display_post_summary($use_compact_post_summary_for_home);
                 print("<div class=\"post-list-spacer\">&nbsp;</div>\n");
             }

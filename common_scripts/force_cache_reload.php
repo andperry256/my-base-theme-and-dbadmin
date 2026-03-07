@@ -2,7 +2,12 @@
 //==============================================================================
 
 $today_date = date('ymd');
-require(__DIR__.'/get_local_site_dir.php');
+
+if (isset($_POST['submitted'])) {
+    include(__DIR__.'/recache_all_pages.php');
+}
+
+require_once(__DIR__.'/get_local_site_dir.php');
 if (is_file("$base_dir/last_preset_link_version.php")) {
     include("$base_dir/last_preset_link_version.php");
 }
@@ -33,8 +38,15 @@ fprintf($ofp,"  // The value will be superseded anyway if set to before the star
 fprintf($ofp,"  \$last_preset_link_version = '$last_preset_link_version';\n");
 fprintf($ofp,"?>\n");
 fclose($ofp);
-print("<p>Last preset link version set to <em>$last_preset_link_version</em></p>");
-print("<p>Site =  <em>$local_site_dir</em></p>");
-print("<p>Location =  <em>$location</em></p>");
+print("<p>Last preset link version set to <em>$last_preset_link_version</em></p>\n");
+print("<p>Site =  <em>$local_site_dir</em></p>\n");
+print("<p>Location =  <em>$location</em></p>\n");
+if ($location == 'real') {
+    print("<form method=\"post\">\n");
+    print("<input type=\"submit\" style=\"font-size: 1.1em;\" value=\"Re-cache all pages/posts\"><span style=\"font-size:0.85em\"><br />");
+    print("N.B. This may take a minute or so to complete, so please be patient.</span>\n");
+    print("<input type=\"hidden\" name=\"submitted\">\n");
+    print("</form>\n");
+}
 
 //==============================================================================

@@ -3,12 +3,12 @@
 if (!defined('SHARED_FUNCT_DEFINED')):
 //================================================================================
 /*
- * My Base Theme - Shared Functions
- *
- * Includes functions that may need to be accessed:-
- * 1. By scripts running outside the WordPress environment.
- * 2. By scripts in the wp-custom-scripts directory.
- * 3. By child theme scripts.
+ My Base Theme - Shared Functions
+
+ Includes functions that may need to be accessed:-
+ 1. By scripts running outside the WordPress environment.
+ 2. By scripts in the wp-custom-scripts directory.
+ 3. By child theme scripts.
  */
 //================================================================================
 /*
@@ -61,7 +61,7 @@ function set_default_header_image_paths()
 
 //================================================================================
 /*
-* Function set_header_image_paths
+Function set_header_image_paths
 */
 //================================================================================
 
@@ -78,9 +78,9 @@ function set_header_image_paths($slug,$type)
 
 //================================================================================
 /*
-* Function output_page_header
-*
-* This function is used to output the main title header of the current page.
+Function output_page_header
+
+This function is used to output the main title header of the current page.
 */
 //================================================================================
 
@@ -105,19 +105,19 @@ function output_page_header()
 
 //================================================================================
 /*
-* Function get_content_part
-*
-* This function is used extract and output a given portion of the page content
-* and is for use when the content section of a page is being built using a custom
-* PHP script. A numeric part number is passed as a parameter and this indicates
-* that the text is to be extracted from between the following tags in the
-* WordPress page content:-
-*
-* [part<n>]
-* [/part<n>]
-*
-* where <n> is the part number. This allows multiple portions to be extracted
-* from the pages content for use at different points in the page.
+Function get_content_part
+
+This function is used extract and output a given portion of the page content
+and is for use when the content section of a page is being built using a custom
+PHP script. A numeric part number is passed as a parameter and this indicates
+that the text is to be extracted from between the following tags in the
+WordPress page content:-
+
+[part<n>]
+[/part<n>]
+
+where <n> is the part number. This allows multiple portions to be extracted
+from the pages content for use at different points in the page.
 */
 //================================================================================
 
@@ -146,15 +146,15 @@ function get_content_part($part_no)
 
 //================================================================================
 /*
-* Function output_meta_data
-*
-* This function is used to generate meta tag data in the page header.
-* A number of global variables are referenced by the function to set up the tags
-* as required. These will have been set up previously by running any 'metadata.php'
-* scripts in the page hierachy within the custom scripts folder.
-*
-* N.B. To cancel a meta description from an ancestor page without creating a new one,
-* the meta description must be re-defined for the page as an empty string.
+Function output_meta_data
+
+This function is used to generate meta tag data in the page header.
+A number of global variables are referenced by the function to set up the tags
+as required. These will have been set up previously by running any 'metadata.php'
+scripts in the page hierachy within the custom scripts folder.
+
+N.B. To cancel a meta description from an ancestor page without creating a new one,
+the meta description must be re-defined for the page as an empty string.
 */
 //================================================================================
 
@@ -200,13 +200,13 @@ function output_meta_data()
 
 //================================================================================
 /*
-* Function output_stylesheet_link
-*
-* This function is used to output a stylesheet link in the HTML header when
-* the URL hierachy is scanned by setup_params.php. The stylesheet file must be
-* named styles.css.
-*
-* The associated light/dark theme stylesheet will also be linked in if present.
+Function output_stylesheet_link
+
+This function is used to output a stylesheet link in the HTML header when
+the URL hierachy is scanned by setup_params.php. The stylesheet file must be
+named styles.css.
+
+The associated light/dark theme stylesheet will also be linked in if present.
 */
 //================================================================================
 
@@ -229,15 +229,15 @@ function output_stylesheet_link($path,$sub_path)
 
 //================================================================================
 /*
-* Function include_inline_stylesheet
-*
-* This function loads a stylesheet file and outputs its contents within
-* <style></style> tags by way of inline styles. It can be called from anywhere
-* but is also used by setup_params.php when scanning the URL hierachy. There
-* is no constraint on the stylesheet filename, but when called from
-* setup_params.php, it will always be inline-styles.css.
-*
-* The associated light/dark theme stylesheet will also be included if present.
+Function include_inline_stylesheet
+
+This function loads a stylesheet file and outputs its contents within
+<style></style> tags by way of inline styles. It can be called from anywhere
+but is also used by setup_params.php when scanning the URL hierachy. There
+is no constraint on the stylesheet filename, but when called from
+setup_params.php, it will always be inline-styles.css.
+
+The associated light/dark theme stylesheet will also be included if present.
 */
 //================================================================================
 
@@ -262,8 +262,7 @@ function include_inline_stylesheet($path)
 
 //================================================================================
 /*
-* Function include_inline_javascript
-*
+Function include_inline_javascript
 */
 //================================================================================
 
@@ -276,7 +275,7 @@ function include_inline_javascript($path)
 
 //================================================================================
 /*
-* Functions save_php_error_log & restore_php_error_log
+Functions save_php_error_log & restore_php_error_log
 */
 //================================================================================
 
@@ -301,7 +300,7 @@ function restore_php_error_log()
 
 //================================================================================
 /*
-* Function output_to_access_log
+Function output_to_access_log
 */
 //================================================================================
 
@@ -341,12 +340,12 @@ function output_to_access_log($user='',$add_info='')
 
 //================================================================================
 /*
-* Function simplify_html_tag
-*
-* This function is called by the simplify_html function or a site specific
-* function that calls the latter.
-*
-* It reduces all tags of a given type to a simple tag with no options.
+Function simplify_html_tag
+
+This function is called by the simplify_html function or a site specific
+function that calls the latter.
+
+It reduces all tags of a given type to a simple tag with no options.
 */
 //================================================================================
 
@@ -363,15 +362,15 @@ function simplify_html_tag($content,$tag)
 
 //================================================================================
 /*
-* Function simplify_html
-*
-* This function is called to simplify a word processor document that has been
-* exported as HTML. Its main purpose is to remove any built-in style
-* information that is otherwise defined in CSS.
-*
-* If further edits are required, then it is suggested that this function is
-* called from a site specific function with the necessary additional
-* functionality.
+Function simplify_html
+
+This function is called to simplify a word processor document that has been
+exported as HTML. Its main purpose is to remove any built-in style
+information that is otherwise defined in CSS.
+
+If further edits are required, then it is suggested that this function is
+called from a site specific function with the necessary additional
+functionality.
 */
 //================================================================================
 
@@ -419,19 +418,19 @@ function simplify_html($content)
 
 //================================================================================
 /*
-* Function recache_page
-*
-* This function is for use in conjuction with the 'WP Super Cache' plugin. It is
-* called to clear any cache files for a given page and then activate the page to
-* cause the cache to be regenerated (provided the page is configured to be cached).
-* A path to the page is provided as a parameter and this can be one of the
-* following:
-*
-* 1. The WordPress page name (slug). This option works for both posts and pages.
-* 2. A full URI sub-path specifying the hierarchy of the page with its ancestors.
-*
-* An optional parameter specifies a run count, allowing for the re-cache to be run
-* more than once (generally twice) in special situations.
+Function recache_page
+
+This function is for use in conjuction with the 'WP Super Cache' plugin. It is
+called to clear any cache files for a given page and then activate the page to
+cause the cache to be regenerated (provided the page is configured to be cached).
+A path to the page is provided as a parameter and this can be one of the
+following:
+
+1. The WordPress page name (slug). This option works for both posts and pages.
+2. A full URI sub-path specifying the hierarchy of the page with its ancestors.
+
+An optional parameter specifies a run count, allowing for the re-cache to be run
+more than once (generally twice) in special situations.
 */
 //================================================================================
 
@@ -493,10 +492,10 @@ function recache_page($page_path,$run_count=1)
 
 //================================================================================
 /*
-* Function recache_all_pages
-*
-* This function is called to execute the recache_page function on all published
-* pages/posts within the site.
+Function recache_all_pages
+
+This function is called to execute the recache_page function on all published
+pages/posts within the site.
 */
 //================================================================================
 
@@ -519,12 +518,12 @@ function recache_all_pages($type='page')
 
 //================================================================================
 /*
-* Function create_cache_reload_link
-*
-* This function needs to be included in the theme header.php script. It will cause
-* the page to be immediately redirected a script which recaches and reloads the
-* page, on the condition that a 'recache indicator' has been supplied as a URL
-* parameter.
+Function create_cache_reload_link
+
+This function needs to be included in the theme header.php script. It will cause
+the page to be immediately redirected a script which recaches and reloads the
+page, on the condition that a 'recache indicator' has been supplied as a URL
+parameter.
 */
 //================================================================================
 
@@ -547,6 +546,48 @@ function create_cache_reload_link()
             $uri_path = 'home';
         }
         print("<meta http-equiv=\"refresh\" content=\"0;URL='$base_url/common_scripts/load_recached_page.php?uripath=$uri_path'\" />\n");
+    }
+}
+
+//================================================================================
+/*
+Function load_updated_page_content
+
+This function checks all HTML files in the page content directory, and if a file
+timestamp is found to be changed, a forced recache is performed on the
+associated page.
+*/
+//================================================================================
+
+function load_updated_page_content($page_content_dir)
+{
+    $db = db_connect(WP_DBID);
+    $filetimes = [];
+    $dirlist = scandir($page_content_dir);
+    foreach ($dirlist as $file) {
+        if (pathinfo($file,PATHINFO_EXTENSION) == 'html') {
+            $filetimes[$file] = filemtime("$page_content_dir/$file");
+        }
+    }
+    foreach ($filetimes as $filename => $filetime) {
+        $where_clause = 'filename=?';
+        $where_values = ['s',$filename];
+        if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'file_timestamps','*',$where_clause,$where_values,''))) {
+            if ($row['filetime'] != $filetime) {
+                // File timestamp has changed.
+                $set_fields = 'filetime';
+                $set_values = ['i',$row['filetime']];
+                mysqli_update_query($db,'file_timestamps',$set_fields,$set_values,$where_clause,$where_values);
+                recache_page(pathinfo($filename,PATHINFO_FILENAME));
+            }
+        }
+        else {
+            // Add entry to file timestamps table.
+            $fields = 'filename,filetime';
+            $values = ['s',$filename,'i',$filetime];
+            mysqli_insert_query($db,'file_timestamps',$fields,$values);
+            recache_page(pathinfo($filename,PATHINFO_FILENAME));
+        }
     }
 }
 
@@ -947,16 +988,16 @@ function load_codemirror($sub_path)
 
 //================================================================================
 /*
-* Function output_font_stylesheet_links
-*
-* ******** THIS FUNCTION IS DEPRECATED ********
-*
-* This function is used to generate the stylesheet links for the main and header
-* fonts assigned within the given theme. It relies on access to Google Fonts.
-*
-* It generates the necessary CSS files in the root directory of the Base Theme if
-* not already present. To force regeneration of all such files, load any page on
-* the site with the parameter 'reloadfonts' appended to the URL.
+Function output_font_stylesheet_links
+
+******** THIS FUNCTION IS DEPRECATED ********
+
+This function is used to generate the stylesheet links for the main and header
+fonts assigned within the given theme. It relies on access to Google Fonts.
+
+It generates the necessary CSS files in the root directory of the Base Theme if
+not already present. To force regeneration of all such files, load any page on
+the site with the parameter 'reloadfonts' appended to the URL.
 */
 //================================================================================
 

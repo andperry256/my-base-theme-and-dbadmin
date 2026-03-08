@@ -8,6 +8,11 @@ if (isset($_POST['submitted'])) {
 }
 
 require_once(__DIR__.'/get_local_site_dir.php');
+if (($location == 'real') && (isset($page_content_dir)) && is_dir($page_content_dir)) {
+    require_once("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
+    load_updated_page_content($page_content_dir);
+}
+
 if (is_file("$base_dir/last_preset_link_version.php")) {
     include("$base_dir/last_preset_link_version.php");
 }

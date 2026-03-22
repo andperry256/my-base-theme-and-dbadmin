@@ -131,12 +131,22 @@ function display_sidebar_content()
             elseif ((empty($action_filter)) || ($action_filter == $latest_action)) {
                 // Item can be displayed
                 if (!empty($link)) {
-                    // Sidebar item is a custom link
-                    print("<tr><td class=\"sidebar-item\"><a href=\"$custom_pages_url/$relative_path/$link\"");
-                    if ($row['new_window']) {
-                          print(" target=\"_blank\"");
+                    // Sidebar item is a custom link/embed
+                    print("<tr><td class=\"sidebar-item\">");
+                    if (substr($link,0,1) == '@') {
+                        // Embed
+                        $link = substr($link,1);
+                        include("$custom_pages_path/$relative_path/$link");
                     }
-                    print(">$label</a></td></tr>\n");
+                    else {
+                        // Link
+                        print("<a href=\"$custom_pages_url/$relative_path/$link\"");
+                        if ($row['new_window']) {
+                              print(" target=\"_blank\"");
+                        }
+                        print(">$label</a>");
+                    }
+                    print("</td></tr>\n");
                 }
                 elseif ((!empty($action_name)) || (!empty($table_name))) {
                     // Sidebar item is an action and/or table reference

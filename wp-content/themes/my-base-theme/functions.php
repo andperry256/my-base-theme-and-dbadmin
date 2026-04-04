@@ -246,8 +246,10 @@ Function filter_authenticated_posts
 For this function to work, the child theme must:
 
 1. Ensure that the function get_access_level is accessible.
-2. Include the following line in its functions.php script:
-   add_action('pre_get_posts', 'filter_authenticated_posts');
+2. Include the following lines in its functions.php script:
+    if (!current_user_can('edit_posts')) {
+        add_action('pre_get_posts', 'filter_authenticated_posts');
+    }
 */
 //==============================================================================
 

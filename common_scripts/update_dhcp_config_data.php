@@ -36,7 +36,7 @@ $content1 = str_replace('{dhcp_end}',$dhcp_end_node,$content1);
 $content2 = '';
 foreach ($content1 as $line) {
     if (strpos($line,'#### ADD FIXED') !== false) {
-        $where_clause = "ip_element_4>=1 AND ip_element_4<=254";
+        $where_clause = "ip_element_4>=1 AND ip_element_4<=254 AND mac_address NOT LIKE 'FF:FF:FF:FF:FF:%'";
         $where_values = [];
         $add_clause = 'ORDER BY ip_element_4 ASC';
         $query_result = mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,$add_clause);
@@ -63,7 +63,7 @@ $content1 = str_replace('{dhcp_end}',$dhcp_end_node,$content1);
 $content2 = '';
 foreach ($content1 as $line) {
     if (strpos($line,'#### ADD FIXED') !== false) {
-        $where_clause = "ip_element_4>=1 AND ip_element_4<=254";
+        $where_clause = "ip_element_4>=1 AND ip_element_4<=254 AND mac_address NOT LIKE 'FF:FF:FF:FF:FF:%'";
         $where_values = [];
         $add_clause = 'ORDER BY ip_element_4 ASC';
         $query_result = mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,$add_clause);
@@ -95,7 +95,7 @@ foreach ($content1 as $line) {
         $content2 .= "dhcp-range=$ip_subnet_addr.$dhcp_start_node,$ip_subnet_addr.$dhcp_end_node,3h\n";
     }
     elseif (strpos($line,'#### ADD FIXED') !== false) {
-        $where_clause = "ip_element_4>=1 AND ip_element_4<=254";
+        $where_clause = "ip_element_4>=1 AND ip_element_4<=254 AND mac_address NOT LIKE 'FF:FF:FF:FF:FF:%'";
         $where_values = [];
         $add_clause = 'ORDER BY ip_element_4 ASC';
         $query_result = mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,$add_clause);

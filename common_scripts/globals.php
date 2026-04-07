@@ -9,6 +9,7 @@ a number of key variables as global.
 global $base_dir;
 global $base_url;
 global $cache_dir;
+global $cpanel_user;
 global $custom_pages_path;
 global $custom_pages_url;
 global $custom_scripts_path;
@@ -17,8 +18,10 @@ global $db_admin_dir;
 global $db_admin_url;
 global $db_mode;
 global $home_ip_addr;
+global $local_site_dir;
 global $location;
 global $maintenance_dir;
+global $online_port;
 global $private_scripts_dir;
 global $relative_path;
 global $root_dir;

@@ -773,7 +773,7 @@ Function save_record
 
 function save_record($record,$old_record_id,$new_record_id)
 {
-    global $custom_pages_path, $relative_path;
+    global $custom_pages_path, $relative_path, $location, $cpanel_user, $mirror_hostname, $replicate;
     $action = $record->action;
     $table = $record->table;
     global $custom_pages_path, $relative_path;
@@ -807,6 +807,7 @@ function save_record($record,$old_record_id,$new_record_id)
                 // Auto-increment field needs to be omitted but need to note that there
                 // is one present.
                 $auto_inc_field_present = true;
+                $inhibit_replication = true;  // Inhibit replication where there is an auto increment field
             }
             elseif (empty($field_value)) {
                 // Field is empty.
@@ -886,6 +887,7 @@ function save_record($record,$old_record_id,$new_record_id)
         }
 
         // Run beforeSave method if available
+        // N.B. beforeSave is responsible for setting variable $replicate
         if (method_exists($table_obj,'beforeSave')) {
             $result = $table_obj->beforeSave($record);
             if ($result === false) {
@@ -894,45 +896,53 @@ function save_record($record,$old_record_id,$new_record_id)
         }
     }
 
+    // Fields/values for a full record update
+    $set_fields = '';
+    $set_values = [];
+    foreach ($new_mysql_fields AS $field => $value) {
+        $set_fields .= "$field,";
+        $set_values = (isset($field_is_null[$field]))
+            ? array_merge($set_values,['n',null])
+            : array_merge($set_values,[$record->FieldType($field),$value]);
+    }
+    $set_fields = rtrim($set_fields,',');
+
+    // Fields/values for a full record insertion
+    $insert_fields = '';
+    $insert_values = [];
+    foreach ($new_mysql_fields as $field => $value) {
+        $insert_fields .= "$field,";
+        $insert_values = (isset($field_is_null[$field]))
+            ? array_merge($insert_values,['n',null])
+            : array_merge($insert_values,[$record->FieldType($field),$value]);
+    }
+    $insert_fields = rtrim($insert_fields,',');
+
+    // Where clause on old primary keys
+    $old_where_clause = '';
+    $old_where_values = [];
+    foreach ($old_primary_keys as $field => $value) {
+        $old_where_clause .= " AND $field=?";
+        $old_where_values = array_merge($old_where_values,[$record->FieldType($field),$value]);
+    }
+    $old_where_clause = substr($old_where_clause,5);
+
+    // Where clause on current primary keys
+    $new_where_clause = '';
+    $new_where_values = [];
+    foreach ($new_primary_keys as $field => $value) {
+        $new_where_clause .= " AND $field=?";
+        $new_where_values = array_merge($new_where_values,[$record->FieldType($field),$value]);
+    }
+    $new_where_clause = substr($new_where_clause,5);
+
     if (($action == 'edit') || ($action == 'update')) {
         // Save the record
-        $set_fields = '';
-        $set_values = [];
-        foreach ($new_mysql_fields AS $field => $value) {
-            $set_fields .= "$field,";
-            $set_values = (isset($field_is_null[$field]))
-                ? array_merge($set_values,['n',null])
-                : array_merge($set_values,[$record->FieldType($field),$value]);
-        }
-        $set_fields = rtrim($set_fields,',');
-        $where_clause = '';
-        $where_values = [];
-        foreach ($old_primary_keys as $field => $value) {
-            $where_clause .= " $field=? AND ";
-            $where_values[count($where_values)] = $record->FieldType($field);
-            $where_values[count($where_values)] = $value;
-        }
-        $where_clause = rtrim($where_clause,' AND');
-        $main_query_result = mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$where_values);
-
-        if (isset($_POST['replicate_changes'])) {
-            // Replicate change to online site
-            $db2 = online_db_connect();
-            mysqli_query_normal($db2,$query);
-        }
+        $main_query_result = mysqli_update_query($db,$table,$set_fields,$set_values,$old_where_clause,$old_where_values);
     }
     elseif (($action == 'new') || ($action == 'copy')) {
         // Insert the record
-        $fields = '';
-        $values = [];
-        foreach ($new_mysql_fields as $field => $value) {
-            $fields .= "$field,";
-            $values = (isset($field_is_null[$field]))
-                ? array_merge($values,['n',null])
-                : array_merge($values,[$record->FieldType($field),$value]);
-        }
-        $fields = rtrim($fields,',');
-        $main_query_result = mysqli_insert_query($db,$table,$fields,$values);
+        $main_query_result = mysqli_insert_query($db,$table,$insert_fields,$insert_values);
     }
 
     // Update any auto-increment fields in the record object to reflect the
@@ -952,14 +962,47 @@ function save_record($record,$old_record_id,$new_record_id)
         (!empty($row['seq_no_field'])) && ($seq_no = $record->FieldVal($row['seq_no_field'])) && ($seq_no == NEXT_SEQ_NO_INDICATOR)) {
         $where_values = ['s',$row['seq_no_field']];
         if (($row2 = mysqli_fetch_assoc(mysqli_free_format_query($db,"SHOW COLUMNS FROM $base_table WHERE Field=?",$where_values))) &&
-        ($row2['Default'] == NEXT_SEQ_NO_INDICATOR)) {
+            ($row2['Default'] == NEXT_SEQ_NO_INDICATOR)) {
             $sort_1_value = $record->FieldVal($row['sort_1_field']);
             $seq_no = update_seq_number($base_table,$sort_1_value,$seq_no);
             $record->SetField($row['seq_no_field'],$seq_no,query_field_type($db,$table,$row['seq_no_field']));
             $primary_keys = double_decode_record_id($new_record_id);
             $primary_keys[$row['seq_no_field']] = $seq_no;
             $new_record_id = encode_record_id($primary_keys);
+            $inhibit_replication = true;  // Inhibit replication where there is an auto sequence number
         }
+    }
+
+    // Replicate update on mirror host if required
+    if ((!empty($replicate)) && (empty($inhibit_replication)) && (!empty($mirror_hostname))) {
+        $dbname = admin_db_name();
+        $new_prefix = ($location == 'local') ? $cpanel_user : 'local';
+        $mirror_dbname = $new_prefix.substr($dbname,strpos($dbname,'_'));
+        if ($db2 = mysqli_connect($mirror_hostname,REAL_DB_USER,REAL_DB_PASSWD,$mirror_dbname)) {
+
+            // Insert mirror record if required
+            mysqli_conditional_insert_query($db2,$table,$insert_fields,$insert_values,$new_where_clause,$new_where_values);
+
+            // Update mirror record
+            mysqli_update_query($db2,$table,$set_fields,$set_values,$new_where_clause,$new_where_values);
+
+            // Delete old mirror record if there has been a primary key change
+            if (($action != 'new') && ($new_where_values !== $old_where_values)) {
+                mysqli_delete_query($db2,$table,$old_where_clause,$old_where_values);
+            }
+        }
+        else {
+            $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (DB connect failure).";
+        }
+    }
+    elseif ((!empty($replicate)) && (!empty($inhibit_replication))){
+        $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (incompatible with table structure).";
+    }
+    elseif ((!empty($replicate)) && (empty($mirror_hostname))){
+        $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (mirror host not specified).";
+    }
+    if (!empty($warning_message)) {
+        update_session_var('save_info',$warning_message);
     }
 
     // Run the after save function for any file widgets
@@ -1327,20 +1370,8 @@ function handle_record($action,$params)
                 print("<input type=\"checkbox\" name =\"save_as_new\">&nbsp;Save as new record\n");
                 print("<div class=\"halfspace\">&nbsp;</div>");
 
-                // Generate 'replicate changes' selector if required conditions are met
-                $where_clause = 'table_name=?';
-                $where_values = ['s',$base_table];
-                if (($location == 'local') &&
-                    (function_exists('online_db_connect')) &&
-                    ($row = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_info','*',$where_clause,$where_values,''))) &&
-                    ($row['replicate_enabled'])) {
-                    // Check that corresponding online record exists
-                    $db2 = online_db_connect();
-                    if (($db2) && (mysqli_num_rows(mysqli_select_query($db2,$table,'*',$select_this_record['where_clause'],$select_this_record['where_values'],'')) > 0)) {
-                        print("<input type=\"checkbox\" name =\"replicate_changes\">&nbsp;Replicate changes\n");
-                        print("<div class=\"halfspace\">&nbsp;</div>");
-                    }
-                }
+                // Generate 'replicate changes' selector if required
+                // Code to be added
             }
             print("<input type=\"Submit\" value =\"Save\">\n");
             print("<input type=\"hidden\" name=\"submitted\"/>\n");
@@ -1370,7 +1401,7 @@ afterDelete method for the associated table class.
 
 function delete_record($record,$record_id)
 {
-    global $custom_pages_path, $relative_path, $alt_include_path, $db_admin_dir;
+    global $custom_pages_path, $relative_path, $location, $cpanel_user, $replicate, $mirror_hostname, $alt_include_path, $db_admin_dir;
     $db = admin_db_connect();
     $table = $record->table;
     $base_table = get_base_table($table);
@@ -1391,6 +1422,7 @@ function delete_record($record,$record_id)
         $table_obj = new $classname;
 
         // Run beforeDelete method if available
+        // N.B. beforeDelete is responsible for setting variable $replicate
         if (method_exists($table_obj,'beforeDelete')) {
             $result = $table_obj->beforeDelete($record);
             if ($result === false) {
@@ -1404,14 +1436,23 @@ function delete_record($record,$record_id)
         $primary_keys = double_decode_record_id($record_id);
         foreach ($primary_keys as $field => $value) {
             $where_clause .= "$field=? AND ";
-            $where_values[count($where_values)] = $record->FieldType($field);
-            $where_values[count($where_values)] = $record->FieldVal($field);
+            $where_values = array_merge($where_values,[$record->FieldType($field),$record->FieldVal($field)]);
         }
         $where_clause = rtrim($where_clause,' AND');
         mysqli_delete_query($db,$table,$where_clause,$where_values);
 
+        // Delete mirror record if required
+        if ((!empty($replicate)) && (!empty($mirror_hostname))) {
+            $dbname = admin_db_name();
+            $new_prefix = ($location == 'local') ? $cpanel_user : 'local';
+            $mirror_dbname = $new_prefix.substr($dbname,strpos($dbname,'_'));
+            if ($db2 = mysqli_connect($mirror_hostname,REAL_DB_USER,REAL_DB_PASSWD,$mirror_dbname)) {
+                mysqli_delete_query($db2,$table,$where_clause,$where_values);
+            }
+        }
+
+        // Run afterDelete method if available
         if  (class_exists ($classname,false)) {
-            // Run afterDelete method if available
             if (method_exists($table_obj,'afterDelete')) {
                 $result = $table_obj->afterDelete($record);
             }

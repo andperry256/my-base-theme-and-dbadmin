@@ -97,21 +97,22 @@ class tables_home_dhcp_settings
             }
         }
     }
-
-    function afterDelete($record)
+    function setReplicate()
     {
-        global $mirror_hostname;
-        if (!empty($mirror_hostname)) {
-            $dbname = admin_db_name();
-            $mirror_dbname = 'local'.substr($dbname,strpos($dbname,'_'));
-            if ($db2 = mysqli_connect($mirror_hostname,REAL_DB_USER,REAL_DB_PASSWD,$mirror_dbname)) {
-
-                // Delete mirror record
-                $where_clause = 'ip_element_4=? AND hostname=?';
-                $where_values = ['i',$record->FieldVal('ip_element_4'),'s',$record->FieldVal('hostname')];
-                mysqli_delete_query($db2,'home_dhcp_settings',$where_clause,$where_values);
-            }
+        global $location, $replicate;
+        if ($location == 'real') {
+            $replicate = true;
         }
+    }
+
+    function beforeDelete($record)
+    {
+        $this->setReplicate();
+    }
+
+    function beforeSave($record)
+    {
+        $this->setReplicate();
     }
 
     function afterSave($record)
@@ -131,37 +132,6 @@ class tables_home_dhcp_settings
         $where_clause = 'ip_element_4=? AND hostname=?';
         $where_values = ['i',$ip_element_4,'s',$hostname];
         mysqli_update_query($db,'home_dhcp_settings',$set_fields,$set_values,$where_clause,$where_values);
-
-        if (!empty($mirror_hostname)) {
-            $dbname = admin_db_name();
-            $mirror_dbname = 'local'.substr($dbname,strpos($dbname,'_'));
-            if ($db2 = mysqli_connect($mirror_hostname,REAL_DB_USER,REAL_DB_PASSWD,$mirror_dbname)) {
-
-                // Insert mirror record if required
-                $fields = 'ip_element_4,mac_address,hostname';
-                $values = ['i',$ip_element_4,'s',$mac_address,'s',$hostname];
-                $where_clause = 'ip_element_4=? AND hostname=?';
-                $where_values = ['i',$ip_element_4,'s',$hostname];
-                mysqli_conditional_insert_query($db2,'home_dhcp_settings',$fields,$values,$where_clause,$where_values);
-
-                // Update mirror record
-                $fields = 'mac_address,friendly_name';
-                $values = ['s',$mac_address,'s',$friendly_name];
-                if (!empty($vendor)) {
-                    $fields .= ',vendor';
-                    $values = array_merge($values,['s',$vendor]);
-                }
-                mysqli_update_query($db2,'home_dhcp_settings',$fields,$values,$where_clause,$where_values);
-
-                if (($record->OldPKVal('ip_element_4') != $ip_element_4) || ($record->OldPKVal('hostname') != $hostname)) {
-
-                    // Delete old mirror record
-                    $where_clause = 'ip_element_4=? AND hostname=?';
-                    $where_values = ['i',$record->OldPKVal('ip_element_4'),'s',$record->OldPKVal('hostname')];
-                    mysqli_delete_query($db2,'home_dhcp_settings',$where_clause,$where_values);
-                }
-            }
-        }
     }
 }
 

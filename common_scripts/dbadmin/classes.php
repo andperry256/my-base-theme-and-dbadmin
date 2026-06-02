@@ -295,6 +295,25 @@ class tables_admin_passwords
             $where_values = ['s',$username];
             mysqli_update_query($db,'admin_passwords',$set_fields,$set_values,$where_clause,$where_values);
         }
+        if (($record->FieldIsSet('keycode')) && (substr($record->FieldVal('keycode'),0,1) == '#')) {
+            $this->setUserKeycode($username);
+        }
+    }
+
+    function setUserKeycode($username)
+    {
+        $db = db_connect(2);
+        $query_result = mysqli_query($db,"SELECT * FROM admin_passwords WHERE username='$username'");
+        if (($row = mysqli_fetch_assoc($query_result)) &&
+            ((empty($row['keycode'])) || ($row['keycode'] == '#'))) {
+            $keycode = password_hash($username.date('YmdHis'),PASSWORD_DEFAULT);
+            $keycode = md5($keycode);
+            mysqli_query($db,"UPDATE admin_passwords SET keycode='$keycode' WHERE username='$username'");
+            return $keycode;
+        }
+        else {
+            return false;
+        }
     }
 }
 

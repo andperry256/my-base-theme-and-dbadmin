@@ -418,76 +418,89 @@ function simplify_html($content)
 
 //================================================================================
 /*
+Function clear_cache
+
+This function deletes all the content of the WP cache directory, forcing all pages
+and posts to be re-cached.
+*/
+//================================================================================
+
+function clear_cache($subdir='')
+{
+    global $cache_dir;
+    global $base_url;
+    $pos = strpos($base_url,'//');
+    if (empty($subdir)) {
+        $subdir = "$cache_dir/supercache/".substr($base_url,$pos+2);
+    }
+    print("$subdir\n");
+    $dir = scandir($subdir);
+    foreach ($dir as $file) {
+        if ((is_dir("$subdir/$file"))&& (substr($file,0,1) != '.')) {
+            clear_cache("$subdir/$file");
+            rmdir("$subdir/$file");
+        }
+        elseif (is_file("$subdir/$file")) {
+            unlink("$subdir/$file");
+        }
+    }
+}
+
+//================================================================================
+/*
+Function trigger_cache_generation
+
+This function is called to access a given page or post in such a way that it will
+force it to be cached in the WP cache if not already there. The setting of the
+user agent to be browser based is key to successful operation.
+*/
+//================================================================================
+
+function trigger_cache_generation($url)
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ($http_code === 200);
+}
+
+//================================================================================
+/*
 Function recache_page
 
 This function is for use in conjuction with the 'WP Super Cache' plugin. It is
 called to clear any cache files for a given page and then activate the page to
 cause the cache to be regenerated (provided the page is configured to be cached).
-A path to the page is provided as a parameter and this can be one of the
-following:
 
-1. The WordPress page name (slug). This option works for both posts and pages.
-2. A full URI sub-path specifying the hierarchy of the page with its ancestors.
-
-An optional parameter specifies a run count, allowing for the re-cache to be run
-more than once (generally twice) in special situations.
+This and the 'recache_all_pages' have been rewritten with the help of AI. To refer
+back to the previous versions, please see the backup archive for May 2026.
 */
 //================================================================================
 
-function recache_page($page_path,$run_count=1)
+function recache_page($uri_subpath)
 {
     global $cache_dir;
     global $base_url;
-    if ((!isset($cache_dir)) || (!defined('WP_DBID'))) {
-        // Return with no action/error.
-        return;
-    }
-    $db = db_connect(WP_DBID);
-    if (strpos($page_path,'/') === false) {
-        // Parameter is a page slug - build full sub-path by looping through page hierarchy.
-        $uri_subpath = '';
-        $where_clause = 'post_name=?';
-        $where_values = ['s',$page_path];
-        while($row = mysqli_fetch_assoc(mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,''))) {
-            $uri_subpath = "{$row['post_name']}/$uri_subpath";
-            if ($row['post_parent'] == 0) {
-                break;
-            }
-            else {
-                $where_clause = 'ID=?';
-                $where_values = ['i',$row['post_parent']];
-            }
-        }
-        if (substr($uri_subpath,0,5) == 'home/') {
-            $uri_subpath = substr($uri_subpath,5);
-        }
-        $uri_subpath = trim($uri_subpath,'/');
-    }
-    else {
-        // Parameter is a full URI sub-path.
-        $uri_subpath = $page_path;
-    }
-
-    // Determine path for subdirectory containing cache for given page.
     $pos = strpos($base_url,'//');
     $cache_subdir = "$cache_dir/supercache/".substr($base_url,$pos+2)."/$uri_subpath";
     $cache_subdir = rtrim($cache_subdir,'/');
 
-    // Run operation for prescribed number of times.
-    for ($i=1; $i<=$run_count; $i++) {
-        // Delete cache files for page.
-        if (is_dir($cache_subdir)) {
-            $dirlist = scandir($cache_subdir);
-            foreach ($dirlist as $file) {
-                if (is_file("$cache_subdir/$file")) {
-                    unlink("$cache_subdir/$file");
-                }
-            }
+    // Delete old cache files
+    if (is_dir($cache_subdir)) {
+        $files = glob("$cache_subdir/*");
+        foreach ($files as $file) {
+            if (is_file($file)) unlink($file);
         }
-
-        // Activate page to regenerate cache.
-        $dummy = get_url_content("$base_url/$uri_subpath");
     }
+
+    // Activate page to regenerate cache.
+    trigger_cache_generation("$base_url/$uri_subpath");
 }
 
 //================================================================================
@@ -501,19 +514,38 @@ pages/posts within the site.
 
 function recache_all_pages($type='page')
 {
-    if (defined('WP_DBID')) {
-        $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
-        $db = db_connect(WP_DBID);
-        $where_clause = "post_type='$type' AND post_status='publish'";
-        $where_values = [];
-        $add_clause = "ORDER BY post_name ASC";
-        $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,$add_clause);
-        while ($row = mysqli_fetch_assoc($query_result)) {
-            set_time_limit(30);
-            print("Re-caching $type [{$row['post_name']}]$eol");
-            recache_page($row['post_name']);
-        }
+    if (!defined('WP_DBID')) return;
+
+    $db = db_connect(WP_DBID);
+    $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
+
+    $all_posts = [];
+    $where_clause = "post_type='$type' AND post_status='publish'";
+    $where_values = [];
+    $add_clause = "ORDER BY post_name ASC";
+    $query_result = mysqli_select_query($db,'wp_posts','ID,post_name,post_parent',$where_clause,$where_values,$add_clause);
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        $all_posts[$row['ID']] = $row;
     }
+
+    foreach ($all_posts as $post) {
+        set_time_limit(30);
+        $uri_subpath = build_uri_path($post, $all_posts);
+        print("Re-caching $type [{$post['post_name']}]$eol");
+        recache_page($uri_subpath);
+    }
+}
+
+function build_uri_path($post, &$all_posts)
+{
+    $path = $post['post_name'];
+    $parent_id = $post['post_parent'];
+
+    while ($parent_id > 0 && isset($all_posts[$parent_id])) {
+        $path = $all_posts[$parent_id]['post_name'] . '/' . $path;
+        $parent_id = $all_posts[$parent_id]['post_parent'];
+    }
+    return ($path === 'home') ? '' : $path;
 }
 
 //================================================================================

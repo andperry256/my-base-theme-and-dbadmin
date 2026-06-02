@@ -132,7 +132,14 @@ while ($row = mysqli_fetch_assoc($query_result)) {
         }
     }
     // Output account total
-    print("<td style=\"$table_cell_style\">Total</td><td style=\"$table_cell_style_total\">\n");
+    print("<td style=\"$table_cell_style\">");
+    if (!empty($row['closed'])) {
+        print("[closed]");
+    }
+    else {
+        print("Total");
+    }
+    print("</td><td style=\"$table_cell_style_total\">\n");
     if ($total >= 0) {
         printf("<span class=\"balance-positive\">%01.2f</span>", $total);
     }

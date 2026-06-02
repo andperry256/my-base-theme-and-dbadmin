@@ -22,7 +22,7 @@ if (!function_exists('datepicker_widget')) {
         if (!isset($new_date_start_month)) {
             $new_date_start_month = 1;
         }
-        print("<input type=\"text\" id=\"$field_name\" name=\"$field_name\"  value=\"$field_value\" size=\"10\" style=\"margin-right:0.5em\"
+        print("<input type=\"text\" id=\"$field_name\" name=\"$field_name\"  value=\"$field_value\" size=\"12\" style=\"margin-right:0.5em\"
                 data-datepick=\"showOtherMonths: true, firstDay: 7, dateFormat: 'yyyy-mm-dd', minDate: 'new Date($new_date_start_year, $new_date_start_month -1, 1)'\">\n");
         print("<script>
                 $('#$field_name').datepick({showTrigger: '#calImg'});

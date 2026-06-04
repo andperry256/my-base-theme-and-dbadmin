@@ -204,7 +204,7 @@ Function output_stylesheet_link
 
 This function is used to output a stylesheet link in the HTML header when
 the URL hierachy is scanned by setup_params.php. The stylesheet file must be
-named styles.css.
+named style.css.
 
 The associated light/dark theme stylesheet will also be linked in if present.
 */
@@ -215,14 +215,14 @@ function output_stylesheet_link($path,$sub_path)
     global $link_version, $base_dir, $base_url;
     $stylesheet_id = str_replace('/','-',$sub_path);
     $dir_path = str_replace($base_url,$base_dir,$path);
-    print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-css'  href='$path/$sub_path/styles.css?v=$link_version' type='text/css' media='all' />\n");
+    print("\n<link rel='stylesheet' id='$stylesheet_id"."-style-css'  href='$path/$sub_path/style.css?v=$link_version' type='text/css' media='all' />\n");
 
     if (function_exists('get_session_var')) {
-        if ((get_session_var('theme_mode') == 'light') && (is_file("$dir_path/$sub_path/styles-light.css"))) {
-            print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-light-css'  href='$path/$sub_path/styles-light.css?v=$link_version' type='text/css' media='all' />\n");
+        if ((get_session_var('theme_mode') == 'light') && (is_file("$dir_path/$sub_path/style-light.css"))) {
+            print("\n<link rel='stylesheet' id='$stylesheet_id"."-style-light-css'  href='$path/$sub_path/style-light.css?v=$link_version' type='text/css' media='all' />\n");
         }
-        elseif ((get_session_var('theme_mode') == 'dark') && (is_file("$dir_path/$sub_path/styles-dark.css"))) {
-            print("\n<link rel='stylesheet' id='$stylesheet_id"."-styles-dark-css'  href='$path/$sub_path/styles-dark.css?v=$link_version' type='text/css' media='all' />\n");
+        elseif ((get_session_var('theme_mode') == 'dark') && (is_file("$dir_path/$sub_path/style-dark.css"))) {
+            print("\n<link rel='stylesheet' id='$stylesheet_id"."-style-dark-css'  href='$path/$sub_path/style-dark.css?v=$link_version' type='text/css' media='all' />\n");
         }
     }
 }

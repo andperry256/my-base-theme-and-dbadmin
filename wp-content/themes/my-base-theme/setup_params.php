@@ -17,6 +17,8 @@ global $mobile_header_image_path, $mobile_header_image_url;
 global $private_scripts_dir;
 global $custom_footer_script;
 global $wpdb;
+global $light_theme_css_list, $light_theme_newest_timestamp, $light_theme_filesize_total;
+global $dark_theme_css_list, $dark_theme_newest_timestamp, $dark_theme_filesize_total;
 
 $themes_dir = get_theme_root();
 $site_path_defs_path = "$themes_dir/site_path_defs.php";
@@ -90,8 +92,8 @@ if (is_page()) {
     $uri_sub_path = '';
     foreach ($hierarchy as $element) {
         $uri_sub_path .= "/$element";
-        $subpath = ltrim($uri_sub_path,'/');
-        set_header_image_paths($subpath,'page');
+        $uri_sub_path = ltrim($uri_sub_path,'/');
+        set_header_image_paths($uri_sub_path,'page');
         if (is_file("$custom_pages_path/$uri_sub_path/footer.php")) {
             // Select custom footer script
             $custom_footer_script = "$custom_pages_path/$uri_sub_path/footer.php";
@@ -100,20 +102,9 @@ if (is_page()) {
             // Select menu
             include("$custom_pages_path/$uri_sub_path/select_menu.php");
         }
-        if (is_file("$custom_pages_path/$uri_sub_path/custom_stylesheets.php")) {
-            // Add stylesheets from custom list
-            include("$custom_pages_path/$uri_sub_path/custom_stylesheets.php");
-        }
-        else {
-            // Look for standard stylesheets
-            if (is_file("$custom_pages_path/$uri_sub_path/styles.css")) {
-                // Add linked stylesheet
-                output_stylesheet_link($custom_pages_url,$uri_sub_path);
-            }
-            if (is_file("$custom_pages_path/$uri_sub_path/inline-styles.css")) {
-                // Add inline stylesheet
-                include_inline_stylesheet("$custom_pages_path/$uri_sub_path/inline-styles.css");
-            }
+        if (is_file("$custom_pages_path/$uri_sub_path/inline-styles.css")) {
+            // Add inline stylesheet
+            include_inline_stylesheet("$custom_pages_path/$uri_sub_path/inline-styles.css");
         }
         if (is_file("$custom_pages_path/$uri_sub_path/metadata.php")) {
             // Include any meta tag variables
@@ -146,28 +137,24 @@ elseif (is_single()) {
         may be unpredictable as they could depend upon the order in which the
         categories are processed.
         */
-        $tok = strtok($hierarchy,'/');
+        $hierarchy_elements = explode('/',ltrim($hierarchy,'/'));
         $uri_sub_path = '';
-        while ($tok !== false) {
-            $uri_sub_path .= "/$tok";
-            set_header_image_paths($tok,'category');
-            if (is_file("$custom_pages_path/$tok/footer.php")) {
+        foreach ($hierarchy_elements as $element) {
+            $uri_sub_path .= "/$element";
+            $uri_sub_path = ltrim($uri_sub_path,'/');
+            set_header_image_paths($element,'category');
+            if (is_file("$custom_pages_path/$element/footer.php")) {
                 // Select custom footer script
-                $custom_footer_script = "$custom_categories_path/$tok/footer.php";
+                $custom_footer_script = "$custom_categories_path/$element/footer.php";
             }
-            if (is_file("$custom_categories_path/$tok/select_menu.php")) {
+            if (is_file("$custom_categories_path/$element/select_menu.php")) {
                 // Select menu
-                include("$custom_categories_path/$tok/select_menu.php");
+                include("$custom_categories_path/$element/select_menu.php");
             }
-            if (is_file("$custom_categories_path/$uri_sub_path/styles.css")) {
-                // Add linked stylesheet
-                output_stylesheet_link($custom_categories_url,$tok);
-            }
-            if (is_file("$custom_categories_path/$tok/inline-styles.css")) {
+            if (is_file("$custom_categories_path/$element/inline-styles.css")) {
                 // Add inline stylesheet
-                include_inline_stylesheet("$custom_categories_path/$tok/inline-styles.css");
+                include_inline_stylesheet("$custom_categories_path/$element/inline-styles.css");
             }
-            $tok = strtok('/');
         }
     }
 }
@@ -178,28 +165,24 @@ elseif (is_category()) {
     $category = get_queried_object();
     $id = $category->term_id;
     $hierarchy = get_category_parents($id, false, '/', true);
-    $tok = strtok($hierarchy,'/');
+    $hierarchy_elements = explode('/',ltrim($hierarchy,'/'));
     $uri_sub_path = '';
-    while ($tok !== false) {
-        $uri_sub_path .= "/$tok";
-        set_header_image_paths($tok,'category');
-        if (is_file("$custom_pages_path/$tok/footer.php")) {
+    foreach ($hierarchy_elements as $element) {
+        $uri_sub_path .= "/$element";
+        $uri_sub_path = ltrim($uri_sub_path,'/');
+        set_header_image_paths($element,'category');
+        if (is_file("$custom_pages_path/$element/footer.php")) {
             // Select custom footer script
-            $custom_footer_script = "$custom_categories_path/$tok/footer.php";
+            $custom_footer_script = "$custom_categories_path/$element/footer.php";
         }
-        if (is_file("$custom_categories_path/$tok/select_menu.php")) {
+        if (is_file("$custom_categories_path/$element/select_menu.php")) {
             // Select menu
-            include("$custom_categories_path/$tok/select_menu.php");
+            include("$custom_categories_path/$element/select_menu.php");
         }
-        if (is_file("$custom_categories_path/$uri_sub_path/styles.css")) {
-            // Add linked stylesheet
-            output_stylesheet_link($custom_categories_url,$tok);
-        }
-        if (is_file("$custom_categories_path/$tok/inline-styles.css")) {
+        if (is_file("$custom_categories_path/$element/inline-styles.css")) {
             // Add inline stylesheet
-            include_inline_stylesheet("$custom_categories_path/$tok/inline-styles.css");
+            include_inline_stylesheet("$custom_categories_path/$element/inline-styles.css");
         }
-        $tok = strtok('/');
     }
 }
 

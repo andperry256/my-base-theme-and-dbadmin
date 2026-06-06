@@ -160,6 +160,8 @@ add_action( 'widgets_init', 'my_base_theme_widgets_init' );
  */
 function my_base_theme_scripts()
 {
+    global $split_modes;
+
     if (is_file(__DIR__.'/../../../last_preset_link_version.php')) {
         include (__DIR__.'/../../../last_preset_link_version.php');
     }
@@ -168,11 +170,13 @@ function my_base_theme_scripts()
         $link_version = $last_preset_link_version;
     }
 
-    wp_enqueue_style( 'base-theme-style', get_template_directory_uri().'/style.css', [], $link_version );
-    if (is_child_theme()) {
-        wp_enqueue_style( 'child-theme-style', get_stylesheet_directory_uri().'/style.css', ['base-theme-style'], $link_version );
+    $css_path = build_main_stylesheet();
+    if (!empty($split_modes)) {
+        // Functionality to be added
     }
-
+    else {
+        wp_enqueue_style( 'main-style', "$css_path/style.css", array(), '1.0.0' );
+    }
     wp_enqueue_script( 'my-base-theme-navigation', get_template_directory_uri() . '/js/navigation.js', [], $link_version, true );
     wp_enqueue_script( 'my-base-theme-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', [], $link_version, true );
 
@@ -181,6 +185,206 @@ function my_base_theme_scripts()
     }
 }
 add_action( 'wp_enqueue_scripts', 'my_base_theme_scripts' );
+
+//================================================================================
+
+function build_main_stylesheet()
+{
+    global $base_dir, $base_url, $custom_scripts_path;
+    global $light_mode_css_list, $light_mode_newest_timestamp, $light_mode_filesize_total;
+    global $dark_mode_css_list, $dark_mode_newest_timestamp, $dark_mode_filesize_total;
+
+    // Initialise CSS lists with paths to main theme styles
+    if (!is_dir("$base_dir/auto_css")) {
+        mkdir("$base_dir/auto_css",0775);
+    }
+    $fonts_source = "$base_dir/wp-content/themes/my-base-theme/fonts.css";
+    $fonts_dest = "$base_dir/auto_css/fonts.css";
+    $base_styles = "$base_dir/wp-content/themes/my-base-theme/style.css";
+    if ((!is_file($fonts_dest)) ||
+        (filemtime($fonts_source) > filemtime($fonts_dest))) {
+        $content = file_get_contents($fonts_source);
+        $content = str_replace('#',$base_url,$content);
+        file_put_contents($fonts_dest,$content);
+    }
+
+    $light_mode_css_list = [ $fonts_dest, $base_styles ];
+    $light_mode_newest_timestamp = filemtime("$fonts_dest");
+    if (filemtime($base_styles) > filemtime($fonts_dest)) {
+        $light_mode_newest_timestamp = filemtime($base_styles);
+    }
+    $light_mode_filesize_total = filesize($fonts_dest) + filesize($base_styles);
+    $dark_mode_css_list = $light_mode_css_list;
+    $dark_mode_newest_timestamp = $light_mode_newest_timestamp;
+    $dark_mode_filesize_total = $light_mode_filesize_total;
+    if (is_child_theme()) {
+        add_stylesheets(get_stylesheet_directory(),'');
+    }
+    $css_path = "$base_url/auto_css";
+
+    if (is_page()) {
+        $page_uri = get_page_uri(get_the_ID());
+        $hierarchy = explode('/',ltrim($page_uri,'/'));
+        $uri_sub_path = '';
+        foreach ($hierarchy as $element) {
+            $uri_sub_path .= "/$element";
+            $uri_sub_path = ltrim($uri_sub_path,'/');
+            if (add_stylesheets("$custom_scripts_path/pages",$uri_sub_path)) {
+                $css_path = "$base_url/auto_css/$uri_sub_path";
+            }
+        }
+    }
+    elseif (is_single()) {
+        $categories = get_the_category();
+        foreach ($categories as $key => $dummy) {
+            $id = $categories[$key]->term_id;
+            $slug =  $categories[$key]->slug;
+            $hierarchy = get_category_parents($id, false, '/', true);
+            $hierarchy_elements = explode('/',ltrim($hierarchy,'/'));
+            $uri_sub_path = '';
+            foreach ($hierarchy_elements as $element) {
+                $uri_sub_path .= "/$element";
+                $uri_sub_path = ltrim($uri_sub_path,'/');
+                if (add_stylesheets("$custom_scripts_path/categories",$uri_sub_path)) {
+                    // Stylesheet(s) added - update path for main CSS
+                    $css_path = "$base_url/auto_css/$uri_sub_path";
+                }
+            }
+        }
+    }
+    elseif (is_category()) {
+        $category = get_queried_object();
+        $id = $category->term_id;
+        $hierarchy = get_category_parents($id, false, '/', true);
+        $hierarchy_elements = explode('/',ltrim($hierarchy,'/'));
+        $uri_sub_path = '';
+        foreach ($hierarchy_elements as $element) {
+            $uri_sub_path .= "/$element";
+            $uri_sub_path = ltrim($uri_sub_path,'/');
+            if (add_stylesheets("$custom_scripts_path/posts",$uri_sub_path)) {
+                // Stylesheet(s) added - update path for main CSS
+                $css_path = "$base_url/auto_css/$uri_sub_path";
+            }
+        }
+    }
+    return $css_path;
+}
+
+//================================================================================
+
+function add_stylesheets($base_path,$sub_path)
+{
+    global $base_dir, $location;
+    global $split_modes;  // Set TRUE if light/dark modes are in operation.
+    global $light_mode_css_list, $light_mode_newest_timestamp, $light_mode_filesize_total;
+    global $dark_mode_css_list, $dark_mode_newest_timestamp, $dark_mode_filesize_total;
+
+    // Add stylesheets for current sub-path to list
+    $source_dir = "$base_path/$sub_path";
+    $files_added = false;
+    $files_to_add = [
+        "$source_dir/style.css",
+        "$source_dir/style-light.css",
+        "$source_dir/style-dark.css",
+    ];
+    if (is_file("$source_dir/additional_styles.php") ) {
+        include("$source_dir/additional_styles.php");
+        if (is_array($additional_styles)) {
+            $files_to_add = array_merge($files_to_add,$additional_styles);
+        }
+    }
+    if ($sub_path == 'dbadmin') {
+        $files_to_add = array_merge($files_to_add,["$base_dir/common_scripts/dbadmin/style.css"]);
+        if ($location == 'real') {
+            $files_to_add = array_merge($files_to_add,[
+                "$base_dir/common_scripts/dbadmin/style-light.css",
+                "$base_dir/common_scripts/dbadmin/style-dark.css"
+            ]);
+        }
+        else {
+            $files_to_add = array_merge($files_to_add,[
+                "$base_dir/common_scripts/dbadmin/style-local-light.css",
+                "$base_dir/common_scripts/dbadmin/style-local-dark.css"
+            ]);
+        }
+    }
+    foreach ($files_to_add as $file) {
+        if (is_file($file)) {
+            if ((pathinfo($file,PATHINFO_FILENAME) != 'style-dark') &&
+                (pathinfo($file,PATHINFO_FILENAME) != 'style-local-dark')) {
+
+                // Add to light mode list (main list if light/dark modes not in use)
+                $light_mode_css_list = array_merge($light_mode_css_list, [$file]);
+                $timestamp = filemtime($file);
+                if ($timestamp > $light_mode_newest_timestamp) {
+                    $light_mode_newest_timestamp = $timestamp;
+                }
+                $light_mode_filesize_total += filesize($file);
+                $files_added = true;
+            }
+            if ((!empty($split_modes)) && (pathinfo($file,PATHINFO_FILENAME) != 'style-light') &&
+                (pathinfo($file,PATHINFO_FILENAME) != 'style-local-light')) {
+
+                // Add to dark mode list
+                $dark_mode_css_list = array_merge($dark_mode_css_list, [$file]);
+                $timestamp = filemtime($file);
+                if ($timestamp > $dark_mode_newest_timestamp) {
+                    $dark_mode_newest_timestamp = $timestamp;
+                    $dark_mode_filesize_total += filesize($file);
+                }
+                $files_added = true;
+            }
+        }
+    }
+
+    if ($files_added) {
+        /*
+        Concatenate stylesheets from list to create working scripts if:
+        1. A required working script does not exist, or:
+        2. A working script exists, but is older than one of its source constituents, or:
+        3. A working script exists, but its size does not correspond to the the total size
+           of its source constituents (maybe because scripts have been added or deleted).
+        */
+        $dest_dir = "$base_dir/auto_css/$sub_path";
+        $css_content = '';
+        if (!is_dir($dest_dir)) {
+            mkdir($dest_dir,0775,true);
+        }
+        if (!empty($split_modes)) {
+
+            // Render stylesheets as style-light.css and style-dark.css
+            if ((!is_file("$dest_dir/style-light.css")) ||
+                (filemtime("$dest_dir/style-light.css") < $light_mode_newest_timestamp) ||
+                (filesize("$dest_dir/style-light.css") != $light_mode_filesize_total)) {
+                foreach ($light_mode_css_list as $file_path) {
+                    $css_content .= file_get_contents($file_path);
+                }
+                file_put_contents("$dest_dir/style-light.css",$css_content);
+            }
+            if ((!is_file("$dest_dir/style-dark.css")) ||
+                (filemtime("$dest_dir/style-dark.css") < $dark_mode_newest_timestamp) ||
+                (filesize("$dest_dir/style-dark.css") != $dark_mode_filesize_total)) {
+                foreach ($dark_mode_css_list as $file_path) {
+                    $css_content .= file_get_contents($file_path);
+                }
+                file_put_contents("$dest_dir/style-dark.css",$css_content);
+            }
+        }
+        else {
+
+            // Render a single stylesheet style.css
+            if ((!is_file("$dest_dir/style.css")) ||
+                (filemtime("$dest_dir/style.css") < $light_mode_newest_timestamp) ||
+                (filesize("$dest_dir/style.css") != $light_mode_filesize_total)) {
+                foreach ($light_mode_css_list as $file_path) {
+                    $css_content .= file_get_contents($file_path);
+                }
+                file_put_contents("$dest_dir/style.css",$css_content);
+            }
+        }
+    }
+    return $files_added;
+}
 
 //================================================================================
 /*

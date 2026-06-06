@@ -270,30 +270,6 @@ th {
 /*--------------------------------------------------------------
 # Typography
 --------------------------------------------------------------*/
-@font-face {
-	font-family: 'DM Sans';
-	src:
-		url('fonts/DMSans-Regular.ttf');
-}
-@font-face {
-	font-family: 'DM Sans';
-	src:
-		url('fonts/DMSans-Bold.ttf');
-	font-weight: bold;
-}
-@font-face {
-	font-family: 'DM Sans';
-	src:
-		url('fonts/DMSans-Italic.ttf');
-	font-style: italic;
-}
-@font-face {
-	font-family: 'DM Sans';
-	src:
-		url('fonts/DMSans-BoldItalic.ttf');
-	font-style: italic;
-	font-weight: bold;
-}
 
 body,
 button,

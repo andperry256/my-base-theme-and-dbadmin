@@ -50,7 +50,7 @@ output_meta_data();
             if (is_file($mobile_header_image_path)) {
                 echo("<div class=\"mobile-only-item\"><img src=\"$mobile_header_image_url?v=$link_version\" /></div>");
             }
-      ?>    
+        ?>
         <?php if ( true ) : ?>
               <!-- Force title not to display in this implementation -->
         <?php elseif ( is_front_page() && is_home() ) : ?>

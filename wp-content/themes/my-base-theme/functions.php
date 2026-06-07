@@ -160,7 +160,8 @@ add_action( 'widgets_init', 'my_base_theme_widgets_init' );
  */
 function my_base_theme_scripts()
 {
-    global $split_modes;
+    global $additional_css_links;
+    global $light_and_dark_modes;
 
     if (is_file(__DIR__.'/../../../last_preset_link_version.php')) {
         include (__DIR__.'/../../../last_preset_link_version.php');
@@ -171,11 +172,16 @@ function my_base_theme_scripts()
     }
 
     $css_path = build_main_stylesheet();
-    if (!empty($split_modes)) {
+    if (!empty($light_and_dark_modes)) {
         // Functionality to be added
     }
     else {
         wp_enqueue_style( 'main-style', "$css_path/style.css", array(), '1.0.0' );
+    }
+    if (isset($additional_css_links)) {
+        foreach ($additional_css_links as $id => $link) {
+            wp_enqueue_style( $id, $link, array(), '1.0.0' );
+        }
     }
     wp_enqueue_script( 'my-base-theme-navigation', get_template_directory_uri() . '/js/navigation.js', [], $link_version, true );
     wp_enqueue_script( 'my-base-theme-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', [], $link_version, true );
@@ -275,7 +281,7 @@ function build_main_stylesheet()
 function add_stylesheets($base_path,$sub_path)
 {
     global $base_dir, $location;
-    global $split_modes;  // Set TRUE if light/dark modes are in operation.
+    global $light_and_dark_modes;  // Set TRUE if light/dark modes are in operation.
     global $light_mode_css_list, $light_mode_newest_timestamp, $light_mode_filesize_total;
     global $dark_mode_css_list, $dark_mode_newest_timestamp, $dark_mode_filesize_total;
 
@@ -322,7 +328,7 @@ function add_stylesheets($base_path,$sub_path)
                 $light_mode_filesize_total += filesize($file);
                 $files_added = true;
             }
-            if ((!empty($split_modes)) && (pathinfo($file,PATHINFO_FILENAME) != 'style-light') &&
+            if ((!empty($light_and_dark_modes)) && (pathinfo($file,PATHINFO_FILENAME) != 'style-light') &&
                 (pathinfo($file,PATHINFO_FILENAME) != 'style-local-light')) {
 
                 // Add to dark mode list
@@ -350,7 +356,7 @@ function add_stylesheets($base_path,$sub_path)
         if (!is_dir($dest_dir)) {
             mkdir($dest_dir,0775,true);
         }
-        if (!empty($split_modes)) {
+        if (!empty($light_and_dark_modes)) {
 
             // Render stylesheets as style-light.css and style-dark.css
             if ((!is_file("$dest_dir/style-light.css")) ||

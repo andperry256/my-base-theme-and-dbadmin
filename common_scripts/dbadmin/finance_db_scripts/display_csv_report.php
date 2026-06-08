@@ -8,11 +8,7 @@ if (is_file("/Config/linux_pathdefs.php")) {
 require_once("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 require_once("$base_dir/common_scripts/session_funct.php");
 run_session();
-$link_version = date('ym').'01';
-require("$base_dir/last_preset_link_version.php");
-if ($link_version < $last_preset_link_version) {
-    $link_version = $last_preset_link_version;
-}
+$link_version = get_last_preset_link_version();
 
 //==============================================================================
 ?>

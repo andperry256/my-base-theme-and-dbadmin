@@ -162,31 +162,24 @@ function my_base_theme_scripts()
 {
     global $additional_css_links;
     global $light_and_dark_modes;
-    global $last_preset_link_version;
+    global $link_version;
 
-    if (is_file(__DIR__.'/../../../last_preset_link_version.php')) {
-        include (__DIR__.'/../../../last_preset_link_version.php');
-    }
-    $link_version = date('ym').'01';
-    if ((isset($last_preset_link_version)) && ($link_version < $last_preset_link_version)) {
-        $link_version = $last_preset_link_version;
-    }
-
+    $link_version = get_last_preset_link_version();
     $css_path = build_main_stylesheet();
     if (!empty($light_and_dark_modes)) {
         // Functionality to be added
     }
     else {
         $link = "$css_path/style.css";
-        if (!empty($last_preset_link_version)) {
-            $link .= "?v=$last_preset_link_version";
+        if (!empty($link_version)) {
+            $link .= "?v=$link_version";
         }
         wp_enqueue_style( 'main-style', $link, array(), '1.0.0' );
     }
     if (isset($additional_css_links)) {
         foreach ($additional_css_links as $id => $link) {
-            if (!empty($last_preset_link_version)) {
-                $link .= "?v=$last_preset_link_version";
+            if (!empty($link_version)) {
+                $link .= "?v=$link_version";
             }
             wp_enqueue_style( $id, $link, array(), '1.0.0' );
         }
@@ -296,6 +289,7 @@ function add_stylesheets($base_path,$sub_path)
     // Add stylesheets for current sub-path to list
     $source_dir = "$base_path/$sub_path";
     $files_added = false;
+    $files_updated = false;
     $files_to_add = [
         "$source_dir/style.css",
         "$source_dir/style-light.css",
@@ -374,6 +368,7 @@ function add_stylesheets($base_path,$sub_path)
                     $css_content .= file_get_contents($file_path);
                 }
                 file_put_contents("$dest_dir/style-light.css",$css_content);
+                $files_updated = false;
             }
             if ((!is_file("$dest_dir/style-dark.css")) ||
                 (filemtime("$dest_dir/style-dark.css") < $dark_mode_newest_timestamp) ||
@@ -382,6 +377,7 @@ function add_stylesheets($base_path,$sub_path)
                     $css_content .= file_get_contents($file_path);
                 }
                 file_put_contents("$dest_dir/style-dark.css",$css_content);
+                $files_updated = false;
             }
         }
         else {
@@ -394,8 +390,12 @@ function add_stylesheets($base_path,$sub_path)
                     $css_content .= file_get_contents($file_path);
                 }
                 file_put_contents("$dest_dir/style.css",$css_content);
+                $files_updated = false;
             }
         }
+    }
+    if (($files_updated) && (is_front_page())) {
+        set_last_preset_link_version();
     }
     return $files_added;
 }

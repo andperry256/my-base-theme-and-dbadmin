@@ -1069,12 +1069,6 @@ function get_last_preset_link_version()
         file_put_contents($txt_file,date('ymd').'-01');
     }
     $content = trim(file_get_contents($txt_file));
-
-    // Temporary code
-    if (is_file("$base_dir/last_preset_link_version.php")) {
-        unlink("$base_dir/last_preset_link_version.php");
-    }
-
     return $content;
 }
 

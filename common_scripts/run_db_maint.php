@@ -15,7 +15,7 @@
 //==============================================================================
 
 // Handle main parameters
-if (!isset($argc)) {
+if (PHP_SAPI !== 'cli') {
     exit("script only allowed in command mode\n");
 }
 if (count($argv) < 4) {

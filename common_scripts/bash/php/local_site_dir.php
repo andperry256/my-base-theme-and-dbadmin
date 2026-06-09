@@ -1,5 +1,5 @@
 <?php
-if (isset($argc)) {
+if (PHP_SAPI === 'cli') {
     include(__DIR__.'/include_pathdefs.php');
     exit($local_site_dir);
 }

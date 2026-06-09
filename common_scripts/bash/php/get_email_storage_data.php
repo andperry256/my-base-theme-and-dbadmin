@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 
-if (!isset($argc)) {
+if (PHP_SAPI !== 'cli') {
     exit("Script valid in command line mode only\n");
 }
 elseif (substr(__DIR__,0,5) != '/home') {

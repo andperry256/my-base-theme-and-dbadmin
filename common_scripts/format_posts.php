@@ -7,7 +7,7 @@ This script is only used for occasional maintenance. It normally resides in the
 */
 //==============================================================================
 
-if (!isset($argc)) {
+if (PHP_SAPI !== 'cli') {
     exit("Script allowed in command line mode only\n");
 }
 $min_line_length = 12;

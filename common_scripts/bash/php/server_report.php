@@ -17,7 +17,7 @@ namespace MyBaseProject;
 use PHPMailer\PHPMailer\PHPMailer;
 global $mail_host;
 
-if (PHP_SAPI !== 'cli') {
+if (php_server_mode() == 'web') {
     exit("Script valid in command line mode only\n");
 }
 // Parent directory hierarchy: bash => common_scripts => public_html

@@ -1,5 +1,5 @@
 <?php
-if (php_server_mode() == 'command') {
+if ((PHP_SAPI === 'cli') || (PHP_SAPI === 'cli-fcgi')) {
     include(__DIR__.'/include_pathdefs.php');
     exit($local_site_dir);
 }

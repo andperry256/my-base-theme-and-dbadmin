@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 
-if (php_server_mode() == 'web') {
+if ((PHP_SAPI !== 'cli') && (PHP_SAPI !== 'cli-fcgi')) {
     exit("Script valid in command line mode only\n");
 }
 elseif (substr(__DIR__,0,5) != '/home') {

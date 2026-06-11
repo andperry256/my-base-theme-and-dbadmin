@@ -7,7 +7,7 @@ This script is only used for occasional maintenance. It normally resides in the
 */
 //==============================================================================
 
-if (php_server_mode() == 'web') {
+if ((PHP_SAPI === 'cli') || (PHP_SAPI === 'cli-fcgi')) {
     exit("Script allowed in command line mode only\n");
 }
 $min_line_length = 12;

@@ -15,7 +15,7 @@
 //==============================================================================
 
 // Handle main parameters
-if (php_server_mode() == 'web') {
+if ((PHP_SAPI !== 'cli') && (PHP_SAPI !== 'cli-fcgi')) {
     exit("script only allowed in command mode\n");
 }
 if (count($argv) < 4) {

@@ -14,15 +14,8 @@ if (!isset($base_dir)) {
 }
 require_once("$base_dir/keycode.php");
 
-if (empty($_SERVER['REMOTE_ADDR'])) {
-    $mode = 'command';
-    $eol = "\n";
-}
-else {
-    $mode = 'web';
-    $eol = "<br />\n";
-    print("<h1>Configure Linked Directories</h1>$eol");
-}
+$mode = php_server_mode();
+$eol = eol_string();
 
 $rewrite_rules = [];
 foreach ($dirs as $dir) {

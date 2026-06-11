@@ -34,16 +34,14 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     global $custom_pages_path, $relative_path, $alt_include_path;
     global $widget_types;
     global $dbinfo, $location;
-    if (empty($_SERVER['REMOTE_ADDR'])) {
-        $mode = 'command';
-        $eol = "\n";
+    $mode = php_server_mode();
+    $eol = eol_string();
+    if ($mode == 'command') {
         $ltag = '[';
         $rtag = ']';
         $nbsp = ' ';
     }
     else {
-        $mode = 'web';
-        $eol = "<br />\n";
         $ltag = '<em>';
         $rtag = '</em>';
         $nbsp = '&nbsp;';

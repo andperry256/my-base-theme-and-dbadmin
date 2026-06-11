@@ -517,7 +517,7 @@ function recache_all_pages($type='page')
     if (!defined('WP_DBID')) return;
 
     $db = db_connect(WP_DBID);
-    $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
+    $eol = eol_string();
 
     $all_posts = [];
     $where_clause = "post_type='$type' AND post_status='publish'";

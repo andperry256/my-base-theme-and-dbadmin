@@ -18,7 +18,7 @@ global $password2;
 include("$www_root_dir/$local_site_dir/path_defs.php");
 include("$base_dir/mysql_connect.php");
 
-$eol = isset($_SERVER['REMOTE_ADDR']) ? "<br />\n" : "\n";
+$eol = eol_string();
 $password2 = $password;
 $mysql_backup_dir = "/media/Data/Users/Common/Documents/MySQL_Backup";
 $mysql_error_log = "$mysql_backup_dir/mysql_errors.log";

@@ -75,7 +75,7 @@ according to the setting of the parameter $display_errors.
 function print_stack_trace_for_mysqli_error($display_errors)
 {
     global $error_logfile;
-    $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
+    $eol = eol_string();
     ob_start();
     debug_print_backtrace();
     $trace = ob_get_contents();
@@ -119,7 +119,7 @@ function run_mysqli_query($db,$query,$strict=false,$debug=false,$continue=false)
             exit (readable_markup("$query\n"));
         }
     }
-    $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
+    $eol = eol_string();
     $error_id = substr(md5(date('YmdHis')),0,8);
     $date_and_time = date('Y-m-d H:i:s');
     $fatal_error_message = "There has been a fatal error, details of which have been logged.$eol";
@@ -244,7 +244,7 @@ $values - The values being applied in the query (array). In a correct
 function raise_query_validation_error($query,$param_count,$fields,$values)
 {
     global $error_logfile, $display_error_online;
-    $eol = (!empty($_SERVER['REMOTE_ADDR'])) ? "<br />\n" : "\n";
+    $eol = eol_string();
     $error_id = substr(md5(date('YmdHis')),0,8);
     $date_and_time = date('Y-m-d H:i:s');
     if ((is_file("/Config/linux_pathdefs.php")) || ($display_error_online)) {

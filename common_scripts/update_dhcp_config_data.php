@@ -27,12 +27,25 @@ if (is_file("/Config/linux_pathdefs.php")) {
 }
 $db = itservices_db_connect();
 
+// The following code is temporary until everything is working on the $dhcp_ranges array.
+if ((!isset($dhcp_start_node)) && (!isset($dhcp_start_node)) ){
+    foreach ($dhcp_ranges as $start_node => $end_node) {
+        // Use the first array element as the required data.
+        $dhcp_start_node = $start_node;
+        $dhcp_end_node = $end_node;
+        break;
+    }
+}
+
 // ###### Configuration for ISC DHCP Server ######
 $content1 = file("$source_dir/dhcpd_active.conf");
 $content1 = str_replace('{subnet}',$ip_subnet_addr,$content1);
 $content1 = str_replace('{router}',$router_node,$content1);
-$content1 = str_replace('{dhcp_start}',$dhcp_start_node,$content1);
-$content1 = str_replace('{dhcp_end}',$dhcp_end_node,$content1);
+$ranges = '';
+foreach ($dhcp_ranges as $start_node => $end_node) {
+    $ranges .= "pool {\n    range $ip_subnet_addr.$start_node $ip_subnet_addr.$end_node;\n  }\n  ";
+}
+$content1 = str_replace('{ranges}',rtrim($ranges),$content1);
 $content2 = '';
 foreach ($content1 as $line) {
     if (strpos($line,'#### ADD FIXED') !== false) {

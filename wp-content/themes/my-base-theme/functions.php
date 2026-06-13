@@ -1074,7 +1074,7 @@ function check_blog_template()
     $post_id = $post->ID;
     $template_no = get_post_meta($post_id,'use_template',true);
     if (!empty($template_no) && ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM post_templates WHERE id=$template_no")))) {
-        $content = addslashes($row['content']);
+        $content = mysqli_real_escape_string($db,$row['content']);
         mysqli_query($db,"UPDATE wp_posts SET post_content='$content' WHERE ID=$post_id");
     }
     update_post_meta($post_id,'use_template',0);

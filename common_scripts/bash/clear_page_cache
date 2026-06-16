@@ -2,6 +2,6 @@
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
-    echo "Clearing cache ..."
+    echo "Clearing page cache ..."
     php $root_dir/public_html/common_scripts/clear_cache.php
 fi

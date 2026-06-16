@@ -1,0 +1,12 @@
+#!/bin/bash
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source $script_dir/set_path_vars
+
+# Main loop on domains/subdomains.
+while [ "$1" != "" ]; do
+    domain_path="$root_dir/$1"
+    shift
+    cd $domain_path
+    echo "$domain_path:"
+    $phpcmd ./common_scripts/wp-cli/wp-cli.phar cache flush
+done

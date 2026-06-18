@@ -920,9 +920,10 @@ function check_uncategorised_post()
         if ($uncategorised) {
             print("<p><strong>Warning:</strong> You have saved this post with the 'uncategorised' category.</p>\n");
             print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
-            exit;
+            return false;
         }
     }
+    return true;
 }
 
 //================================================================================
@@ -1016,11 +1017,12 @@ function check_spaces_at_start()
                     print(" The correct formatting will be generated on saving the post.</p>\n");
                     print("<p>If the above has already been done, then try moving the closing &lt;/span&gt; tag to include more characters.</p>\n");
                     print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
-                    exit;
+                    return false;
                 }
             }
         }
     }
+    return true;
 }
 
 //================================================================================
@@ -1048,9 +1050,10 @@ function check_more_directive()
             (strpos($row['post_content'],'<!--no-more-->') === false)) {
             print("<p><strong>Warning:</strong> You have saved this post without a &lt;!--more--&gt; or &lt;!--no-more--&gt; directive.</p>\n");
             print("<p><a href=\"$base_url/wp-admin/post.php?post=$id&action=edit\"><button style=\"font-size:$size;\">Continue</button></a></p>\n");
-            exit;
+            return false;
         }
     }
+    return true;
 }
 
 //================================================================================

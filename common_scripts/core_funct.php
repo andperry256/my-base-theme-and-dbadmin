@@ -15,22 +15,26 @@ if ((isset($base_dir)) && (isset($private_scripts_dir))) {
     */
     //==============================================================================
 
-    function get_url_content($url,$debug=false)
-    {
+    function get_url_content($url,$debug=false): string
+            {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Compatible; PHP/' . PHP_VERSION . ')',
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
         $content = curl_exec($ch);
         if (curl_errno($ch)) {
             $content = 'cURL Error: '.curl_error($ch);
         }
         if ($debug) {
-            exit("$content\n");
+            exit("(string)$content\n");
         }
         else {
-            curl_close($ch);
-            return $content;
+            return (string)$content;
         }
     }
 }

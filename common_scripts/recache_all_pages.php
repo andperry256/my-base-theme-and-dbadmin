@@ -12,6 +12,7 @@ if ($location == 'real') {
     require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
     recache_all_pages('page');
     recache_all_pages('post');
+    recache_all_pages('category');
     if (function_exists('recache_additional_pages')) {
         recache_additional_pages();
     }

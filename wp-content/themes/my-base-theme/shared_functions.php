@@ -515,30 +515,45 @@ pages/posts within the site.
 function recache_all_pages($type='page')
 {
     if (!defined('WP_DBID')) return;
-
     $db = db_connect(WP_DBID);
     $eol = eol_string();
 
-    $all_posts = [];
-    $where_clause = "post_type='$type' AND post_status='publish'";
-    $where_values = [];
-    $add_clause = "ORDER BY post_name ASC";
-    $query_result = mysqli_select_query($db,'wp_posts','ID,post_name,post_parent',$where_clause,$where_values,$add_clause);
-    while ($row = mysqli_fetch_assoc($query_result)) {
-        $all_posts[$row['ID']] = $row;
-    }
+    switch ($type) {
+        case 'page':
+            print("Re-caching front page$eol");
+            recache_page('');
+            // No break
 
-    if ($type == 'page') {
-        print("Re-caching front page$eol");
-        recache_page('');
-    }
-    foreach ($all_posts as $post) {
-        set_time_limit(30);
-        $uri_subpath = build_uri_path($post, $all_posts);
-        print("Re-caching $type [{$post['post_name']}]$eol");
-        recache_page($uri_subpath);
+        case 'post':
+            $all_posts = [];
+            $where_clause = "post_type='$type' AND post_status='publish'";
+            $where_values = [];
+            $add_clause = "ORDER BY post_name ASC";
+            $query_result = mysqli_select_query($db,'wp_posts','ID,post_name,post_parent',$where_clause,$where_values,$add_clause);
+            while ($row = mysqli_fetch_assoc($query_result)) {
+                $all_posts[$row['ID']] = $row;
+            }
+            foreach ($all_posts as $post) {
+                set_time_limit(30);
+                $uri_subpath = build_uri_path($post, $all_posts);
+                print("Re-caching $type [{$post['post_name']}]$eol");
+                recache_page($uri_subpath);
+            }
+            break;
+
+        case 'category':
+            $query = "SELECT * FROM wp_terms LEFT JOIN wp_term_taxonomy ON wp_terms.term_id=wp_term_taxonomy.term_ID WHERE taxonomy='category' ORDER BY slug ASC";
+            $query_result = mysqli_query($db,$query);
+            while ($row = mysqli_fetch_assoc($query_result)) {
+                print("Re-caching category [{$row['slug']}]$eol");
+                empty_cache_dir("category/{$row['slug']}");
+                recache_page("category/{$row['slug']}");
+            }
+            break;
     }
 }
+
+// Sub-functions for use by recache_all_pages
 
 function build_uri_path($post, &$all_posts)
 {
@@ -550,6 +565,34 @@ function build_uri_path($post, &$all_posts)
         $parent_id = $all_posts[$parent_id]['post_parent'];
     }
     return ($path === 'home') ? '' : $path;
+}
+
+function empty_cache_dir($uri_subpath)
+{
+    global $cache_dir;
+    global $base_url;
+    $directory = "$cache_dir/supercache/";
+    $pos = strpos($base_url,'//');
+    $cache_subdir = $directory.substr($base_url,$pos+2)."/$uri_subpath";
+    $cache_subdir = rtrim($cache_subdir,'/');
+    if (!is_dir($directory)) {
+        return;
+    }
+
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($files as $fileinfo) {
+        $path = $fileinfo->getRealPath();
+
+        if ($fileinfo->isDir()) {
+            rmdir($path);
+        } else {
+            unlink($path);
+        }
+    }
 }
 
 //================================================================================

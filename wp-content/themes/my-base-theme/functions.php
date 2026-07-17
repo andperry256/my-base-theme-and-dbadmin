@@ -1449,6 +1449,10 @@ remove_filter('the_content', 'wptexturize');
 remove_filter('the_title', 'wptexturize');
 remove_filter('the_excerpt', 'wptexturize');
 
+// Define font for use in numeric-only elements
+global $numeric_font;
+$numeric_font = 'NotoSans';
+
 //================================================================================
 endif;
 //================================================================================

@@ -1174,8 +1174,9 @@ function handle_record($action,$params)
         $query_result2 = mysqli_query_normal($db,"SHOW COLUMNS FROM $table");
         while ($row2 = mysqli_fetch_assoc($query_result2)) {
             $field_name = $row2['Field'];
+            $field_table = get_table_for_field($table,$field_name);
             $where_clause = 'table_name=? AND field_name=?';
-            $where_values = ['s',$base_table,'s',$field_name];
+            $where_values = ['s',$field_table,'s',$field_name];
             $query_result3 = mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,'');
             if ($row3 = mysqli_fetch_assoc($query_result3)) {
                 // Process new display group if required

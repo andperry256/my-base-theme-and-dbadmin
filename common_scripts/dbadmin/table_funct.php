@@ -733,11 +733,12 @@ function display_table($params)
             else {
                 $value = strip_tags($row[$f]);
             }
+            $font_class = ((is_numeric($value)) || ($row2['widget_type'] == 'date')) ? ' numeric' : '';
             if ($mode == 'desktop') {
-                print("<td class=\"$style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></td>");
+                print("<td class=\"$style$font_class\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></td>");
             }
             else {
-                print("<div class=\"table-listing-cell field-$f $style\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></div> <!-- .table-listing-cell -->");
+                print("<div class=\"table-listing-cell field-$f $style$font_class\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></div> <!-- .table-listing-cell -->");
             }
         }
         print("\n");

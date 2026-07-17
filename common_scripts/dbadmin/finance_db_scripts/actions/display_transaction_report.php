@@ -3,6 +3,7 @@
 
 global $location;
 global $base_url;
+global $numeric_font;
 $db = admin_db_connect();
 delete_session_var('csv_report');
 clear_session_update_records('csv_report');
@@ -289,7 +290,7 @@ if (((isset($_POST['submitted'])) || (isset($_GET['start_month'])) || (isset($_G
     $running_balance = 0;
     $last_accounting_month = '';
     $table_cell_style = "vertical-align:top;padding:3px;";
-    $table_cell_style_ra = $table_cell_style. " text-align:right;";
+    $table_cell_style_ra = $table_cell_style. " text-align:right; font-family:$numeric_font;";
     $table_header_style = $table_cell_style." font-weight:bold;";
     $table_header_style_ra = $table_header_style." text-align:right;";
 

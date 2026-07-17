@@ -3,23 +3,68 @@
 
 /* This script is generated dynamically with the base URL of the given site */
 
+/* Font Family DM Sans */
 @font-face {
-	font-family: 'DM Sans';
+	font-family: DMSans;
 	src: url('#/common_scripts/fonts/DMSans-Regular.ttf');
 }
 @font-face {
-	font-family: 'DM Sans';
+	font-family: DMSans;
 	src: url('#/common_scripts/fonts/DMSans-Bold.ttf');
 	font-weight: bold;
 }
 @font-face {
-	font-family: 'DM Sans';
+	font-family: DMSans;
 	src: url('#/common_scripts/fonts/DMSans-Italic.ttf');
 	font-style: italic;
 }
 @font-face {
-	font-family: 'DM Sans';
+	font-family: DMSans;
 	src: url('#/common_scripts/fonts/DMSans-BoldItalic.ttf');
+	font-style: italic;
+	font-weight: bold;
+}
+
+/* Font Family Noto Sans */
+@font-face {
+	font-family: NotoSans;
+	src: url('#/common_scripts/fonts/NotoSans-Regular.ttf');
+}
+@font-face {
+	font-family: NotoSans;
+	src: url('#/common_scripts/fonts/NotoSans-Bold.ttf');
+	font-weight: bold;
+}
+@font-face {
+	font-family: NotoSans;
+	src: url('#/common_scripts/fonts/NotoSans-Italic.ttf');
+	font-style: italic;
+}
+@font-face {
+	font-family: NotoSans;
+	src: url('#/common_scripts/fonts/NotoSans-BoldItalic.ttf');
+	font-style: italic;
+	font-weight: bold;
+}
+
+/* Font Family Azeret Mono */
+@font-face {
+	font-family: AzeretMono;
+	src: url('#/common_scripts/fonts/AzeretMono-Regular.ttf');
+}
+@font-face {
+	font-family: AzeretMono;
+	src: url('#/common_scripts/fonts/AzeretMono-Bold.ttf');
+	font-weight: bold;
+}
+@font-face {
+	font-family: AzeretMono;
+	src: url('#/common_scripts/fonts/AzeretMono-Italic.ttf');
+	font-style: italic;
+}
+@font-face {
+	font-family: AzeretMono;
+	src: url('#/common_scripts/fonts/AzeretMono-BoldItalic.ttf');
 	font-style: italic;
 	font-weight: bold;
 }

@@ -321,8 +321,11 @@ address {
 
 pre {
     background: #eee;
-    font-family: "Courier 10 Pitch", Courier, monospace;
-    font-size: 15px;
+    font-family:
+        'Azeret Mono',
+        'Courier New',
+        monospace;
+    font-size: 100%;
     font-size: 0.9375rem;
     line-height: 1.6;
     margin-bottom: 1.6em;
@@ -335,8 +338,13 @@ code,
 kbd,
 tt,
 var {
-    font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
-    font-size: 15px;
+    font-family:
+        Monaco,
+        Consolas,
+        'Andale Mono',
+        'DejaVu Sans Mono',
+        monospace;
+    font-size: 100%;
     font-size: 0.9375rem;
 }
 
@@ -494,6 +502,19 @@ table {
 
 .small-text {
     font-size: 0.8em !important;
+}
+
+.numeric {
+    font-family:
+        NotoSans,
+        Verdana,
+        sans-serif;
+}
+
+.fixed-width {
+    font-family:
+        AzeretMono,
+        monospace;
 }
 
 /*--------------------------------------------------------------

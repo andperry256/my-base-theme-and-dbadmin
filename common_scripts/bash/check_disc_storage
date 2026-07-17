@@ -2,13 +2,12 @@
 script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 source $script_dir/set_path_vars
 if [ "$location" == "real" ]; then
+
+    # Report site disc storage
     used_storage=$(du -k $root_dir | tail -n 1 | awk '{print $1}')
     ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/report_disc_storage $site_path $used_storage"
 
-    # The variable $mailbox_list is optional, but to use it, the script must be invoked
-    # by a 'source' directive with the variable preset.
-    if [ "$mailbox_list" != "" ]; then
-        mailbox_data=$($phpcmd $script_dir/php/get_email_storage_data.php $online_domain $mailbox_list)
-        ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/report_email_storage $online_domain $mailbox_data"
-    fi
+    # Report email storage
+    mailbox_data=$($phpcmd $script_dir/php/get_email_storage_data.php $site_path)
+    ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/report_email_storage $site_path $mailbox_data"
 fi

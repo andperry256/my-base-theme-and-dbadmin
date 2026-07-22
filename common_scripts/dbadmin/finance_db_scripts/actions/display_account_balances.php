@@ -87,7 +87,7 @@ while ($row = mysqli_fetch_assoc($query_result)) {
 print("<h1>Account Balances</h1>\n");
 print("<table style=\"$table_style\">\n");
 $where_clause = "label IS NOT NULL";
-$add_clause = 'ORDER BY sort_order ASC';
+$add_clause = 'ORDER BY closed ASC, sort_order ASC';
 $query_result = mysqli_select_query($db,'accounts','*',$where_clause,[],$add_clause);
 while ($row = mysqli_fetch_assoc($query_result)) {
     $account = $row['label'];

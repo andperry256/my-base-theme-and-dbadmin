@@ -2,7 +2,7 @@
 //==============================================================================
 
 if (!defined('DEFAULT_CHARSET')) {
-    define('DEFAULT_CHARSET','utf8');
+    define('DEFAULT_CHARSET','utf8mb4');
 }
 if (!defined('DEFAULT_COLLATION')) {
     define('DEFAULT_COLLATION','utf8mb4_general_ci');

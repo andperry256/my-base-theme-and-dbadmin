@@ -892,14 +892,29 @@ function authenticate_user_in_path()
 
 function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$option,$category='')
 {
+    global $dbinfo, $location;
     $db1 = db_connect($source_dbid,'p',$source_user);
     $db2 = db_connect($target_dbid,'p',$target_user);
+
+    /*
+    Define list of meta fields to be processed, specifying each as a string ('s') or integer ('i').
+    Only include the fields for short address groups/numbers if the relavant tables are present in
+    the target database.
+    */
     $meta_fields = [
-        'pinterest_title',
-        'pinterest_description',
-        'facebook_text',
-        'twitter_text'
+        'pinterest_title' => 's',
+        'pinterest_description' => 's',
+        'facebook_text' => 's',
+        'twitter_text' => 's',
     ];
+    $target_dbname = ($location == 'local') ? $dbinfo[$target_dbid][0] : $dbinfo[$target_dbid][1];
+    if (mysqli_num_rows(mysqli_query_normal($db2,"SHOW FULL TABLES FROM `$target_dbname` WHERE `Tables_in_$target_dbname`='short_address_groups'")) > 0) {
+        $meta_fields = array_merge($meta_fields, [
+                'short_address_group' => 'i',
+                'short_address_number' => 'i',
+            ]);
+    }
+
     $where_clause = "post_type='post' AND post_status='publish'";
     $where_values = [];
     $query_result = mysqli_select_query($db1,'wp_posts','*',$where_clause,$where_values,'');
@@ -951,22 +966,84 @@ function sync_post_data($source_dbid,$source_user,$target_dbid,$target_user,$opt
                             mysqli_update_query($db2,'wp_posts',$fields,$values,$where_clause,$where_values);
                         }
                         // Synchronise any meta values.
-                        foreach ($meta_fields as $field) {
+                        foreach ($meta_fields as $field => $type) {
                             $where_clause = 'post_id=? AND meta_key=?';
                             $where_values_1 = ['',$row1['ID'],'s',$field];
                             $where_values_2 = ['',$row2['ID'],'s',$field];
+                            /*
+                            Copy the meta value if:
+                            1. It is present in the source
+                            2. It is either absent in the target or not equal to the source value.
+                            */
                             if (($row3 = mysqli_fetch_assoc(mysqli_select_query($db1,'wp_postmeta','*',$where_clause,$where_values_1,''))) &&
-                                ($row4 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values_2,''))) &&
-                                ($row3['meta_value'] != $row4['meta_value'])) {
+                                ((($row4 = mysqli_fetch_assoc(mysqli_select_query($db2,'wp_postmeta','*',$where_clause,$where_values_2,''))) &&
+                                  ($row3['meta_value'] != $row4['meta_value'])) ||
+                                 (empty($row4)))
+                               ) {
                                 echo "Synchronising meta value for post $post_name => $field\n";
-                                $fields = 'meta_value';
-                                $values = ['s',$row3['meta_value']];
-                                mysqli_update_query($db2,'wp_postmeta',$fields,$values,$where_clause,$where_values_2);
+                                $value = $row3['meta_value'];
+                                if ($field == 'short_address_group') {
+
+                                    // Map the short address group from the source to the target.
+                                    $where_clause_3 = 'source_group=?';
+                                    $where_values_3 = ['i',$value];
+                                    if ($row7 = mysqli_fetch_assoc(mysqli_select_query($db2,'short_address_groups','*',$where_clause_3,$where_values_3,''))) {
+                                        $value = $row7['group_no'];
+                                    }
+                                }
+
+                                $fields = 'post_id,meta_key,meta_value';
+                                $values = ['i',$row2['ID'],'s',$field,$type,$value];
+                                if (mysqli_conditional_insert_query($db2,'wp_postmeta',$fields,$values,$where_clause,$where_values_2) === NOINSERT) {
+                                    $fields = 'meta_value';
+                                    $values = [$type,$value];
+                                    mysqli_update_query($db2,'wp_postmeta',$fields,$values,$where_clause,$where_values_2);
+                                }
+
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+//==============================================================================
+
+function rebuild_short_address_list()
+{
+    $db = db_connect(WP_DBID);
+    mysqli_delete_query($db,'short_addresses','',[]);
+    $where_clause = "(post_type='post' OR post_type='page') AND post_status='publish'";
+    $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,[],'');
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        /*
+        Create a short address if all the following conditions are true:
+        1. A meta value is defined for the short address group.
+        2. A meta value is defined for the short address number.
+        3. A matching entry is present in the short address groups table.
+        */
+        $where_clause_1 = "post_id=? AND meta_key='short_address_group'";
+        $where_clause_2 = "post_id=? AND meta_key='short_address_number'";
+        $where_clause_3 = "group_no=?";
+        $where_values_1 = ['i',$row['ID']];
+        if (($row1 = mysqli_fetch_assoc(mysqli_select_query($db,'wp_postmeta','*',$where_clause_1,$where_values_1,''))) &&
+            (!empty($row1['meta_value'])) &&
+            ($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'wp_postmeta','*',$where_clause_2,$where_values_1,''))) &&
+            (!empty($row2['meta_value'])) &&
+            ($where_values_2 = ['i',$row1['meta_value']]) &&
+            ($row3 = mysqli_fetch_assoc(mysqli_select_query($db,'short_address_groups','*','',[],'')))) {
+            /*
+            Use a conditional insert in case there is a clash of addresses, though this should
+            not normally occur.
+            */
+            $post_number = $row3['base_offset'] + $row2['meta_value'];
+            $fields = 'post_number,post_name,category';
+            $values = ['i',$post_number,'s',$row['post_name'],'s',$row3['category']];
+            $where_clause = 'post_number=?';
+            $where_values = ['i',$post_number];
+            mysqli_conditional_insert_query($db,'short_addresses',$fields,$values,$where_clause,$where_values);
         }
     }
 }

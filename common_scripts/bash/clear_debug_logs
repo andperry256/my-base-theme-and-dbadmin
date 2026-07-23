@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Clearing debug logs for this site"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $script_dir/set_path_vars
 find $root_dir -name error_log -exec rm {} \;

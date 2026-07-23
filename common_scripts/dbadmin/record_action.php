@@ -12,13 +12,7 @@ originator script within the $_SESSION['post_vars'] array.
 //==============================================================================
 
 error_reporting(E_ALL & ~E_DEPRECATED);
-if ((!session_id()) && (!headers_sent())) {
-    session_start();
-}
-if (!session_id()) {
-    // This should not occur
-    exit ("ERROR - Unable to start session");
-}
+include(__DIR__.'/../session_start.php'); // Parent Dir: common_scripts
 
 // Interpret the URL parameters
 if (isset($_GET['-action'])) {

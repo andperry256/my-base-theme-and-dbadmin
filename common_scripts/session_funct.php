@@ -17,32 +17,10 @@ if (!defined('SESSION_FUNCT_DEFINED')):
 function run_session($noclose=false)
 {
     global $wpdb;
-    global $root_dir;
-    global $location;
-    global $cpanel_user;
     global $global_session_vars;
     global $global_session_id;
     global $saved_form_data;
-    if ($location == 'real') {
-        // Set custom path for session data.
-        $session_dir = "$root_dir/session_data";
-        if (!is_dir($session_dir)) {
-            mkdir($session_dir,0775);
-        }
-        $php_version = explode('.',phpversion());
-        $session_dir .= "/php{$php_version[0]}{$php_version[1]}";
-        if (!is_dir($session_dir)) {
-            mkdir($session_dir,0775);
-        }
-        ini_set('session.save_path',$session_dir);
-    }
-    if ((!session_id()) && (!headers_sent())) {
-        session_start();
-    }
-    if (!session_id()) {
-        // This should not occur
-        exit ("ERROR - Unable to start session");
-    }
+    include(__DIR__.'/session_start.php');
 
     //============================================================================
     // Set following condition true for debugging

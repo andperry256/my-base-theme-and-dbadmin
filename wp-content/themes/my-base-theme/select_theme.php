@@ -1,5 +1,5 @@
 <?php
-session_start();
+include(__DIR__.'/../../../common_scripts/session_start.php'); // Parent Dirs: themes => wp-content => public_html
 if (isset($_GET['mode'])) {
     $_SESSION['theme_mode'] = $_GET['mode'];
 }

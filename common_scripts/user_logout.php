@@ -1,9 +1,7 @@
 <?php
 //==============================================================================
 
-if (session_status() ==  PHP_SESSION_NONE) {
-    session_start();
-}
+include(__DIR__.'/session_start.php');
 include("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
 $username = $_SESSION[SV_USER];

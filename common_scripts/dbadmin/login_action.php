@@ -1,9 +1,7 @@
 <?php
 //==============================================================================
 
-if (session_status() ==  PHP_SESSION_NONE) {
-    session_start();
-}
+include(__DIR__.'/../session_start.php'); // Parent Dir: common_scripts
 require(__DIR__.'/get_local_site_dir.php');
 require_once("$base_dir/mysql_connect.php");
 $db = db_connect($auth_dbid);

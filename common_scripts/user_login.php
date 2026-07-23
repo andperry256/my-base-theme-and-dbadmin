@@ -1,9 +1,7 @@
 <?php
 //==============================================================================
 
-if (session_status() ==  PHP_SESSION_NONE) {
-    session_start();
-}
+include(__DIR__.'/session_start.php');
 if (is_file('/Config/linux_pathdefs.php')) {
     // Local server
     $elements = explode('/',ltrim($_SERVER['REQUEST_URI'],'/'));

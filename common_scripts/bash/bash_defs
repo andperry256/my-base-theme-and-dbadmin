@@ -1,0 +1,4 @@
+#!/bin/bash
+# This script contains Bash definitions (environment, aliases etc.) that
+# are common to all online sites.
+export PATH=$PATH:~/common_bash:~/user_bash:~/maintenance

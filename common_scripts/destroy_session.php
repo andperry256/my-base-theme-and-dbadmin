@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 
-session_start();
+include(__DIR__.'/session_start.php');
 session_destroy();
 exit("Session data destroyed");
 

@@ -31,10 +31,4 @@ if [ "$location" == "real" ]; then
     if [ "$update_cron" == '1' ]; then
         $root_dir/common_bash/crontab_restore
     fi
-
-    # Check if site is marked to clear debug logs.
-    clear_debug_logs=$(ssh -i ~/.ssh/andperry2_rsa -p 88 andper1@cp160174.hpdns.net "/home/andper1/maintenance/get_clear_debug_log_status $site_path")
-    if [ "$clear_debug_logs" == '1' ]; then
-        $root_dir/common_bash/clear_debug_logs
-    fi
 fi

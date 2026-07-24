@@ -1,0 +1,21 @@
+#!/bin/bash
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source $script_dir/set_path_vars
+if [ "$location" == "real" ]; then
+    if [ ! -e "$root_dir/common_bash" ]; then
+        ln -s $root_dir/public_html/common_scripts/bash $root_dir/common_bash
+    fi
+    if [ ! -e "$root_dir/user_bash" ]; then
+        mkdir "$root_dir/user_bash"
+    fi
+fi
+echo ""
+echo "Copy the following lines into $root_dir/.bashrc when setting up a new site:"
+echo ""
+echo "if [ -f ./common_bash/bash_defs ]; then"
+echo "    source ./common_bash/bash_defs"
+echo "fi"
+echo "if [ -f ./user_bash/bash_defs ]; then"
+echo "    source ./user_bash/bash_defs"
+echo "fi"
+echo ""

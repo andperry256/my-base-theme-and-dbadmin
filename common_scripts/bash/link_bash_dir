@@ -1,8 +1,0 @@
-#!/bin/bash
-script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-source $script_dir/set_path_vars
-if [ "$location" == "real" ]; then
-    if [ ! -e "$root_dir/common_bash" ]; then
-        ln -s $root_dir/public_html/common_scripts/bash $root_dir/common_bash
-    fi
-fi

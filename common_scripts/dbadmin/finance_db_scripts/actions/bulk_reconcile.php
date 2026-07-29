@@ -3,6 +3,7 @@
 
 $db = admin_db_connect();
 $account = $_GET['account'];
+global $local_site_dir;
 
 print("<form method=\"post\" action=\"$custom_pages_url/$relative_path/bulk_reconcile_action.php\">\n");
 print("<table>\n");

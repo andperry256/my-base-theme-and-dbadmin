@@ -298,6 +298,14 @@ class tables_admin_passwords
         if (($record->FieldIsSet('keycode')) && (substr($record->FieldVal('keycode'),0,1) == '#')) {
             $this->setUserKeycode($username);
         }
+        if ($record->FieldIsSet('is_totp_user')) {
+            // 'Is TOTP user' is set on this record. Clear it on all other records.
+            $set_fields = 'is_totp_user';
+            $set_values = ['i',0];
+            $where_clause = 'username<>?';
+            $where_values = ['s',$username];
+            mysqli_update_query($db,'admin_passwords',$set_fields,$set_values,$where_clause,$where_values);
+        }
     }
 
     function setUserKeycode($username)

@@ -1,0 +1,170 @@
+/*
+Theme Name: GenericDBAdmin
+Theme URI:http://www.andperry.com
+Author: Andrew Perry
+Author URI: http://www.andperry.com
+Description: This is a child theme to "My Base Theme" and contains all the site specific modifications.
+Template: my-base-theme
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: generic-dbadmin
+Tags:
+
+This theme, like WordPress, is licensed under the GPL.
+Use it to make something cool, have fun, and share what you've learned with others.
+
+My Base Theme is based on Underscores http://underscores.me/, (C) 2012-2016 Automattic, Inc.
+Underscores is distributed under the terms of the GNU GPL v2 or later.
+
+Normalizing styles have been helped along thanks to the fine work of
+Nicolas Gallagher and Jonathan Neal http://necolas.github.io/normalize.css/
+*/
+
+body {
+    font-size: 108%;
+}
+
+h1 {
+    color: steelblue;
+}
+
+/* ============ Header and Main Navigation ========== */
+
+#masthead {
+    margin-top: 20px;
+}
+
+#main {
+    padding: 5%;
+}
+
+.site-footer {
+    margin-bottom: 20px;
+}
+
+#site-navigation {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #b0cde8;
+    width: 100%;
+    margin-top: -2px;
+    opacity: 0.9;
+}
+
+@media screen and (min-width: 40.01em) {
+    #site-navigation {
+        border-left-style: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.main-navigation {
+    background-color: #fff;
+}
+.main-navigation li {
+    margin: 0.2em;
+}
+
+.main-navigation a {
+    padding: 0.4em;
+    background-color: #cbd2da;
+    color: #000096;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #b0cde8;
+    height: 2.4em;
+    opacity: 0.9;
+}
+.main-navigation a,
+.main-navigation ul ul
+{
+    border-radius: 0.5vw;
+}
+
+@media screen and (max-width: 40.0em) {
+    .main-navigation a {
+        border-width: 1px;
+        background-color: #cbd2da;
+        margin: 0 3px;
+    }
+}
+
+.main-navigation ul ul {
+    background-color: #fff;
+}
+
+.main-navigation ul ul a {
+    border-radius: 0.5vw;
+    background-color: #cbd2da;
+    color: #140096;
+    opacity: 0.9;
+}
+
+.main-navigation li:hover > a,
+.main-navigation li.focus > a {
+    border-radius: 0.5vw;
+    background-color: #6492bc;
+}
+
+/* ============ Footer ========== */
+
+#footer {
+    padding:10px;
+    padding-bottom:0px;
+    border-top-style:solid;
+    border-top-width:1px;
+    border-top-color:#999;
+}
+td.footer-table-cell {
+    text-align:center;
+    border-style: none;
+    font-size:0.7em;
+}
+td.counter-table-cell {
+    text-align:center;
+    border-style: none;
+    font-size:0.8em;
+}
+.counter {
+    text-align: center;
+    background-color: #6ac;
+    color: #fff;
+    width: 50px;
+    font-weight: bold;
+    font-size:1.0em;
+}
+
+/* ============ Main Content Area ========== */
+
+#page {
+    max-width: 100%;
+}
+
+.right-aligned-image {
+    float: right;
+    padding: 15px;
+    clear: left;
+}
+
+.grid-box {
+    width:240px;
+    height: 200px;
+    background-color: #ccc;
+    margin: 0 20px 20px 0;
+    text-align: center;
+    display: inline-block;
+}
+
+.grid-box a {
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+    /* Colour is defined inline in script */
+}
+
+.highlight {
+    color: steelblue;
+}

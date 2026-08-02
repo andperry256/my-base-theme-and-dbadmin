@@ -56,8 +56,8 @@ else {
 require("$base_dir/path_defs.php");
 require("$base_dir/mysql_connect.php");
 require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
-require("$db_admin_dir/functions.php");
-require("$db_admin_dir/classes.php");
+require("$dbadmin_dir/functions.php");
+require("$dbadmin_dir/classes.php");
 $post_copy = $_POST;  // deslash does not seem to be required any longer here
 $no_action = true;
 require("$custom_pages_path/$relative_path/_home.php");

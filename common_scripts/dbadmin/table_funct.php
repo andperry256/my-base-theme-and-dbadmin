@@ -337,12 +337,12 @@ function display_table($params)
 {
     global $base_url, $relative_path, $relative_sub_path, $location;
     global $widget_types;
-    global $db_admin_dir;
+    global $dbadmin_dir;
     global $display_table;
     global $page_url_table, $page_url_list_size;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
-    print("<style>\n".file_get_contents("$db_admin_dir/page_link_styles.css")."</style>\n");
+    print("<style>\n".file_get_contents("$dbadmin_dir/page_link_styles.css")."</style>\n");
 
     //============================================================================
     // Part 1 - Data Initialisation

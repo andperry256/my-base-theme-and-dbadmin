@@ -10,7 +10,7 @@
     script:-
 
     $local_site_dir
-    $db_admin_url
+    $dbadmin_url
     $dbid
     PAGE_EDIT_KEYCODE
   */
@@ -20,7 +20,7 @@
   elseif (!isset($local_site_dir)) {
       exit("Local site directory not set.");
   }
-  elseif (!isset($db_admin_url)) {
+  elseif (!isset($dbadmin_url)) {
       exit("DB Admin URL not set.");
   }
   elseif (!isset($dbid)) {
@@ -55,7 +55,7 @@
   $where_values = ['s',$page_slug];
   $query_result = mysqli_select_query($db,'wp_posts','*',$where_clause,$where_values,'');
   if ($row = mysqli_fetch_assoc($query_result)) {
-      print("<form method=\"post\" action=\"$db_admin_url/quick-edit/action.php\">\n");
+      print("<form method=\"post\" action=\"$dbadmin_url/quick-edit/action.php\">\n");
       print("<textarea name=\"content\" rows=\"12\">{$row['post_content']}</textarea>\n");
       print("<input type=\"submit\" value=\"Save\" />\n");
       print("<input type=\"hidden\" name=\"post_name\" value=\"$page_slug\" />\n");

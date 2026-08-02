@@ -60,14 +60,14 @@ output_meta_data();
     </div><!-- .site-branding -->
 
     <?php
-    if (isset($custom_theme_path)) {
+    if (isset($theme_dir)) {
         // The main stylesheet (style.css) is included by default. Include the associated
         // light/dark theme stylesheet here if applicable.
-        if ((is_file("$custom_theme_path/style-light.css")) && (get_session_var('theme_mode') == 'light')) {
-            print("<link rel='stylesheet' id='-home-styles-css'  href='$custom_theme_url/style-light.css?v=$link_version' type='text/css' media='all' />");
+        if ((is_file("$theme_dir/style-light.css")) && (get_session_var('theme_mode') == 'light')) {
+            print("<link rel='stylesheet' id='-home-styles-css'  href='$theme_url/style-light.css?v=$link_version' type='text/css' media='all' />");
         }
-        elseif ((is_file("$custom_theme_path/style-dark.css")) && (get_session_var('theme_mode') == 'dark')) {
-            print("<link rel='stylesheet' id='-home-styles-css'  href='$custom_theme_url/style-dark.css?v=$link_version' type='text/css' media='all' />");
+        elseif ((is_file("$theme_dir/style-dark.css")) && (get_session_var('theme_mode') == 'dark')) {
+            print("<link rel='stylesheet' id='-home-styles-css'  href='$theme_url/style-dark.css?v=$link_version' type='text/css' media='all' />");
         }
     }
   ?>

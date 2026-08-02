@@ -115,7 +115,7 @@ Function generate_widget
 
 function generate_widget($table,$field_name,$field_value)
 {
-    global $base_dir, $base_url, $db_admin_url, $codemirror_dir;
+    global $base_dir, $base_url, $dbadmin_url, $codemirror_dir;
     $db = admin_db_connect();
     $mode = get_viewing_mode();
     $base_table = get_table_for_field($table,$field_name);
@@ -1060,7 +1060,7 @@ associated base table for widget information.
 
 function handle_record($action,$params)
 {
-    global $base_url, $base_dir, $db_admin_url, $relative_path, $location, $presets;
+    global $base_url, $base_dir, $dbadmin_url, $relative_path, $location, $presets;
     global $select_this_record;
     global $saved_form_data;
     $db = admin_db_connect();
@@ -1162,7 +1162,7 @@ function handle_record($action,$params)
         $param_list .= "&-returnurl=";
         $param_list .= urlencode(get_session_var(['get_vars','-returnurl']));
     }
-    print("<form method=\"post\" action=\"$db_admin_url/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
+    print("<form method=\"post\" action=\"$dbadmin_url/record_action.php?$param_list\" enctype=\"multipart/form-data\">\n");
     $last_display_group = '';
 
     // Check that the record exists unless the action is set to 'new'.
@@ -1402,7 +1402,7 @@ afterDelete method for the associated table class.
 
 function delete_record($record,$record_id)
 {
-    global $custom_pages_path, $relative_path, $location, $cpanel_user, $replicate, $mirror_hostname, $alt_include_path, $db_admin_dir;
+    global $custom_pages_path, $relative_path, $location, $cpanel_user, $replicate, $mirror_hostname, $alt_include_path, $dbadmin_dir;
     $db = admin_db_connect();
     $table = $record->table;
     $base_table = get_base_table($table);

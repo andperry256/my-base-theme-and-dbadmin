@@ -7,8 +7,8 @@ require("datepicker_include.php");
 require("widget_types.php");
 require("$root_dir/maintenance/db_master_location.php");
 $return_url = cur_url_par();
-//print("<script type=\"text/javascript\" src=\"$db_admin_url/form_funct.js\"></script>\n");
-include_inline_javascript("$db_admin_dir/form_funct.js");
+//print("<script type=\"text/javascript\" src=\"$dbadmin_url/form_funct.js\"></script>\n");
+include_inline_javascript("$dbadmin_dir/form_funct.js");
 
 //==============================================================================
 ?>
@@ -16,11 +16,11 @@ include_inline_javascript("$db_admin_dir/form_funct.js");
   // Functions to select desktop/mobile mode
   function selectDesktopMode()
   {
-    window.location.href = "<?php echo "$db_admin_url/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
+    window.location.href = "<?php echo "$dbadmin_url/load_viewing_mode.php?mode=desktop&returnurl=$return_url" ?>";
   }
   function selectMobileMode()
   {
-    window.location.href = "<?php echo "$db_admin_url/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
+    window.location.href = "<?php echo "$dbadmin_url/load_viewing_mode.php?mode=mobile&returnurl=$return_url" ?>";
   }
 </script>
 <?php if (get_session_var('theme_mode') == 'dark'): ?>
@@ -509,7 +509,7 @@ if ((!isset($hide_dbadmin)) || (!$hide_dbadmin)) {
     }
     print("</p>\n");
 }
-print("<script type=\"text/javascript\" src=\"$db_admin_url/no_resubmit.js\"></script>\n");
-//include_inline_javascript("$db_admin_url/no_resubmit.js");
+print("<script type=\"text/javascript\" src=\"$dbadmin_url/no_resubmit.js\"></script>\n");
+//include_inline_javascript("$dbadmin_url/no_resubmit.js");
 
 //==============================================================================

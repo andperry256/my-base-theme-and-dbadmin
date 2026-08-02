@@ -6,7 +6,7 @@ if (!function_exists('sync_databases')) :
 function sync_databases($local_db_name)
 {
     global $location, $custom_pages_path, $relative_path, $local_site_dir, $local_site_dir2,
-    $localhost_id, $db_admin_url, $db_master_location, $server_station_id,
+    $localhost_id, $dbadmin_url, $db_master_location, $server_station_id,
     $table_export_dir;
     if (isset($local_site_dir2)) {
         // Override the global setting of $local_site_dir

@@ -5,7 +5,7 @@
 //================================================================================
 
 ini_set('output_buffering','off');
-ini_set('zlib.output_compression',false);
+//ini_set('zlib.output_compression',false);
 while(@ob_end_flush());
 ini_set('implicit_flush',true);
 ob_implicit_flush(true);

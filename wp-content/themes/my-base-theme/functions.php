@@ -599,7 +599,7 @@ function display_post_summary($use_compact_format)
     global $wpdb;
     global $base_dir;
     global $base_url;
-    global $home_ip_addr;
+    global $home_remote_ip_addr;
     global $show_author_in_post_summary;
     global $thumbnail_image_types;
     global $thumbnail_image_widths;
@@ -667,7 +667,7 @@ function display_post_summary($use_compact_format)
         if (strpos($post_content,'<!--more-->') === false) {
             print("<a href=\"$base_url/$slug\">Go to Post</a>\n");
         }
-        if ($_SERVER['REMOTE_ADDR'] == $home_ip_addr) {
+        if ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr) {
             print("<a href=\"$base_url/post-to-social?slug=$slug\" target=\"_blank\">Post to Social</a>");
         }
     }

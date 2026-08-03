@@ -44,7 +44,6 @@ if ((!function_exists('user_access_level')) && (!empty($define_user_access_level
 global $base_dir;
 global $base_url;
 global $db_mode;
-global $home_remote_ip_addr;
 global $location;
 global $private_key_path;
 global $relative_path;

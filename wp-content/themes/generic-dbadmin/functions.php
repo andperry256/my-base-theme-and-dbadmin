@@ -16,22 +16,3 @@ function is_local()
 }
 
 //==============================================================================
-/*
-Custom visibility rules for the 'If Menu' plugin
-*/
-//==============================================================================
-
-function menu_condition_is_local($conditions)
-{
-    $conditions[] = [
-        'id'        =>  'is_local',
-        'name'      =>  __('Is Local', 'i18n-domain'),
-        'condition' =>  function ($item) {
-                            return is_local();
-                        },
-    ];
-    return $conditions;
-}
-add_filter('if_menu_conditions', 'menu_condition_is_local');
-
-//==============================================================================

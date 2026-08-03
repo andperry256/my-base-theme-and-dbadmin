@@ -44,13 +44,14 @@ if ((!function_exists('user_access_level')) && (!empty($define_user_access_level
 global $base_dir;
 global $base_url;
 global $db_mode;
-global $home_ip_addr;
+global $home_remote_ip_addr;
 global $location;
 global $private_key_path;
 global $relative_path;
+global $root_dir;
 
-if ((!isset($local_site_dir)) || (!isset($cpanel_user)) ||
-    (!isset($main_domain)) || (!isset($theme_name))) {
+if ((empty($local_site_dir)) || (empty($cpanel_user)) ||
+    (empty($main_domain)) || (empty($theme_name))) {
     exit("One or more essential variables not defined");
 }
 

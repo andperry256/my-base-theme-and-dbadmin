@@ -102,7 +102,7 @@ if ($counter_enabled) {
         exit;
     }
 
-    if (((!isset($standalone_counter)) || (!$standalone_counter)) && (!$is_bot)) {
+    if ((php_server_mode() == 'web') && ((!isset($standalone_counter)) || (!$standalone_counter)) && (!$is_bot)) {
         $ip_addr = $_SERVER['REMOTE_ADDR'];
         mysqli_query($db,"DELETE FROM counter_hits WHERE date<'$today_date'");
         $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date' AND ip_addr='$ip_addr'");

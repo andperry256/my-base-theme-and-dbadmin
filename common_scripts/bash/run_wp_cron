@@ -7,11 +7,11 @@
 #
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $script_dir/set_path_vars
+source $root_dir/maintenance/set_sync_params
 
 # Main loop on domains/subdomains.
-while [ "$1" != "" ]; do
-    domain_path="$root_dir/$1"
-    shift
+for subpath in ${wordpress_installations[@]}; do
+    domain_path="$root_dir/$subpath"
     cd $domain_path
     echo ""
     echo $(date)." - $domain_path"

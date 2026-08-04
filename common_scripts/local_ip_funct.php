@@ -39,8 +39,9 @@ on the external IP if access is made via an internet-based domain name.
 
 function is_home_local_ip($ip_addr)
 {
-    return (defined('HOME_IP_ADDR'))
-        ? ((is_local_ip($ip_addr)) || ($ip_addr == HOME_IP_ADDR))
+    global $home_remote_ip_addr;
+    return (!empty($home_remote_ip_addr))
+        ? ((is_local_ip($ip_addr)) || ($ip_addr == $home_remote_ip_addr))
         : false;
 }
 

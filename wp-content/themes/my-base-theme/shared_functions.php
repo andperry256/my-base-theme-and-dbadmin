@@ -1210,7 +1210,7 @@ counter information.
 function update_web_counter($dbid)
 {
     $db = db_connect($dbid);
-    $end_year = current_counter_year($dbid);
+    $end_year = current_counter_year($db);
     if (!empty($end_year)) {
 
         // Check if a counter exists for the current year.
@@ -1275,9 +1275,8 @@ function update_web_counter($dbid)
 
 //==============================================================================
 
-function current_counter_year($dbid)
+function current_counter_year($db)
 {
-    $db = db_connect($dbid);
     $this_year = (int)date('Y');
     $this_month = (int)date('m');
     $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='start_month'");

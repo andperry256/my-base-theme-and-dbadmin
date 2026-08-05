@@ -324,7 +324,7 @@ function mysqli_select_query($db,$table,$fields,$where_clause,$where_values,$add
     $pos = 0;
     for ($i=0; $i<$where_values_count; $i+=2) {
         if ($where_values[$i] == 's') {
-            $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
+            $param = ((is_string($where_values[$i+1])) && ($where_values[$i+1] !== ''))
                 ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                 : "''";
         }
@@ -385,7 +385,7 @@ function mysqli_update_query($db,$table,$set_fields,$set_values,$where_clause,$w
             $param = 'NULL';
         }
         elseif (($all_values[$i] == 's') || ($all_values[$i] == 'sn')) {
-            $param = ((is_string($all_values[$i+1])) && ($all_values[$i+1] != ''))
+            $param = ((is_string($all_values[$i+1])) && ($all_values[$i+1] !== ''))
                 ? "'".mysqli_real_escape_string($db,$all_values[$i+1])."'"
                 : "''";
         }
@@ -461,7 +461,7 @@ function mysqli_insert_query($db,$table,$fields,$values,$strict=false,$debug=fal
             $param = 'NULL';
         }
         elseif (($values[$i] == 's') || ($values[$i] == 'sn')) {
-            $param = ((is_string($values[$i+1])) && (!empty($values[$i+1])))
+            $param = ((is_string($values[$i+1])) && ($values[$i+1] !== ''))
                 ? "'".mysqli_real_escape_string($db,$values[$i+1])."'"
                 : "''";
         }
@@ -537,7 +537,7 @@ function mysqli_delete_query($db,$table,$where_clause,$where_values,$strict=fals
     $pos = 0;
     for ($i=0; $i<$where_values_count; $i+=2) {
         if ($where_values[$i] == 's') {
-            $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
+            $param = ((is_string($where_values[$i+1])) && ($where_values[$i+1] !== ''))
                 ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                 : "''";
         }
@@ -583,7 +583,7 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
         $pos = 0;
         for ($i=0; $i<$where_values_count; $i+=2) {
             if ($where_values[$i] == 's') {
-                $param = ((is_string($where_values[$i+1])) && (!empty($where_values[$i+1])))
+                $param = ((is_string($where_values[$i+1])) && ($where_values[$i+1] !== ''))
                     ? "'".mysqli_real_escape_string($db,$where_values[$i+1])."'"
                     : "''";
             }

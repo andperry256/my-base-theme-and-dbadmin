@@ -1453,6 +1453,9 @@ remove_filter('the_excerpt', 'wptexturize');
 global $numeric_font;
 $numeric_font = 'NotoSans';
 
+// Register update_web_counter as a dynamic cache action
+add_action( 'wpsc_cached_page', 'update_web_counter' );
+
 //================================================================================
 endif;
 //================================================================================

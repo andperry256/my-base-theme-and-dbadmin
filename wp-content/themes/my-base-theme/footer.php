@@ -8,6 +8,9 @@
  *
  * @package My_Base_Theme
  */
+if (function_exists('update_web_counter')) {
+    update_web_counter(WP_DBID);
+}
 ?>
 
 </div><!-- #content -->

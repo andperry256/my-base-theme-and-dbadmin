@@ -1193,6 +1193,152 @@ function get_last_preset_link_version()
 }
 
 //==============================================================================
+/*
+Function update_web_counter (and sub-functions current_counter_year, is_bot)
+
+This function is called to update the web counter for the site. In the WordPress
+environment, it is normally configured as a dynamic cache action in conjunction
+with the WP Super Cache plugin, being invoked by the theme footer template. In
+other environments, it simply needs to be invoked at a suitable point in page
+script.
+
+There is a single parameter specifying the ID of the database which contains the
+counter information.
+*/
+//==============================================================================
+
+function update_web_counter($dbid)
+{
+    $db = db_connect($dbid);
+    $end_year = current_counter_year($dbid);
+    if (!empty($end_year)) {
+
+        // Check if a counter exists for the current year.
+        $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='$end_year"."_count'");
+        if (mysqli_num_rows($query_result) == 0) {
+            // New counter year - add the required initialised records.
+            mysqli_query($db,"INSERT INTO counter_info (id,value) VALUES ('$end_year"."_count','0')");
+            mysqli_query($db,"INSERT INTO counter_info (id,value) VALUES ('$end_year"."_daily','0.0')");
+            $start_date = $start_year.'-'.sprintf("%02d",$start_month).'-01';
+            mysqli_query($db,"INSERT INTO counter_info (id,value) VALUES ('$end_year"."_start','$start_date')");
+        }
+
+        // Obtain the current counter start date.
+        $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='$end_year"."_start'");
+        if ($row = mysqli_fetch_assoc($query_result)) {
+            $counter_start_date = $row['value'];
+        }
+        else {
+            // This should not occur.
+            return;
+        }
+
+        $start_year = (int)substr($counter_start_date,0,4);
+        $start_month = (int)substr($counter_start_date,5,2);
+        $start_day = (int)substr($counter_start_date,8,2);
+        $today_date = date('Y-m-d');
+
+        // Read the counter for the current year.
+        $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='$end_year"."_count'");
+        if ($row = mysqli_fetch_assoc($query_result)) {
+            $counter_val = (int)$row['value'];
+        }
+        else {
+            // This should not occur.
+            return;
+        }
+
+        if ((php_server_mode() == 'web') && ((!isset($standalone_counter)) || (!$standalone_counter)) && (!is_bot())) {
+            $ip_addr = $_SERVER['REMOTE_ADDR'];
+            mysqli_query($db,"DELETE FROM counter_hits WHERE date<'$today_date'");
+            $query_result = mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date' AND ip_addr='$ip_addr'");
+            if (mysqli_num_rows($query_result) == 0) {
+                // First visit of the day for the given client, so update the counter
+                $counter_val++;
+                mysqli_query($db,"UPDATE counter_info SET value='$counter_val' WHERE id='$end_year"."_count'");
+                mysqli_query($db,"INSERT INTO counter_hits VALUES('$today_date','$ip_addr',$counter_val)");
+            }
+            elseif ($row = mysqli_fetch_assoc($query_result)) {
+                // Client has already visited today.
+                $own_counter = $row['count'];
+            }
+        }
+
+        // Calculate and update the daily average for the current counting period.
+        $start_date_offset = mktime(1,0,0,$start_month,$start_day,$start_year);
+        $today_date_offset = mktime(1,0,0,(int)date('m'),(int)date('d'),(int)date('Y'));
+        $days_counting = (($today_date_offset - $start_date_offset) / 86400) + 1;
+        $daily_average = sprintf("%01.1f",$counter_val/$days_counting);
+        mysqli_query($db,"UPDATE counter_info SET value='$daily_average' WHERE id='$end_year"."_daily'");
+    }
+}
+
+//==============================================================================
+
+function current_counter_year($dbid)
+{
+    $db = db_connect($dbid);
+    $this_year = (int)date('Y');
+    $this_month = (int)date('m');
+    $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='start_month'");
+    if (($query_result) && ($row = mysqli_fetch_assoc($query_result))) {
+        $start_month = (int)$row['value'];
+        if ($this_month >= $start_month) {
+            $start_year = $this_year;
+        }
+        else {
+            $start_year = $this_year - 1;
+        }
+        if ($start_month == 1) {
+            $end_year = $start_year;
+        }
+        else {
+            $end_year = $start_year + 1;
+        }
+        return $end_year;
+    }
+    else {
+        return false;
+    }
+}
+
+//==============================================================================
+
+function is_bot(): bool
+{
+    if (empty($_SERVER['HTTP_USER_AGENT'])) {
+        return true;
+    }
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+    $bot_pattern = '/(' . implode('|', [
+        // Major Search Engines & Social
+        'googlebot', 'bingbot', 'yandex', 'baiduspider', 'duckduckbot', 'slurp',
+        'facebookexternalhit', 'twitterbot', 'linkedinbot', 'pinterest', 'applebot',
+
+        // AI Crawlers & Scrapers
+        'gptbot', 'chatgpt', 'claudebot', 'anthropic', 'cohere-ai', 'perplexbot',
+        'bytespider', 'ccbot', 'diffbot', 'img2dataset',
+
+        // Generic Bot & Crawler Terms
+        'bot', 'crawler', 'spider', 'archiver', 'transcoder', 'fetch', 'scraper',
+
+        // HTTP Libraries, CLI Tools, & Headless Browsers
+        'curl', 'wget', 'python', 'guzzle', 'httpclient', 'libwww', 'axios',
+        'java\/', 'go-http-client', 'headlesschrome', 'phantomjs', 'puppeteer',
+
+        // Monitoring & Security Scanners
+        'uptime', 'pingdom', 'nagios', 'lighthouse', 'semrush', 'ahrefs', 'mj12bot'
+    ]) . ')/i';
+
+    if ((preg_match($bot_pattern, $user_agent)) || (empty($_SERVER['HTTP_ACCEPT_LANGUAGE']))) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+//==============================================================================
 define('SHARED_FUNCT_DEFINED',true);
 endif;
 //==============================================================================

@@ -11,27 +11,36 @@ Function db_connect
 This is the main function to connect to the MySQL database associated with a
 given database ID as defined in the $dbinfo array for the site. Each element of
 this array has the database ID as the key and is itself an array with the
-following elements:-
+following elements:
 0 - Local database name.
 1 - Online database name.
 2 - Default character set (optional).
+3 - Database sub-oath (optional).]
+4 - Alternate user (optional).
 
 This function performs a MySQLi connection using either object orientated or
 procedural style, as specified by the $mode parameter (defaults to procedural
 style).
 
-The database user name normally defaults to that defined by the constant
-REAL_DB_USER, but there is the option to override this with an optional
-parameter (e.g. to gain elevated access).
+The database username normally defaults to that defined by the constant
+REAL_DB_USER, but there are the options to override this with:
+1. An optional parameter function parameter, or:
+2. An optional username in the given $dbinfo database profile.
 */
 //==============================================================================
 
 function db_connect($dbid,$mode='p',$alt_user='')
 {
     global $db_mode, $location, $dbinfo;
-    $main_user = (!empty($alt_user))
-        ? $alt_user
-        : REAL_DB_USER;
+    if (!empty($alt_user)) {
+        $main_user = $alt_user;
+    }
+    elseif (!empty($dbinfo[$dbid][4])) {
+        $main_user = $dbinfo[$dbid][4];
+    }
+    else {
+        $main_user = REAL_DB_USER;
+    }
 
     $local_db = strtok($dbinfo[$dbid][0],'/');
     $tok = strtok('/');

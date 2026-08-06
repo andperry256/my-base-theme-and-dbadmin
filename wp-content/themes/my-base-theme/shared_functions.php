@@ -1202,15 +1202,19 @@ with the WP Super Cache plugin, being invoked by the theme footer template. In
 other environments, it simply needs to be invoked at a suitable point in page
 script.
 
-There is a single parameter specifying the ID of the database which contains the
-counter information.
+Parameters for update_web_counter and current_counter_year:
+$dbid - The database ID as used in a call to the db_connect function.
+$db   - Optional, set to a DB object for an existing connection, overriding
+        the $dbid parameter.
 */
 //==============================================================================
 
-function update_web_counter($dbid)
+function update_web_counter($dbid,$db=null)
 {
-    $db = db_connect($dbid);
-    $end_year = current_counter_year($db);
+    if (empty($db)) {
+        $db = db_connect($dbid);
+    }
+    $end_year = current_counter_year($dbid,$db);
     if (!empty($end_year)) {
 
         // Check if a counter exists for the current year.
@@ -1275,8 +1279,11 @@ function update_web_counter($dbid)
 
 //==============================================================================
 
-function current_counter_year($db)
+function current_counter_year($dbid,$db=null)
 {
+    if (empty($db)) {
+        $db = db_connect($dbid);
+    }
     $this_year = (int)date('Y');
     $this_month = (int)date('m');
     $query_result = mysqli_query($db,"SELECT * FROM counter_info WHERE id='start_month'");
@@ -1335,6 +1342,46 @@ function is_bot(): bool
     else {
         return false;
     }
+}
+
+//==============================================================================
+/*
+Function display_web_counter
+
+This function is called to display the current web counter and associated
+statistics.
+Parameters:
+$dbid - The database ID as used in a call to the db_connect function.
+$db   - Optional, set to a DB object for an existing connection, overriding
+        the $dbid parameter.
+*/
+//==============================================================================
+
+function display_web_counter($dbid,$db=null)
+{
+    if (empty($db)) {
+        $db = db_connect($dbid);
+    }
+    $end_year = current_counter_year($dbid,$db);
+    $today_date = date('Y-m-d');
+    $today_count = mysqli_num_rows(mysqli_query($db,"SELECT * FROM counter_hits WHERE date='$today_date'"));
+    $counter_value = ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM counter_info WHERE id='{$end_year}_count'")))
+        ? $row['value']
+        : null;
+    $daily_average = ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM counter_info WHERE id='{$end_year}_daily'")))
+        ? $row['value']
+        : null;
+    $start_date = ($row = mysqli_fetch_assoc(mysqli_query($db,"SELECT * FROM counter_info WHERE id='{$end_year}_start'")))
+        ? $row['value']
+        : null;
+    $start_date = date('d M Y',strtotime($start_date));
+    $start_date = str_replace(' ','&nbsp;',$start_date);
+    print("<p style=\"line-height:1.6em\">");
+    print("Count: &nbsp;$counter_value<br />");
+    print("Since: &nbsp;$start_date<br />");
+    print(sprintf("Daily: &nbsp;%01.1f<br />",$daily_average));
+    print("Today: &nbsp;$today_count</p>\n");
+
 }
 
 //==============================================================================

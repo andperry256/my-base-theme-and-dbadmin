@@ -12,11 +12,15 @@ This is the main function to connect to the MySQL database associated with a
 given database ID as defined in the $dbinfo array for the site. Each element of
 this array has the database ID as the key and is itself an array with the
 following elements:
+
 0 - Local database name.
 1 - Online database name.
 2 - Default character set (optional).
-3 - Database sub-oath (optional).]
+3 - DB admin sub-path (optional).
 4 - Alternate user (optional).
+
+Elements 0 and 1 can optionally be of the format <dbname>/<hostname> where an
+alternate host needs to be specified.
 
 This function performs a MySQLi connection using either object orientated or
 procedural style, as specified by the $mode parameter (defaults to procedural
@@ -24,6 +28,7 @@ style).
 
 The database username normally defaults to that defined by the constant
 REAL_DB_USER, but there are the options to override this with:
+
 1. An optional parameter function parameter, or:
 2. An optional username in the given $dbinfo database profile.
 */

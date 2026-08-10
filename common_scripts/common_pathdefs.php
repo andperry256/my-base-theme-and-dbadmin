@@ -131,3 +131,9 @@ ini_set('log_errors','1');
 ini_set('error_log',"$root_dir/logs/php_error.log");
 
 //==============================================================================
+// Debug code - comment out in normal operation
+//==============================================================================
+
+// if ((is_local_ip($_SERVER['REMOTE_ADDR'])) || ($_SERVER['REMOTE_ADDR'] == $home_remote_ip_addr)) ini_set('display_errors','1');
+
+//==============================================================================

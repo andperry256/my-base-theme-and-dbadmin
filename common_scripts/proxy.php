@@ -1,13 +1,18 @@
 <?php
 //==============================================================================
 
-require(__DIR__.'/../path_defs.php');
+require("{$_SERVER['DOCUMENT_ROOT']}/path_defs.php");
 $path = $_GET['file'] ?? '';
 if (empty($path) || strpos($path, '..') !== false) {
     header("HTTP/1.1 400 Bad Request");
     exit('Invalid path');
 }
-$target_url = "$r2_base/" . ltrim($path, '/');
+$type = $_GET['type'] ?? 'r2';
+$bases = [
+    'r2'    => $r2_base ?? '',
+    'local' => $local_file_storage_url ?? '',
+];
+$target_url = "{$bases[$type]}/" . ltrim($path, '/');
 
 $ch = curl_init($target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

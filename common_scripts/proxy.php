@@ -10,7 +10,7 @@ if (empty($path) || strpos($path, '..') !== false) {
 $type = $_GET['type'] ?? 'r2';
 $bases = [
     'r2'    => $r2_base ?? '',
-    'local' => $local_file_storage_url ?? '',
+    'local' => "$base_url/media_files" ?? '',
 ];
 $target_url = "{$bases[$type]}/" . ltrim($path, '/');
 

@@ -8,41 +8,9 @@ if ((isset($base_dir)) && (isset($private_scripts_dir))) {
     // Website specific functionality
     require_once("$base_dir/mysql_connect.php");
     require_once(__DIR__."/session_funct.php");
-
-    //==============================================================================
-    /*
-    Function get_url_content
-    */
-    //==============================================================================
-
-    function get_url_content($url,$debug=false): string
-            {
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL            => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Compatible; PHP/' . PHP_VERSION . ')',
-            CURLOPT_SSL_VERIFYPEER => true,
-        ]);
-        $content = curl_exec($ch);
-        if (curl_errno($ch)) {
-            $content = 'cURL Error: '.curl_error($ch);
-        }
-        if ($debug) {
-            exit("(string)$content\n");
-        }
-        else {
-            return (string)$content;
-        }
-    }
+    require_once(__DIR__."/get_url_content.php");
 }
 
-/*
-The following functionality is not website specific and may be used in general
-system utilities.
-*/
 require_once(__DIR__."/mysql_funct.php");
 
 //==============================================================================

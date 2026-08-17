@@ -27,11 +27,11 @@ else {
 }
 
 foreach (['paths.php','.htaccess'] as $file) {
-    $content = file_get_contents("$base_dir/media/$file");
+    $content = file_get_contents("$base_dir/media_files/$file");
     $content = preg_replace('/links-[0-9a-f]+/',"$links_path",$content);
-    file_put_contents("$base_dir/media/$file",$content);
+    file_put_contents("$base_dir/media_files/$file",$content);
 }
-print("Links URL is now $base_url/media/$links_path$eol");
+print("Links URL is now $base_url/media_files/$links_path$eol");
 print("Operation completed$eol");
 
 //==============================================================================

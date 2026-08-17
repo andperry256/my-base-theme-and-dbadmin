@@ -90,7 +90,7 @@ is useful when embedding scripts inside an <iframe>.
 
 function is_ip_authorised($ip_addr,$access_level=1)
 {
-    $db = dbconnect(ADMIN_DBID);
+    $db = db_connect(ADMIN_DBID);
     $where_clause = 'remote_addr=? AND access_level>=?';
     $where_values = ['s',$ip_addr,'i',$access_level];
     return (mysqli_num_rows(mysqli_select_query($db,'login_sessions','*',$where_clause,$where_values,'')) > 0);

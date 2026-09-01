@@ -1,16 +1,13 @@
 <?php
 //================================================================================
 /*
-These functions perform database backup, restore and sync operations by invoking
-Bash commands. Interaction with the remove server is achieved by using SSH with
-private/public key authentication. The availability of these function eliminates
-the need for direct remote MySQL access, which may not be possible in certain
-situations
+THIS SCRIPT IS DEPRECATED.
 
-They are only valid for use on a local server.
+The functionality is being moved into the mysql_sync_funct.php script in the
+'config' repository.
 */
 //================================================================================
-if (!defined('MYSQL_SYNC_FUNCT_DEFINED')):
+if (false):  // (!defined('MYSQL_SYNC_FUNCT_DEFINED')):
 //================================================================================
 
 function run_db_sync_command($command,$message='',$verbose=false)

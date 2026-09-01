@@ -1,6 +1,10 @@
 <?php
+//==============================================================================
+if (!defined('GET_URL_CONTENT_DEFINED')):
+//==============================================================================
+
 function get_url_content($url,$debug=false): string
-        {
+{
     $ch = curl_init();
     curl_setopt_array($ch, [
         CURLOPT_URL            => $url,
@@ -21,3 +25,8 @@ function get_url_content($url,$debug=false): string
         return (string)$content;
     }
 }
+
+//==============================================================================
+define('GET_URL_CONTENT_DEFINED',true);
+endif;
+//==============================================================================

@@ -1,0 +1,16 @@
+#!/bin/bash
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $script_dir/set_path_vars
+source $root_dir/maintenance/set_sync_params
+all_paths=("${non_wp_site_checks[@]}" "${wordpress_installations[@]}")
+for subpath in "${all_paths[@]}"; do
+    if [ "$subpath" == "public_html" ]; then
+        output=$(wget -q -O - https://$online_domain/common_scripts/site_check.php)
+        echo "Main [$output]"
+
+    else
+        output=$(wget -q -O - https://$subpath/common_scripts/site_check.php)
+        first_element="${subpath%%.*}"
+        echo "$first_element [$output]"
+    fi
+done

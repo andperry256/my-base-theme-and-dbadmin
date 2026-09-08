@@ -1389,6 +1389,22 @@ function display_web_counter($dbid,$db=null)
 }
 
 //==============================================================================
+/*
+Function display_site_check
+
+This function causes the site check line to be output on the page. This is only
+applied to the front page of the site.
+*/
+//==============================================================================
+
+function display_site_check()
+{
+    if (is_front_page()) {
+        print("<!-- *** SITE CHECK *** DO NOT DELETE THIS LINE *** -->\n");
+    }
+}
+
+//==============================================================================
 define('SHARED_FUNCT_DEFINED',true);
 endif;
 //==============================================================================

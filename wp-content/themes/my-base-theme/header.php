@@ -24,10 +24,10 @@ wp_head();
 $themes_dir = get_theme_root();
 require("$themes_dir/my-base-theme/setup_params.php");
 output_meta_data();
+display_site_check();
 ?>
 </head>
 
-<!-- *** SITE CHECK *** DO NOT DELETE THIS LINE *** -->
 <body <?php body_class(); ?> >
 
 <div id="super-container">

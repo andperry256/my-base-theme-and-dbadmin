@@ -11,7 +11,7 @@
  */
 //==============================================================================
 
-if (is_front_page()) {
+if ((is_front_page()) && (!isset($_GET['sitecheck']))) {
     // Auto-load main dashboard
     header("Location: ./dbadmin/db-main");
     exit;
@@ -43,9 +43,9 @@ check_login_status($db);
         output_meta_data();
 	    create_cache_reload_link();
         //==============================================================================
+        display_site_check();
         ?>
     </head>
-    <!-- *** SITE CHECK *** DO NOT DELETE THIS LINE *** -->
     <body <?php body_class(); ?>>
         <div id="page" class="site" >
             <a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'my-base-theme' ); ?></a>

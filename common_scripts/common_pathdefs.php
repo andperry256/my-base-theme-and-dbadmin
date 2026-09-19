@@ -79,6 +79,9 @@ elseif (is_file("/Config/linux_pathdefs.php")) {
     else {
         $base_url = "$localhost_root_url/Sites/$local_site_dir/public_html";
     }
+    if (!empty($_SERVER['HTTPS'])) {
+        $base_url = str_replace('http:','https:',$base_url);
+    }
     $root_dir = "$www_root_dir/Sites/$local_site_dir";
     $base_dir = "$root_dir/public_html";
     $private_key_path = '/var/www/.ssh/sites_rsa';

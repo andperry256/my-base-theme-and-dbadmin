@@ -1436,13 +1436,8 @@ add_action( 'widgets_init', 'blog_home_load_widget' );
 
 //================================================================================
 
-// Auto update of plugins - enable online and disable on local server
-if (is_file("/Config/linux_pathdefs.php")) {
-    add_filter( 'auto_update_plugin', '__return_false' );
-}
-else {
-    add_filter( 'auto_update_plugin', '__return_true' );
-}
+// Enable automatic plugin updates
+add_filter( 'auto_update_plugin', '__return_true' );
 
 // Disable smart quotes
 remove_filter('the_content', 'wptexturize');

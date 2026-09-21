@@ -1,33 +1,22 @@
 <?php
 //================================================================================
-//
-//    Mail Handling Functions.
-//
-//================================================================================
-//
-//    N.B. Certain functions in this module depend upon the following site
-//    specific function being defined elsewhere (normally in mysql_connect.php):-
-//
-//    mail_db_connect()
-//
-//    returning a database link variable.
-//
+if (!defined('MAIL_FUNCT_DEFINED')):
 //================================================================================
 
-namespace MyBaseProject;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
-if (!is_dir($php_mailer_dir)) {
-    exit("PHPMailer directory not defined\n");
+global $wpdb;
+if (isset($wpdb)) {
+    include(__DIR__.'/phpmailer_wp_paths.php');
 }
 else {
-    require_once("$php_mailer_dir/src/PHPMailer.php");
-    require_once("$php_mailer_dir/src/SMTP.php");
-    require_once("$php_mailer_dir/src/Exception.php");
+    include(__DIR__.'/phpmailer_non_wp_paths.php');
 }
 
+//================================================================================
+/*
+N.B. Certain functions in this module depend upon the site specific function
+mail_db_connect() being defined elsewhere (normally in mysql_connect.php),
+returning a database link variable.
+*/
 //==============================================================================
 /*
 Function output_mail
@@ -122,7 +111,7 @@ function output_mail($mail_info,$host,$attachments=[])
         $where_values = ['s',$host];
         if ($row = mysqli_fetch_assoc(mysqli_select_query($db,'mail_routes','*',$where_clause,$where_values,''))) {
             // Create PHPMailer object
-            $mail = new PHPMailer();
+            $mail = new \PHPMailer\PHPMailer\PHPMailer();
             $mail->CharSet = 'UTF-8';
 
             // Process message content
@@ -323,4 +312,7 @@ function email_previous_day_mail_log($station_id,$from_addr)
     }
 }
 
+//================================================================================
+define ( 'MAIL_FUNCT_DEFINED', true );
+endif;
 //================================================================================

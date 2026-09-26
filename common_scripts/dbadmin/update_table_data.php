@@ -729,15 +729,17 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
     $query = str_replace('{query}','UPDATE dba_relationships SET table_name=\'$table_name\' WHERE table_name=\'$$table_name\'',$query);
     mysqli_query_normal($db,$query);
 
+    // Run init.php script if present
+    if (is_file("$custom_pages_path/$relative_path/actions/init.php")) {
+        include("$custom_pages_path/$relative_path/actions/init.php");
+    }
+
+    // Delete orphan table/field information
     $where_clause = 'orphan=1';
     $where_values = [];
     mysqli_delete_query($db,'dba_table_info',$where_clause,$where_values);
     mysqli_delete_query($db,'dba_table_fields',$where_clause,$where_values);
     print("Operation completed.$eol");
-    if ((false) && ($mode == 'web')) { // Functionality deprecated
-        print("<p><a href=\"./?-table=_view_orphan_table_info_records\" target=\"_blank\">Orphan Table Info Records</a><br />\n");
-        print("<a href=\"./?-table=_view_orphan_table_field_records\" target=\"_blank\">Orphan Table Field Records</a></p>\n");
-    }
 }
 
 //==============================================================================

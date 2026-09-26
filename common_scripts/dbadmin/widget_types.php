@@ -21,6 +21,7 @@ $widget_types = [
   'input-num' => false,
   'input-text' => true,
   'input-text-small' => false,
+  'link' => false,
   'password' => false,
   'select' => true,
   'static' => true,

@@ -723,23 +723,36 @@ function display_table($params)
         $record_offset++;
         $record_id = encode_record_id($primary_key);
         foreach ($fields as $f => $ord) {
-            /* */
             $where_clause = 'table_name=? AND field_name=?';
             $where_values = ['s',$base_table,'s',$f];
             if (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) &&
                 ($row2['widget_type'] == 'checkbox')) {
                 $value = ($row[$f]) ? '[X]' : '';
             }
+            elseif (($row2 = mysqli_fetch_assoc(mysqli_select_query($db,'dba_table_fields','*',$where_clause,$where_values,''))) &&
+                ($row2['widget_type'] == 'link')) {
+                $description = strtok($row[$f],'^');
+                $address = strtok('^');
+                $open_in_new = strtok('^');
+                $value = "<a href=\"$address\"";
+                if (!empty($open_in_new)) {
+                    $value .= " target=\"_blank\"";
+                }
+                $value .= ">$description</a>";
+                $cell_link = $value;
+            }
             else {
                 $value = strip_tags($row[$f]);
             }
             $font_class = ((is_numeric($value)) || ($row2['widget_type'] == 'date')) ? ' numeric' : '';
+            $cell_link = $cell_link ?? "<a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a>";
             if ($mode == 'desktop') {
-                print("<td class=\"$style$font_class\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></td>");
+                print("\n<td class=\"$style$font_class\">$cell_link</td>");
             }
             else {
-                print("<div class=\"table-listing-cell field-$f $style$font_class\"><a href=\"$base_url/$relative_path/?-table=$table&-action=$record_action&-recordid=$record_id\">$value</a></div> <!-- .table-listing-cell -->");
+                print("\n<div class=\"table-listing-cell field-$f $style$font_class\">$cell_link</div>");
             }
+            unset($cell_link);
         }
         print("\n");
         if ($mode == 'desktop') {

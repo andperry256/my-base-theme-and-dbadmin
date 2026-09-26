@@ -332,6 +332,17 @@ function generate_widget($table,$field_name,$field_value)
                     }
                 }
                 break;
+
+            case 'link';
+                $description = strtok($field_value,'^');
+                $address = strtok('^');
+                $open_in_new = strtok('^');
+                print("<a href=\"$address\"");
+                if (!empty($open_in_new)) {
+                    print(" target=\"_blank\"");
+                }
+                print(">$description</a>");
+                break;
         }
     }
 }

@@ -731,6 +731,7 @@ function update_table_data_main($dbid,$update_charsets,$optimise,$purge)
 
     // Run init.php script if present
     if (is_file("$custom_pages_path/$relative_path/actions/init.php")) {
+        print("Running init.php script ...$eol");
         include("$custom_pages_path/$relative_path/actions/init.php");
     }
 

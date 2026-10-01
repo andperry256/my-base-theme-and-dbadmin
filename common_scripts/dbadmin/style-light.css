@@ -28,15 +28,3 @@ table.table-record a.required {
 td.update-selection-header {
     background-color: #ccc;
 }
-
-.highlight-error {
-    color:tomato;
-}
-
-.highlight-warning {
-    color:orange;
-}
-
-.highlight-success {
-    color:steelblue;
-}

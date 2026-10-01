@@ -1214,3 +1214,25 @@ a.cat-nav-link:hover {
 .blog-footnote {
     font-size: 0.85em;
 }
+
+/*--------------------------------------------------------------
+# Miscellaneous
+--------------------------------------------------------------*/
+
+.highlight-error {
+    font-weight:bold;
+    font-style:normal;
+    color:tomato;
+}
+
+.highlight-warning {
+    font-weight:bold;
+    font-style:normal;
+    color:orange;
+}
+
+.highlight-success {
+    font-weight:bold;
+    font-style:normal;
+    color:steelblue;
+}

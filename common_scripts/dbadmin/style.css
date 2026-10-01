@@ -294,24 +294,6 @@ div.update-field-value {
     height: 4pt;
 }
 
-.highlight-error {
-    font-weight:bold;
-    font-style:normal;
-    color:tomato;
-}
-
-.highlight-warning {
-    font-weight:bold;
-    font-style:normal;
-    color:orange;
-}
-
-.highlight-success {
-    font-weight:bold;
-    font-style:normal;
-    color:steelblue;
-}
-
 a.admin-link {
     font-size: 0.9em;
     border: solid 1px #999;

@@ -6,21 +6,21 @@
 /* Font Family DM Sans */
 @font-face {
 	font-family: DMSans;
-	src: url('#/common_scripts/fonts/DMSans-Regular.ttf');
+	src: url('#/common_scripts/fonts/DMSans-Regular.woff2') format('woff2');
 }
 @font-face {
 	font-family: DMSans;
-	src: url('#/common_scripts/fonts/DMSans-Bold.ttf');
+	src: url('#/common_scripts/fonts/DMSans-Bold.woff2') format('woff2');
 	font-weight: bold;
 }
 @font-face {
 	font-family: DMSans;
-	src: url('#/common_scripts/fonts/DMSans-Italic.ttf');
+	src: url('#/common_scripts/fonts/DMSans-Italic.woff2') format('woff2');
 	font-style: italic;
 }
 @font-face {
 	font-family: DMSans;
-	src: url('#/common_scripts/fonts/DMSans-BoldItalic.ttf');
+	src: url('#/common_scripts/fonts/DMSans-BoldItalic.woff2') format('woff2');
 	font-style: italic;
 	font-weight: bold;
 }
@@ -28,43 +28,47 @@
 /* Font Family Noto Sans */
 @font-face {
 	font-family: NotoSans;
-	src: url('#/common_scripts/fonts/NotoSans-Regular.ttf');
+	src: url('#/common_scripts/fonts/subset-NotoSans-Regular.woff2') format('woff2');
+    font-display: swap;
 }
 @font-face {
 	font-family: NotoSans;
-	src: url('#/common_scripts/fonts/NotoSans-Bold.ttf');
+	src: url('#/common_scripts/fonts/subset-NotoSans-Bold.woff2') format('woff2');
 	font-weight: bold;
+    font-display: swap;
 }
 @font-face {
 	font-family: NotoSans;
-	src: url('#/common_scripts/fonts/NotoSans-Italic.ttf');
+	src: url('#/common_scripts/fonts/subset-NotoSans-Italic.woff2') format('woff2');
 	font-style: italic;
+    font-display: swap;
 }
 @font-face {
 	font-family: NotoSans;
-	src: url('#/common_scripts/fonts/NotoSans-BoldItalic.ttf');
+	src: url('#/common_scripts/fonts/subset-NotoSans-BoldItalic.woff2') format('woff2');
 	font-style: italic;
 	font-weight: bold;
+    font-display: swap;
 }
 
 /* Font Family Azeret Mono */
 @font-face {
 	font-family: AzeretMono;
-	src: url('#/common_scripts/fonts/AzeretMono-Regular.ttf');
+	src: url('#/common_scripts/fonts/AzeretMono-Regular.woff2') format('woff2');
 }
 @font-face {
 	font-family: AzeretMono;
-	src: url('#/common_scripts/fonts/AzeretMono-Bold.ttf');
+	src: url('#/common_scripts/fonts/AzeretMono-Bold.woff2') format('woff2');
 	font-weight: bold;
 }
 @font-face {
 	font-family: AzeretMono;
-	src: url('#/common_scripts/fonts/AzeretMono-Italic.ttf');
+	src: url('#/common_scripts/fonts/AzeretMono-Italic.woff2') format('woff2');
 	font-style: italic;
 }
 @font-face {
 	font-family: AzeretMono;
-	src: url('#/common_scripts/fonts/AzeretMono-BoldItalic.ttf');
+	src: url('#/common_scripts/fonts/AzeretMono-BoldItalic.woff2') format('woff2');
 	font-style: italic;
 	font-weight: bold;
 }

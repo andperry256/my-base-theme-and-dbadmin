@@ -18,7 +18,7 @@ elseif (substr(__DIR__,0,5) != '/home') {
 // Parent directory hierarchy: => bash => common_scripts => public_html
 require(__DIR__."/../../../path_defs.php");
 $mailbox_data = '';
-if ((function_exists('online_itservices_db_connect')) && ($db = itservices_db_connect())) {
+if ($db = itservices_db_connect()) {
     $site_path = $argv[1];
     $where_clause = 'site_path=?';
     $where_values = ['s',$site_path];

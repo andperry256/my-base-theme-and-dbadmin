@@ -48,6 +48,7 @@ global $location;
 global $private_key_path;
 global $relative_path;
 global $root_dir;
+global $site_mysql_backup_dir;
 
 if ((empty($local_site_dir)) || (empty($cpanel_user)) ||
     (empty($main_domain)) || (empty($theme_name))) {
@@ -63,6 +64,7 @@ if (is_dir($online_root_dir)) {
     $root_dir = $online_root_dir;
     $base_dir = "$root_dir/public_html";
     $base_url = "https://www.$main_domain";
+    $site_mysql_backup_dir = "$root_dir/mysql_backup";
     if (!is_link("$root_dir/common_bash")) {
         symlink("$base_dir/common_scripts/bash","$root_dir/common_bash");
     }
@@ -85,6 +87,9 @@ elseif (is_file("/Config/linux_pathdefs.php")) {
     $root_dir = "$www_root_dir/Sites/$local_site_dir";
     $base_dir = "$root_dir/public_html";
     $private_key_path = '/var/www/.ssh/sites_rsa';
+    if ((isset($mysql_backup_dir)) && (isset($server_station_id))) {
+         $site_mysql_backup_dir = "$mysql_backup_dir/$server_station_id";
+    }
 }
 else {
     exit("Valid location not detected");
@@ -117,7 +122,6 @@ global $menu_css_dir;               $menu_css_dir = "$base_dir/menu_css";
 global $menu_css_url;               $menu_css_url = "$base_url/menu_css";
 global $online_port;                $online_port = '88';
 global $private_scripts_dir;        $private_scripts_dir = "$root_dir/private_scripts";
-global $site_mysql_backup_dir;      $site_mysql_backup_dir = "$root_dir/mysql_backup";
 global $theme_dir;                  $theme_dir = "$base_dir/wp-content/themes/$theme_name";
 global $theme_url;                  $theme_url = "$base_url/wp-content/themes/$theme_name";
 global $uploads_dir;                $uploads_dir = "$base_dir/wp-content/uploads";

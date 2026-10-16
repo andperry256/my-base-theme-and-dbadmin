@@ -158,7 +158,7 @@ Function itservices_db_connect
 if (!function_exists('itservices_db_connect')) {
     function itservices_db_connect($mode='p')
     {
-        global $location, $www_root_dir;
+        global $location, $www_root_dir, $local_site_dir;
         if (($location == 'local') && (function_exists('local_itservices_db_connect'))) {
             // Local host with a function 'local_itservices_db_connect' for the given web site.
             return local_itservices_db_connect($mode);
@@ -178,9 +178,19 @@ if (!function_exists('itservices_db_connect')) {
                     break;
             }
         }
-        elseif (($location == 'real') && (function_exists('online_itservices_db_connect'))) {
-            // Online host with a function 'online_itservices_db_connect' for the given web site.
-            return online_itservices_db_connect($mode);
+        elseif ($location == 'real') {
+            $user = ($local_site_dir == 'andperry.com') ? 'andper1_main' : "andper1_{$local_site_dir}";
+            switch ($mode) {
+                case 'o':
+                    return new mysqli( 'localhost', $user, REAL_DB_PASSWD, 'andper1_itservices' );
+                    break;
+                case 'p':
+                    return mysqli_connect( 'localhost', $user, REAL_DB_PASSWD, 'andper1_itservices' );
+                    break;
+                default:
+                    return false;
+                    break;
+            }
         }
         else {
             return false;

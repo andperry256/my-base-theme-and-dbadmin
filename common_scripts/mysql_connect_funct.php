@@ -1,9 +1,6 @@
 <?php
 //==============================================================================
-/*
-This script is designed by be included by the mysql_connect.php script for the
-given site.
-*/
+if (!defined('COMMON_MYSQL_CONNECT_FUNCT_DEFINED')):
 //==============================================================================
 /*
 Function db_connect
@@ -155,17 +152,24 @@ Function itservices_db_connect
 */
 //==============================================================================
 
-if (!function_exists('itservices_db_connect')) {
-    function itservices_db_connect($mode='p')
-    {
-        global $location, $www_root_dir, $local_site_dir;
-        if (($location == 'local') && (function_exists('local_itservices_db_connect'))) {
-            // Local host with a function 'local_itservices_db_connect' for the given web site.
+function itservices_db_connect($mode='p')
+{
+    global $www_root_dir, $local_site_dir;
+    if (is_dir($www_root_dir)) {
+
+        // Local server
+        if (function_exists('local_itservices_db_connect')) {
+            /*
+            Local host with a function 'local_itservices_db_connect' for the given web site.
+            This function would normally be contained within the script at /Config/localhost.php.
+            */
             return local_itservices_db_connect($mode);
         }
-        elseif (($location == 'local') && (is_dir("$www_root_dir/Sites/andperry.com/private_scripts"))) {
-            // Local host with no function 'local_itservices_db_connect' for the given web site.
-            // Connect by default to the IT Services database for andperry.com.
+        elseif (is_dir("$www_root_dir/Sites/andperry.com/private_scripts")) {
+            /*
+            Local host with no function 'local_itservices_db_connect' for the given web site.
+            Connect by default to the local IT Services database for andperry.com.
+            */
             switch ($mode) {
                 case 'o':
                     return new mysqli( 'localhost', LOCAL_DB_USER, LOCAL_DB_PASSWD, 'local_itservices' );
@@ -178,7 +182,22 @@ if (!function_exists('itservices_db_connect')) {
                     break;
             }
         }
-        elseif ($location == 'real') {
+    }
+    else {
+
+        // Online site
+        if (function_exists('online_itservices_db_connect')) {
+            /*
+            Online site with a function 'online_itservices_db_connect'. This function would normally be
+            contained within the script at ~/public_html/mysql_connect.php.
+            */
+            return online_itservices_db_connect($mode);
+        }
+        else {
+            /*
+            Online site with no function 'online_itservices_db_connect'.
+            Connect by default to the online IT Services database for andperry.com.
+            */
             $user = ($local_site_dir == 'andperry.com') ? 'andper1_main' : "andper1_{$local_site_dir}";
             switch ($mode) {
                 case 'o':
@@ -192,10 +211,8 @@ if (!function_exists('itservices_db_connect')) {
                     break;
             }
         }
-        else {
-            return false;
-        }
     }
+    return false;
 }
 
 //==============================================================================
@@ -241,4 +258,7 @@ function db_debug_connection_profile($db)
     echo "</ul>";
 }
 
+//==============================================================================
+define('COMMON_MYSQL_CONNECT_FUNCT_DEFINED',true);
+endif;
 //==============================================================================

@@ -160,14 +160,14 @@ function itservices_db_connect($mode='p')
         // Local server
         if (function_exists('local_itservices_db_connect')) {
             /*
-            Local host with a function 'local_itservices_db_connect' for the given web site.
-            This function would normally be contained within the script at /Config/localhost.php.
+            Local host with a function 'local_itservices_db_connect'. This function would normally be
+            contained within the script at /Config/localhost.php.
             */
             return local_itservices_db_connect($mode);
         }
         elseif (is_dir("$www_root_dir/Sites/andperry.com/private_scripts")) {
             /*
-            Local host with no function 'local_itservices_db_connect' for the given web site.
+            Local host with no function 'local_itservices_db_connect'.
             Connect by default to the local IT Services database for andperry.com.
             */
             switch ($mode) {

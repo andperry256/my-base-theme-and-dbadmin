@@ -72,18 +72,19 @@ for ($sub_addr=1; $sub_addr<=254; $sub_addr++) {
     }
     elseif (($where_clause = 'ip_element_4=?') &&
             ($where_values = ['i',$sub_addr]) &&
-      ($row = mysqli_fetch_assoc(mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,'')))) {
-  // Item in DHCP settings table not found on scan (offline)
-  $mac_address = $row['mac_address'];
-  $name = (empty($row['friendly_name'])) ? $row['hostname'] : $row['friendly_name'];
-  $vendor = '';
-  $status = 'offline';
+            ($row = mysqli_fetch_assoc(mysqli_select_query($db,'home_dhcp_settings','*',$where_clause,$where_values,'')))) {
+
+        // Item in DHCP settings table not found on scan (offline)
+        $mac_address = $row['mac_address'];
+        $name = (empty($row['friendly_name'])) ? $row['hostname'] : $row['friendly_name'];
+        $vendor = '';
+        $status = 'offline';
     }
     else {
-  $status = '';
+        $status = '';
     }
     if (!empty($status)) {
-  print("<tr><td class=\"td-$status\">$ip_address</td><td class=\"td-$status\">$name</td><td class=\"td-$status\">$mac_address</td><td class=\"td-$status\">$vendor</td></tr>");
+        print("<tr><td class=\"td-$status\">$ip_address</td><td class=\"td-$status\">$name</td><td class=\"td-$status\">$mac_address</td><td class=\"td-$status\">$vendor</td></tr>");
         print("\n");
     }
 }

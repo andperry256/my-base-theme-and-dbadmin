@@ -43,7 +43,7 @@ function generate_table_dump($db,$table,$options=[])
 
     // Add DROP TABLE and CREATE TABLE statements.
     $sql_script .= "DROP TABLE IF EXISTS `$table`;\n";
-    $sql_script .=$row[1] . ";\n\n";
+    $sql_script .= $row[1].";\n\n";
     mysqli_free_result($result);
     if (!empty($options['struct_only'])) {
         return $sql_script;

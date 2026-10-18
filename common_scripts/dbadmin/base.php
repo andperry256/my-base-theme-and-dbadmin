@@ -209,7 +209,16 @@ function display_mobile_close_sidebar_button()
 function display_main_content($mode)
 {
     global $custom_pages_path,$custom_pages_url,$base_url,$relative_path, $relative_sub_path, $alt_include_path;
+    global $server_station_id, $ssl_hostname;
     $db = admin_db_connect();
+    $db_its = itservices_db_connect();
+
+    $where_clause = 'domname=? AND dbname=?';
+    $where_values = ['s',$server_station_id,'s',admin_db_name()];
+    if ($row = mysqli_fetch_assoc(mysqli_select_query($db_its,'dbases','*',$where_clause,$where_values,''))) {
+        $site_path = $row['site_path'];
+        $sub_path = $row['sub_path'];
+    }
 
     // Process the URL parameters
     if (isset($_GET['-action'])) {
@@ -369,7 +378,7 @@ function display_main_content($mode)
                 break;
 
             case 'search_and_replace':
-                search_and_replace(admin_db_name());
+                search_and_replace($site_path,$sub_path);
                 break;
 
             default:

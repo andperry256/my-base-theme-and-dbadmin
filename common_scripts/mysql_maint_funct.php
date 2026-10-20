@@ -285,32 +285,47 @@ This function loads the data from a CSV file into a given DB table.
 */
 //==============================================================================
 
-function import_table_from_csv($db,$table,$input_file)
+function import_table_from_csv($db,$table,$input_file,$reset_table=false)
 {
-    try {
-        $result = mysqli_query($db, "SHOW CREATE TABLE `$table`");
-    }
-    catch (Exception $e) {
-        if (empty($result)) {
-            return false;
-        }
-    }
-    $row = mysqli_fetch_row($result);
-    mysqli_query($db,"DROP TABLE IF EXISTS `$table`");
-    mysqli_query($db,$row[1]);
+    global $eol;
 
+    // Re-create empty table if option is set.
+    if ($reset_table) {
+        try {
+            $query_result = mysqli_query($db, "SHOW CREATE TABLE `$table`");
+        }
+        catch (Exception $e) {
+            if (empty($query_result)) {
+                return false;
+            }
+        }
+        $row = mysqli_fetch_row($query_result);
+        mysqli_query($db,"DROP TABLE IF EXISTS `$table`");
+        mysqli_query($db,$row[1]);
+    }
+
+    // Load file and get field list from first line.
     $csv_content = file($input_file);
     $field_list = trim($csv_content[0],',');
     unset($csv_content[0]);
     $sql_script = '';
+
+    // Loop through records.
     foreach($csv_content as $line) {
         $values =  str_getcsv($line);
         $value_list = '';
+
+        // Loop through field values.
         foreach ($values as $value) {
             $value_list .= "'" . mysqli_real_escape_string($db,$value) . "',";
         }
         $value_list = rtrim($value_list,',');
-        mysqli_query($db,"INSERT INTO `$table` ($field_list) VALUES ($value_list)");
+
+        // Run the INSERT query.
+        $query_result = mysqli_query($db,"INSERT INTO `$table` ($field_list) VALUES ($value_list)");
+        if ((!$query_result) && (isset($eol))) {
+            print("Unable to insert record ($value_list)$eol");
+        }
     }
 }
 
@@ -328,12 +343,14 @@ function export_table_to_csv($db, $table, $output_file, $where_clause='')
     $query_result = mysqli_select_query($db,$table,'*',$where_clause,[],'');
     $ofp = fopen($output_file, 'w');
 
+    // Generate field list as first row.
     $field_info = mysqli_fetch_fields($query_result);
     foreach ($field_info as$field) {
         $headers[] = $field->name;
     }
     fputcsv($ofp,$headers);
 
+    // Loop through records.
     while ($row = mysqli_fetch_assoc($query_result)) {
         fputcsv($ofp,$row);
     }

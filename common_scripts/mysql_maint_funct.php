@@ -278,6 +278,121 @@ function update_database($local_site_dir,$db_sub_path,$sql_script)
 }
 
 //==============================================================================
+/*
+Function import_table_from_csv
+
+This function loads the data from a CSV file into a given DB table.
+*/
+//==============================================================================
+
+function import_table_from_csv($db,$table,$input_file)
+{
+    try {
+        $result = mysqli_query($db, "SHOW CREATE TABLE `$table`");
+    }
+    catch (Exception $e) {
+        if (empty($result)) {
+            return false;
+        }
+    }
+    $row = mysqli_fetch_row($result);
+    mysqli_query($db,"DROP TABLE IF EXISTS `$table`");
+    mysqli_query($db,$row[1]);
+
+    $csv_content = file($input_file);
+    $field_list = trim($csv_content[0],',');
+    unset($csv_content[0]);
+    $sql_script = '';
+    foreach($csv_content as $line) {
+        $values =  str_getcsv($line);
+        $value_list = '';
+        foreach ($values as $value) {
+            $value_list .= "'" . mysqli_real_escape_string($db,$value) . "',";
+        }
+        $value_list = rtrim($value_list,',');
+        mysqli_query($db,"INSERT INTO `$table` ($field_list) VALUES ($value_list)");
+    }
+}
+
+//==============================================================================
+/*
+Function export_table_to_csv
+
+This function dumps the data from a given DB table into a CSV file.
+*/
+//==============================================================================
+
+function export_table_to_csv($db, $table, $output_file, $where_clause='')
+{
+    $output_csv_content = '';
+    $query_result = mysqli_select_query($db,$table,'*',$where_clause,[],'');
+    $ofp = fopen($output_file, 'w');
+
+    $field_info = mysqli_fetch_fields($query_result);
+    foreach ($field_info as$field) {
+        $headers[] = $field->name;
+    }
+    fputcsv($ofp,$headers);
+
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        fputcsv($ofp,$row);
+    }
+    fclose($ofp);
+}
+
+//==============================================================================
+/*
+Function transfer_mysql_table_data
+
+This function copies table data from one database to another. The destination
+table is always initialised to a blank copy of the source table before copying
+records.
+
+The following parameters are passed:-
+$db1          - Connection to source DB.
+$db2          - Connection to dest DB.
+$table        - Table being copied.
+$select_query - Leave blank to copy whole table. Otherwise set to a select query
+                to be applied to the table.
+*/
+//==============================================================================
+
+function transfer_mysql_table_data($db1,$db2,$table,$select_query='')
+{
+    // Re-initialise table in destination DB.
+    mysqli_query($db2,"DROP TABLE IF EXISTS `$table`");
+    $query_result = mysqli_query($db1, "SHOW CREATE TABLE `$table`");
+    $row = mysqli_fetch_row($query_result);
+    $query = rtrim($row[1],';');
+    mysqli_query($db2,$query);
+
+    // Loop through records in source DB.
+    if (empty($select_query)) {
+        $select_query = "SELECT * FROM `$table`";
+    }
+    $query_result = mysqli_query($db1,$select_query);
+    while ($row = mysqli_fetch_assoc($query_result)) {
+
+        // Build and run INSERT query.
+        $field_list = '';
+        $value_list = '';
+        foreach ($row as $field_name => $value) {
+            $field_list .= "$field_name,";
+            if ($value === null) {
+                $value_list .= 'NULL,';
+            }
+            else {
+                $value_list .= "'" . mysqli_real_escape_string($db1,$value) . "',";
+            }
+        }
+        $field_list = rtrim($field_list,',');
+        $value_list = rtrim($value_list,',');
+        $insert_query = "INSERT INTO {$table} ({$field_list}) VALUES ({$value_list})";
+        mysqli_query($db2,$insert_query);
+    }
+}
+
+//==============================================================================
 define('MYSQL_MAINT_FUNCT_DEFINED',true);
 endif;
 //==============================================================================

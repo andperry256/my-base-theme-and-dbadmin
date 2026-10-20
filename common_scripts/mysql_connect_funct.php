@@ -160,8 +160,8 @@ function itservices_db_connect($mode='p')
         // Local server
         if (function_exists('local_itservices_db_connect')) {
             /*
-            Local host with a function 'local_itservices_db_connect'. This function would normally be
-            contained within the script at /Config/localhost.php.
+            Local host with a function 'local_itservices_db_connect'. This function would be server
+            specific, and normally contained within the script at /Config/localhost.php.
             */
             return local_itservices_db_connect($mode);
         }
@@ -188,8 +188,8 @@ function itservices_db_connect($mode='p')
         // Online site
         if (function_exists('online_itservices_db_connect')) {
             /*
-            Online site with a function 'online_itservices_db_connect'. This function would normally be
-            contained within the script at ~/public_html/mysql_connect.php.
+            Online site with a function 'online_itservices_db_connect'. This function would be site
+            specific, and normally contained within the script at ~/public_html/mysql_connect.php.
             */
             return online_itservices_db_connect($mode);
         }

@@ -74,26 +74,36 @@ function sync_databases($site_path,$sub_path)
         switch ($_POST['sync_mode']) {
 
             case 'in':
+
+                // Sync database from online to local.
                 db_backup($site_path,$sub_path,$main_domain,$remote_mysql_backup_dir,'',['dbname' => $online_dbname]);
                 copy("$remote_mysql_backup_dir/db1.sql","$local_mysql_backup_dir/db1.sql");
                 db_restore($site_path,$sub_path,$ssl_hostname,$local_mysql_backup_dir,'db1',['dbname' => $local_dbname]);
                 break;
 
             case 'out':
+
+                // Sync database from local to online.
                 db_backup($site_path,$sub_path,$ssl_hostname,$local_mysql_backup_dir,'',['dbname' => $local_dbname]);
                 copy("$local_mysql_backup_dir/db1.sql","$remote_mysql_backup_dir/db1.sql");
                 db_restore($site_path,$sub_path,$main_domain,$remote_mysql_backup_dir,'db1',['dbname' => $online_dbname]);
                 break;
 
             case 'backup':
+
+                // Back up database (locally).
                 db_backup($site_path,$sub_path,$ssl_hostname,$local_mysql_backup_dir,'',['dbname' => $local_dbname]);
                 break;
 
             case 'restore':
+
+                // Restore database (locally).
                 db_restore($site_path,$sub_path,$ssl_hostname,$local_mysql_backup_dir,'db1','',['dbname' => $local_dbname]);
                 break;
 
             case 'table-in':
+
+                // Sync table from online to local.
                 $table = $_POST['table'];
                 if ((empty($table)) || (substr($table,0,2) == 'V#')) {
                     print("<p>ERROR - valid table not selected (please refresh page to try again).</p>\n");
@@ -108,6 +118,8 @@ function sync_databases($site_path,$sub_path)
                 break;
 
             case 'table-out':
+
+                // Sync table from local to online.
                 $table = $_POST['table'];
                 if ((empty($table)) || (substr($table,0,2) == 'V#')) {
                     print("<p>ERROR - valid table not selected (please refresh page to try again).</p>\n");
@@ -122,6 +134,8 @@ function sync_databases($site_path,$sub_path)
                 break;
 
             case 'table-dump':
+
+                // Dump table to CSV file.
                 $table = str_replace('V#','',$_POST['table']);
                 if (empty($table)) {
                     print("<p>ERROR - valid table not selected (please refresh page to try again).</p>\n");
@@ -134,6 +148,8 @@ function sync_databases($site_path,$sub_path)
 
             case 'table-append':
             case 'table-replace':
+
+                // Import to table from CSV file.
                 $table = $_POST['table'];
                 $csv_file = "$local_mysql_backup_dir/table_{$table}.csv";
                 $reset_table = ($_POST['sync_mode'] == 'table-replace');
@@ -147,7 +163,6 @@ function sync_databases($site_path,$sub_path)
                     $action = ($reset_table) ? 'replaced from' : 'appended from';
                     print("<p>Table $local_dbname.$table $action table_{$table}.csv.</p>");
                 }
-
                 break;
         }
     }

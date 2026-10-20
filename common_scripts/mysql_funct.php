@@ -599,58 +599,6 @@ function mysqli_free_format_query($db,$query,$where_values,$strict=true,$debug=f
 }
 
 //==============================================================================
-/*
-Function transfer_mysql_table_data
-
-This function copies table data from one database to another. The destination
-table is always initialised to a blank copy of the source table before copying
-records.
-
-The following parameters are passed:-
-$db1          - Connection to source DB.
-$db2          - Connection to dest DB.
-$table        - Table being copied.
-$select_query - Leave blank to copy whole table. Otherwise set to a select query
-                to be applied to the table.
-*/
-//==============================================================================
-
-function transfer_mysql_table_data($db1,$db2,$table,$select_query='')
-{
-    // Re-initialise table in destination DB.
-    mysqli_query($db2,"DROP TABLE IF EXISTS `$table`");
-    $query_result = mysqli_query($db1, "SHOW CREATE TABLE `$table`");
-    $row = mysqli_fetch_row($query_result);
-    $query = rtrim($row[1],';');
-    mysqli_query($db2,$query);
-
-    // Loop through records in source DB.
-    if (empty($select_query)) {
-        $select_query = "SELECT * FROM `$table`";
-    }
-    $query_result = mysqli_query($db1,$select_query);
-    while ($row = mysqli_fetch_assoc($query_result)) {
-
-        // Build and run INSERT query.
-        $field_list = '';
-        $value_list = '';
-        foreach ($row as $field_name => $value) {
-            $field_list .= "$field_name,";
-            if ($value === null) {
-                $value_list .= 'NULL,';
-            }
-            else {
-                $value_list .= "'" . mysqli_real_escape_string($db1,$value) . "',";
-            }
-        }
-        $field_list = rtrim($field_list,',');
-        $value_list = rtrim($value_list,',');
-        $insert_query = "INSERT INTO {$table} ({$field_list}) VALUES ({$value_list})";
-        mysqli_query($db2,$insert_query);
-    }
-}
-
-//==============================================================================
 define('MYSQL_FUNCT_DEFINED',true);
 endif;
 //==============================================================================

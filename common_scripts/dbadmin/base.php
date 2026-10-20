@@ -374,7 +374,7 @@ function display_main_content($mode)
                 break;
 
             case 'dbsync':
-                sync_databases(admin_db_name());
+                sync_databases($site_path,$sub_path);
                 break;
 
             case 'search_and_replace':

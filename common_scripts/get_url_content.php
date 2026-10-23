@@ -23,12 +23,9 @@ function get_url_content($url, $post_data = [], $debug = false): string
     curl_setopt_array($ch, $options);
 
     $content = curl_exec($ch);
-
     if (curl_errno($ch)) {
         $content = 'cURL Error: ' . curl_error($ch);
     }
-
-    curl_close($ch);
 
     if ($debug) {
         exit((string)$content . "\n");

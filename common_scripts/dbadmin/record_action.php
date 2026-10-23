@@ -56,6 +56,7 @@ else {
 require("$base_dir/path_defs.php");
 require("$base_dir/mysql_connect.php");
 require("$base_dir/wp-content/themes/my-base-theme/shared_functions.php");
+require("$base_dir/common_scripts/mysql_maint_funct.php");
 require("$dbadmin_dir/functions.php");
 require("$dbadmin_dir/classes.php");
 $post_copy = $_POST;  // deslash does not seem to be required any longer here

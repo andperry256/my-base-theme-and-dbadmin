@@ -784,11 +784,13 @@ Function save_record
 
 function save_record($record,$old_record_id,$new_record_id)
 {
-    global $custom_pages_path, $relative_path, $location, $cpanel_user, $mirror_hostname, $replicate;
+    global $custom_pages_path, $relative_path, $location, $cpanel_user;
+    global $mirror_host_url, $replicate, $local_site_dir, $real_db_passwd;
     $action = $record->action;
     $table = $record->table;
     global $custom_pages_path, $relative_path;
     $db = admin_db_connect();
+    $db_sub_path = admin_db_subpath();
     $base_table = get_base_table($table);
     $old_primary_keys = double_decode_record_id($old_record_id);
     $new_primary_keys = double_decode_record_id($new_record_id);
@@ -818,7 +820,6 @@ function save_record($record,$old_record_id,$new_record_id)
                 // Auto-increment field needs to be omitted but need to note that there
                 // is one present.
                 $auto_inc_field_present = true;
-                $inhibit_replication = true;  // Inhibit replication where there is an auto increment field
             }
             elseif (empty($field_value)) {
                 // Field is empty.
@@ -980,39 +981,25 @@ function save_record($record,$old_record_id,$new_record_id)
             $primary_keys = double_decode_record_id($new_record_id);
             $primary_keys[$row['seq_no_field']] = $seq_no;
             $new_record_id = encode_record_id($primary_keys);
-            $inhibit_replication = true;  // Inhibit replication where there is an auto sequence number
         }
     }
 
-    // Replicate update on mirror host if required
-    if ((!empty($replicate)) && (empty($inhibit_replication)) && (!empty($mirror_hostname))) {
-        $dbname = admin_db_name();
-        $new_prefix = ($location == 'local') ? $cpanel_user : 'local';
-        $mirror_dbname = $new_prefix.substr($dbname,strpos($dbname,'_'));
-        if ($db2 = mysqli_connect($mirror_hostname,REAL_DB_USER,REAL_DB_PASSWD,$mirror_dbname)) {
-
-            // Insert mirror record if required
-            mysqli_conditional_insert_query($db2,$table,$insert_fields,$insert_values,$new_where_clause,$new_where_values);
-
-            // Update mirror record
-            mysqli_update_query($db2,$table,$set_fields,$set_values,$new_where_clause,$new_where_values);
-
-            // Delete old mirror record if there has been a primary key change
-            if (($action != 'new') && ($new_where_values !== $old_where_values)) {
-                mysqli_delete_query($db2,$table,$old_where_clause,$old_where_values);
-            }
-        }
-        else {
-            $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (DB connect failure).";
+    // Update table on mirror server if required
+    if ((!empty($replicate)) && (!empty($mirror_host_url))) {
+        $dump = dump_db_table($local_site_dir,$db_sub_path,$table);
+        $post_data = [
+            'sql_script' => $dump,
+            'db_passwd' => $real_db_passwd
+        ];
+        $result = get_url_content("$mirror_host_url/common_scripts/db_update.php?sub_path=$db_sub_path",$post_data);
+        if ((is_string($result)) && (trim($result) != '')) {
+            print("[$result]<br />\n");
+            print("<a href=\"javascript:history.go(-1)\">[Go Back]</a>");
+            exit;
         }
     }
-    elseif ((!empty($replicate)) && (!empty($inhibit_replication))){
-        $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (incompatible with table structure).";
-    }
-    elseif ((!empty($replicate)) && (empty($mirror_hostname))){
+    elseif (!empty($replicate)) {
         $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (mirror host not specified).";
-    }
-    if (!empty($warning_message)) {
         update_session_var('save_info',$warning_message);
     }
 
@@ -1413,8 +1400,10 @@ afterDelete method for the associated table class.
 
 function delete_record($record,$record_id)
 {
-    global $custom_pages_path, $relative_path, $location, $cpanel_user, $replicate, $mirror_hostname, $alt_include_path, $dbadmin_dir;
+    global $custom_pages_path, $relative_path, $location, $cpanel_user, $alt_include_path, $dbadmin_dir;
+    global $mirror_host_url, $replicate, $local_site_dir, $real_db_passwd;
     $db = admin_db_connect();
+    $db_sub_path = admin_db_subpath();
     $table = $record->table;
     $base_table = get_base_table($table);
     $classname = "tables_$base_table";
@@ -1453,14 +1442,23 @@ function delete_record($record,$record_id)
         $where_clause = rtrim($where_clause,' AND');
         mysqli_delete_query($db,$table,$where_clause,$where_values);
 
-        // Delete mirror record if required
-        if ((!empty($replicate)) && (!empty($mirror_hostname))) {
-            $dbname = admin_db_name();
-            $new_prefix = ($location == 'local') ? $cpanel_user : 'local';
-            $mirror_dbname = $new_prefix.substr($dbname,strpos($dbname,'_'));
-            if ($db2 = mysqli_connect($mirror_hostname,REAL_DB_USER,REAL_DB_PASSWD,$mirror_dbname)) {
-                mysqli_delete_query($db2,$table,$where_clause,$where_values);
+        // Update table on mirror server if required
+        if ((!empty($replicate)) && (!empty($mirror_host_url))) {
+            $dump = dump_db_table($local_site_dir,$db_sub_path,$table);
+            $post_data = [
+                'sql_script' => $dump,
+                'db_passwd' => $real_db_passwd
+            ];
+            $result = get_url_content("$mirror_host_url/common_scripts/db_update.php?sub_path=$db_sub_path",$post_data);
+            if ((is_string($result)) && (trim($result) != '')) {
+                print("[$result]<br />\n");
+                print("<a href=\"javascript:history.go(-1)\">[Go Back]</a>");
+                exit;
             }
+        }
+        elseif (!empty($replicate)) {
+            $warning_message = "<strong>WARNING</strong> - Replication enabled, but could not be completed (mirror host not specified).";
+            update_session_var('save_info',$warning_message);
         }
 
         // Run afterDelete method if available

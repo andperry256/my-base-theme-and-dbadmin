@@ -120,6 +120,9 @@ if (is_page()) {
 //================================================================================
 
 elseif (is_single()) {
+    if (is_file("$custom_posts_path/init.php")) {
+        include("$custom_posts_path/init.php");
+    }
     if (is_file("$custom_categories_path/select_menu.php")) {
         include("$custom_categories_path/select_menu.php");
     }
@@ -162,6 +165,9 @@ elseif (is_single()) {
 //================================================================================
 
 elseif (is_category()) {
+    if (is_file("$custom_categories_path/init.php")) {
+        include("$custom_categories_path/init.php");
+    }
     $category = get_queried_object();
     $id = $category->term_id;
     $hierarchy = get_category_parents($id, false, '/', true);

@@ -5,7 +5,7 @@ if (!function_exists('search_and_replace')) :
 
 function search_and_replace($site_path,$sub_path)
 {
-    global $location, $ssl_hostname;
+    global $location, $ssl_hostname,$www_root_dir;
 
     print("<h1>Search and Replace</h1>\n");
     if ($location != 'local') {
@@ -15,16 +15,17 @@ function search_and_replace($site_path,$sub_path)
 
     $db = admin_db_connect();
     $dbname = admin_db_name();
+    include("$www_root_dir/Sites/$site_path/private_scripts/mysql_passwords.php");
 
     // First submission - Run dump and prompt user with number of pending replacements.
     if (isset($_POST['submitted1'])) {
         if ($_POST['table'] == '#all#') {
             $url = "https://$ssl_hostname/$site_path/common_scripts/db_dump.php?sub_path=$sub_path&full=1";
-            $dump = get_url_content($url,['db_passwd' => REAL_DB_PASSWD]);
+            $dump = get_url_content($url,['db_passwd' => $real_db_passwd]);
         }
         elseif(!empty($_POST['table'])) {
             $url = "https://$ssl_hostname/$site_path/common_scripts/db_dump.php?sub_path=$sub_path&table={$_POST['table']}";
-            $dump = get_url_content($url,['db_passwd' => REAL_DB_PASSWD]);
+            $dump = get_url_content($url,['db_passwd' => $real_db_passwd]);
         }
         else {
             $dump = '';
@@ -53,11 +54,11 @@ function search_and_replace($site_path,$sub_path)
         $search = get_session_var('search');
         $replace = get_session_var('replace');
         $url = get_session_var('dump_url');
-        $dump = get_url_content($url,['db_passwd' => REAL_DB_PASSWD]);
+        $dump = get_url_content($url,['db_passwd' => $real_db_passwd]);
         $dump = str_replace($search,$replace,$dump,$count);
         $url = "https://$ssl_hostname/$site_path/common_scripts/db_update.php?sub_path=$sub_path";
         $options = [
-            'db_passwd' => REAL_DB_PASSWD,
+            'db_passwd' => $real_db_passwd,
             'sql_script' => $dump,
         ];
         $dummy = get_url_content($url,$options);

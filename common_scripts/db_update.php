@@ -12,7 +12,11 @@ if ($db_passwd != $real_db_passwd) {
     exit ("ERROR - Authentication failure\n");
 }
 if (!empty($sub_path)) {
-    update_database($local_site_dir,$sub_path,$sql_script);
+    $result = (update_database($local_site_dir,$sub_path,$sql_script)) ? 'OK' : 'ERROR - DB update failure';
 }
+else {
+    $result = 'ERROR - Sub-path not specified\n';
+}
+exit($result);
 
 //==============================================================================

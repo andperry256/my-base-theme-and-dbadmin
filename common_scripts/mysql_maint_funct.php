@@ -1,4 +1,4 @@
-    <?php
+<?php
 //==============================================================================
 if (!defined('MYSQL_MAINT_FUNCT_DEFINED')):
 //==============================================================================
@@ -229,20 +229,24 @@ $sql_script - String containing the SQL script.
 
 function import_db_dump($db,$sql_script)
 {
-    mysqli_multi_query($db,$sql_script);
-    do {
-        if ($result = mysqli_store_result($db)) {
-            mysqli_free_result($result);
+    if (mysqli_multi_query($db,$sql_script)) {
+        do {
+            if ($result = mysqli_store_result($db)) {
+                mysqli_free_result($result);
+            }
+            if (!mysqli_more_results($db)) {
+                break;
+            }
+            if (!mysqli_next_result($db)) {
+                return false;
+            }
         }
-        if (!mysqli_more_results($db)) {
-            break;
-        }
-        if (!mysqli_next_result($db)) {
-            return $false;
-        }
+        while (true);
+        return true;
     }
-    while (true);
-    return true;
+    else {
+        return false;
+    }
 }
 
 //==============================================================================
@@ -274,7 +278,7 @@ function update_database($local_site_dir,$db_sub_path,$sql_script)
     $dbname = (!empty($www_root_dir)) ? $dbinfo[$dbid][0] : $dbinfo[$dbid][1];
 
     // Run the dump import
-    import_db_dump($db,$sql_script);
+    return (import_db_dump($db,$sql_script));
 }
 
 //==============================================================================

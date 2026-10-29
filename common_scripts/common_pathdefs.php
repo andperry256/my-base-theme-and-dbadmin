@@ -16,6 +16,26 @@ subsequently updated by the parent script.
 */
 //==============================================================================
 
+require(__DIR__.'/allowed_hosts.php');
+
+// Check for maintenance mode
+if (is_file(__DIR__.'/../maint_mode.php')) {
+    include(__DIR__.'/../maint_mode.php');
+    $remote_addr = $_SERVER['REMOTE_ADDR'] ?? null;
+    if ((isset($maint_mode)) && ($maint_mode) && ($remote_addr != $home_remote_ip_addr)) {
+        if (is_file(__DIR__.'/../maint_mode.html')) {
+            print(file_get_contents(__DIR__.'/../maint_mode.html'));
+        }
+        else {
+            print("<p>This site is currently undergoing essential maintenance.</p>\n");
+            print("<p>It should be restored to normal operation very soon.</p>\n");
+        }
+        exit;
+    }
+}
+
+//==============================================================================
+
 global $wpdb;
 if (!isset($wpdb)) {
     // Outside WP environment
@@ -132,7 +152,6 @@ global $uploads_url;                $uploads_url = "$base_url/wp-content/uploads
 require("$base_dir/common_scripts/local_ip_funct.php");
 require("$base_dir/common_scripts/core_funct.php");
 require("$base_dir/libraries/library_path_defs.php");
-require("$base_dir/common_scripts/allowed_hosts.php");
 ini_set('display_errors','0');
 ini_set('log_errors','1');
 ini_set('error_log',"$root_dir/logs/php_error.log");

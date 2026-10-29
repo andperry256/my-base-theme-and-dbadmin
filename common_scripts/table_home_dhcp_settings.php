@@ -117,7 +117,6 @@ class tables_home_dhcp_settings
 
     function afterSave($record)
     {
-        global $mirror_hostname;
         $db = admin_db_connect();
         $ip_element_4 = $record->FieldVal('ip_element_4');
         $hostname = $record->FieldVal('hostname');
